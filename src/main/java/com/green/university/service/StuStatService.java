@@ -52,10 +52,7 @@ public class StuStatService {
 	 * 모든 학생 id 리스트
 	 */
 	public List<Long> readIdList() {
-
-		List<Long> idList = studentRepository.selectIdList();
-
-		return idList;
+        return studentRepository.findStudentIds();
 	}
 
 	/*

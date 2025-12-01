@@ -4,6 +4,7 @@ import lombok.Data;
 
 import jakarta.validation.constraints.*;
 import java.sql.Date;
+import java.time.LocalDate;
 
 /**
  * student_tb insert용
@@ -25,7 +26,7 @@ public class CreateStudentDto {
 	@Min(100)
 	@Max(999)
 	private Long deptId;
-	private Date entranceDate;
+	private LocalDate entranceDate;
 	@Email
 	private String email;
 	
