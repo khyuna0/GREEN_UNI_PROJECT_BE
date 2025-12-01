@@ -8,20 +8,21 @@ import lombok.Setter;
 @Entity
 @Data
 public class StuSch { // 학적상태 저장 테이블
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
     
     // Student 엔티티
+    @Id
     @ManyToOne
     @JoinColumn(name = "student_id")
     private Student student;
 
+    @Id
     private Long schYear;
+
+    @Id
     private Long semester;
 
 //     Scholarship 엔티티
     @ManyToOne
-    private Scholarship scholarship;
+    @JoinColumn(name = "sch_type")
+    private Scholarship schType;
 }

@@ -18,12 +18,12 @@ import java.util.List;
 public interface PreStuSubRepository extends JpaRepository<PreStuSub,Long> {
 
 	// 학생의 예비 수강 신청 내역에 해당 강의가 있는지 조회
-	PreStuSub selectByStudentIdAndSubjectId(@Param("studentId") Long studentId, @Param("subjectId") Long subjectId);
+	PreStuSub findByStudentIdAndSubjectId(@Param("studentId") Long studentId, @Param("subjectId") Long subjectId);
 	
 	// 학생의 이번 학기 전체 예비 수강 신청 내역 조회
-	List<StuSubAppDto> selectListByStudentIdAndSemester(@Param("studentId") Long studentId, @Param("subYear") Long subYear, @Param("semester") Long semester);
+	List<StuSubAppDto> findByStudentIdAndSemester(@Param("studentId") Long studentId, @Param("subYear") Long subYear, @Param("semester") Long semester);
 	
-	// 학생의 예비 수강 신청 학점 조회
+	// 학생의 예비 수강 신청 학점 조회 (보류
 	StuSubSumGradesDto selectSumGrades(@Param("studentId") Long studentId, @Param("subYear") Long subYear, @Param("semester") Long semester);
 	
 	// 학생의 예비 수강 신청 내역 시간표 조회

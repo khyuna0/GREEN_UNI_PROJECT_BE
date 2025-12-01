@@ -171,24 +171,25 @@ public class AdminService {
 	@Transactional
 	public void createRoom(@Validated RoomFormDto roomFormDto) {
 		// 강의실 중복 입력 검사
-		List<Room> roomList = roomRepository.selectByRoomDto();
-		for (int i = 0; i < roomList.size(); i++) {
-			if (roomList.get(i).getId().equals((roomFormDto.getId()))) {
-				throw new CustomRestfullException("이미 존재하는 강의실입니다", HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		}
+		List<Room> roomList = roomRepository.findAll();
+        for (Room value : roomList) {
+            if (value.getId().equals((roomFormDto.getId()))) {
+                throw new CustomRestfullException("이미 존재하는 강의실입니다", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
 
-		Long resultRowCount = roomRepository.insert(roomFormDto);
-		if (resultRowCount != 1) {
-			System.out.println("강의실 입력 서비스 오류");
-		}
+        Room room = new Room();
+        room.setId(roomFormDto.getId());
+        room.setCollege(roomFormDto.getCollege());
+
+		roomRepository.save(room);
 	}
 
 	/**
 	 * 강의실 조회 서비스
 	 */
 	public List<Room> readRoom() {
-		List<Room> roomList = roomRepository.selectByRoomDto();
+		List<Room> roomList = roomRepository.findAll();
 		return roomList;
 	}
 

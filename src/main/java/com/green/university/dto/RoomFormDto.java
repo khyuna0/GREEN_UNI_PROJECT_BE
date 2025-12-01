@@ -1,5 +1,6 @@
 package com.green.university.dto;
 
+import com.green.university.entity.College;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -14,7 +15,8 @@ import jakarta.validation.constraints.NotNull;
 public class RoomFormDto {
 	@NotNull
 	@Size(min = 4, max = 4)
-	private String id;
+	private Long id;
+
 	@NotNull
-	private String collegeId;
+	private College college;
 }

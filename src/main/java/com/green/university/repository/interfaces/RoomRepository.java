@@ -14,6 +14,5 @@ import java.util.List;
 
 
 public interface RoomRepository extends JpaRepository<Room,Long> {
-	public Long insert(RoomFormDto roomFormDto);
-	public List<Room> selectByRoomDto();
+
 }

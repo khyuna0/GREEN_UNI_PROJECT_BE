@@ -3,6 +3,7 @@ package com.green.university.service;
 import com.green.university.dto.response.GradeForScholarshipDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.ScholarshipRepository;
+import com.green.university.repository.interfaces.StudentRepository;
 import com.green.university.repository.interfaces.TuitionRepository;
 import com.green.university.entity.*;
 import com.green.university.utils.Define;
@@ -37,6 +38,10 @@ public class TuitionService {
 
 	@Autowired
 	private GradeService gradeService;
+
+    @Autowired
+    private StudentRepository studentRepository;
+
 
 	/**
 	 * @param studentId (principal의 id와 동일)
@@ -79,7 +84,7 @@ public class TuitionService {
 	public Long createCurrentSchType(Long studentId) {
 
 		StuSch stuSch = new StuSch();
-		stuSch.setStudentId(studentId);
+		stuSch.setStudent(studentRepository.findById(studentId).orElseThrow(() -> new CustomRestfullException("해당 학생 정보가 없습니다.", HttpStatus.NOT_FOUND)));
 		stuSch.setSchYear(Define.CURRENT_YEAR);
 		stuSch.setSemester(Define.CURRENT_SEMESTER);
 
@@ -103,19 +108,19 @@ public class TuitionService {
 				Double avgGrade = gradeDto.getAvgGrade();
 				// 평점에 따라 장학금 유형 결정
 				if (avgGrade >= 4.2) {
-					stuSch.setSchType(1L);
+					stuSch.setSchType(scholarshipRepository.findById(1L).orElseThrow(() -> new CustomRestfullException("해당 장학금 정보가 없습니다.", HttpStatus.NOT_FOUND)));
 				} else if (avgGrade >= 3.7) {
-					stuSch.setSchType(2L);
+					stuSch.setSchType(scholarshipRepository.findById(2L).orElseThrow(() -> new CustomRestfullException("해당 장학금 정보가 없습니다.", HttpStatus.NOT_FOUND)));
 				}
 			}
 
 			// 1학년 1학기 학생이라면
 		} else {
-			stuSch.setSchType(2L);
+			stuSch.setSchType(scholarshipRepository.findById(2L).orElseThrow(() -> new CustomRestfullException("해당 장학금 정보가 없습니다.", HttpStatus.NOT_FOUND)));
 		}
 
-		scholarshipRepository.insertCurrentSchType(stuSch);
-		return stuSch.getSchType();
+		scholarshipRepository.save(stuSch);
+		return stuSch.getSchType().getType();
 	}
 
 	/**

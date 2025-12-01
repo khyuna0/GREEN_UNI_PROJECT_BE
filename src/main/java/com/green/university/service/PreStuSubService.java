@@ -36,7 +36,7 @@ public class PreStuSubService {
 	// 학생의 예비 수강신청 내역에 해당 강의가 존재하는지 확인
 	public PreStuSub readPreStuSub(Long studentId, Long subjectId) {
 
-		PreStuSub preStuSubEntity = preStuSubRepository.selectByStudentIdAndSubjectId(studentId, subjectId);
+		PreStuSub preStuSubEntity = preStuSubRepository.findByStudentIdAndSubjectId(studentId, subjectId);
 
 		return preStuSubEntity;
 	}
@@ -44,7 +44,7 @@ public class PreStuSubService {
 	// 학생의 전체 예비 수강신청 내역 조회
 	public List<StuSubAppDto> readPreStuSubList(Long studentId) {
 
-		List<StuSubAppDto> preStuSubList = preStuSubRepository.selectListByStudentIdAndSemester(studentId,
+		List<StuSubAppDto> preStuSubList = preStuSubRepository.findByStudentIdAndSemester(studentId,
 				Define.CURRENT_YEAR, Define.CURRENT_SEMESTER);
 
 		return preStuSubList;
