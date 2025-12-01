@@ -11,10 +11,8 @@ import java.util.List;
  *  박성희
  *  단과대별 등록금 repository
  */
-
-
 public interface CollTuitRepository extends JpaRepository<College,Long> {
-	public Long insert(CollTuitFormDto collTuitFormDto);
+
+    //등록금 중복?
 	public List<CollTuitFormDto> selectByCollTuitDto();
-	public Long updateByCollTuitDto(CollTuitFormDto collTuitFormDto);
 }

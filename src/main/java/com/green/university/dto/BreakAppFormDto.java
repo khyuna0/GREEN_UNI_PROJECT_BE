@@ -12,16 +12,16 @@ import jakarta.validation.constraints.NotNull;
 
 @Data
 public class BreakAppFormDto {
-	
-	private Long studentId;
-	private Long studentGrade;
-	private Long fromYear;
-	private Long fromSemester;
-	@NotNull
-	private Long toYear;
-	@NotNull
-	private Long toSemester;
-	@NotNull
-	private String type;
-	
+
+    private Long studentId;
+    private Long studentGrade;
+    private Long fromYear;
+    private Long fromSemester;
+    @NotNull
+    private Long toYear;
+    @NotNull
+    private Long toSemester;
+    @NotNull
+    private String type;
+
 }

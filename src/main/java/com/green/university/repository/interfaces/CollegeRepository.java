@@ -14,10 +14,13 @@ import java.util.List;
 
 
 public interface CollegeRepository extends JpaRepository<College,Long> {
-	public Long insert(CollegeFormDto CollegeFormDto);
 
-	public List<College> selectCollegeDto();
+    // 단과대 이름 중복 체크용
+    boolean existsByName(String name);
 
-	public Long selectCollegeDtoByName(String name);
-	public College selectCollegeDtoById(Long id);
+    //public List<College> selectCollegeDto(); 단과대조회, 중복검사에 씀
+    //public int selectCollegeDtoByName(String name);
+    //public College selectCollegeDtoById(Integer id);
+
+
 }

@@ -14,10 +14,16 @@ import java.util.List;
 
 
 public interface DepartmentRepository extends JpaRepository<Department,Long> {
-	public Long insert(DepartmentFormDto departmentFormDto);
-	
-	public Department selectById(Long id);
-	public List<Department> selectByDepartmentDto();
-	public Long updateByDepartmentDto(DepartmentFormDto departmentFormDto);
+//	public Long insert(DepartmentFormDto departmentFormDto);
+//
+//	public Department selectById(Long id);
+//	public List<Department> selectByDepartmentDto();
+//	public Long updateByDepartmentDto(DepartmentFormDto departmentFormDto);
+
+    // 학과 이름 중복 체크
+    boolean existsByName(String name);
+
+    // 전체 학과 이름순 조회
+    List<Department> findAllByOrderByNameAsc();
 	
 }

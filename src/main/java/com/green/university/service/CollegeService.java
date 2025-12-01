@@ -1,10 +1,12 @@
 package com.green.university.service;
 
+import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.CollegeRepository;
 import com.green.university.repository.interfaces.DepartmentRepository;
 import com.green.university.entity.College;
 import com.green.university.entity.Department;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,32 +26,24 @@ public class CollegeService {
 	@Autowired
 	private DepartmentRepository departmentRepository;
 
-	/**
-	 * @param college_id
-	 * @return id로 해당 단과대 정보 가져옴
-	 */
+    
+    //id로 해당 단과대 정보 가져옴
 	public College readCollById(Long id) {
-
-		College collEntity = collegeRepository.selectCollegeDtoById(id);
-		return collEntity;
+        return collegeRepository.findById(id)
+                .orElseThrow(()-> new CustomRestfullException("해당 단과대를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 	}
 
-	/**
-	 * @param dept_id
-	 * @return id로 해당 학과 정보 가져옴
-	 */
+
+    //id로 해당 학과 정보 가져옴 , deptId
 	public Department readDeptById(Long id) {
-
-		Department deptEntity = departmentRepository.selectById(id);
-		return deptEntity;
+        return departmentRepository.findById(id)
+                .orElseThrow(() -> new CustomRestfullException("해당 학과를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
 	}
 
-	/**
-	 * @return 전체 학과 정보 조회
-	 */
-	public List<Department> readDeptAll() {
 
-		List<Department> deptEntityList = departmentRepository.selectByDepartmentDto();
+    //전체 학과 정보 조회
+	public List<Department> readDeptAll() {
+		List<Department> deptEntityList = departmentRepository.findAll();
 		return deptEntityList;
 	}
 
