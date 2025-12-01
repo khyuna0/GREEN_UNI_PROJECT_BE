@@ -1,7 +1,7 @@
 package com.green.university.repository.interfaces;
 
-import com.green.university.repository.model.CollTuit;
-import com.green.university.repository.model.Tuition;
+import com.green.university.entity.CollTuit;
+import com.green.university.entity.Tuition;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;

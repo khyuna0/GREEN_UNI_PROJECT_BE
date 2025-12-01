@@ -1,7 +1,7 @@
 package com.green.university.repository.interfaces;
 
 import com.green.university.dto.CollegeFormDto;
-import com.green.university.repository.model.College;
+import com.green.university.entity.College;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 

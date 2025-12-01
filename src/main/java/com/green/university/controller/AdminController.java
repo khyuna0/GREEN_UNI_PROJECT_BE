@@ -1,10 +1,10 @@
 package com.green.university.controller;
 
 import com.green.university.dto.*;
-import com.green.university.repository.model.College;
-import com.green.university.repository.model.Department;
-import com.green.university.repository.model.Room;
-import com.green.university.repository.model.Subject;
+import com.green.university.entity.College;
+import com.green.university.entity.Department;
+import com.green.university.entity.Room;
+import com.green.university.entity.Subject;
 import com.green.university.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

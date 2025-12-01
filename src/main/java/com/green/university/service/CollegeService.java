@@ -2,8 +2,8 @@ package com.green.university.service;
 
 import com.green.university.repository.interfaces.CollegeRepository;
 import com.green.university.repository.interfaces.DepartmentRepository;
-import com.green.university.repository.model.College;
-import com.green.university.repository.model.Department;
+import com.green.university.entity.College;
+import com.green.university.entity.Department;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

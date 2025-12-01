@@ -2,10 +2,10 @@ package com.green.university.controller;
 
 import com.green.university.dto.response.PrincipalDto;
 import com.green.university.handler.exception.CustomRestfullException;
-import com.green.university.repository.model.BreakApp;
-import com.green.university.repository.model.StuStat;
-import com.green.university.repository.model.Student;
-import com.green.university.repository.model.Tuition;
+import com.green.university.entity.BreakApp;
+import com.green.university.entity.StuStat;
+import com.green.university.entity.Student;
+import com.green.university.entity.Tuition;
 import com.green.university.service.*;
 import com.green.university.utils.Define;
 import com.green.university.utils.StuStatUtil;

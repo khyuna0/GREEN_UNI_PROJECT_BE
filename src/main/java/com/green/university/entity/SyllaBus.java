@@ -1,6 +1,7 @@
 package com.green.university.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Data;
 
 @Data
@@ -8,6 +9,7 @@ import lombok.Data;
 public class SyllaBus {
 
     //subjectId
+    @Id
     private Subject subject;
 
     private String overview;

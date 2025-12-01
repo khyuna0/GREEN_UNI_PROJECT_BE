@@ -3,7 +3,7 @@ package com.green.university.repository.interfaces;
 import com.green.university.dto.*;
 import com.green.university.dto.response.ProfessorInfoDto;
 import com.green.university.dto.response.UserInfoForUpdateDto;
-import com.green.university.repository.model.Professor;
+import com.green.university.entity.Professor;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 

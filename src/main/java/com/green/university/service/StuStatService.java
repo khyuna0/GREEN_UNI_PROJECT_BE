@@ -3,7 +3,7 @@ package com.green.university.service;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.StuStatRepository;
 import com.green.university.repository.interfaces.StudentRepository;
-import com.green.university.repository.model.StuStat;
+import com.green.university.entity.StuStat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

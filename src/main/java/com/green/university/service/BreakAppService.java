@@ -4,7 +4,7 @@ import com.green.university.dto.BreakAppFormDto;
 import com.green.university.handler.exception.CustomPathException;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.BreakAppRepository;
-import com.green.university.repository.model.BreakApp;
+import com.green.university.entity.BreakApp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

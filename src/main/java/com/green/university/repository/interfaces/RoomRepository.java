@@ -1,7 +1,7 @@
 package com.green.university.repository.interfaces;
 
 import com.green.university.dto.RoomFormDto;
-import com.green.university.repository.model.Room;
+import com.green.university.entity.Room;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 

@@ -7,7 +7,7 @@ import com.green.university.dto.response.ReadSyllabusDto;
 import com.green.university.dto.response.SubjectDto;
 import com.green.university.dto.response.SubjectForProfessorDto;
 import com.green.university.dto.response.SubjectPeriodForProfessorDto;
-import com.green.university.repository.model.Subject;
+import com.green.university.entity.Subject;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;

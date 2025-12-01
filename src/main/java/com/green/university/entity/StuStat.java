@@ -14,6 +14,8 @@ public class StuStat {
     private Long id;
 
     //studentId
+    @ManyToOne
+    @JoinColumn(name = "student_id")
     private Student student;
 
     private String status;
@@ -21,6 +23,8 @@ public class StuStat {
     private Date toDate;
 
     //breakAppId
-    //private BreakApp breakApp;
+    @ManyToOne
+    @JoinColumn(name = "break_app_id")
+    private BreakApp breakApp;
 
 }

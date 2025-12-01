@@ -1,9 +1,6 @@
 package com.green.university.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,13 +16,19 @@ public class Subject {
     private String name;
 
     // professorId
-    //private Professor professor;
+    @ManyToOne
+    @JoinColumn(name = "professor_id")
+    private Professor professor;
 
     // roomId
-    //private Room room;
+    @ManyToOne
+    @JoinColumn(name = "room_id")
+    private Room room;
 
     // deptId
-    // private Department department;
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private Department department;
 
     private String type;
     private Long subYear;

@@ -2,7 +2,7 @@ package com.green.university.repository.interfaces;
 
 import com.green.university.dto.ScheduleDto;
 import com.green.university.dto.ScheduleFormDto;
-import com.green.university.repository.model.Schedule;
+import com.green.university.entity.Schedule;
 
 
 import java.util.List;

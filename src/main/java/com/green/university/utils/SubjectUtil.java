@@ -1,7 +1,7 @@
 package com.green.university.utils;
 
 import com.green.university.dto.SubjectFormDto;
-import com.green.university.repository.model.Subject;
+import com.green.university.entity.Subject;
 
 import java.util.List;
 

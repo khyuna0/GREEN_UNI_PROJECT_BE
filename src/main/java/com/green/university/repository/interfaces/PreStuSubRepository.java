@@ -3,7 +3,7 @@ package com.green.university.repository.interfaces;
 import com.green.university.dto.response.StuSubAppDto;
 import com.green.university.dto.response.StuSubDayTimeDto;
 import com.green.university.dto.response.StuSubSumGradesDto;
-import com.green.university.repository.model.PreStuSub;
+import com.green.university.entity.PreStuSub;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;

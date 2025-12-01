@@ -1,7 +1,7 @@
 package com.green.university.repository.interfaces;
 
 import com.green.university.dto.BreakAppFormDto;
-import com.green.university.repository.model.BreakApp;
+import com.green.university.entity.BreakApp;
 
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;

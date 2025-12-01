@@ -1,8 +1,8 @@
 package com.green.university.utils;
 
 import com.green.university.handler.exception.CustomRestfullException;
-import com.green.university.repository.model.BreakApp;
-import com.green.university.repository.model.StuStat;
+import com.green.university.entity.BreakApp;
+import com.green.university.entity.StuStat;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;

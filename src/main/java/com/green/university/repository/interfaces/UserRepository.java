@@ -2,7 +2,7 @@ package com.green.university.repository.interfaces;
 
 import com.green.university.dto.ChangePasswordDto;
 import com.green.university.dto.response.PrincipalDto;
-import com.green.university.repository.model.User;
+import com.green.university.entity.User;
 import org.springframework.data.repository.CrudRepository;
 
 

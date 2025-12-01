@@ -5,7 +5,7 @@ import com.green.university.dto.response.StuSubAppDto;
 import com.green.university.dto.response.StuSubDayTimeDto;
 import com.green.university.dto.response.StuSubSumGradesDto;
 import com.green.university.dto.response.StudentInfoForProfessorDto;
-import com.green.university.repository.model.StuSub;
+import com.green.university.entity.StuSub;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;

@@ -2,8 +2,8 @@ package com.green.university.controller;
 
 import com.green.university.dto.*;
 import com.green.university.handler.exception.CustomRestfullException;
-import com.green.university.repository.model.Professor;
-import com.green.university.repository.model.Student;
+import com.green.university.entity.Professor;
+import com.green.university.entity.Student;
 import com.green.university.service.ProfessorService;
 import com.green.university.service.StudentService;
 import com.green.university.service.UserService;

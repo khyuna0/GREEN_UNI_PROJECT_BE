@@ -2,7 +2,7 @@ package com.green.university.service;
 
 import com.green.university.dto.StudentListForm;
 import com.green.university.repository.interfaces.StudentRepository;
-import com.green.university.repository.model.Student;
+import com.green.university.entity.Student;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

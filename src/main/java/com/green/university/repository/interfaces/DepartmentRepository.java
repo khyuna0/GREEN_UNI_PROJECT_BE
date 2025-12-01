@@ -1,7 +1,7 @@
 package com.green.university.repository.interfaces;
 
 import com.green.university.dto.DepartmentFormDto;
-import com.green.university.repository.model.Department;
+import com.green.university.entity.Department;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 

@@ -1,7 +1,7 @@
 package com.green.university.repository.interfaces;
 
 import com.green.university.dto.response.StudentInfoStatListDto;
-import com.green.university.repository.model.StuStat;
+import com.green.university.entity.StuStat;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;

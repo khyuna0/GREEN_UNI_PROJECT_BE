@@ -1,9 +1,6 @@
 package com.green.university.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,7 +26,9 @@ public class Professor {
     private String email;
 
 //    Department 엔티티
-//    private Department department;
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private Department department;
 
     private Date hireDate;
 }

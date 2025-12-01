@@ -4,7 +4,7 @@ import com.green.university.dto.response.GradeForScholarshipDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.ScholarshipRepository;
 import com.green.university.repository.interfaces.TuitionRepository;
-import com.green.university.repository.model.*;
+import com.green.university.entity.*;
 import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

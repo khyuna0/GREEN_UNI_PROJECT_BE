@@ -1,7 +1,10 @@
 package com.green.university.entity;
 
-import com.green.university.repository.model.Student;
+import com.green.university.entity.Student;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 
 @Entity
@@ -9,7 +12,13 @@ import lombok.Data;
 public class PreStuSub {
 
     // Student 엔티티
-//    private Student student;
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "student_id")
+    private Student student;
     // Subject 엔티티
-//    private Subject subject;
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "subject_id")
+    private Subject subject;
 }

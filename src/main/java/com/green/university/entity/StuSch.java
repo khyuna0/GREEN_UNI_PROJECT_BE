@@ -14,7 +14,9 @@ public class StuSch { // 학적상태 저장 테이블
     private Long id;
     
     // Student 엔티티
-//    private Student student;
+    @ManyToOne
+    @JoinColumn(name = "student_id")
+    private Student student;
 
     private Long schYear;
     private Long semester;

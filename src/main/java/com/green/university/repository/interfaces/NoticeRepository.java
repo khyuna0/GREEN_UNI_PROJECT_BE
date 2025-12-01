@@ -2,7 +2,7 @@ package com.green.university.repository.interfaces;
 
 import com.green.university.dto.NoticeFormDto;
 import com.green.university.dto.NoticePageFormDto;
-import com.green.university.repository.model.Notice;
+import com.green.university.entity.Notice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 

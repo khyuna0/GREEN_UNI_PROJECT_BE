@@ -3,7 +3,7 @@ package com.green.university.utils;
 import com.green.university.dto.response.StuSubDayTimeDto;
 import com.green.university.dto.response.StuSubSumGradesDto;
 import com.green.university.handler.exception.CustomRestfullException;
-import com.green.university.repository.model.Subject;
+import com.green.university.entity.Subject;
 import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;

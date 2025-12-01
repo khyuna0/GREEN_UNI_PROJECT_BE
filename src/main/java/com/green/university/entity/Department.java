@@ -5,14 +5,14 @@ import lombok.Data;
 
 @Entity
 @Data
-public class Room {
-
+public class Department {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //  College엔티티
+    private String name;
+
     @ManyToOne
-    @JoinColumn(name = "college_id")
-    private College college;
+    @JoinColumn(name = "colleage_id")
+    private College colleage;
 }

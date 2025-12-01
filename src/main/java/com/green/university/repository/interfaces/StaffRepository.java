@@ -5,7 +5,7 @@ import com.green.university.dto.FindIdFormDto;
 import com.green.university.dto.FindPasswordFormDto;
 import com.green.university.dto.UserUpdateDto;
 import com.green.university.dto.response.UserInfoForUpdateDto;
-import com.green.university.repository.model.Staff;
+import com.green.university.entity.Staff;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 

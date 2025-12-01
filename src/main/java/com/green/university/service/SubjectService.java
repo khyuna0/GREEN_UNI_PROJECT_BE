@@ -5,7 +5,7 @@ import com.green.university.dto.CurrentSemesterSubjectSearchFormDto;
 import com.green.university.dto.response.SubjectDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.SubjectRepository;
-import com.green.university.repository.model.Subject;
+import com.green.university.entity.Subject;
 import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

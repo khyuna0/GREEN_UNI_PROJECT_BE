@@ -1,9 +1,6 @@
 package com.green.university.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,7 +24,9 @@ public class Student {
     private String email;
 
     //deptId
-    //private Department department;
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private Department department;
 
     private Long grade;
     private Long semester;

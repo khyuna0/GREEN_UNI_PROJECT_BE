@@ -3,7 +3,7 @@ package com.green.university.controller;
 import com.green.university.dto.NoticeFormDto;
 import com.green.university.dto.NoticePageFormDto;
 import com.green.university.handler.exception.CustomRestfullException;
-import com.green.university.repository.model.Notice;
+import com.green.university.entity.Notice;
 import com.green.university.service.NoticeService;
 import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
