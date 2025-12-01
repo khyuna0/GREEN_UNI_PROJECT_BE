@@ -12,8 +12,6 @@ import java.util.List;
  *  박성희
  *  공지 repository
  */
-
-
 public interface NoticeRepository extends JpaRepository<Notice,Long> {
 	public Long insert(NoticeFormDto noticeFormDto);
 	public List<Notice> selectByNoticeDto(NoticePageFormDto noticePageFormDto);

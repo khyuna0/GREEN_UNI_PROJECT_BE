@@ -19,10 +19,8 @@ public interface EvaluationRepository extends JpaRepository<Evaluation,Long> {
 	
 	// 강의 평가 제출 (학생)
 	public Long insert(EvaluationDto evaluationFormDto);
-	
 	// 강의평가 했는지 조회 (학생)
 	public Evaluation selectEvaluation(Long studentId);
-	
 	// 강의평가 조회 (교수)
 	public List<MyEvaluationDto> selectMyEvaluationDtoByProfessorId(Long professorId);
 	// 과목별 강의평가 조회 (교수)

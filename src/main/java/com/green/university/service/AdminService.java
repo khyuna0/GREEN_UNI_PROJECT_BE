@@ -34,37 +34,26 @@ public class AdminService {
     @Autowired
     private SyllaBusRepository syllaBusRepository;
 
-    /**
-     * 단과대 입력 서비스
-     */
+    // 단과대 입력
     @Transactional
     public void createCollege(@Validated CollegeFormDto collegeFormDto) {
         // 같은 이름 중복 검사
-        List<College> collegeList = collegeRepository.selectCollegeDto();
-        for (int i = 0; i < collegeList.size(); i++) {
-            if (collegeList.get(i).getName().equals(collegeFormDto.getName())) {
-                throw new CustomRestfullException("이미 존재하는 단과대입니다", HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+        if(collegeRepository.existsByName(collegeFormDto.getName())){
+            throw new CustomRestfullException("이미 존재하는 단과대입니다", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        Long resultRowCount = collegeRepository.insert(collegeFormDto);
-        if (resultRowCount != 1) {
-            System.out.println("단과대 입력 서비스 오류");
-        }
+        College college = new College();
+        college.setName(collegeFormDto.getName());
+        collegeRepository.save(college);
     }
 
-    /**
-     * 단과대 조회 서비스
-     */
+    // 단과대 조회
     @Transactional
     public List<College> readCollege() {
-        List<College> collegeList = collegeRepository.selectCollegeDto();
-        return collegeList;
+        return collegeRepository.findAll();
     }
 
-    /**
-     * 단과대 삭제 서비스
-     */
+    // 단과대 삭제
     public void deleteCollege(Long id) {
         collegeRepository.deleteById(id);
     }
@@ -103,7 +92,7 @@ public class AdminService {
         departmentRepository.deleteById(collegeId);
     }
 
-   // 학과 수정
+    // 학과 수정
     public void updateDepartment(DepartmentFormDto departmentFormDto) {
 
         // 기존 학과 엔티티 가져오기
