@@ -84,7 +84,7 @@ public class TuitionService {
 	public Long createCurrentSchType(Long studentId) {
 
 		StuSch stuSch = new StuSch();
-		stuSch.setStudent(studentRepository.findById(studentId).orElseThrow(() -> new CustomRestfullException("해당 학생 정보가 없습니다.", HttpStatus.NOT_FOUND)));
+		stuSch.setStudentId(studentId);
 		stuSch.setSchYear(Define.CURRENT_YEAR);
 		stuSch.setSemester(Define.CURRENT_SEMESTER);
 
@@ -119,7 +119,7 @@ public class TuitionService {
 			stuSch.setSchType(scholarshipRepository.findById(2L).orElseThrow(() -> new CustomRestfullException("해당 장학금 정보가 없습니다.", HttpStatus.NOT_FOUND)));
 		}
 
-		scholarshipRepository.save(stuSch);
+		Stust.save(stuSch);
 		return stuSch.getSchType().getType();
 	}
 
