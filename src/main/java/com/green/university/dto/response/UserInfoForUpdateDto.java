@@ -1,0 +1,20 @@
+package com.green.university.dto.response;
+
+import lombok.Data;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+
+@Data
+public class UserInfoForUpdateDto {
+
+	@NotBlank
+	private String address;
+	@Size(min = 11, max = 13)
+	private String tel;
+	@Email
+	private String email;
+	
+}
