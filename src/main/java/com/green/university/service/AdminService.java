@@ -74,47 +74,49 @@ public class AdminService {
      */
     @Transactional
     public void createDepartment(@Validated DepartmentFormDto departmentFormDto) {
-        // 같은 학과 이름 중복 검사
-        List<Department> departmentList = departmentRepository.selectByDepartmentDto();
-        for (int i = 0; i < departmentList.size(); i++) {
-            if (departmentList.get(i).getName().equals(departmentFormDto.getName())) {
-                throw new CustomRestfullException("이미 존재하는 학과입니다", HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+
+        // 같은 학과 이름이 이미 존재하는지 검사
+        if (departmentRepository.existsByName(departmentFormDto.getName())) {
+            throw new CustomRestfullException("이미 존재하는 학과입니다", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        Long resultRowCount = departmentRepository.insert(departmentFormDto);
-        if (resultRowCount != 1) {
-            System.out.println("학과 입력 서비스 오류");
-        }
+
+        Department department = new Department();
+        department.setName(departmentFormDto.getName());
+
+        //collegeId 까지 매핑?
+        College college = collegeRepository.findById(departmentFormDto.getCollegeId())
+                .orElseThrow(() -> new CustomRestfullException("단과대를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+        department.setCollege(college);
+
+        departmentRepository.save(department);
+
     }
 
-    /**
-     * 학과 조회 서비스
-     */
+    // 학과 조회
     public List<Department> readDepartment() {
-        List<Department> departmentList = departmentRepository.selectByDepartmentDto();
-        for (int i = 0; i < departmentList.size(); i++) {
-            System.out.println(departmentList.get(i));
-        }
+        List<Department> departmentList = departmentRepository.findAll();
         return departmentList;
     }
 
-    /**
-     * 학과 삭제 서비스
-     */
+    // 학과 삭제
     public void deleteDepartment(Long collegeId) {
         departmentRepository.deleteById(collegeId);
-
     }
 
-    /**
-     * 학과 수정 서비스
-     */
-    public Long updateDepartment(DepartmentFormDto departmentFormDto) {
-        Long resultRowCount = departmentRepository.updateByDepartmentDto(departmentFormDto);
-        if (resultRowCount != 1) {
-            System.out.println("학과 수정 서비스 오류");
-        }
-        return resultRowCount;
+   // 학과 수정
+    public void updateDepartment(DepartmentFormDto departmentFormDto) {
+
+        // 기존 학과 엔티티 가져오기
+        Department department = departmentRepository.findById(departmentFormDto.getId())
+                .orElseThrow(() -> new CustomRestfullException("해당 학과를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
+
+        // 학과 이름 수정
+        department.setName(departmentFormDto.getName());
+
+        // 단과대 수정
+        College college =
+
+
     }
 
     // 단과대별 등록금 입력
@@ -134,16 +136,16 @@ public class AdminService {
         collTuit.setCollege(college);
         collTuit.setAmount(collTuitFormDto.getAmount());
         collTuitRepository.save(collTuit);
-        
+
     }
 
-   //단과대 등록금 조회
+    //단과대 등록금 조회
     public List<CollTuitFormDto> readCollTuit() {
 
         //엔티티 전체 조회
         List<CollTuit> collTuitList = collTuitRepository.findAll();
 
-        // 2) 엔티티 -> DTO 변환 (새로운 private 메서드 없이, 여기서 바로)
+        // 엔티티 -> DTO 변환 (새로운 private 메서드 없이, 여기서 바로)
         return collTuitList.stream().map(collTuit -> {
             CollTuitFormDto dto = new CollTuitFormDto();
             dto.setCollegeId(collTuit.getCollege().getId());
