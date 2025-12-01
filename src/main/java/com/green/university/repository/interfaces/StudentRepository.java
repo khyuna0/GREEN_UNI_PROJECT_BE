@@ -1,6 +1,5 @@
 package com.green.university.repository.interfaces;
 
-import com.green.university.dto.*;
 import com.green.university.entity.Department;
 import com.green.university.entity.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,24 +26,21 @@ public interface StudentRepository extends JpaRepository<Student,Long> {
 	// password 발급용 model 확인 - FindPasswordFormDto
     Long findByIdAndNameAndEmail(Long id, String name, String email);
 
+	// =============== 아래 코드는 페이징 하는 것 같은데 .. 추후 수정 ..
 
-	// 페이지별 학생 조회
+	// 페이지별(?) 학생 조회 - StudentListForm
+	// 기존 코드는 폼으로도 찾고, 과별로 찾고, 학번으로 찾았었음 ..
     List<Student> findByIdAndDepartment(Long id, Department department);
 	List<Student> findByDepartment(Department department);
-
-	//**********************************
-	// 페이지, 과별 학생조회
-    List<Student> selectByDepartmentId(StudentListForm studentListForm);
-	
-	// 학번으로 학생 조회
-    List<Student> selectByStudentId(StudentListForm studentListForm);
 	
 	// 페이징 처리 위한 전체 학생 수 조회
     Long selectStudentAmount();
 	
 	// 페이징 처리 위한 과 학생 수 조회
     Long selectStudentAmountByDeptId(Long deptId);
-	
+
+	// =============== 이건 리액트에서 랜더링 하면 되는 거 아닌가 ..?
+
 	// 학생 grade, semester 업데이트
     Long updateStudentGradeAndSemester1_2();
 	Long updateStudentGradeAndSemester2_1();

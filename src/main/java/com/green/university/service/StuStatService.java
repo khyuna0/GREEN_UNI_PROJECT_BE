@@ -1,6 +1,9 @@
 package com.green.university.service;
 
+import com.green.university.entity.BreakApp;
+import com.green.university.entity.Student;
 import com.green.university.handler.exception.CustomRestfullException;
+import com.green.university.repository.interfaces.BreakAppRepository;
 import com.green.university.repository.interfaces.StuStatRepository;
 import com.green.university.repository.interfaces.StudentRepository;
 import com.green.university.entity.StuStat;
@@ -9,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -23,6 +27,8 @@ public class StuStatService {
 
 	@Autowired
 	private StudentRepository studentRepository;
+    @Autowired
+    private BreakAppRepository breakAppRepository;
 
 	/**
 	 * @param studentId
@@ -30,10 +36,7 @@ public class StuStatService {
 	 */
 	@Transactional
 	public StuStat readCurrentStatus(Long studentId) {
-
-		StuStat stuStatEntity = stuStatRepository.selectByStudentIdOrderbyIdDesc(studentId).get(0);
-
-		return stuStatEntity;
+		return stuStatRepository.findAllByStudentIdOrderByIdDesc(studentId).get(0);
 	}
 
 	/**
@@ -42,10 +45,7 @@ public class StuStatService {
 	 */
 	@Transactional
 	public List<StuStat> readStatusList(Long studentId) {
-
-		List<StuStat> stuStatList = stuStatRepository.selectByStudentIdOrderbyIdDesc(studentId);
-
-		return stuStatList;
+		return stuStatRepository.findAllByStudentIdOrderByIdDesc(studentId);
 	}
 
 	/**
@@ -63,32 +63,42 @@ public class StuStatService {
 	 */
 	@Transactional
 	public void createFirstStatus(Long studentId) {
-
-		Long resultRowCount = stuStatRepository.insert(studentId, "재학", "9999-01-01", null);
-
-		if (resultRowCount != 1) {
-			throw new CustomRestfullException("학적 상태 생성에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		Student student = studentRepository.findById(studentId).orElseThrow(
+				() -> new CustomRestfullException("학생을 조회할 수 없습니다.", HttpStatus.NOT_FOUND)
+		);
+		StuStat stuStat = new StuStat();
+		// 기본값 세팅을 이렇게 해야할까 ..?
+		stuStat.setStudent(student);
+		stuStat.setStatus("재학");
+		stuStat.setFromDate(LocalDate.parse("9999-01-01")); // LocalDate 에서 어떻게 넣어야 할 지 다시 생각해보기
+		stuStat.setBreakApp(null);
+		stuStatRepository.save(stuStat);
 	}
 
 	/**
 	 * 학적 상태 변동 새로운 상태 추가 + 기존 학적 상태의 to_date를 now()로 변경 breakAppId가 없다면 null로 받기
+	 * 꼭 저렇게 다 나눠서 받아야 하는건가? @param 이용해서 ..?
 	 */
-
 	public void updateStatus(Long studentId, String newStatus, String newToDate, Long breakAppId) {
-
 		// 가장 최근의 기존 학적 상태 데이터의 id
-		Long targetId = stuStatRepository.selectByStudentIdOrderbyIdDesc(studentId).get(0).getId();
-
-		// 기존 학적 상태의 to_date를 now()로 변경
-		Long updateRowCount = stuStatRepository.updateOldStatus(targetId);
-
+		Long targetId = stuStatRepository.findAllByStudentIdOrderByIdDesc(studentId).get(0).getId();
+		// 이렇게 찾는 게 맞는지 + 에러도 잘 구현한 건지 확인 할 것
+		Student student = studentRepository.findById(studentId).orElseThrow(
+				() -> new CustomRestfullException("학생을 조회할 수 없습니다.", HttpStatus.NOT_FOUND)
+		);
+		// breakApp 찾기
+		BreakApp breakApp = breakAppRepository.findById(breakAppId).orElseThrow(
+				() -> new CustomRestfullException("휴학 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+		);
+		StuStat stuStat = new StuStat();
+		// 기본값 세팅을 이렇게 해야할까 ..?
 		// 새로운 학적 상태 추가
-		Long insertRowCount = stuStatRepository.insert(studentId, newStatus, newToDate, breakAppId);
-
-		if (updateRowCount != 1 || insertRowCount != 1) {
-			throw new CustomRestfullException("학적 상태 변경에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		stuStat.setStudent(student);
+		stuStat.setStatus(newStatus);
+		stuStat.setFromDate(LocalDate.parse(newToDate));
+		stuStat.setToDate(LocalDate.now());
+		stuStat.setBreakApp(breakApp);
+		stuStatRepository.save(stuStat);
 	}
 
 }
