@@ -17,7 +17,7 @@ public class CreateStudentDto {
 	@NotEmpty
 	@Size(min = 2, max= 30)
 	private String name;
-	private Date birthDate;
+	private LocalDate birthDate;
 	private String gender;
 	@NotEmpty
 	private String address;

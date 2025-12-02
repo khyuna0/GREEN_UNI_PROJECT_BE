@@ -111,7 +111,7 @@ public class UserService {
      */
     @Transactional
     public void createStudentToStudentAndUser(CreateStudentDto createStudentDto) {
-        Department dept = DepartmentRepository.findById(createStudentDto.getDeptId())
+        Department dept = departmentRepository.findById(createStudentDto.getDeptId())
                 .orElseThrow(() -> new RuntimeException("학과가 없습니다."));
         Student student = new Student();
         student.setName(createStudentDto.getName());
@@ -333,7 +333,7 @@ public class UserService {
 
         // 마이페이지에서 소속 : 공과대학 컴퓨터공학과 ( CollegeName DeptName ) 형식으로 출력됨 그래서 Dto 사용하나봄
 
-        dto.setCollegeName(professor.getDepartment().getColleage().getName());
+        dto.setCollegeName(professor.getDepartment().getCollege().getName());
         dto.setDeptName(professor.getDepartment().getName());
 
 		return dto;
@@ -366,9 +366,9 @@ public class UserService {
         if (findIdFormDto.getUserRole().equals("student")) {
             findId = studentRepository.findByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail());
         } else if (findIdFormDto.getUserRole().equals("professor")) {
-            findId = professorRepository.selectIdByNameAndEmail(findIdFormDto);
+            findId = professorRepository.findByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail()).getId();
         } else if (findIdFormDto.getUserRole().equals("staff")) {
-            findId = staffRepository.selectIdByNameAndEmail(findIdFormDto);
+            findId = staffRepository.findByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail()).getId();
         }
 
         if (findId == null) {
@@ -401,12 +401,12 @@ public class UserService {
                 throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else if (findPasswordFormDto.getUserRole().equals("professor")) {
-            findId = professorRepository.selectProfessorByIdAndNameAndEmail(findPasswordFormDto);
+            findId = professorRepository.findByIdAndNameAndEmail(findPasswordFormDto.getId(),findPasswordFormDto.getName(),findPasswordFormDto.getEmail()).getId();
             if (findId == null) {
                 throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else if (findPasswordFormDto.getUserRole().equals("staff")) {
-            findId = staffRepository.selectStaffByIdAndNameAndEmail(findPasswordFormDto);
+            findId = staffRepository.findByIdAndNameAndEmail(findPasswordFormDto.getId(),findPasswordFormDto.getName(),findPasswordFormDto.getEmail()).getId();
             if (findId == null) {
                 throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
             }
