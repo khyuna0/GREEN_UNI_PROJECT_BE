@@ -132,7 +132,7 @@ public class TuitionController {
 	}
 
 	/**
-	 * 등록금 납부 고지서 생성
+	 * 등록금 납부 고지서 생성 (학생 id를 가지고 와서 for문으로 돌려서 tuition을 생성하는 것 같은데)
 	 */
 	@GetMapping("/create")
 	public String createTuiProc(Model model) {

@@ -1,10 +1,9 @@
 package com.green.university.repository.interfaces;
 
-import com.green.university.dto.*;
-import com.green.university.dto.response.StudentInfoDto;
-import com.green.university.dto.response.UserInfoForUpdateDto;
+import com.green.university.entity.Department;
 import com.green.university.entity.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 
 import java.util.List;
@@ -17,61 +16,42 @@ import java.util.List;
 
 public interface StudentRepository extends JpaRepository<Student,Long> {
 
-	// student_tb에 insert
-	public Long insertToStudent(CreateStudentDto createStudentDto);
-
-	// staff_tb에서 자동 생성된 id 받아오기
-	public Long selectIdByCreateStudentDto(CreateStudentDto createStudentDto);
-
 	/**
 	 * @author 서영 전체 학생의 id만 가져오기
 	 */
-	public List<Long> selectIdList();
+	@Query ("SELECT s.id FROM Student s")
+	List<Long> findAllStudentIds();
 
-	/**
-	 * @author 서영 특정 학생의 정보 가져오기
-	 */
-	public Student selectByStudentId(Long studentId);
+	// id 찾기 - FindIdFormDto
+    Long findByNameAndEmail(String name, String email);
 
-	// 업데이트용 정보 읽기
-	public UserInfoForUpdateDto selectByUserId(Long userId);
+	// password 발급용 model 확인 - FindPasswordFormDto
+    Long findByIdAndNameAndEmail(Long id, String name, String email);
 
-	// 유저 정보 업데이트
-	public Long updateStudent(UserUpdateDto userUpdateDto);
+	// =============== 아래 코드는 페이징 하는 것 같은데 .. 추후 수정 ..
 
-	// 학생 info id로 불러오기
-	public StudentInfoDto selectStudentInfoById(Long id);
-
-	// id 찾기
-	public Long selectIdByNameAndEmail(FindIdFormDto findIdFormDto);
-
-	// password 발급용 model 확인
-	public Long selectStudentByIdAndNameAndEmail(FindPasswordFormDto findPasswordFormDto);
-	
-	// 페이지별 학생 조회
-	public List<Student> selectStudentList(StudentListForm studentListForm);
-	
-	// 페이지, 과별 학생조회
-	public List<Student> selectByDepartmentId(StudentListForm studentListForm);
-	
-	// 학번으로 학생 조회
-	public List<Student> selectByStudentId(StudentListForm studentListForm);
+	// 페이지별(?) 학생 조회 - StudentListForm
+	// 기존 코드는 폼으로도 찾고, 과별로 찾고, 학번으로 찾았었음 ..
+    List<Student> findByIdAndDepartment(Long id, Department department);
+	List<Student> findByDepartment(Department department);
 	
 	// 페이징 처리 위한 전체 학생 수 조회
-	public Long selectStudentAmount();
+    Long selectStudentAmount();
 	
 	// 페이징 처리 위한 과 학생 수 조회
-	public Long selectStudentAmountByDeptId(Long deptId);
-	
+    Long selectStudentAmountByDeptId(Long deptId);
+
+	// =============== 이건 리액트에서 랜더링 하면 되는 거 아닌가 ..?
+
 	// 학생 grade, semester 업데이트
-	public Long updateStudentGradeAndSemester1_2();
-	public Long updateStudentGradeAndSemester2_1();
-	public Long updateStudentGradeAndSemester2_2();
-	public Long updateStudentGradeAndSemester3_1();
-	public Long updateStudentGradeAndSemester3_2();
-	public Long updateStudentGradeAndSemester4_1();
-	public Long updateStudentGradeAndSemester4_2();
-	
-	
-	
+    Long updateStudentGradeAndSemester1_2();
+	Long updateStudentGradeAndSemester2_1();
+	Long updateStudentGradeAndSemester2_2();
+	Long updateStudentGradeAndSemester3_1();
+	Long updateStudentGradeAndSemester3_2();
+	Long updateStudentGradeAndSemester4_1();
+	Long updateStudentGradeAndSemester4_2();
+
+
+
 }

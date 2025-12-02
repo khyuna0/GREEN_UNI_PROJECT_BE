@@ -2,6 +2,8 @@ package com.green.university.repository.interfaces;
 
 import com.green.university.dto.UpdateStudentGradeDto;
 
+import com.green.university.entity.StuSubDetail;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 
 /**
@@ -10,7 +12,7 @@ import org.springframework.data.repository.query.Param;
  *
  */
 
-public interface StuSubDetailRepository {
+public interface StuSubDetailRepository extends JpaRepository<StuSubDetail,Long> {
 	
 	// 학생 성적 업데이트
 	Long updateGrade(UpdateStudentGradeDto updateStudentGradeDto);

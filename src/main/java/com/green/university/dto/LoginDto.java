@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 
 
 @Data
-public class LoginDto {
+public class LoginDto { // 로그인 유효성 검증용
 	
 	@Min(100000)
 	@Max(2147483646)

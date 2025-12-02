@@ -1,15 +1,14 @@
 package com.green.university.entity;
 
+import com.green.university.dto.CreateStudentDto;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
-@Getter
-@Setter
+@Data
 public class Student {
 
     @Id
@@ -17,7 +16,7 @@ public class Student {
     private Long id;
 
     private String name;
-    private Date birthDate;
+    private LocalDate birthDate;
     private String gender;
     private String address;
     private String tel;
