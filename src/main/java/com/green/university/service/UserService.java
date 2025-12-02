@@ -45,26 +45,30 @@ public class UserService {
 	 * 
 	 * @param createStaffDto
 	 */
-	@Transactional
-	public void createStaffToStaffAndUser(CreateStaffDto createStaffDto) {
+    @Transactional
+    public void createStaffToStaffAndUser(CreateStaffDto dto) {
 
-		Long resultCountRow = staffRepository.insertToStaff(createStaffDto);
-		if (resultCountRow != 1) {
-			throw new CustomRestfullException(Define.CREATE_FAIL, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		Long staffId = staffRepository.selectIdByCreateStaffDto(createStaffDto);
-		User user = new User();
+        // Staff 저장
+        Staff staff = new Staff();
+        staff.setName(dto.getName());
+        staff.setGender(dto.getGender());
+        staff.setAddress(dto.getAddress());
+        staff.setTel(dto.getTel());
+        staff.setEmail(dto.getEmail());
 
-		user.setId(staffId);
-		user.setPassword(passwordEncoder.encode(staffId + ""));
-		user.setUserRole("staff");
+        Staff savedStaff = staffRepository.save(staff);
 
-		resultCountRow = userRepository.insertToUser(user);
-		if (resultCountRow != 1) {
-			throw new CustomRestfullException(Define.CREATE_FAIL, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+        Long staffId = savedStaff.getId(); // 저장한 값으로 유저 테이블 값 생성하기 (로그인 위한 테이블!)
 
-	}
+        // User 저장
+        User user = new User();
+        user.setId(staffId);
+        user.setPassword(passwordEncoder.encode(staffId + ""));
+        user.setUserRole("staff");
+
+        userRepository.save(user); // INSERT 실행
+    }
+
 
 	/**
 	 * professor 생성 서비스 먼저 professor_tb에 insert한 후 professor_tb에 생긴 id를 끌고와 user_tb에

@@ -10,18 +10,18 @@ import lombok.Setter;
 public class StuSch { // 학적상태 저장 테이블
 
     @Id
-    @Column
-    private Long studentId; // 복합키 테이블이라 아이디 정보 저장함
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Id
-    @Column
+    // Student 엔티티
+    @ManyToOne
+    @JoinColumn(name = "student_id")
+    private Student student;
+
     private Long schYear;
-
-    @Id
-    @Column
     private Long semester;
 
+    // Scholarship 엔티티
     @ManyToOne
-    @JoinColumn
     private Scholarship schType;
 }

@@ -3,6 +3,7 @@ package com.green.university.service;
 import com.green.university.dto.response.GradeForScholarshipDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.ScholarshipRepository;
+import com.green.university.repository.interfaces.StuSchRepository;
 import com.green.university.repository.interfaces.StudentRepository;
 import com.green.university.repository.interfaces.TuitionRepository;
 import com.green.university.entity.*;
@@ -41,6 +42,9 @@ public class TuitionService {
 
     @Autowired
     private StudentRepository studentRepository;
+
+    @Autowired
+    private StuSchRepository stuSchRepository;
 
 
 	/**
@@ -83,12 +87,12 @@ public class TuitionService {
 	 */
 	public Long createCurrentSchType(Long studentId) {
 
+        Student studentEntity = userService.readStudent(studentId);
+
 		StuSch stuSch = new StuSch();
-		stuSch.setStudentId(studentId);
+		stuSch.setStudent(studentEntity);
 		stuSch.setSchYear(Define.CURRENT_YEAR);
 		stuSch.setSemester(Define.CURRENT_SEMESTER);
-
-		Student studentEntity = userService.readStudent(studentId);
 
 		// 1학년 2학기 이상의 학생이라면
 		if (studentEntity.getGrade() > 1 || studentEntity.getSemester() == 2) {
@@ -102,7 +106,7 @@ public class TuitionService {
 			}
 
 			if (gradeDto == null) {
-				scholarshipRepository.insertCurrentSchType(stuSch);
+                stuSchRepository.save(stuSch);
 				return null;
 			} else {
 				Double avgGrade = gradeDto.getAvgGrade();
@@ -119,7 +123,7 @@ public class TuitionService {
 			stuSch.setSchType(scholarshipRepository.findById(2L).orElseThrow(() -> new CustomRestfullException("해당 장학금 정보가 없습니다.", HttpStatus.NOT_FOUND)));
 		}
 
-		Stust.save(stuSch);
+        stuSchRepository.save(stuSch);
 		return stuSch.getSchType().getType();
 	}
 
@@ -176,7 +180,7 @@ public class TuitionService {
 		Long schAmount = 0L;
 
 		if (schType != null) {
-			schEntity = scholarshipRepository.selectByStudentIdAndSemester(studentId, Define.CURRENT_YEAR,
+			schEntity = stuSchRepository.findSchTypeByStudentIdAndSchYearAndSemester(studentId, Define.CURRENT_YEAR,
 					Define.CURRENT_SEMESTER);
 			// 등록금액보다 최대 장학금액이 더 크다면
 			if (tuiAmount < schAmount) {

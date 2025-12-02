@@ -38,6 +38,6 @@ public interface PreStuSubRepository extends JpaRepository<PreStuSub,Long> {
 
 
 	// 예비 수강 신청 내역에 해당 강의가 있는 학생들 조회
-	List<PreStuSub> selectBySubjectId(Long subjectId);
+	List<PreStuSub> findBySubjectId(Long subjectId);
 	
 }
