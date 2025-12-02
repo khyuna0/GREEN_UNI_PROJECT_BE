@@ -151,7 +151,7 @@ public class AdminController {
 	 * @return 강의실 삭제 기능
 	 */
 	@GetMapping("/roomDelete")
-	public String deleteRoom(Model model, @RequestParam Long id) {
+	public String deleteRoom(Model model, @RequestParam String id) {
 		model.addAttribute("id", id);
 		adminService.deleteRoom(id);
 		return "redirect:/admin/room";

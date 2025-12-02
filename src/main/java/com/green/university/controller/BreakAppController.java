@@ -60,7 +60,7 @@ public class BreakAppController {
 
         // 단과대 이름
         String collName = collegeService
-                .readCollById(collegeService.readDeptById(studentInfo.getDepartment().getId()).getColleage().getId()).getName();
+                .readCollById(collegeService.readDeptById(studentInfo.getDepartment().getId()).getCollege().getId()).getName();
         model.addAttribute("collName", collName);
 
         // 학생이 재학 상태가 아니라면 신청 불가능
@@ -152,7 +152,7 @@ public class BreakAppController {
 
         // 단과대 이름
         String collName = collegeService
-                .readCollById(collegeService.readDeptById(studentInfo.getDepartment().getId()).getColleage().getId()).getName();
+                .readCollById(collegeService.readDeptById(studentInfo.getDepartment().getId()).getCollege().getId()).getName();
         model.addAttribute("collName", collName);
 
         return "break/appDetail";
