@@ -193,9 +193,11 @@ public class TuitionService {
                 schAmount = scholarship.getMaxAmount();
             }
         }
+        // 실납부금액 (전체 등록 금액 - 장학 금액)
+        Long payAmount = tuiAmount - schAmount;
 
 		// 등록금 고지서 생성
-		Tuition tuition = new Tuition(studentId, Define.CURRENT_YEAR, Define.CURRENT_SEMESTER, tuiAmount, schType,
+		Tuition tuition = new Tuition(studentId, Define.CURRENT_YEAR, Define.CURRENT_SEMESTER, tuiAmount, payAmount, schType,
 				schAmount);
 
         tuitionRepository.save(tuition);

@@ -9,7 +9,7 @@ public class Tuition {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 기존 복합 키 테이블을 기존 하던 방식으로 수정함
+    private Long id; // 기존 복합 키 테이블을 기존 방식으로 수정함
 
     @ManyToOne
     @JoinColumn(name = "student_id")
@@ -21,15 +21,17 @@ public class Tuition {
 
     private Long tuiAmount; // 등록 금액
 
+    private Long payAmount; // 실납부금액 / 없어서 추가함! (수정)
+
     @ManyToOne
     @JoinColumn(name = "sch_type")
     private Scholarship schType;
 
     private Long schAmount; // 장학 금액
 
-    private boolean status; // 납부 여부
+    private boolean status = false; // 납부 여부, 기본값 false인듯 (수정)
 
     // 등록금 고지서 생성을 위한 생성자
-    public Tuition(Long studentId, Long currentYear, Long currentSemester, Long tuiAmount, Long schType, Long schAmount) {
+    public Tuition(Long studentId, Long currentYear, Long currentSemester, Long tuiAmount, Long payAmount ,Long schType, Long schAmount ) {
     }
 }
