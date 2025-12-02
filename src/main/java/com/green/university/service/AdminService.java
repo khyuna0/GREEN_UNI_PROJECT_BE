@@ -1,12 +1,9 @@
 package com.green.university.service;
 
 import com.green.university.dto.*;
+import com.green.university.entity.*;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.*;
-import com.green.university.entity.College;
-import com.green.university.entity.Department;
-import com.green.university.entity.Room;
-import com.green.university.entity.Subject;
 import com.green.university.utils.SubjectUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -208,7 +205,7 @@ public class AdminService {
     /**
      * 강의실 삭제 서비스
      */
-    public void deleteRoom(Long id) {
+    public void deleteRoom(String id) {
         roomRepository.deleteById(id);
     }
 
