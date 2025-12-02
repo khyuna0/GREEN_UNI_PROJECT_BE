@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class EvaluationDto {
+    // 입력용 dto
 
     private Long studentId;
     private Long subjectId;

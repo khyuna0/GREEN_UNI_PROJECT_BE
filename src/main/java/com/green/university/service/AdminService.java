@@ -93,6 +93,7 @@ public class AdminService {
     }
 
     // 학과 수정
+    @Transactional
     public void updateDepartment(DepartmentFormDto departmentFormDto) {
 
         // 기존 학과 엔티티 가져오기
@@ -103,8 +104,11 @@ public class AdminService {
         department.setName(departmentFormDto.getName());
 
         // 단과대 수정
-        College college =
+        College college = collegeRepository.findById(departmentFormDto.getCollegeId())
+                .orElseThrow(()-> new CustomRestfullException("단과대를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
+        department.setCollege(college);
 
+        departmentRepository.save(department); // 없어도됨 ? -> 트랜잭션 끝날 때 JPA가 변경 내용을 자동으로 감지(dirty checking)하고 UPDATE
 
     }
 

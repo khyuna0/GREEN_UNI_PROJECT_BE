@@ -42,7 +42,7 @@ public class BreakAppService {
                 .orElseThrow(() -> new CustomRestfullException("학생을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         // 이미 처리중인 휴학 신청이 있는지 검사
-        List<BreakApp> breakAppList = breakAppRepository.findByStudent_Id(dto.getStudentId());
+        List<BreakApp> breakAppList = breakAppRepository.findByStudent_IdOrderByIdDesc(dto.getStudentId());
         for (BreakApp b : breakAppList) {
             if ("처리중".equals(b.getStatus())) {
                 throw new CustomPathException("이미 처리중인 신청 내역이 존재합니다.",
@@ -69,7 +69,7 @@ public class BreakAppService {
     // 해당 학생의 휴학 신청 내역 조회
     @Transactional(readOnly = true)
     public List<BreakApp> readByStudentId(Long studentId) {
-        return breakAppRepository.findByStudent_Id(studentId);
+        return breakAppRepository.findByStudent_IdOrderByIdDesc(studentId);
     }
 
     // 처리되지 않은 휴학 신청 내역 조회 (교직원)
