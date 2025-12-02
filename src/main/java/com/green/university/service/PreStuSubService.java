@@ -50,10 +50,8 @@ public class PreStuSubService {
 	public List<StuSubAppDto> readPreStuSubList(Long studentId) {
 
         return preStuSubRepository
-                .findByStudent_IdAndSubject_Sub_yearAndSubject_Semester(
-                        studentId,
-                        Define.CURRENT_YEAR,
-                        Define.CURRENT_SEMESTER
+                .findByStudent_Id(
+                        studentId
                 ).stream() // 리스트 내부의 각 preStuSub 엔티티(pre)를 StuSubAppDto 객체로 변환
                 .map(pre -> new StuSubAppDto(
                         studentId,
@@ -63,11 +61,21 @@ public class PreStuSubService {
                 .toList();
 	}
 
-	// 학생의 예비 수강신청 내역 추가 / 단일 건으로 적용되고,
+	// 학생의 예비 수강신청 내역 추가 / 단일 건으로 적용
 	@Transactional
 	public void createPreStuSub(Long studentId, Long subjectId) {
 
-		// 신청 대상 과목 정보
+        // 이미 신청한 과목인지 확인
+        PreStuSub existed = readPreStuSub(studentId, subjectId);
+
+        if (existed != null) {
+            throw new CustomRestfullException(
+                    "이미 해당 과목을 예비 수강신청했습니다.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        // 신청 대상 과목 정보
 		Subject targetSubject = subjectRepository.findById(subjectId).orElseThrow(() -> new CustomRestfullException("없는 과목입니다.", HttpStatus.NOT_FOUND));
 
 		// 현재 총 신청 학점 검증용 DTO
@@ -95,6 +103,7 @@ public class PreStuSubService {
 		// 현재 학생의 시간표와 겹치지 않는지 확인
 		StuSubUtil.checkDayTime(targetSubject, dayTimeList);
 
+
 		// 수강신청 내역 추가
         PreStuSub preStuSub = new PreStuSub();
         preStuSub.setStudent(studentRepository.findById(studentId).orElseThrow(() -> new CustomRestfullException("없는 학생 정보입니다.", HttpStatus.NOT_FOUND)));
@@ -102,8 +111,7 @@ public class PreStuSubService {
         preStuSubRepository.save(preStuSub);
 
 		// 해당 강의 현재인원 +1
-        Subject subject = subjectRepository.findById(subjectId).orElseThrow(() -> new CustomRestfullException("없는 과목입니다.", HttpStatus.NOT_FOUND));
-		subject.setNumOfStudent(subject.getNumOfStudent()+1);
+        targetSubject.setNumOfStudent(targetSubject.getNumOfStudent() + 1);
 
 	}
 
@@ -112,11 +120,15 @@ public class PreStuSubService {
 	public void deletePreStuSub(Long studentId, Long subjectId) {
 
         PreStuSub preStuSub = preStuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId);
+
+        if (preStuSub == null) { // 해당 예비 수강 신청 내역 없을 때 예외처리
+            throw new CustomRestfullException("신청 내역이 존재하지 않습니다.", HttpStatus.NOT_FOUND);
+        }
         preStuSubRepository.deleteById(preStuSub.getId());
 
         // 해당 강의 현재인원 -1
         Subject subject = subjectRepository.findById(subjectId).orElseThrow(() -> new CustomRestfullException("없는 과목입니다.", HttpStatus.NOT_FOUND));
-        subject.setNumOfStudent(subject.getNumOfStudent()-1);
+        subject.setNumOfStudent(subject.getNumOfStudent()-1); // 트랜젝션 종료 시 자동 업데이트 됨...?
 
 	}
 

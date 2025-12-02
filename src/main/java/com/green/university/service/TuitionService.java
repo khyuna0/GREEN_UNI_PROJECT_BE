@@ -182,23 +182,35 @@ public class TuitionService {
         // 해당 학생의 특정 년도, 학기의 장학금 유형과 금액 정보 구하기
         StuSch stuSch = stuSchRepository.findByStudent_IdAndSchYearAndSemester(studentId, Define.CURRENT_YEAR, Define.CURRENT_SEMESTER);
 
+        Scholarship scholarship = null;
+        if (stuSch.getSchType() != null) { // 장학금 받을 수 있는 경우(장학금 타입이 null이 아님)
+            scholarship = scholarshipRepository.findById(stuSch.getSchType().getType())
+                    .orElseThrow(() -> new CustomRestfullException("장학금 정보 없음", HttpStatus.NOT_FOUND));
+        }
+
         Long schAmount = 0L;
 
 		// 장학금액 확인 (장학금 지원 대상이 아니면 schAmount(장학금액) 0으로 저장함)
         if(stuSch.getSchType() != null) {
-            Scholarship scholarship = scholarshipRepository.findById(stuSch.getSchType().getType()).orElseThrow(() -> new CustomRestfullException("장학금 정보 없음", HttpStatus.NOT_FOUND));
-            if (tuiAmount < schAmount) {
+            schAmount = scholarship.getMaxAmount();
+            if (tuiAmount < schAmount) { // 장학금액이 등록금액보다 큰 경우 처리
                 schAmount = tuiAmount;
-            } else {
-                schAmount = scholarship.getMaxAmount();
             }
         }
         // 실납부금액 (전체 등록 금액 - 장학 금액)
         Long payAmount = tuiAmount - schAmount;
 
 		// 등록금 고지서 생성
-		Tuition tuition = new Tuition(studentId, Define.CURRENT_YEAR, Define.CURRENT_SEMESTER, tuiAmount, payAmount, schType,
-				schAmount);
+        Tuition tuition = new Tuition(
+                student,
+                Define.CURRENT_YEAR,
+                Define.CURRENT_SEMESTER,
+                tuiAmount,
+                payAmount,
+                scholarship,
+                schAmount
+        );
+
 
         tuitionRepository.save(tuition);
 
@@ -214,6 +226,7 @@ public class TuitionService {
 
 		Tuition tuition = tuitionRepository.findByStudent_IdAndTuiYearAndSemester(studentId, Define.CURRENT_YEAR, Define.CURRENT_SEMESTER);
         tuition.setStatus(true);
+        tuitionRepository.save(tuition);
 
 			String status = stuStatService.readCurrentStatus(studentId).getStatus();
 			if ("휴학".equals(status)) {

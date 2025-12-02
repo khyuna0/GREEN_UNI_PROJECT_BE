@@ -32,6 +32,22 @@ public class Tuition {
     private boolean status = false; // 납부 여부, 기본값 false인듯 (수정)
 
     // 등록금 고지서 생성을 위한 생성자
-    public Tuition(Long studentId, Long currentYear, Long currentSemester, Long tuiAmount, Long payAmount ,Long schType, Long schAmount ) {
+    public Tuition(Student student,
+                   Long tuiYear,
+                   Long semester,
+                   Long tuiAmount,
+                   Long payAmount,
+                   Scholarship schType,
+                   Long schAmount) {
+
+        this.student = student;
+        this.tuiYear = tuiYear;
+        this.semester = semester;
+        this.tuiAmount = tuiAmount;
+        this.payAmount = payAmount;
+        this.schType = schType;
+        this.schAmount = schAmount;
+        this.status = false; // 기본값
     }
+
 }
