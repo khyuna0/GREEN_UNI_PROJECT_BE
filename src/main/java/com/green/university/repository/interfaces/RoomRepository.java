@@ -13,6 +13,6 @@ import java.util.List;
  */
 
 
-public interface RoomRepository extends JpaRepository<Room,Long> {
+public interface RoomRepository extends JpaRepository<Room,String> {
 
 }

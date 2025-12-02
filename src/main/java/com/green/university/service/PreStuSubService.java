@@ -41,7 +41,7 @@ public class PreStuSubService {
 	// 학생의 예비 수강신청 내역에 해당 강의가 존재하는지 확인
 	public PreStuSub readPreStuSub(Long studentId, Long subjectId) {
 
-		PreStuSub preStuSubEntity = preStuSubRepository.findByStudentIdAndSubjectId(studentId, subjectId);
+		PreStuSub preStuSubEntity = preStuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId);
 
 		return preStuSubEntity;
 	}
@@ -91,7 +91,7 @@ public class PreStuSubService {
 	@Transactional
 	public void deletePreStuSub(Long studentId, Long subjectId) {
 
-        PreStuSub preStuSub = preStuSubRepository.findByStudentIdAndSubjectId(studentId, subjectId );
+        PreStuSub preStuSub = preStuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId );
 		// 해당 강의 현재인원 -1
         Subject subject = subjectRepository.findById(subjectId).orElseThrow(() -> new CustomRestfullException("없는 과목입니다.", HttpStatus.NOT_FOUND));
         subject.setNumOfStudent(subject.getNumOfStudent()-1);

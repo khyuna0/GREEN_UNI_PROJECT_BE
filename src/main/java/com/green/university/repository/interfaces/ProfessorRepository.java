@@ -43,18 +43,18 @@ public interface ProfessorRepository extends JpaRepository<Professor,Long> {
     public Staff findByIdAndNameAndEmail(Long id, String name, String email);
 
 	// 페이지별 교수 조회
-	public List<Professor> selectProfessorList(ProfessorListForm professorListForm);
+//	public List<Professor> selectProfessorList(ProfessorListForm professorListForm);
 
 	// 페이지, 과별 교수조회
-	public List<Professor> selectByDepartmentId(ProfessorListForm professorListForm);
+	public List<Professor> findByDepartment_Id(Long departmentId);
 
 	// id로 교수 조회
-	public List<Professor> selectByProfessorId(ProfessorListForm professorListForm);
+//	public List<Professor> selectByProfessorId(ProfessorListForm professorListForm);
 
 	// 페이징 처리 위한 전체 교수 수 조회
-	public Long selectProfessorAmount();
+//	public Long selectProfessorAmount();
 
 	// 페이징 처리 위한 과 교수 수 조회
-	public Long selectProfessorAmountByDeptId(Long deptId);
+	public Long  countByDepartment_Id(Long departmentId);
 
 }
