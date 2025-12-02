@@ -2,12 +2,9 @@ package com.green.university.service;
 
 import com.green.university.dto.*;
 import com.green.university.dto.response.*;
-import com.green.university.entity.Department;
+import com.green.university.entity.*;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.*;
-import com.green.university.entity.Staff;
-import com.green.university.entity.Student;
-import com.green.university.entity.User;
 import com.green.university.utils.Define;
 import com.green.university.utils.TempPassword;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -137,18 +135,19 @@ public class UserService {
 
     @Transactional
     public PrincipalDto login(LoginDto loginDto) {
-        PrincipalDto userEntity = userRepository.selectById(loginDto.getId());
-
-        if (userEntity == null) {
-            System.out.println("564156456");
-            throw new CustomRestfullException(Define.NOT_FOUND_ID, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        if (!passwordEncoder.matches(loginDto.getPassword(), userEntity.getPassword())) {
+        User user = userRepository.findById(loginDto.getId()).orElseThrow(
+                () -> new CustomRestfullException("아이디를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+        );
+        if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
             throw new CustomRestfullException(Define.WRONG_PASSWORD, HttpStatus.BAD_REQUEST);
         }
-
-        return userEntity;
+        // 응답 dto로 내보내주기
+        PrincipalDto principalDto = new PrincipalDto();
+        principalDto.setId(user.getId());
+        principalDto.setPassword(user.getPassword());
+        principalDto.setUserRole(user.getUserRole());
+        // 근데 name은 어디서 내보내줘야함? name 없는 채로 return 하기
+        return principalDto;
     }
 
     /**
@@ -253,10 +252,11 @@ public class UserService {
      */
     @Transactional
     public void updatePassword(ChangePasswordDto changePasswordDto) {
-        Long resultCountRaw = userRepository.updatePassword(changePasswordDto);
-        if (resultCountRaw != 1) {
-            throw new CustomRestfullException(Define.UPDATE_FAIL, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        User user = userRepository.findById(changePasswordDto.getId()).orElseThrow(
+                () -> new CustomRestfullException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+        );
+        user.setPassword(changePasswordDto.getAfterPassword());
+        userRepository.save(user);
     }
 
     /**
@@ -344,13 +344,14 @@ public class UserService {
      */
     @Transactional
     public String updateTempPassword(FindPasswordFormDto findPasswordFormDto) {
+        // dto에 userrole과 user의 userrole을 어떻게 잘 맞춰서 쓸 수 있을까..
         Long userId = findPasswordFormDto.getId();
         String userName = findPasswordFormDto.getName();
         String userEmail = findPasswordFormDto.getEmail();
 
-        String password = null;
         Long findId = 0L;
 
+        // 추후에 역할별 ID 조회용 함수 맵을 생성할 수도 있다
         if (findPasswordFormDto.getUserRole().equals("student")) {
             findId = studentRepository.findByIdAndNameAndEmail(userId, userName, userEmail);
             if (findId == null) {
@@ -368,22 +369,69 @@ public class UserService {
             }
         }
 
-        password = new TempPassword().returnTempPassword();
-        System.out.println(password);
-        ChangePasswordDto changePasswordDto = new ChangePasswordDto();
-        changePasswordDto.setAfterPassword(passwordEncoder.encode(password));
-        changePasswordDto.setId(findPasswordFormDto.getId());
-        userRepository.updatePassword(changePasswordDto);
+        String tempPassword = new TempPassword().returnTempPassword(); // 임시 비밀번호 생성
+        System.out.println(tempPassword);
 
-        return password;
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new CustomRestfullException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+        );
+        user.setPassword(passwordEncoder.encode(tempPassword));
+        userRepository.save(user);
+
+        return tempPassword;
 
     }
 
+    // studentId로 학생의 학적 변동 내역(StuStat)을 StudentInfoStatListDto로 가져오기
     public List<StudentInfoStatListDto> readStudentInfoStatListByStudentId(Long studentId) {
+        //sta를 찾아 2개 나옴 -> 이걸 모두 찍어줄거임
+        List<StuStat> stuStatList = stuStatRepository.findByStudent_IdOrderByIdDesc(studentId);
 
-        List<StudentInfoStatListDto> list = stuStatRepository.selectStuStatListBystudentId(studentId);
+        // 찍어줘야하는 dto
+        List<StudentInfoStatListDto> result = new ArrayList<>();
 
-        return list;
+        for (StuStat stuStat : stuStatList) {
+            StudentInfoStatListDto dto = new StudentInfoStatListDto();
+            dto.setFromDate(stuStat.getFromDate());
+            dto.setStatus(stuStat.getStatus());
+
+            // 휴학 신청 여부 확인
+            BreakApp breakApp = stuStat.getBreakApp();
+            if (breakApp != null) {
+                dto.setDetail(breakApp.getType());
+                dto.setAdopt(breakApp.getStatus());
+                dto.setToYear(breakApp.getToYear());
+                dto.setToSemester(breakApp.getToSemester());
+            } else {
+                dto.setDetail(null);
+                dto.setAdopt(null);
+                dto.setToYear(null);
+                dto.setToSemester(null);
+            }
+
+            result.add(dto);
+        }
+
+        return result;
+
+        /* 간단버전
+         return stuStatList.stream()
+            .map(stuStat -> {
+                StudentInfoStatListDto dto = new StudentInfoStatListDto();
+                dto.setFromDate(stuStat.getFromDate());
+                dto.setStatus(stuStat.getStatus());
+
+                BreakApp breakApp = stuStat.getBreakApp();
+                if (breakApp != null) {
+                    dto.setDetail(breakApp.getType());
+                    dto.setAdopt(breakApp.getStatus());
+                    dto.setToYear(breakApp.getToYear());
+                    dto.setToSemester(breakApp.getToSemester());
+                }
+                return dto;
+            })
+            .collect(Collectors.toList());
+        */
     }
 
 }

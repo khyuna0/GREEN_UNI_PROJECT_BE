@@ -1,10 +1,8 @@
 package com.green.university.repository.interfaces;
 
-import com.green.university.dto.response.StudentInfoStatListDto;
 import com.green.university.entity.StuStat;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -19,10 +17,8 @@ public interface StuStatRepository extends JpaRepository<StuStat,Long> {
 	List<StuStat> findAllByStudentIdOrderByIdDesc(Long studentId);
 
 	/**
-	 * 학생 내정보 조회에 학적변동리스트
+	 * 학생 내정보 조회에 학적변동리스트 (최신순으로 정렬함 - 내림차순)
 	 * @author 김지현
 	 */
-	// 이건 웹에서 직접 확인 해보고 고칠 것
-	public List<StudentInfoStatListDto> selectStuStatListBystudentId(Long studentId);
-	
+	List<StuStat> findByStudent_IdOrderByIdDesc(Long studentId);
 }

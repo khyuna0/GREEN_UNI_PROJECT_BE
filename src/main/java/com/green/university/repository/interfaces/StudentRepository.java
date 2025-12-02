@@ -3,6 +3,7 @@ package com.green.university.repository.interfaces;
 import com.green.university.entity.Department;
 import com.green.university.entity.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 
 import java.util.List;
@@ -18,7 +19,8 @@ public interface StudentRepository extends JpaRepository<Student,Long> {
 	/**
 	 * @author 서영 전체 학생의 id만 가져오기
 	 */
-    List<Long> findStudentIds();
+	@Query ("SELECT s.id FROM Student s")
+	List<Long> findAllStudentIds();
 
 	// id 찾기 - FindIdFormDto
     Long findByNameAndEmail(String name, String email);

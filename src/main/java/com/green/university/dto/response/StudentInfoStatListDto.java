@@ -2,6 +2,8 @@ package com.green.university.dto.response;
 
 import lombok.Data;
 
+import java.time.LocalDate;
+
 /**
  * 학생의 my info 탭에 표시할
  * 학적변동 리스트 받을 dto
@@ -12,10 +14,10 @@ import lombok.Data;
 public class StudentInfoStatListDto {
 
 	// 변동 날짜
-	private String fromDate;
+	private LocalDate fromDate;
 	// 변동 구분
 	private String status;
-	// 변동 세부 구분
+	// 변동 세부 구분 (type : 질병, 출산, 군 ..)
 	private String detail;
 	// 승인 여부
 	private String adopt;
