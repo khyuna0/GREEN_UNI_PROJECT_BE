@@ -10,9 +10,9 @@ import lombok.Data;
 @Data
 public class GradeForScholarshipDto {
 
-	private Long studentId;
-	private Long subYear;
-	private Long semester;
-	private Double avgGrade;
-	
+    private Long studentId;
+    private Long subYear;
+    private Long semester;
+    private Double avgGrade;
+
 }
