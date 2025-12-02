@@ -1,34 +1,35 @@
 package com.green.university.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Data
 @Entity
 public class Tuition {
 
-    //studentId
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id; // 기존 복합 키 테이블을 기존 하던 방식으로 수정함
+
     @ManyToOne
     @JoinColumn(name = "student_id")
     private Student student;
 
-    @Id
-    private Long tuiYear;
+    private Long tuiYear; // 등록 연도
 
-    @Id
-    private Long semester;
+    private Long semester; // 등록 학기
 
-    private Long tuiAmount;
+    private Long tuiAmount; // 등록 금액
 
-    //schType
-    //private Scholarship scholarship;
+    @ManyToOne
+    @JoinColumn(name = "sch_type")
+    private Scholarship schType;
 
-    private Long schAmount;
-    private Long status;
+    private Long schAmount; // 장학 금액
 
+    private boolean status; // 납부 여부
 
-
+    // 등록금 고지서 생성을 위한 생성자
+    public Tuition(Long studentId, Long currentYear, Long currentSemester, Long tuiAmount, Long schType, Long schAmount) {
+    }
 }

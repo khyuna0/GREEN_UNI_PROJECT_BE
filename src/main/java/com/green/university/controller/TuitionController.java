@@ -77,6 +77,7 @@ public class TuitionController {
 		model.addAttribute("student", studentInfo);
 
 		// 등록금 납부 대상이 아니라면 진입 불가
+
 		// 해당 학생의 학적 상태가 '졸업' 또는 '자퇴'라면 X
 		// 해당 학생이 이번 학기 휴학을 승인받은 상태라면 X
 
