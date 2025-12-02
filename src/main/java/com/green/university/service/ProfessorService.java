@@ -140,19 +140,20 @@ public class ProfessorService {
 
 	/**
 	 * @param professorListForm
-	 * @return 교수 리스트 조회
+	 * @return 교수 리스트 조회( 가 아니라 검색 같다 )
 	 */
 
     @Transactional
     public List<Professor> readProfessorList(ProfessorListForm form) {
 
-        // 1) professorId로 단일 검색 (PK는 유니크라 단건 조회가 맞음)
+        // 1) professorId로 단일 검색 (PK는 유니크라 단건 조회)
         if (form.getProfessorId() != null) {
 
             Professor p = professorRepository.findById(form.getProfessorId())
                     .orElse(null);
 
-            return (p == null) ? List.of() : List.of(p);  // 조회 결과가 1개이므로 단건 리스트로 반환,
+            return (p == null) ? List.of() : List.of(p);
+            // 조회 결과가 1개이므로 단건 리스트로 반환,
             // 컨트롤러에서 리스트 요구해서 리스트로 반환했음
         }
 

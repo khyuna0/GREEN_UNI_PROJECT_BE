@@ -49,28 +49,48 @@ public class PreStuSubService {
 	// 학생의 전체 예비 수강신청 내역 조회
 	public List<StuSubAppDto> readPreStuSubList(Long studentId) {
 
-		List<StuSubAppDto> preStuSubList = preStuSubRepository.findByStudentIdAndSemester(studentId,
-				Define.CURRENT_YEAR, Define.CURRENT_SEMESTER);
-
-		return preStuSubList;
+        return preStuSubRepository
+                .findByStudent_IdAndSubject_Sub_yearAndSubject_Semester(
+                        studentId,
+                        Define.CURRENT_YEAR,
+                        Define.CURRENT_SEMESTER
+                ).stream() // 리스트 내부의 각 preStuSub 엔티티(pre)를 StuSubAppDto 객체로 변환
+                .map(pre -> new StuSubAppDto(
+                        studentId,
+                        pre.getSubject(),
+                        pre.getSubject().getProfessor()
+                ))
+                .toList();
 	}
 
-	// 학생의 예비 수강신청 내역 추가
+	// 학생의 예비 수강신청 내역 추가 / 단일 건으로 적용되고,
 	@Transactional
 	public void createPreStuSub(Long studentId, Long subjectId) {
 
 		// 신청 대상 과목 정보
 		Subject targetSubject = subjectRepository.findById(subjectId).orElseThrow(() -> new CustomRestfullException("없는 과목입니다.", HttpStatus.NOT_FOUND));
 
-		// 현재 총 신청 학점
-		StuSubSumGradesDto stuSubSumGradesDto = preStuSubRepository.selectSumGrades(studentId, Define.CURRENT_YEAR,
-				Define.CURRENT_SEMESTER);
+		// 현재 총 신청 학점 검증용 DTO
+		StuSubSumGradesDto stuSubSumGradesDto = new StuSubSumGradesDto();
 
-		// 최대 수강 가능 학점을 넘지 않는지 확인
+        Long totalGrades = preStuSubRepository.findByStudent_Id(studentId)
+                .stream() //리스트를 스트림(Stream)으로 바꿔서 반복 처리
+                // PreStuSub에서 Subject를 꺼내고, 그 Subject의 학점(grades, 타입 Long)을 long 형태로 변환해 추출
+                .mapToLong(pre -> pre.getSubject().getGrades())
+                .sum();
+
+        stuSubSumGradesDto.setSumGrades(totalGrades); // 총학점 저장
+        stuSubSumGradesDto.setStudentId(studentId);
+
+        // 최대 수강 가능 학점을 넘지 않는지 확인
 		StuSubUtil.checkSumGrades(targetSubject, stuSubSumGradesDto);
 
 		// 해당 학생의 예비 수강 신청 내역 시간표
-		List<StuSubDayTimeDto> dayTimeList = preStuSubRepository.selectDayTime(studentId);
+		List<StuSubDayTimeDto> dayTimeList = preStuSubRepository
+                .findByStudent_Id(studentId) // 예비 수강신청에서 학생 아이디로 찾아서
+                .stream() 
+                .map(pre -> new StuSubDayTimeDto(pre.getSubject())) // 시간 정보만 DTO에 저장하고
+                .toList(); // StuSubDayTimeDto 리스트로 반환
 
 		// 현재 학생의 시간표와 겹치지 않는지 확인
 		StuSubUtil.checkDayTime(targetSubject, dayTimeList);
@@ -91,8 +111,10 @@ public class PreStuSubService {
 	@Transactional
 	public void deletePreStuSub(Long studentId, Long subjectId) {
 
-        PreStuSub preStuSub = preStuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId );
-		// 해당 강의 현재인원 -1
+        PreStuSub preStuSub = preStuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId);
+        preStuSubRepository.deleteById(preStuSub.getId());
+
+        // 해당 강의 현재인원 -1
         Subject subject = subjectRepository.findById(subjectId).orElseThrow(() -> new CustomRestfullException("없는 과목입니다.", HttpStatus.NOT_FOUND));
         subject.setNumOfStudent(subject.getNumOfStudent()-1);
 
