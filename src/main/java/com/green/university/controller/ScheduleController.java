@@ -5,7 +5,7 @@ import com.green.university.dto.ScheduleFormDto;
 import com.green.university.dto.response.PrincipalDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.entity.Schedule;
-import com.green.university.service.ScheuleService;
+import com.green.university.service.ScheduleService;
 import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,7 +33,7 @@ public class ScheduleController {
 	private HttpSession session;
 
 	@Autowired
-	private ScheuleService scheuleService;
+	private ScheduleService scheuleService;
 
 	/**
 	 * 학사일정 페이지

@@ -2,7 +2,9 @@ package com.green.university.dto.response;
 
 import lombok.Data;
 
-import java.sql.Date;
+import java.util.Date;
+
+//import java.sql.Date; 타입 오류 때문에 위로 변경
 
 @Data
 public class ProfessorInfoDto {

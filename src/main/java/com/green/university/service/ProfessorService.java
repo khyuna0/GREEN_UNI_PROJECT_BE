@@ -142,19 +142,29 @@ public class ProfessorService {
 	 * @param professorListForm
 	 * @return 교수 리스트 조회
 	 */
-	@Transactional
-	public List<Professor> readProfessorList(ProfessorListForm professorListForm) {
-		List<Professor> list = null;
-		if (professorListForm.getProfessorId() != null) {
-			list = professorRepository.selectByProfessorId(professorListForm);
-		} else if (professorListForm.getDeptId() != null) {
-			list = professorRepository.selectByDepartmentId(professorListForm);
-		} else {
-			list = professorRepository.selectProfessorList(professorListForm);
-		}
 
-		return list;
-	}
+    @Transactional
+    public List<Professor> readProfessorList(ProfessorListForm form) {
+
+        // 1) professorId로 단일 검색 (PK는 유니크라 단건 조회가 맞음)
+        if (form.getProfessorId() != null) {
+
+            Professor p = professorRepository.findById(form.getProfessorId())
+                    .orElse(null);
+
+            return (p == null) ? List.of() : List.of(p);  // 조회 결과가 1개이므로 단건 리스트로 반환,
+            // 컨트롤러에서 리스트 요구해서 리스트로 반환했음
+        }
+
+        // 2) deptId로 검색 (특정 학과 교수 목록 조회)
+        if (form.getDeptId() != null) {
+            return professorRepository.findByDepartment_Id(form.getDeptId());
+        }
+
+        // 3) 조건 없음 → 전체 교수 목록 조회
+        return professorRepository.findAll();
+    }
+
 
 	/**
 	 * 
@@ -166,9 +176,9 @@ public class ProfessorService {
 
 		Long amount = null;
 		if (professorListForm.getDeptId() != null) {
-			amount = professorRepository.selectProfessorAmountByDeptId(professorListForm.getDeptId());
+			amount = professorRepository.countByDepartment_Id(professorListForm.getDeptId());
 		} else {
-			amount = professorRepository.selectProfessorAmount();
+			amount = professorRepository.count(); // .count() -> 테이블의 전체 row 개수를 long 타입으로 반환하는 메서드
 		}
 
 		return amount;

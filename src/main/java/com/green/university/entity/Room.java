@@ -7,9 +7,9 @@ import lombok.Data;
 @Data
 public class Room {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Id // 엔티티 필드 수정함
+    @Column(length = 5)
+    private String id;   // PK = 문자열 그대로 사용
 
     //  College엔티티
     @ManyToOne

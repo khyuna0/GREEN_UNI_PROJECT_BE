@@ -12,7 +12,7 @@ public class StuSch { // 학적상태 저장 테이블
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     // Student 엔티티
     @ManyToOne
     @JoinColumn(name = "student_id")
@@ -21,7 +21,7 @@ public class StuSch { // 학적상태 저장 테이블
     private Long schYear;
     private Long semester;
 
-//     Scholarship 엔티티
+    // Scholarship 엔티티
     @ManyToOne
-    private Scholarship scholarship;
+    private Scholarship schType;
 }

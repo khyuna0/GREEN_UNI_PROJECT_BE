@@ -48,7 +48,7 @@ public class PersonalController {
 	@Autowired
 	private NoticeService noticeService;
 	@Autowired
-	private ScheuleService scheuleService;
+	private ScheduleService scheuleService;
 	
 	/**
 	 * @author 서영 메인 홈페이지
@@ -64,7 +64,7 @@ public class PersonalController {
 		
 		// 학사일정
 		// 샘플이므로, 2월달로 고정함
-		List<Schedule> scheduleList = scheuleService.readScheduleListByMonth(2L);
+		List<Schedule> scheduleList = scheuleService.readScheduleListByMonth(2023,2);
 		model.addAttribute("scheduleList", scheduleList);
 		
 		if (principal.getUserRole().equals("student")) {
