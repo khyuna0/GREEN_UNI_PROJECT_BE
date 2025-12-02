@@ -17,12 +17,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface StaffRepository extends JpaRepository<Staff,Long> {
 
-	// staff_tb에 insert
-	public Long insertToStaff(CreateStaffDto createStaffDto);
-
-	// staff_tb에서 자동 생성된 id 받아오기
-	public Long selectIdByCreateStaffDto(CreateStaffDto createStaffDto);
-
+    
 	// 업데이트용 정보 읽기
 	public UserInfoForUpdateDto selectByUserId(Long userId);
 
@@ -34,8 +29,11 @@ public interface StaffRepository extends JpaRepository<Staff,Long> {
 	
 	// id 찾기
 	public Long selectIdByNameAndEmail(FindIdFormDto findIdFormDto);
-	
+
+    // id 찾기, 한 컬럼 찾는 용도라 id만 찾기로 바꾸지 않음
+    public Staff findByNameAndEmail(String name, String email);
+    
 	// password 발급용 model 확인
-	public Long selectStaffByIdAndNameAndEmail(FindPasswordFormDto findPasswordFormDto);
+	public Staff findByIdAndNameAndEmail(Long id,String name, String email);
 
 }

@@ -13,6 +13,6 @@ public class Department {
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "colleage_id")
+    @JoinColumn(name = "colleage_id") // 오타 수정할 것!
     private College colleage;
 }
