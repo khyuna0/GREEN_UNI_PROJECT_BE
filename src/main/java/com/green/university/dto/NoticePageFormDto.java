@@ -4,10 +4,10 @@ import lombok.Data;
 
 @Data
 public class NoticePageFormDto {
-	
-	
-	// 페이징 처리
-	private Long page;
-	private String keyword;
-	private String type;
+
+
+    // 페이징 처리
+    private Long page;
+    private String keyword;
+    private String type;
 }

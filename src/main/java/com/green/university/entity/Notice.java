@@ -1,12 +1,11 @@
 package com.green.university.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -30,6 +29,12 @@ public class Notice {
 
     // 이미지 관련.. 필드를 써야할 것 같은데..
     // private NoticeFile noticeFile
+
+    //파일목록
+    @OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NoticeFile> files = new ArrayList<>();
+
+
 
 
 }
