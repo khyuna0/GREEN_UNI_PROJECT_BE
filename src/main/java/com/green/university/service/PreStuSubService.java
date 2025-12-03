@@ -111,7 +111,7 @@ public class PreStuSubService {
         preStuSubRepository.save(preStuSub);
 
 		// 해당 강의 현재인원 +1
-        targetSubject.setNumOfStudent(targetSubject.getNumOfStudent() + 1);
+        targetSubject.setNumOfStudent(targetSubject.getNumOfStudent() + 1); // 트랜젝션 종료 시 자동 업데이트 됨...?
 
 	}
 

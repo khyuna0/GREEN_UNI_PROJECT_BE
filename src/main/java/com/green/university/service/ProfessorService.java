@@ -37,6 +37,8 @@ public class ProfessorService {
 	@Autowired
 	private ProfessorRepository professorRepository;
 
+    private static final int PAGE_SIZE = 20; // 교수 리스트 / 검색 페이징 용
+
 	/**
 	 * 교수가 맡은 과목들의 학기 검색
 	 * 
@@ -44,8 +46,8 @@ public class ProfessorService {
 	 * @return SubjectPeriodForProfessorDto list
 	 */
 	@Transactional
-	public List<SubjectPeriodForProfessorDto> selectSemester(Long id) {
-		List<SubjectPeriodForProfessorDto> list = subjectRepository.selectSemester(id);
+	public List<SubjectPeriodForProfessorDto> selectSemester(Long professorId) {
+		List<SubjectPeriodForProfessorDto> list = subjectRepository.selectSemester(professorId);
 		return list;
 	}
 
@@ -145,39 +147,39 @@ public class ProfessorService {
 	 */
 
     @Transactional
-    public Page<Professor> readProfessorList(ProfessorListForm form, int page, int size) {
+    public Page<Professor> readProfessorList(ProfessorListForm professorListForm, int page) {
 
-        if (page < 0) page = 0;
-        if (size <= 0) size = 10;
+        if (page < 1) page = 1;
+        
+        int realPage = page - 1; // 페이지 번호가 1부터 시작하게 보정함
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        Page<Professor> professors = professorRepository.findAll(pageable); // 검색어가 없을 때 기본 전체 조회
+        Pageable pageable = PageRequest.of(realPage, PAGE_SIZE, Sort.by("id").descending());
 
         // 1) professorId로 단일 검색 (PK는 유니크라 단건 조회)
-        if (form.getProfessorId() != null) {
+        if (professorListForm.getProfessorId() != null) {
 
-            Professor p = professorRepository.findById(form.getProfessorId())
+            Professor p = professorRepository.findById(professorListForm.getProfessorId())
                     .orElse(null);
             List<Professor> result = (p == null) ? List.of() : List.of(p);
 
             return new PageImpl<>(result, pageable, result.size());
-            // 고유키 검색이므로 단건 반환
+            // 고유키 검색 - 단건 반환
         }
 
         // 2) deptId로 검색 (특정 학과 교수 목록 조회)
-        if (form.getDeptId() != null) {
-            return professorRepository.findByDepartment_id(form.getDeptId(), pageable);
+        if (professorListForm.getDeptId() != null) {
+            return professorRepository.findByDepartment_id(professorListForm.getDeptId(), pageable);
         }
 
         // 3) 조건 없음 → 전체 교수 목록 조회
-        return professors;
+        return professorRepository.findAll(pageable);
     }
 
 
 	/**
 	 * 
-	 * @param studentListForm
-	 * @return 교수 수 (페이징?) 나중엔 필요없을듯
+	 * @param professorListForm
+	 * @return 교수 수 (페이징?) 나중엔 필요없을듯, 컨트롤러에서 처리
 	 */
 	@Transactional
 	public Long readProfessorAmount(ProfessorListForm professorListForm) {
