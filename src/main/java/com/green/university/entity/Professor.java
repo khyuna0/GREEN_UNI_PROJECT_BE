@@ -25,7 +25,6 @@ public class Professor {
     private String tel;
     private String email;
 
-//    Department 엔티티
     @ManyToOne
     @JoinColumn(name = "department_id")
     private Department department;

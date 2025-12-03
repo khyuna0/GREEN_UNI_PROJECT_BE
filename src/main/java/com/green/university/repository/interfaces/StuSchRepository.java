@@ -1,6 +1,5 @@
 package com.green.university.repository.interfaces;
 
-import com.green.university.entity.Scholarship;
 import com.green.university.entity.StuSch;
 import org.springframework.data.jpa.repository.JpaRepository;
 

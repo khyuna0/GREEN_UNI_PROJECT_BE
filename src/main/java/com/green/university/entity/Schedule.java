@@ -1,10 +1,7 @@
 package com.green.university.entity;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -17,8 +14,11 @@ public class Schedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    // Staff 엔티티
+
+    @ManyToOne
+    @JoinColumn(name = "staff_id")
     private Staff staff;
+
     private LocalDate startDay;
     private LocalDate endDay;
     private String information;

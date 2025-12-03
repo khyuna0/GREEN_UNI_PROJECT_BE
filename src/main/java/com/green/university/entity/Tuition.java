@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 public class Tuition {
 

@@ -18,20 +18,15 @@ public class Notice {
     private String category;
     private String title;
 
-    // 추후 TEXT로 써야함(내용이 긴가봄)
     @Column(columnDefinition = "TEXT")
     private String content;
     private Long views;
 
-    // 타임스탬프 ..
+    // 타임스탬프 ..?
     private Timestamp createdTime;
-
 
     // 파일목록
     @OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NoticeFile> files = new ArrayList<>();
-
-
-
 
 }

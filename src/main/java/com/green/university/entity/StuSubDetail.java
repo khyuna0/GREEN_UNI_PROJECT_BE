@@ -7,18 +7,15 @@ import lombok.Data;
 @Entity
 public class StuSubDetail {
 
-    //id
     @Id
     @ManyToOne
     @JoinColumn(name = "stu_sub_id")
     private StuSub stuSub;
 
-    //studentId
     @ManyToOne
     @JoinColumn(name = "student_id")
     private Student student;
 
-    //subjectId
     @ManyToOne
     @JoinColumn(name = "subject_id")
     private Subject subject;
