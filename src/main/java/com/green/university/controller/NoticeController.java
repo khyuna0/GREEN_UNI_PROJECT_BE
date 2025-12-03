@@ -122,22 +122,22 @@ public class NoticeController {
         return "/board/notice";
     }
 
-    /**
-     * 공지사항 검색 기능
-     */
+    // 공지사항 검색 기능
     @GetMapping("/search")
     public String showNoticeByKeyword(Model model, NoticePageFormDto noticePageFormDto) {
-        model.addAttribute("keyword", noticePageFormDto.getKeyword());
+
+        noticePageFormDto.setPage(1L); // 첫페이지는 1페이지
+
+        Page<Notice> noticePage = noticeService.readNoticePage(noticePageFormDto);
         model.addAttribute("crud", "selectKeyword");
+        model.addAttribute("keyword", noticePageFormDto.getKeyword());
+        model.addAttribute("type",noticePageFormDto.getType());
         noticePageFormDto.setPage(0L);
-        List<Notice> noticeList = noticeService.readNoticeByKeyword(noticePageFormDto);
-        Long amount = noticeService.readNoticeAmount(noticePageFormDto);
-        model.addAttribute("listCount", Math.ceil(amount / 10.0));
-        if (noticeList.isEmpty()) {
-            model.addAttribute("noticeList", null);
-        } else {
-            model.addAttribute("noticeList", noticeList);
-        }
+
+        model.addAttribute("noticeList",noticePage.getContent());
+        model.addAttribute("listCount",noticePage.getTotalPages());
+        model.addAttribute("currentPage",1L);
+
         return "/board/notice";
     }
 

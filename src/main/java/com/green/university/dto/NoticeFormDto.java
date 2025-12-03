@@ -8,13 +8,11 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
 import java.sql.Timestamp;
-/**
- *
- * @author 박성희
- *
- */
+
+
 @Data
 public class NoticeFormDto {
+
     private Long id;
     private Long noticeId;
     private String category;
