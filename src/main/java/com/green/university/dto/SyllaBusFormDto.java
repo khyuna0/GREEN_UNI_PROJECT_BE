@@ -7,7 +7,7 @@ import lombok.Data;
  *
  */
 @Data
-public class SyllaBusFormDto {
+public class SyllaBusFormDto { // 강의 계획서 업데이트용 dto
 	
 	private Long subjectId;
 	private String overview;

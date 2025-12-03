@@ -47,15 +47,15 @@ public class UserService {
      * @param createStaffDto
      */
     @Transactional
-    public void createStaffToStaffAndUser(CreateStaffDto dto) {
+    public void createStaffToStaffAndUser(CreateStaffDto createStaffDto) {
 
         // Staff 저장
         Staff staff = new Staff();
-        staff.setName(dto.getName());
-        staff.setGender(dto.getGender());
-        staff.setAddress(dto.getAddress());
-        staff.setTel(dto.getTel());
-        staff.setEmail(dto.getEmail());
+        staff.setName(createStaffDto.getName());
+        staff.setGender(createStaffDto.getGender());
+        staff.setAddress(createStaffDto.getAddress());
+        staff.setTel(createStaffDto.getTel());
+        staff.setEmail(createStaffDto.getEmail());
 
         Staff savedStaff = staffRepository.save(staff);
 
@@ -74,7 +74,7 @@ public class UserService {
      * professor 생성 서비스 / 먼저 professor_tb에 insert한 후 professor_tb에 생긴 id를 끌고와 user_tb에
      * 생성함
      *
-     * @param createStaffDto
+     * @param dto
      */
     @Transactional
     public void createProfessorToProfessorAndUser(CreateProfessorDto dto) {
@@ -107,7 +107,7 @@ public class UserService {
      * professor 생성 서비스 먼저 professor_tb에 insert한 후 professor_tb에 생긴 id를 끌고와 user_tb에
      * 생성함
      *
-     * @param createStaffDto
+     * @param createStudentDto
      */
     @Transactional
     public void createStudentToStudentAndUser(CreateStudentDto createStudentDto) {
@@ -261,7 +261,6 @@ public class UserService {
     public void updateProfessor(UserUpdateDto updateDto) {
 
         Professor professor = professorRepository.findById(updateDto.getUserId()).orElseThrow(() -> new CustomRestfullException("없는 직원 정보입니다.", HttpStatus.NOT_FOUND));
-        ;
 
         professor.setAddress(updateDto.getAddress());
         professor.setTel(updateDto.getTel());
@@ -321,21 +320,18 @@ public class UserService {
 
         Professor professor = professorRepository.findById(id).orElseThrow(() -> new CustomRestfullException("없는 교수 정보입니다.", HttpStatus.NOT_FOUND));
 
-
-        ProfessorInfoDto dto = new ProfessorInfoDto();
-        dto.setId(professor.getId());
-        dto.setName(professor.getName());
-        dto.setBirthDate(professor.getBirthDate());
-        dto.setGender(professor.getGender());
-        dto.setAddress(professor.getAddress());
-        dto.setTel(professor.getTel());
-        dto.setEmail(professor.getEmail());
-        dto.setHireDate(professor.getHireDate());
-
-        // 마이페이지에서 소속 : 공과대학 컴퓨터공학과 ( CollegeName DeptName ) 형식으로 출력됨 그래서 Dto 사용하나봄
-
-        dto.setCollegeName(professor.getDepartment().getCollege().getName());
-        dto.setDeptName(professor.getDepartment().getName());
+        ProfessorInfoDto dto = new ProfessorInfoDto(professor); // dto 생성자 추가함
+//        dto.setId(professor.getId());
+//        dto.setName(professor.getName());
+//        dto.setBirthDate(professor.getBirthDate());
+//        dto.setGender(professor.getGender());
+//        dto.setAddress(professor.getAddress());
+//        dto.setTel(professor.getTel());
+//        dto.setEmail(professor.getEmail());
+//        dto.setHireDate(professor.getHireDate());
+//
+//        dto.setCollegeName(professor.getDepartment().getCollege().getName());
+//        dto.setDeptName(professor.getDepartment().getName());
 
         return dto;
     }

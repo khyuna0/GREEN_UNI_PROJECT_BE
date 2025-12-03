@@ -14,16 +14,12 @@ import java.util.Optional;
 
 public interface SyllaBusRepository extends JpaRepository<SyllaBus,Long> {
 
-	// 강의 등록 시, 강의 ID만 미리 저장
-	public Long insertOnlySubId(Long subjectId);
-
 	/**
 	 * 강의계획서 업데이트
 	 * @author 김지현
 	 * @param syllaBusFormDto
 	 * @return 실행 row count
 	 */
-	public Long updateSyllabus(SyllaBusFormDto syllaBusFormDto);
 
 	/**
 	 * 과목명으로 강의계획서 찾기

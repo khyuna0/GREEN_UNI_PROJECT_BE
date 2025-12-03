@@ -235,8 +235,10 @@ public class AdminService {
         Department department = departmentRepository.findById(subjectFormDto.getDeptId()).orElseThrow(
                 () -> new CustomRestfullException("해당 학과가 존재하지 않습니다.", HttpStatus.NOT_FOUND)
         );
+
+        // 과목 추가 하고, 그 과목 키로 강의 계획서 생성(내용은 없음, 회원가입과 비슷한 느낌?)
         Subject subject = new Subject();
-        subject.setId(subjectFormDto.getId());
+        subject.setId(subjectFormDto.getId()); // 기본키 자동생성인데, 새 엔티티 생성 시 아이디 넣어줘야 할 필요 있을까?
         subject.setName(subjectFormDto.getName());
         subject.setProfessor(professor);
         subject.setRoom(room);
@@ -254,7 +256,10 @@ public class AdminService {
 
 		// 강의계획서에 강의 ID 저장 (수정해야함)
 		Long subjectId = subjectRepository.findIdOrderById(subjectFormDto.getId());
-		syllaBusRepository.insertOnlySubId(subjectId);
+        
+        SyllaBus syllaBus = new SyllaBus(); // 강의 아이디로 강의 찾아 엔티티에 강의만 저장함
+        syllaBus.setSubject(subjectRepository.findById(subjectId).orElseThrow(() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)));
+		syllaBusRepository.save(syllaBus);
 		return subjectList;
 	}
 
