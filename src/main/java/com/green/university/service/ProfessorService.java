@@ -206,11 +206,14 @@ public class ProfessorService {
 	@Transactional
 	public void updateSyllabus(SyllaBusFormDto syllaBusFormDto) {
 
-		Long resultRowCount = syllaBusRepository.updateSyllabus(syllaBusFormDto);
-		if (resultRowCount != 1) {
-			throw new CustomRestfullException("제출 실패", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+        SyllaBus syllaBus = syllaBusRepository.findBySubject_Id(syllaBusFormDto.getSubjectId()).orElseThrow(
+                () -> new CustomRestfullException("강의 계획서를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+        syllaBus.setOverview(syllaBusFormDto.getOverview());
+        syllaBus.setObjective(syllaBusFormDto.getObjective());
+        syllaBus.setTextbook(syllaBusFormDto.getTextbook());
+        syllaBus.setProgram(syllaBusFormDto.getProgram());
 
+        syllaBusRepository.save(syllaBus);
 	}
 
 	/**

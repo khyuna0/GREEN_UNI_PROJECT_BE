@@ -254,7 +254,10 @@ public class AdminService {
 
 		// 강의계획서에 강의 ID 저장 (수정해야함)
 		Long subjectId = subjectRepository.findIdOrderById(subjectFormDto.getId());
-		syllaBusRepository.insertOnlySubId(subjectId);
+        
+        SyllaBus syllaBus = new SyllaBus(); // 강의 아이디로 강의 찾아 엔티티에 강의만 저장함
+        syllaBus.setSubject(subjectRepository.findById(subjectId).orElseThrow(() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)));
+		syllaBusRepository.save(syllaBus);
 		return subjectList;
 	}
 
