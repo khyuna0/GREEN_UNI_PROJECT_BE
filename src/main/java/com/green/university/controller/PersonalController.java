@@ -54,7 +54,7 @@ public class PersonalController {
 	 * @author 서영 메인 홈페이지
 	 */
 	@GetMapping("")
-	public String home(Model model) {
+	public ResponseEntity<?> home(Model model) {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 
@@ -93,7 +93,7 @@ public class PersonalController {
 	 * @return login.jsp
 	 */
 	@GetMapping("/login")
-	public String login() {
+	public ResponseEntity<?> login() {
 
 		return "/user/login";
 	}
@@ -106,7 +106,7 @@ public class PersonalController {
 	 * @return 메인 페이지 이동(수정 예정)
 	 */
 	@PostMapping("/login")
-	public String signInProc(@Valid LoginDto loginDto, BindingResult bindingResult, HttpServletResponse response,
+	public ResponseEntity<?> signInProc(@Valid LoginDto loginDto, BindingResult bindingResult, HttpServletResponse response,
 							 HttpServletRequest request) {
 
 		if (bindingResult.hasErrors()) {
@@ -146,7 +146,7 @@ public class PersonalController {
 	 * @return updateUser.jsp
 	 */
 	@GetMapping("/update")
-	public String updateUser(Model model) {
+	public ResponseEntity<?> updateUser(Model model) {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 		UserInfoForUpdateDto userInfoForUpdateDto = null;
@@ -171,7 +171,7 @@ public class PersonalController {
 	 * @return updateUser.jsp
 	 */
 	@PutMapping("/update")
-	public String updateUserProc(@Valid UserInfoForUpdateDto userInfoForUpdateDto, BindingResult bindingResult,
+	public ResponseEntity<?> updateUserProc(@Valid UserInfoForUpdateDto userInfoForUpdateDto, BindingResult bindingResult,
 			@RequestParam String password) {
 
 		if (bindingResult.hasErrors()) {
@@ -216,7 +216,7 @@ public class PersonalController {
 	 * @return updatePasword.jsp
 	 */
 	@GetMapping("/password")
-	public String updatePassword() {
+	public ResponseEntity<?> updatePassword() {
 
 		return "/user/updatePassword";
 	}
@@ -228,7 +228,7 @@ public class PersonalController {
 	 * @return updateUser.jsp
 	 */
 	@PutMapping("/password")
-	public String updatePasswordProc(@Valid ChangePasswordDto changePasswordDto, BindingResult bindingResult) {
+	public ResponseEntity<?> updatePasswordProc(@Valid ChangePasswordDto changePasswordDto, BindingResult bindingResult) {
 
 		if (bindingResult.hasErrors()) {
 			StringBuilder sb = new StringBuilder();
@@ -259,7 +259,7 @@ public class PersonalController {
 	 * @return 로그인 페이지
 	 */
 	@GetMapping("/logout")
-	public String logout() {
+	public ResponseEntity<?> logout() {
 		session.invalidate();
 
 		return "redirect:/login";
@@ -272,7 +272,7 @@ public class PersonalController {
 	 * @return 학생 정보 조회 페이지
 	 */
 	@GetMapping("/info/student")
-	public String readStudentInfo(Model model) {
+	public ResponseEntity<?> readStudentInfo(Model model) {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 		StudentInfoDto student = userService.readStudentInfo(principal.getId());
@@ -290,7 +290,7 @@ public class PersonalController {
 	 * @return 직원 정보조회 페이지
 	 */
 	@GetMapping("/info/staff")
-	public String readStaffInfo(Model model) {
+	public ResponseEntity<?> readStaffInfo(Model model) {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 		Staff staff = userService.readStaff(principal.getId());
@@ -306,7 +306,7 @@ public class PersonalController {
 	 * @return 교수 정보 조회 페이지
 	 */
 	@GetMapping("/info/professor")
-	public String readProfessorInfo(Model model) {
+	public ResponseEntity<?> readProfessorInfo(Model model) {
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 		ProfessorInfoDto professor = userService.readProfessorInfo(principal.getId());
 		model.addAttribute("professor", professor);
@@ -319,7 +319,7 @@ public class PersonalController {
 	 * @return 아이디 찾기 페이지
 	 */
 	@GetMapping("/find/id")
-	public String findId() {
+	public ResponseEntity<?> findId() {
 
 		return "/user/findId";
 	}
@@ -331,7 +331,7 @@ public class PersonalController {
 	 * @return 찾은 아이디 표시 페이지
 	 */
 	@PostMapping("/find/id")
-	public String findIdProc(Model model, @Valid FindIdFormDto findIdFormDto, BindingResult bindingResult) {
+	public ResponseEntity<?> findIdProc(Model model, @Valid FindIdFormDto findIdFormDto, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			StringBuilder sb = new StringBuilder();
 			bindingResult.getAllErrors().forEach(error -> {
@@ -352,7 +352,7 @@ public class PersonalController {
 	 * @return 아이디 찾기 페이지
 	 */
 	@GetMapping("/find/password")
-	public String findPassword() {
+	public ResponseEntity<?> findPassword() {
 
 		return "/user/findPassword";
 	}
@@ -364,7 +364,7 @@ public class PersonalController {
 	 * @return 비밀번호 표시 페이지
 	 */
 	@PostMapping("/find/password")
-	public String findPasswordProc(Model model, @Valid FindPasswordFormDto findPasswordFormDto,
+	public ResponseEntity<?> findPasswordProc(Model model, @Valid FindPasswordFormDto findPasswordFormDto,
 			BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			StringBuilder sb = new StringBuilder();
@@ -381,7 +381,7 @@ public class PersonalController {
 	}
 
 	@GetMapping("/guide")
-	public String pop() {
+	public ResponseEntity<?> pop() {
 
 		return "/user/passwordPop";
 	}
@@ -390,7 +390,7 @@ public class PersonalController {
 	 * @return 에러페이지
 	 */
 	@GetMapping("/error")
-	public String handleError() {
+	public ResponseEntity<?> handleError() {
 		return "/error/errorPage";
 	}
 }

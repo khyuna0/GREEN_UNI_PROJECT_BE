@@ -29,7 +29,7 @@ public class AdminController {
 	 * @return 단과대 페이지
 	 */
 	@GetMapping("/college")
-	public String college(Model model, @RequestParam(defaultValue = "select") String crud) {
+	public ResponseEntity<?> college(Model model, @RequestParam(defaultValue = "select") String crud) {
 		model.addAttribute("crud", crud);
 		List<College> collegeList = adminService.readCollege();
 		if (collegeList.isEmpty()) {
@@ -45,7 +45,7 @@ public class AdminController {
 	 * @return 단과대학 입력 기능
 	 */
 	@PostMapping("/college")
-	public String collegeProc(CollegeFormDto collegeFormDto) {
+	public ResponseEntity<?> collegeProc(CollegeFormDto collegeFormDto) {
 		adminService.createCollege(collegeFormDto);
 		return "redirect:/admin/college";
 	}
@@ -55,7 +55,7 @@ public class AdminController {
 	 * @return 단과대학 삭제 기능
 	 */
 	@GetMapping("/collegeDelete")
-	public String deleteCollege(Model model, @RequestParam Long id) {
+	public ResponseEntity<?> deleteCollege(Model model, @RequestParam Long id) {
 		model.addAttribute("id", id);
 		adminService.deleteCollege(id);
 		return "redirect:/admin/college";
@@ -66,7 +66,7 @@ public class AdminController {
 	 * @return 학과 페이지 페이지 이동 시, 단과대학 조회 후 이동
 	 */
 	@GetMapping("/department")
-	public String department(Model model, @RequestParam(defaultValue = "select") String crud) {
+	public ResponseEntity<?> department(Model model, @RequestParam(defaultValue = "select") String crud) {
 		model.addAttribute("crud", crud);
 		List<Department> departmentList = adminService.readDepartment();
 		List<College> collegeList = adminService.readCollege();
@@ -88,7 +88,7 @@ public class AdminController {
 	 * @return 학과 입력 기능
 	 */
 	@PostMapping("/department")
-	public String departmentProc(DepartmentFormDto departmentFormDto) {
+	public ResponseEntity<?> departmentProc(DepartmentFormDto departmentFormDto) {
 		adminService.createDepartment(departmentFormDto);
 		return "redirect:/admin/department";
 	}
@@ -98,7 +98,7 @@ public class AdminController {
 	 * @return 학과 삭제 기능
 	 */
 	@GetMapping("/departmentDelete")
-	public String deleteDepartment(Model model, @RequestParam Long id) {
+	public ResponseEntity<?> deleteDepartment(Model model, @RequestParam Long id) {
 		model.addAttribute("id", id);
 		adminService.deleteDepartment(id);
 		return "redirect:/admin/department";
@@ -109,7 +109,7 @@ public class AdminController {
 	 * @return 학과 수정 기능
 	 */
 	@PutMapping("/department")
-	public String updateDepartment(DepartmentFormDto departmentFormDto) {
+	public ResponseEntity<?> updateDepartment(DepartmentFormDto departmentFormDto) {
 		adminService.updateDepartment(departmentFormDto);
 		return "redirect:/admin/department";
 	}
@@ -119,7 +119,7 @@ public class AdminController {
 	 * @return 강의실 페이지
 	 */
 	@GetMapping("/room")
-	public String room(Model model, @RequestParam(defaultValue = "select") String crud) {
+	public ResponseEntity<?> room(Model model, @RequestParam(defaultValue = "select") String crud) {
 		model.addAttribute("crud", crud);
 		List<Room> roomList = adminService.readRoom();
 		List<College> collegeList = adminService.readCollege();
@@ -141,7 +141,7 @@ public class AdminController {
 	 * @return 강의실 입력 기능
 	 */
 	@PostMapping("/room")
-	public String roomProc(RoomFormDto roomFormDto) {
+	public ResponseEntity<?> roomProc(RoomFormDto roomFormDto) {
 		adminService.createRoom(roomFormDto);
 		return "redirect:/admin/room";
 	}
@@ -151,7 +151,7 @@ public class AdminController {
 	 * @return 강의실 삭제 기능
 	 */
 	@GetMapping("/roomDelete")
-	public String deleteRoom(Model model, @RequestParam String id) {
+	public ResponseEntity<?> deleteRoom(Model model, @RequestParam String id) {
 		model.addAttribute("id", id);
 		adminService.deleteRoom(id);
 		return "redirect:/admin/room";

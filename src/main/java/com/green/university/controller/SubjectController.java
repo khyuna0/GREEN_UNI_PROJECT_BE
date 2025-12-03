@@ -38,7 +38,7 @@ public class SubjectController {
 
 	// 모든 강의 조회 (모든 연도-학기에 대해서)
 	@GetMapping("/list/{page}")
-	public String readSubjectList(Model model, @PathVariable Long page) {
+	public ResponseEntity<?> readSubjectList(Model model, @PathVariable Long page) {
 
 		// 강의 리스트 (전체)
 		List<SubjectDto> subjectList = subjectService.readSubjectList();
@@ -72,7 +72,7 @@ public class SubjectController {
 
 	// 전체 강의 목록에서 필터링
 	@GetMapping("/list/search")
-	public String readSubjectListSearch(Model model, @Validated AllSubjectSearchFormDto allSubjectSearchFormDto) {
+	public ResponseEntity<?> readSubjectListSearch(Model model, @Validated AllSubjectSearchFormDto allSubjectSearchFormDto) {
 
 		// 강의 리스트
 		List<SubjectDto> subjectList = subjectService.readSubjectListSearch(allSubjectSearchFormDto);
@@ -103,7 +103,7 @@ public class SubjectController {
 	 * @return 강의계획서 조회
 	 */
 	@GetMapping("/syllabus/{subjectId}")
-	public String readSyllabus(Model model, @PathVariable Long subjectId) {
+	public ResponseEntity<?> readSyllabus(Model model, @PathVariable Long subjectId) {
 		ReadSyllabusDto readSyllabusDto = professorService.readSyllabus(subjectId);
 		if (readSyllabusDto.getOverview() != null) {
 			readSyllabusDto.setOverview(readSyllabusDto.getOverview().replace("\r\n", "<br>"));

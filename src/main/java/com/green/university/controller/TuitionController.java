@@ -53,7 +53,7 @@ public class TuitionController {
 	 * @return 납부된 등록금 내역 조회 페이지
 	 */
 	@GetMapping("/list")
-	public String tuitionList(Model model) {
+	public ResponseEntity<?> tuitionList(Model model) {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 
@@ -70,7 +70,7 @@ public class TuitionController {
 	 *         해당 학기 (2023-1)에 등록금을 납부한 기록이 있다면 납부하기 버튼 제거
 	 */
 	@GetMapping("/payment")
-	public String tuitionPayment(Model model) {
+	public ResponseEntity<?> tuitionPayment(Model model) {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 		Student studentInfo = userService.readStudent(principal.getId());
@@ -115,7 +115,7 @@ public class TuitionController {
 	 * @return 등록금 납부 페이지로 다시 돌아가서 납부 완료됨을 보여주기
 	 */
 	@PostMapping("/payment")
-	public String tuitionPaymentProc() {
+	public ResponseEntity<?> tuitionPaymentProc() {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 		tuitionService.updateStatus(principal.getId());
@@ -127,7 +127,7 @@ public class TuitionController {
 	 * 장학금 유형 설정 + 등록금 납부 고지서 생성 페이지
 	 */
 	@GetMapping("/bill")
-	public String createPayment(Model model) {
+	public ResponseEntity<?> createPayment(Model model) {
 
 		return "/tuition/createPayment";
 	}
@@ -136,7 +136,7 @@ public class TuitionController {
 	 * 등록금 납부 고지서 생성 (학생 id를 가지고 와서 for문으로 돌려서 tuition을 생성하는 것 같은데)
 	 */
 	@GetMapping("/create")
-	public String createTuiProc(Model model) {
+	public ResponseEntity<?> createTuiProc(Model model) {
 
 		List<Long> studentIdList = stuStatService.readIdList();
 

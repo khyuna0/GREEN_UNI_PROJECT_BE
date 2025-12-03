@@ -38,7 +38,7 @@ public class EvaluationController {
 	 * @return 강의평가 화면 클릭
 	 */
 	@GetMapping("")
-	public String evaluation(Model model, Long subjectId) {
+	public ResponseEntity<?> evaluation(Model model, Long subjectId) {
 
 		QuestionDto dto = questionService.readQuestion();
 		model.addAttribute("subjectId", subjectId);
@@ -50,7 +50,7 @@ public class EvaluationController {
 	 * 강의평가 post
 	 */
 	@PostMapping("/write/{subjectId}")
-	public String EvaluationProc(@PathVariable Long subjectId, EvaluationDto evaluationFormDto, Model model) {
+	public ResponseEntity<?> EvaluationProc(@PathVariable Long subjectId, EvaluationDto evaluationFormDto, Model model) {
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 
 		evaluationFormDto.setStudentId(principal.getId());
@@ -81,7 +81,7 @@ public class EvaluationController {
 
 	// 강의 평가 처음화면 (교수)
 	@GetMapping("/read")
-	public String readEvaluation(Model model) {
+	public ResponseEntity<?> readEvaluation(Model model) {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 
@@ -95,7 +95,7 @@ public class EvaluationController {
 
 	// 과목별 강의 평가 조회 (교수)
 	@PostMapping("/read")
-	public String readEvaluation(Model model, HttpServletRequest httpServletRequest) {
+	public ResponseEntity<?> readEvaluation(Model model, HttpServletRequest httpServletRequest) {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 		String name = httpServletRequest.getParameter("subjectId");

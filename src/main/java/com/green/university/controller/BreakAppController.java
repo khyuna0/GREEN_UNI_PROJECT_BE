@@ -48,7 +48,7 @@ public class BreakAppController {
 
     //휴학 신청 페이지
     @GetMapping("/application")
-    public String breakApplication(Model model) {
+    public ResponseEntity<?> breakApplication(Model model) {
 
         PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
         Student studentInfo = userService.readStudent(principal.getId());
@@ -87,7 +87,7 @@ public class BreakAppController {
      * @return 휴복학 신청 내역 페이지
      */
     @PostMapping("/application")
-    public String breakApplicationProc(@Validated BreakAppFormDto breakAppFormDto) {
+    public ResponseEntity<?> breakApplicationProc(@Validated BreakAppFormDto breakAppFormDto) {
 
         PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 
@@ -110,7 +110,7 @@ public class BreakAppController {
      * @return 휴복학 신청 내역 페이지 (학생용)
      */
     @GetMapping("/list")
-    public String breakAppListByStudentId(Model model) {
+    public ResponseEntity<?> breakAppListByStudentId(Model model) {
 
         PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 
@@ -125,7 +125,7 @@ public class BreakAppController {
      * @return 처리되지 않은 휴복학 신청 내역 페이지 (교직원용)
      */
     @GetMapping("/list/staff")
-    public String breakAppListByState(Model model) {
+    public ResponseEntity<?> breakAppListByState(Model model) {
 
         List<BreakApp> breakAppList = breakAppService.readByStatus("처리중");
 
@@ -138,7 +138,7 @@ public class BreakAppController {
      * @return 휴학 신청서 확인 학생 / 교직원에 따라 옆에 카테고리 바뀌어야 함
      */
     @GetMapping("/detail/{id}")
-    public String breakDetail(@PathVariable Long id, Model model) {
+    public ResponseEntity<?> breakDetail(@PathVariable Long id, Model model) {
 
         BreakApp breakApp = breakAppService.readById(id);
         model.addAttribute("breakApp", breakApp);
@@ -162,7 +162,7 @@ public class BreakAppController {
      * 휴학 신청 취소 (학생)
      */
     @PostMapping("/delete/{id}")
-    public String deleteBreakApp(@PathVariable Long id) {
+    public ResponseEntity<?> deleteBreakApp(@PathVariable Long id) {
 
         // 신청서의 학번과 현재 로그인된 아이디가 일치하는지 확인
         PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
@@ -179,7 +179,7 @@ public class BreakAppController {
      * 휴학 신청 처리 (교직원)
      */
     @PostMapping("/update/{id}")
-    public String updateBreakApp(@PathVariable Long id, String status) {
+    public ResponseEntity<?> updateBreakApp(@PathVariable Long id, String status) {
 
         breakAppService.updateById(id, status);
 

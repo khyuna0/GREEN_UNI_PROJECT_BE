@@ -98,7 +98,7 @@ public class StuSubController {
 
     // 과목 조회 (현재 학기)
 	@GetMapping("/subjectList/{page}")
-	public String readSubjectList(Model model, @PathVariable Long page) {
+	public ResponseEntity<?> readSubjectList(Model model, @PathVariable Long page) {
 
 		// 강의 리스트
 		List<SubjectDto> subjectList = subjectService.readSubjectListByCurrentSemester();
@@ -132,7 +132,7 @@ public class StuSubController {
 
 	// 과목 조회 (현재 학기)에서 필터링
 	@GetMapping("/subjectList/search")
-	public String readSubjectListSearch(Model model,
+	public ResponseEntity<?> readSubjectListSearch(Model model,
 			@Validated CurrentSemesterSubjectSearchFormDto currentSemesterSubjectSearchFormDto) {
 
 		// 강의 리스트
@@ -164,7 +164,7 @@ public class StuSubController {
 	 */
 
 	@GetMapping("/pre/{page}")
-	public String preStuSubApplication(Model model, @PathVariable int page) { // page 값 int로 변경함
+	public ResponseEntity<?> preStuSubApplication(Model model, @PathVariable int page) { // page 값 int로 변경함
 
 		// 예비 수강 신청 기간이 아니라면
 		if (SUGANG_PERIOD != 0) {
@@ -224,7 +224,7 @@ public class StuSubController {
 	 */
 
 	@PostMapping("/pre/{subjectId}")
-	public String insertPreStuSubAppProc(@PathVariable Long subjectId) {
+	public ResponseEntity<?> insertPreStuSubAppProc(@PathVariable Long subjectId) {
 
 		// 예비 수강 신청 기간이 아니라면
 		if (SUGANG_PERIOD != 0) {
@@ -243,7 +243,7 @@ public class StuSubController {
 	 */
 
 	@DeleteMapping("/pre/{subjectId}")
-	public String deletePreStuSubAppProc(@PathVariable Long subjectId, @RequestParam Long type) {
+	public ResponseEntity<?> deletePreStuSubAppProc(@PathVariable Long subjectId, @RequestParam Long type) {
 
 		// 예비 수강 신청 기간이 아니라면
 		if (SUGANG_PERIOD != 0) {
@@ -264,7 +264,7 @@ public class StuSubController {
 
 	// 예비 수강 신청 강의 목록에서 필터링
 	@GetMapping("/pre/search")
-	public String preStuSubApplicationSearch(Model model,
+	public ResponseEntity<?> preStuSubApplicationSearch(Model model,
 			@Validated CurrentSemesterSubjectSearchFormDto currentSemesterSubjectSearchFormDto) {
 
 		// 예비 수강 신청 기간이 아니라면
@@ -312,7 +312,7 @@ public class StuSubController {
 	 * @return 수강 신청
 	 */
 	@GetMapping("/application/{page}")
-	public String stuSubApplication(Model model, @PathVariable Long page) {
+	public ResponseEntity<?> stuSubApplication(Model model, @PathVariable Long page) {
 
 		// 수강 신청 기간이 아니라면
 		if (SUGANG_PERIOD != 1) {
@@ -368,7 +368,7 @@ public class StuSubController {
 
 	// 수강 신청 강의 목록에서 필터링
 	@GetMapping("/application/search")
-	public String stuSubApplicationSearch(Model model,
+	public ResponseEntity<?> stuSubApplicationSearch(Model model,
 			@Validated CurrentSemesterSubjectSearchFormDto currentSemesterSubjectSearchFormDto) {
 
 		// 수강 신청 기간이 아니라면
@@ -415,7 +415,7 @@ public class StuSubController {
 	 * 수강 신청 처리 (신청)
 	 */
 	@PostMapping("/insertApp/{subjectId}")
-	public String insertStuSubAppProc(@PathVariable Long subjectId, @RequestParam Long type) {
+	public ResponseEntity<?> insertStuSubAppProc(@PathVariable Long subjectId, @RequestParam Long type) {
 
 		// 수강 신청 기간이 아니라면
 		if (SUGANG_PERIOD != 1) {
@@ -438,7 +438,7 @@ public class StuSubController {
 	 * 수강 신청 처리 (취소)
 	 */
 	@DeleteMapping("/deleteApp/{subjectId}")
-	public String deleteStuSubAppProc(@PathVariable Long subjectId, @RequestParam Long type) {
+	public ResponseEntity<?> deleteStuSubAppProc(@PathVariable Long subjectId, @RequestParam Long type) {
 
 		// 수강 신청 기간이 아니라면
 		if (SUGANG_PERIOD != 1) {
@@ -461,7 +461,7 @@ public class StuSubController {
 	 * @return 예비 수강 신청 내역
 	 */
 	@GetMapping("/preAppList")
-	public String preStuSubAppList(Model model, @RequestParam Long type) {
+	public ResponseEntity<?> preStuSubAppList(Model model, @RequestParam Long type) {
 
 		// 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
@@ -516,7 +516,7 @@ public class StuSubController {
 	 * @return 수강 신청 내역
 	 */
 	@GetMapping("/list")
-	public String stuSubAppList(Model model) {
+	public ResponseEntity<?> stuSubAppList(Model model) {
 
 		// 예비 수강 신청 기간이라면
 		if (SUGANG_PERIOD == 0) {
