@@ -12,6 +12,7 @@ import com.green.university.repository.interfaces.*;
 import com.green.university.entity.Professor;
 import com.green.university.entity.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -144,40 +145,46 @@ public class ProfessorService {
 	 */
 
     @Transactional
-    public List<Professor> readProfessorList(ProfessorListForm form) {
+    public Page<Professor> readProfessorList(ProfessorListForm form, int page, int size) {
+
+        if (page < 0) page = 0;
+        if (size <= 0) size = 10;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        Page<Professor> professors = professorRepository.findAll(pageable); // 검색어가 없을 때 기본 전체 조회
 
         // 1) professorId로 단일 검색 (PK는 유니크라 단건 조회)
         if (form.getProfessorId() != null) {
 
             Professor p = professorRepository.findById(form.getProfessorId())
                     .orElse(null);
+            List<Professor> result = (p == null) ? List.of() : List.of(p);
 
-            return (p == null) ? List.of() : List.of(p);
-            // 조회 결과가 1개이므로 단건 리스트로 반환,
-            // 컨트롤러에서 리스트 요구해서 리스트로 반환했음
+            return new PageImpl<>(result, pageable, result.size());
+            // 고유키 검색이므로 단건 반환
         }
 
         // 2) deptId로 검색 (특정 학과 교수 목록 조회)
         if (form.getDeptId() != null) {
-            return professorRepository.findByDepartment_Id(form.getDeptId());
+            return professorRepository.findByDepartment_id(form.getDeptId(), pageable);
         }
 
         // 3) 조건 없음 → 전체 교수 목록 조회
-        return professorRepository.findAll();
+        return professors;
     }
 
 
 	/**
 	 * 
 	 * @param studentListForm
-	 * @return 교수 수
+	 * @return 교수 수 (페이징?) 나중엔 필요없을듯
 	 */
 	@Transactional
 	public Long readProfessorAmount(ProfessorListForm professorListForm) {
 
 		Long amount = null;
 		if (professorListForm.getDeptId() != null) {
-			amount = professorRepository.countByDepartment_Id(professorListForm.getDeptId());
+			amount = professorRepository.countByDepartment_id(professorListForm.getDeptId());
 		} else {
 			amount = professorRepository.count(); // .count() -> 테이블의 전체 row 개수를 long 타입으로 반환하는 메서드
 		}
