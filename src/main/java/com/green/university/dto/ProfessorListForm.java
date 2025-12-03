@@ -9,8 +9,9 @@ import lombok.Data;
 @Data
 public class ProfessorListForm {
 
+    // 검색어가 있는 경우, 검색어를 이 DTO에 넣어 찾는다
 	private Long deptId;
 	private Long professorId;
-	private Long page;
+	private int page;
 	
 }

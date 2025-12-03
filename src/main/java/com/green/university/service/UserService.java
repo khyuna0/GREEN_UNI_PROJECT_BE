@@ -235,20 +235,19 @@ public class UserService {
         studentRepository.save(updatedStudent);
     }
 
-    /**
-     * 직원 정보 수정
-     *
-     * @param updateDto
-     */
-    @Transactional
-    public void updateStaff(UserUpdateDto dto) {
+	/**
+	 * 직원 정보 수정
+	 * 
+	 * @param updateDto
+	 */
+	@Transactional
+	public void updateStaff(UserUpdateDto updateDto) {
 
-        Professor professor = professorRepository.findById(dto.getUserId()).orElseThrow(() -> new CustomRestfullException("없는 직원 정보입니다.", HttpStatus.NOT_FOUND));
-        ;
+        Professor professor = professorRepository.findById(updateDto.getUserId()).orElseThrow(() -> new CustomRestfullException("없는 직원 정보입니다.", HttpStatus.NOT_FOUND));;
 
-        professor.setAddress(dto.getAddress());
-        professor.setTel(dto.getTel());
-        professor.setEmail(dto.getEmail());
+        professor.setAddress(updateDto.getAddress());
+        professor.setTel(updateDto.getTel());
+        professor.setEmail(updateDto.getEmail());
 
         professorRepository.save(professor);
     }

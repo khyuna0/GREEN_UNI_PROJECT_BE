@@ -128,7 +128,7 @@ public class StuSubService {
 		for (Long subjectId : idList1) {
 
 			// 예비 수강 신청에서 해당 강의를 신청했던 내역 가져오기
-			List<PreStuSub> preAppList = preStuSubRepository.findBySubjectId(subjectId);
+			List<PreStuSub> preAppList = preStuSubRepository.findBySubject_Id(subjectId);
 
 			// 예비 수강 신청했던 인원들이 자동으로 수강 신청되도록
 			// 해당 내역 그대로 수강 신청 추가

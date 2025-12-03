@@ -84,7 +84,9 @@ public class ScheduleService { // todo ScheduleService로 변경
     @Transactional
     public List<Schedule> readScheduleListByMonth(int year, int month) {
 
+        // 해당 연도·월의 1일
         LocalDate start = LocalDate.of(year, month, 1);
+        // 해당 연도·월의 마지막 날 (28~31일)
         LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
 
         return scheduleRepository.findByStartDayBetween(start, end);

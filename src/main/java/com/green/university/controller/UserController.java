@@ -9,6 +9,7 @@ import com.green.university.service.StudentService;
 import com.green.university.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -126,17 +127,17 @@ public class UserController {
 	}
 
 	/**
-	 * 교수 조회
+	 * 교수 조회 (검색인 듯?)
 	 * 
 	 * @param model
-	 * @return 교수 조회 페이지
+	 * @return 교수 조회 페이지 (아래 showProfessorListByPage와 합칠 수 있을 것 같다)
 	 */
 	@GetMapping("/professorList")
 	public String showProfessorList(Model model, @RequestParam(required = false) Long professorId,
 			@RequestParam(required = false) Long deptId) {
 
 		ProfessorListForm professorListForm = new ProfessorListForm();
-		professorListForm.setPage(0L);
+		professorListForm.setPage(0);
 		if (professorId != null) {
 			professorListForm.setProfessorId(professorId);
 		} else if (deptId != null) {
@@ -166,7 +167,7 @@ public class UserController {
 	 * @return 교수 조회 페이지
 	 */
 	@GetMapping("/professorList/{page}")
-	public String showProfessorListByPage(Model model, @PathVariable Long page,
+	public String showProfessorListByPage(Model model, @PathVariable int page,
 			@RequestParam(required = false) Long deptId) {
 
 		ProfessorListForm professorListForm = new ProfessorListForm();
@@ -183,6 +184,9 @@ public class UserController {
 
 		return "/user/professorList";
 	}
+
+
+
 
 	/**
 	 * 학생 조회
