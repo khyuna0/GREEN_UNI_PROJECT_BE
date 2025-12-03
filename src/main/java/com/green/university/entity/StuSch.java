@@ -7,13 +7,12 @@ import lombok.Setter;
 
 @Entity
 @Data
-public class StuSch { // 학적상태 저장 테이블
+public class StuSch { // 학생 장학금
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Student 엔티티
     @ManyToOne
     @JoinColumn(name = "student_id")
     private Student student;
@@ -21,7 +20,6 @@ public class StuSch { // 학적상태 저장 테이블
     private Long schYear;
     private Long semester;
 
-    // Scholarship 엔티티
     @ManyToOne
     private Scholarship schType;
 }

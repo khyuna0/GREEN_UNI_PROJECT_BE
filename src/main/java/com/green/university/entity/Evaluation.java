@@ -10,12 +10,10 @@ public class Evaluation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Student 엔티티 studentId
     @ManyToOne
     @JoinColumn(name = "student_id")
     private Student student;
 
-    // Subject 엔티티 subjectId
     @ManyToOne
     @JoinColumn(name = "subject_id")
     private Subject subject;

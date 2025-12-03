@@ -14,7 +14,6 @@ public class StuStat { // 학생 재학 상태 (입학날짜, 휴학 여부 ..)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 학생 한 명이 여러 상태를 가질 수 있음
     @ManyToOne
     @JoinColumn(name = "student_id")
     private Student student;

@@ -22,7 +22,6 @@ public class Student {
     private String tel;
     private String email;
 
-    //deptId
     @ManyToOne
     @JoinColumn(name = "department_id")
     private Department department;
