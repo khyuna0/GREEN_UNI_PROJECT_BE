@@ -6,7 +6,7 @@ import lombok.Data;
 public class NoticePageFormDto {
 
     // 페이징 처리
-    private Long page;
+    private int page;
     private String keyword;
     private String type;
 

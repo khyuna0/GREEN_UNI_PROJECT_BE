@@ -51,14 +51,14 @@ public class NoticeService {
     // 검색 + 페이징 처리
     public Page<Notice> readNoticePage(NoticePageFormDto noticePageFormDto){
 
-        Long pageParam = noticePageFormDto.getPage();
-        Long page = (pageParam == null || pageParam < 1) ? 1L : pageParam;
+        int pageParam = noticePageFormDto.getPage();
+        int page = pageParam < 1 ? 1 : pageParam;
 
         String keyword = noticePageFormDto.getKeyword();
         String type = noticePageFormDto.getType();
 
         Pageable pageable = PageRequest.of(
-                (int)(page - 1),          // 1페이지 -> 0, 2페이지 -> 1 ...
+                page - 1,          // 1페이지 -> 0, 2페이지 -> 1 ...
                 PAGE_SIZE,
                 Sort.by(Sort.Direction.DESC,"id") // 최신 글 순
         );
@@ -99,13 +99,14 @@ public class NoticeService {
         Notice notice = noticeRepository.findById(id)
                 .orElseThrow(() -> new CustomRestfullException("공지 없음", HttpStatus.NOT_FOUND));
 
-        Long currentViews = notice.getViews();
+        Long currentViews = notice.getViews() == null ? 0: notice.getViews();
         notice.setViews(currentViews + 1);
 
         return notice;
     }
 
     // 공지 수정
+    @Transactional
     public void updateNotice(NoticeFormDto noticeFormDto) {
         Notice notice = noticeRepository.findById(noticeFormDto.getId())
                 .orElseThrow(() -> new CustomRestfullException("공지 없음", HttpStatus.NOT_FOUND));

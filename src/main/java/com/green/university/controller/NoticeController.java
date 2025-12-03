@@ -32,7 +32,7 @@ public class NoticeController {
     @GetMapping("")
     public String notice(Model model,
                          @RequestParam(defaultValue = "select") String crud,
-                         @RequestParam(defaultValue = "1") Long page) {
+                         @RequestParam(defaultValue = "1") int page) {
 
         model.addAttribute("crud", crud);
 
@@ -107,7 +107,7 @@ public class NoticeController {
      */
     @GetMapping("/list/{page}")
     public String showNoticeListByPage(Model model, @RequestParam(defaultValue = "select") String crud,
-                                       @PathVariable Long page) {
+                                       @PathVariable int page) {
         model.addAttribute("crud", crud);
         NoticePageFormDto noticeFormDto = new NoticePageFormDto();
         noticeFormDto.setPage((page - 1) * 10);

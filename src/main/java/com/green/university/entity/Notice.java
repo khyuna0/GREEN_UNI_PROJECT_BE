@@ -2,6 +2,7 @@ package com.green.university.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.w3c.dom.Text;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -15,12 +16,11 @@ public class Notice {
     private Long id;
 
     private String category;
-
     private String title;
 
     // 추후 TEXT로 써야함(내용이 긴가봄)
+    @Column(columnDefinition = "TEXT")
     private String content;
-
     private Long views;
 
     // 타임스탬프 ..
