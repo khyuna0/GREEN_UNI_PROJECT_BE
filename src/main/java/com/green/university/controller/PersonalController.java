@@ -14,18 +14,17 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User 로그인, 정보수정
@@ -66,8 +65,12 @@ public class PersonalController {
 		// 샘플이므로, 2월달로 고정함
 		List<Schedule> scheduleList = scheuleService.readScheduleListByMonth(2023,2);
 		model.addAttribute("scheduleList", scheduleList);
-		
+
+        // null로 초기화한 사용자 엔티티들
+
+
 		if (principal.getUserRole().equals("student")) {
+            // Todo 엔티티 말고 따로 dto 만들어서 처리
 			StudentInfoDto studentInfo = userService.readStudentInfo(principal.getId());
 			StuStat stuStat = stuStatService.readCurrentStatus(principal.getId());
 			model.addAttribute("userInfo", studentInfo);
@@ -84,7 +87,13 @@ public class PersonalController {
 			model.addAttribute("userInfo", professorInfo);
 		}
 
-		return "/main";
+        return ResponseEntity.ok(Map.of(
+                "noticeList", noticeList,
+                "scheduleList", scheduleList,
+                "userInfo", studentInfo,
+                "currentStatus", stuStat.getStatus()
+
+        ));
 	}
 
 	/**

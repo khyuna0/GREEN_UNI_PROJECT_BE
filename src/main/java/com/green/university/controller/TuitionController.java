@@ -76,12 +76,14 @@ public class TuitionController {
 	public ResponseEntity<?> tuitionPayment() {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
+        // Todo 엔티티 말고 따로 dto 만들어서 처리
 		Student studentInfo = userService.readStudent(principal.getId());
 		// 등록금 납부 대상이 아니라면 진입 불가
 
 		// 해당 학생의 학적 상태가 '졸업' 또는 '자퇴'라면 X
 		// 해당 학생이 이번 학기 휴학을 승인받은 상태라면 X
 
+        // Todo 엔티티 말고 따로 dto 만들어서 처리
 		StuStat stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
 		List<BreakApp> breakAppList = breakAppService.readByStudentId(studentInfo.getId()); // 최근 순으로 정렬되어 있음
 

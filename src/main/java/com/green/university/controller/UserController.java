@@ -128,8 +128,7 @@ public class UserController {
 
 	/**
 	 * 교수 조회 (검색인 듯?)
-	 * 
-	 * @param model
+	 *
 	 * @return 교수 조회 페이지 (아래 showProfessorListByPage와 합칠 수 있을 것 같다)
 	 */
 	@GetMapping("/professorList")
@@ -162,8 +161,7 @@ public class UserController {
 
 	/**
 	 * 교수 조회
-	 * 
-	 * @param model
+	 *
 	 * @return 교수 조회 페이지
 	 */
 	@GetMapping("/professorList/{page}")
@@ -190,8 +188,7 @@ public class UserController {
 
 	/**
 	 * 학생 조회
-	 * 
-	 * @param model
+	 *
 	 * @return 학생 조회 페이지
 	 */
 	@GetMapping("/studentList")
@@ -224,8 +221,7 @@ public class UserController {
 
 	/**
 	 * 학생 조회
-	 * 
-	 * @param model
+	 *
 	 * @return 학생 조회 페이지
 	 */
 	@GetMapping("/studentList/{page}")
