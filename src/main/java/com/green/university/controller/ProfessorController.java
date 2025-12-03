@@ -69,7 +69,7 @@ public class ProfessorController {
 	 * @return 조회 신청한 학기의 본인 강좌 조회 페이지
 	 */
 	@PostMapping("/subject")
-	public ResponseEntity<?> subjectListProc(Model model, @RequestParam String period) {
+	public ResponseEntity<?> subjectListProc( @RequestParam String period) {
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 		List<SubjectPeriodForProfessorDto> semesterList = professorService.selectSemester(principal.getId());
 		String[] strs = period.split("year");
@@ -90,7 +90,7 @@ public class ProfessorController {
 	 * @return 해당 과목을 듣는 학생 리스트
 	 */
 	@GetMapping("/subject/{subjectId}")
-	public ResponseEntity<?> subjectStudentList(Model model, @PathVariable Long subjectId) {
+	public ResponseEntity<?> subjectStudentList( @PathVariable Long subjectId) {
 		List<StudentInfoForProfessorDto> studentList = professorService.selectBySubjectId(subjectId);
 		Subject subject = professorService.selectSubjectById(subjectId);
 
@@ -108,7 +108,7 @@ public class ProfessorController {
 	 * @return 출결 및 성적 기입 페이지
 	 */
 	@GetMapping("/subject/{subjectId}/{studentId}")
-	public ResponseEntity<?> updateStudentDetail(Model model, @PathVariable Long subjectId, @PathVariable Long studentId) {
+	public ResponseEntity<?> updateStudentDetail( @PathVariable Long subjectId, @PathVariable Long studentId) {
 
 		Student student = userService.readStudent(studentId);
 		model.addAttribute("student", student);
@@ -118,7 +118,7 @@ public class ProfessorController {
 	}
 
 	@PutMapping("/subject/{subjectId}/{studentId}")
-	public ResponseEntity<?> updateStudentDetailProc(Model model, @PathVariable Long subjectId, @PathVariable Long studentId,
+	public ResponseEntity<?> updateStudentDetailProc( @PathVariable Long subjectId, @PathVariable Long studentId,
 			UpdateStudentGradeDto updateStudentGradeDto) {
 
 		// 점수 입력
@@ -141,7 +141,7 @@ public class ProfessorController {
 	 * @return 강의계획서 업데이트 창
 	 */
 	@GetMapping("/syllabus/update/{subjectId}")
-	public ResponseEntity<?> createSyllabus(Model model, @PathVariable Long subjectId) {
+	public ResponseEntity<?> createSyllabus( @PathVariable Long subjectId) {
 		ReadSyllabusDto readSyllabusDto = professorService.readSyllabus(subjectId);
 
 		model.addAttribute("syllabus", readSyllabusDto);

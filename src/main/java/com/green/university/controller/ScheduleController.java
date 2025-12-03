@@ -53,7 +53,7 @@ public class ScheduleController {
 	}
 
 	@GetMapping("/list")
-	public ResponseEntity<?> ScheduleList(Model model, @RequestParam(defaultValue = "select") String crud) {
+	public ResponseEntity<?> ScheduleList( @RequestParam(defaultValue = "select") String crud) {
 		model.addAttribute("crud", crud);
 		List<Schedule> schedule = scheuleService.readSchedule();
 		model.addAttribute("schedule", schedule);
@@ -65,7 +65,7 @@ public class ScheduleController {
 	//일정 추가
 	
 	@PostMapping("/write")
-	public ResponseEntity<?> ScheduleProc(Model model, ScheduleFormDto scheduleFormDto) {
+	public ResponseEntity<?> ScheduleProc( ScheduleFormDto scheduleFormDto) {
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 		System.out.println("write");
 		System.out.println(scheduleFormDto);
@@ -85,7 +85,7 @@ public class ScheduleController {
 	}
 
 	@GetMapping("/delete")
-	public ResponseEntity<?> deleteSchedule(Model model, @RequestParam Long id) {
+	public ResponseEntity<?> deleteSchedule( @RequestParam Long id) {
 		model.addAttribute("id", id);
 		scheuleService.deleteSchedule(id);
 
@@ -93,7 +93,7 @@ public class ScheduleController {
 	}
 
 	@GetMapping("/detail")
-	public ResponseEntity<?> detailSchedule(Model model, Long id, @RequestParam(defaultValue = "read") String crud) {
+	public ResponseEntity<?> detailSchedule( Long id, @RequestParam(defaultValue = "read") String crud) {
 		ScheduleDto schedule = scheuleService.readScheduleById(id);
 		model.addAttribute("crud",crud);
 		model.addAttribute("schedule", schedule);

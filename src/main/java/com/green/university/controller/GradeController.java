@@ -98,7 +98,7 @@ public class GradeController {
 	 * @return
 	 */
 	@PostMapping("/read")
-	public ResponseEntity<?> readGradeProc(Model model, HttpServletRequest httpServletRequest) {
+	public ResponseEntity<?> readGradeProc( HttpServletRequest httpServletRequest) {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 

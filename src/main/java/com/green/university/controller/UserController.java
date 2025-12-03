@@ -133,7 +133,7 @@ public class UserController {
 	 * @return 교수 조회 페이지 (아래 showProfessorListByPage와 합칠 수 있을 것 같다)
 	 */
 	@GetMapping("/professorList")
-	public ResponseEntity<?> showProfessorList(Model model, @RequestParam(required = false) Long professorId,
+	public ResponseEntity<?> showProfessorList( @RequestParam(required = false) Long professorId,
 			@RequestParam(required = false) Long deptId) {
 
 		ProfessorListForm professorListForm = new ProfessorListForm();
@@ -167,7 +167,7 @@ public class UserController {
 	 * @return 교수 조회 페이지
 	 */
 	@GetMapping("/professorList/{page}")
-	public ResponseEntity<?> showProfessorListByPage(Model model, @PathVariable int page,
+	public ResponseEntity<?> showProfessorListByPage( @PathVariable int page,
 			@RequestParam(required = false) Long deptId) {
 
 		ProfessorListForm professorListForm = new ProfessorListForm();
@@ -195,7 +195,7 @@ public class UserController {
 	 * @return 학생 조회 페이지
 	 */
 	@GetMapping("/studentList")
-	public ResponseEntity<?> showStudentList(Model model, @RequestParam(required = false) Long studentId,
+	public ResponseEntity<?> showStudentList( @RequestParam(required = false) Long studentId,
 			@RequestParam(required = false) Long deptId) {
 
 		StudentListForm studentListForm = new StudentListForm();
@@ -229,7 +229,7 @@ public class UserController {
 	 * @return 학생 조회 페이지
 	 */
 	@GetMapping("/studentList/{page}")
-	public ResponseEntity<?> showStudentListByPage(Model model, @PathVariable Long page,
+	public ResponseEntity<?> showStudentListByPage( @PathVariable Long page,
 			@RequestParam(required = false) Long deptId) {
 
 		StudentListForm studentListForm = new StudentListForm();

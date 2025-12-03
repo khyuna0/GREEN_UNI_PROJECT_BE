@@ -31,7 +31,7 @@ public class NoticeController {
      * @return 공지사항 페이지
      */
     @GetMapping("")
-    public ResponseEntity<?> notice(Model model,
+    public ResponseEntity<?> notice(
                          @RequestParam(defaultValue = "select") String crud,
                          @RequestParam(defaultValue = "1") int page) {
 
@@ -89,7 +89,7 @@ public class NoticeController {
      * @return 공지사항 상세 조회 기능
      */
     @GetMapping("/read")
-    public ResponseEntity<?> selectByIdNotice(Model model, @RequestParam Long id) {
+    public ResponseEntity<?> selectByIdNotice( @RequestParam Long id) {
         model.addAttribute("crud", "read");
         model.addAttribute("id", id);
         Notice notice = noticeService.readByIdNotice(id);
@@ -105,7 +105,7 @@ public class NoticeController {
 
     // 공지사항 페이지 이동
     @GetMapping("/list/{page}")
-    public ResponseEntity<?> showNoticeListByPage(Model model,
+    public ResponseEntity<?> showNoticeListByPage(
                                        @RequestParam(defaultValue = "select") String crud,
                                        @PathVariable int page) {
 
@@ -126,7 +126,7 @@ public class NoticeController {
 
     // 공지사항 검색 기능
     @GetMapping("/search")
-    public ResponseEntity<?> showNoticeByKeyword(Model model, NoticePageFormDto noticePageFormDto) {
+    public ResponseEntity<?> showNoticeByKeyword( NoticePageFormDto noticePageFormDto) {
 
         noticePageFormDto.setPage(1); // 첫페이지는 1페이지
 
@@ -145,7 +145,7 @@ public class NoticeController {
 
     // 검색 + 페이지
     @GetMapping("/search/{page}")
-    public ResponseEntity<?> showNoticeByKeywordAndPage(Model model, NoticePageFormDto noticePageFormDto,
+    public ResponseEntity<?> showNoticeByKeywordAndPage( NoticePageFormDto noticePageFormDto,
                                              @PathVariable int page, @RequestParam String keyword) {
 
         noticePageFormDto.setPage(page);
@@ -166,7 +166,7 @@ public class NoticeController {
     
     //  공지사항 수정 페이지
     @GetMapping("/update")
-    public ResponseEntity<?> update(Model model, @RequestParam Long id) {
+    public ResponseEntity<?> update( @RequestParam Long id) {
         model.addAttribute("crud", "update");
         model.addAttribute("id", id);
 
@@ -185,7 +185,7 @@ public class NoticeController {
 
     // 공지사항 삭제
     @GetMapping("/delete")
-    public ResponseEntity<?> delete(Model model, @RequestParam Long id) {
+    public ResponseEntity<?> delete( @RequestParam Long id) {
         model.addAttribute("id", id);
         noticeService.deleteNotice(id);
         return "redirect:/notice";

@@ -331,7 +331,7 @@ public class PersonalController {
 	 * @return 찾은 아이디 표시 페이지
 	 */
 	@PostMapping("/find/id")
-	public ResponseEntity<?> findIdProc(Model model, @Valid FindIdFormDto findIdFormDto, BindingResult bindingResult) {
+	public ResponseEntity<?> findIdProc( @Valid FindIdFormDto findIdFormDto, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			StringBuilder sb = new StringBuilder();
 			bindingResult.getAllErrors().forEach(error -> {
@@ -364,7 +364,7 @@ public class PersonalController {
 	 * @return 비밀번호 표시 페이지
 	 */
 	@PostMapping("/find/password")
-	public ResponseEntity<?> findPasswordProc(Model model, @Valid FindPasswordFormDto findPasswordFormDto,
+	public ResponseEntity<?> findPasswordProc( @Valid FindPasswordFormDto findPasswordFormDto,
 			BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			StringBuilder sb = new StringBuilder();
