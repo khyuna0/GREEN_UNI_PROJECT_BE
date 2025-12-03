@@ -9,6 +9,7 @@ import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
@@ -102,23 +103,24 @@ public class NoticeController {
         return "/board/notice";
     }
 
-    /**
-     * 공지사항 페이지 이동
-     */
+    // 공지사항 페이지 이동
     @GetMapping("/list/{page}")
-    public String showNoticeListByPage(Model model, @RequestParam(defaultValue = "select") String crud,
+    public String showNoticeListByPage(Model model,
+                                       @RequestParam(defaultValue = "select") String crud,
                                        @PathVariable int page) {
+
         model.addAttribute("crud", crud);
+
         NoticePageFormDto noticeFormDto = new NoticePageFormDto();
-        noticeFormDto.setPage((page - 1) * 10);
-        Long amount = noticeService.readNoticeAmount(noticeFormDto);
-        List<Notice> noticeList = noticeService.readNotice(noticeFormDto);
-        model.addAttribute("listCount", Math.ceil(amount / 10.0));
-        if (noticeList.isEmpty()) {
-            model.addAttribute("noticeList", null);
-        } else {
-            model.addAttribute("noticeList", noticeList);
-        }
+        noticeFormDto.setPage(page);
+        noticeFormDto.setKeyword(null);
+        noticeFormDto.setType(null);
+
+        Page<Notice> noticePage = noticeService.readNoticePage(noticeFormDto);
+        model.addAttribute("noticeList",noticePage.getContent());
+        model.addAttribute("listCount",noticePage.getTotalPages());
+        model.addAttribute("currentPage",page);
+
         return "/board/notice";
     }
 
@@ -126,46 +128,43 @@ public class NoticeController {
     @GetMapping("/search")
     public String showNoticeByKeyword(Model model, NoticePageFormDto noticePageFormDto) {
 
-        noticePageFormDto.setPage(1L); // 첫페이지는 1페이지
+        noticePageFormDto.setPage(1); // 첫페이지는 1페이지
 
         Page<Notice> noticePage = noticeService.readNoticePage(noticePageFormDto);
         model.addAttribute("crud", "selectKeyword");
         model.addAttribute("keyword", noticePageFormDto.getKeyword());
         model.addAttribute("type",noticePageFormDto.getType());
-        noticePageFormDto.setPage(0L);
+        noticePageFormDto.setPage(0);
 
         model.addAttribute("noticeList",noticePage.getContent());
         model.addAttribute("listCount",noticePage.getTotalPages());
-        model.addAttribute("currentPage",1L);
+        model.addAttribute("currentPage",1);
 
         return "/board/notice";
     }
 
-    /**
-     * 공지사항 검색 기능 (키워드 검색 페이징 처리)
-     */
+    // 검색 + 페이지
     @GetMapping("/search/{page}")
     public String showNoticeByKeywordAndPage(Model model, NoticePageFormDto noticePageFormDto,
-                                             @PathVariable Long page, @RequestParam String keyword) {
-        model.addAttribute("keyword", noticePageFormDto.getKeyword());
-        model.addAttribute("crud", "selectKeyword");
-        noticePageFormDto.setPage((page - 1) * 10);
-        List<Notice> noticeList = noticeService.readNoticeByKeyword(noticePageFormDto);
-        Long amount = noticeService.readNoticeAmount(noticePageFormDto);
+                                             @PathVariable int page, @RequestParam String keyword) {
 
-        model.addAttribute("listCount", Math.ceil(amount / 10.0));
-        if (noticeList.isEmpty()) {
-            model.addAttribute("noticeList", null);
-        } else {
-            model.addAttribute("noticeList", noticeList);
-        }
+        noticePageFormDto.setPage(page);
+
+        Page<Notice> noticePage = noticeService.readNoticePage(noticePageFormDto);
+        model.addAttribute("crud","selectKeyword");
+        model.addAttribute("keyword",noticePageFormDto.getKeyword());
+        model.addAttribute("type",noticePageFormDto.getType());
+
+        model.addAttribute("noticeList",noticePage.getContent());
+        model.addAttribute("listCount",noticePage.getTotalPages());
+        model.addAttribute("currentPage",page);
+
         return "/board/notice";
+       
     }
 
-    /**
-     *
-     * @return 공지사항 수정 페이지
-     */
+    
+    //  공지사항 수정 페이지
     @GetMapping("/update")
     public String update(Model model, @RequestParam Long id) {
         model.addAttribute("crud", "update");
@@ -176,20 +175,15 @@ public class NoticeController {
         return "/board/notice";
     }
 
-    /**
-     *
-     * @return 공지사항 수정 기능
-     */
+   
+    // 공지사항 수정
     @PutMapping("/update")
     public String update(@Validated NoticeFormDto noticeFormDto) {
         noticeService.updateNotice(noticeFormDto);
         return "redirect:/notice";
     }
 
-    /**
-     *
-     * @return 공지사항 삭제 조회 기능
-     */
+    // 공지사항 삭제
     @GetMapping("/delete")
     public String delete(Model model, @RequestParam Long id) {
         model.addAttribute("id", id);
