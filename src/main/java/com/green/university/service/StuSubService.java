@@ -64,7 +64,9 @@ public class StuSubService {
 	public void createStuSub(Long studentId, Long subjectId) {
 
 		// 신청 대상 과목 정보
-		Subject targetSubject = subjectRepository.selectSubjectById(subjectId);
+		Subject targetSubject = subjectRepository.findById(subjectId).orElseThrow(
+				() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+		);
 
 		// 신청 대상 과목의 정원이 다 찼다면 신청 불가
 		if (targetSubject.getNumOfStudent() >= targetSubject.getCapacity()) {
@@ -121,7 +123,7 @@ public class StuSubService {
 	public void createStuSubByPreStuSub() {
 
 		// 1. 정원 >= 신청인원인 강의
-		List<Long> idList1 = subjectRepository.selectIdByLessNumOfStudent();
+		List<Long> idList1 = subjectRepository.findIdByCapacityGreaterThanOrEqualNumOfStudent();
 
 		for (Long subjectId : idList1) {
 
@@ -144,7 +146,7 @@ public class StuSubService {
 		}
 
 		// 2. 정원 < 신청인원인 강의
-		List<Long> idList2 = subjectRepository.selectIdByMoreNumOfStudent();
+		List<Long> idList2 = subjectRepository.findIdByCapacityLessThanNumOfStudent();
 
 		for (Long subjectId : idList2) {
 

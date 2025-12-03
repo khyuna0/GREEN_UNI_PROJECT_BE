@@ -11,12 +11,10 @@ public class StuSub {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //studentId;
     @ManyToOne
     @JoinColumn(name = "student_id")
     private Student student;
 
-    //subjectId
     @ManyToOne
     @JoinColumn(name = "subject_id")
     private Subject subject;

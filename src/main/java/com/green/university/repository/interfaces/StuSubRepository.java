@@ -22,6 +22,7 @@ public interface StuSubRepository extends JpaRepository<StuSub,Long> {
 	 * @return StudentInfoForProfessorDto 리스트
 	 */
 	List<StudentInfoForProfessorDto> selectBySubjectId(Long subjectId);
+	List<StuSub> findBySubject_Id(Long subjectId);
 	
 	/**
 	 * stu_sub_tb의 grade 컬럼에 성적 입력

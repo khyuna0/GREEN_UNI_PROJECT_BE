@@ -24,28 +24,28 @@ import java.util.List;
 @Service
 public class UserService {
 
-	@Autowired
-	private StaffRepository staffRepository;
-	@Autowired
-	private ProfessorRepository professorRepository;
-	@Autowired
-	private StudentRepository studentRepository;
-	@Autowired
-	private UserRepository userRepository;
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-	@Autowired
-	private StuStatService stuStatService;
-	@Autowired
-	private StuStatRepository stuStatRepository;
+    @Autowired
+    private StaffRepository staffRepository;
+    @Autowired
+    private ProfessorRepository professorRepository;
+    @Autowired
+    private StudentRepository studentRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private StuStatService stuStatService;
+    @Autowired
+    private StuStatRepository stuStatRepository;
     @Autowired
     private DepartmentRepository departmentRepository;
 
-	/**
-	 * staff 생성 서비스로 먼저 staff_tb에 insert한 후 staff_tb에 생긴 id를 끌고와 user_tb에 생성함
-	 * 
-	 * @param createStaffDto
-	 */
+    /**
+     * staff 생성 서비스로 먼저 staff_tb에 insert한 후 staff_tb에 생긴 id를 끌고와 user_tb에 생성함
+     *
+     * @param createStaffDto
+     */
     @Transactional
     public void createStaffToStaffAndUser(CreateStaffDto dto) {
 
@@ -70,14 +70,14 @@ public class UserService {
         userRepository.save(user); // INSERT 실행
     }
 
-	/**
-	 * professor 생성 서비스 / 먼저 professor_tb에 insert한 후 professor_tb에 생긴 id를 끌고와 user_tb에
-	 * 생성함
-	 *
-	 * @param createStaffDto
-	 */
-	@Transactional
-	public void createProfessorToProfessorAndUser(CreateProfessorDto dto) {
+    /**
+     * professor 생성 서비스 / 먼저 professor_tb에 insert한 후 professor_tb에 생긴 id를 끌고와 user_tb에
+     * 생성함
+     *
+     * @param createStaffDto
+     */
+    @Transactional
+    public void createProfessorToProfessorAndUser(CreateProfessorDto dto) {
 
         // Professor 엔티티 생성
         Professor professor = new Professor();
@@ -111,7 +111,7 @@ public class UserService {
      */
     @Transactional
     public void createStudentToStudentAndUser(CreateStudentDto createStudentDto) {
-        Department dept = DepartmentRepository.findById(createStudentDto.getDeptId())
+        Department dept = departmentRepository.findById(createStudentDto.getDeptId())
                 .orElseThrow(() -> new RuntimeException("학과가 없습니다."));
         Student student = new Student();
         student.setName(createStudentDto.getName());
@@ -187,7 +187,7 @@ public class UserService {
 
         Staff staff = staffRepository.findById(userId).orElseThrow(() -> new CustomRestfullException("없는 직원 정보입니다.", HttpStatus.NOT_FOUND));
 
-		UserInfoForUpdateDto userInfoForUpdateDto = new UserInfoForUpdateDto();
+        UserInfoForUpdateDto userInfoForUpdateDto = new UserInfoForUpdateDto();
         userInfoForUpdateDto.setAddress(staff.getAddress());
         userInfoForUpdateDto.setTel(staff.getTel());
         userInfoForUpdateDto.setEmail(staff.getEmail());
@@ -235,22 +235,23 @@ public class UserService {
         studentRepository.save(updatedStudent);
     }
 
-	/**
-	 * 직원 정보 수정
-	 * 
-	 * @param updateDto
-	 */
-	@Transactional
-	public void updateStaff(UserUpdateDto dto) {
+    /**
+     * 직원 정보 수정
+     *
+     * @param updateDto
+     */
+    @Transactional
+    public void updateStaff(UserUpdateDto dto) {
 
-        Professor professor = professorRepository.findById(dto.getUserId()).orElseThrow(() -> new CustomRestfullException("없는 직원 정보입니다.", HttpStatus.NOT_FOUND));;
+        Professor professor = professorRepository.findById(dto.getUserId()).orElseThrow(() -> new CustomRestfullException("없는 직원 정보입니다.", HttpStatus.NOT_FOUND));
+        ;
 
         professor.setAddress(dto.getAddress());
         professor.setTel(dto.getTel());
         professor.setEmail(dto.getEmail());
 
         professorRepository.save(professor);
-	}
+    }
 
     /**
      * 교수 정보 수정
@@ -260,7 +261,8 @@ public class UserService {
     @Transactional
     public void updateProfessor(UserUpdateDto updateDto) {
 
-        Professor professor = professorRepository.findById(updateDto.getUserId()).orElseThrow(() -> new CustomRestfullException("없는 직원 정보입니다.", HttpStatus.NOT_FOUND));;
+        Professor professor = professorRepository.findById(updateDto.getUserId()).orElseThrow(() -> new CustomRestfullException("없는 직원 정보입니다.", HttpStatus.NOT_FOUND));
+        ;
 
         professor.setAddress(updateDto.getAddress());
         professor.setTel(updateDto.getTel());
@@ -297,26 +299,26 @@ public class UserService {
         );
     }
 
-	/**
-	 * 직원 조회
-	 * 
-	 * @param id
-	 * @return staffEntity
-	 */
-	@Transactional
-	public Staff readStaff(Long id) {
-		Staff staffEntity = staffRepository.findById(id).orElseThrow(() -> new CustomRestfullException("없는 직원 정보입니다.", HttpStatus.NOT_FOUND));
-		return staffEntity;
-	}
+    /**
+     * 직원 조회
+     *
+     * @param id
+     * @return staffEntity
+     */
+    @Transactional
+    public Staff readStaff(Long id) {
+        Staff staffEntity = staffRepository.findById(id).orElseThrow(() -> new CustomRestfullException("없는 직원 정보입니다.", HttpStatus.NOT_FOUND));
+        return staffEntity;
+    }
 
-	/**
-	 * 교수 정보 조회
-	 * 
-	 * @param id
-	 * @return professorEntity
-	 */
-	@Transactional
-	public ProfessorInfoDto readProfessorInfo(Long id) {
+    /**
+     * 교수 정보 조회
+     *
+     * @param id
+     * @return professorEntity
+     */
+    @Transactional
+    public ProfessorInfoDto readProfessorInfo(Long id) {
 
         Professor professor = professorRepository.findById(id).orElseThrow(() -> new CustomRestfullException("없는 교수 정보입니다.", HttpStatus.NOT_FOUND));
 
@@ -333,11 +335,11 @@ public class UserService {
 
         // 마이페이지에서 소속 : 공과대학 컴퓨터공학과 ( CollegeName DeptName ) 형식으로 출력됨 그래서 Dto 사용하나봄
 
-        dto.setCollegeName(professor.getDepartment().getColleage().getName());
+        dto.setCollegeName(professor.getDepartment().getCollege().getName());
         dto.setDeptName(professor.getDepartment().getName());
 
-		return dto;
-	}
+        return dto;
+    }
 
     /**
      * 학생 정보 조회
@@ -366,9 +368,9 @@ public class UserService {
         if (findIdFormDto.getUserRole().equals("student")) {
             findId = studentRepository.findByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail());
         } else if (findIdFormDto.getUserRole().equals("professor")) {
-            findId = professorRepository.selectIdByNameAndEmail(findIdFormDto);
+            findId = professorRepository.findByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail()).getId();
         } else if (findIdFormDto.getUserRole().equals("staff")) {
-            findId = staffRepository.selectIdByNameAndEmail(findIdFormDto);
+            findId = staffRepository.findByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail()).getId();
         }
 
         if (findId == null) {
@@ -401,12 +403,12 @@ public class UserService {
                 throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else if (findPasswordFormDto.getUserRole().equals("professor")) {
-            findId = professorRepository.selectProfessorByIdAndNameAndEmail(findPasswordFormDto);
+            findId = professorRepository.findByIdAndNameAndEmail(findPasswordFormDto.getId(), findPasswordFormDto.getName(), findPasswordFormDto.getEmail()).getId();
             if (findId == null) {
                 throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else if (findPasswordFormDto.getUserRole().equals("staff")) {
-            findId = staffRepository.selectStaffByIdAndNameAndEmail(findPasswordFormDto);
+            findId = staffRepository.findByIdAndNameAndEmail(findPasswordFormDto.getId(), findPasswordFormDto.getName(), findPasswordFormDto.getEmail()).getId();
             if (findId == null) {
                 throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
             }

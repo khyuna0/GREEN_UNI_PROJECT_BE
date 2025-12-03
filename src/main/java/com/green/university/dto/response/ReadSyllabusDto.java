@@ -25,14 +25,16 @@ public class ReadSyllabusDto {
 	private Long endTime;
 	private String roomId;
 	private String collegeName;
+
 	private String professorName;
 	private String deptName;
 	private String tel;
 	private String email;
+
 	private String overview;
 	private String objective;
 	private String textbook;
 	private String program;
-	
+
 	
 }

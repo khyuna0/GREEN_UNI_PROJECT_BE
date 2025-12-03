@@ -1,5 +1,6 @@
 package com.green.university.dto.response;
 
+import com.green.university.entity.StuSub;
 import lombok.Data;
 
 /**
@@ -26,5 +27,14 @@ public class StudentInfoForProfessorDto {
 	private Long finalExam;
 	// 총합 환산 점수
 	private Long convertedMark;
+
+	// StuSub 엔티티 -> StudentInfoForProfessorDto로 변환
+	private StudentInfoForProfessorDto toEntity (StuSub stuSub) {
+		StudentInfoForProfessorDto  dto = new StudentInfoForProfessorDto();
+		dto.setId(stuSub.getId());
+		dto.setStudentId(stuSub.getStudent().getId());
+		dto.setStudentName(stuSub.getStudent().getName());
+		dto.
+	}
 	
 }
