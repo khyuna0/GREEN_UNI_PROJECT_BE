@@ -166,33 +166,33 @@ public class ProfessorService {
 		if (professor == null) {
 			throw new CustomRestfullException("교수 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 		}
-		ReadSyllabusDto dto = new ReadSyllabusDto();
+		ReadSyllabusDto dto = new ReadSyllabusDto(subject, professor, syllaBus); // Dto에 생성자 추가함
 
 		// 교과목 정보
-		dto.setSubjectId(subject.getId());
-		dto.setName(subject.getName());
-		dto.setSubYear(subject.getSubYear().toString());
-		dto.setSemester(subject.getSemester().toString());
-		dto.setGrades(subject.getGrades());
-		dto.setType(subject.getType());
-
-		dto.setSubDay(subject.getSubDay());
-		dto.setStartTime(subject.getStartTime());
-		dto.setEndTime(subject.getEndTime());
-		dto.setRoomId(subject.getRoom().getId());
-		dto.setDeptName(subject.getDepartment().getName());
-		dto.setCollegeName(subject.getDepartment().getCollege().getName()); // 확인 필요
-
-		// 교강사 정보
-		dto.setProfessorName(professor.getName());
-		dto.setTel(professor.getTel());
-		dto.setEmail(professor.getEmail());
-
-		// SyllaBus 부분 (개요, 목표, 정보, 계획)
-		dto.setOverview(syllaBus.getOverview());
-		dto.setObjective(syllaBus.getObjective());
-		dto.setTextbook(syllaBus.getTextbook());
-		dto.setProgram(syllaBus.getProgram());
+//		dto.setSubjectId(subject.getId());
+//		dto.setName(subject.getName());
+//		dto.setSubYear(subject.getSubYear());
+//		dto.setSemester(subject.getSemester());
+//		dto.setGrades(subject.getGrades());
+//		dto.setType(subject.getType());
+//
+//		dto.setSubDay(subject.getSubDay());
+//		dto.setStartTime(subject.getStartTime());
+//		dto.setEndTime(subject.getEndTime());
+//		dto.setRoomId(subject.getRoom().getId());
+//		dto.setDeptName(subject.getDepartment().getName());
+//		dto.setCollegeName(subject.getDepartment().getCollege().getName()); // 확인 필요
+//
+//		// 교강사 정보
+//		dto.setProfessorName(professor.getName());
+//		dto.setTel(professor.getTel());
+//		dto.setEmail(professor.getEmail());
+//
+//		// SyllaBus 부분 (개요, 목표, 정보, 계획)
+//		dto.setOverview(syllaBus.getOverview());
+//		dto.setObjective(syllaBus.getObjective());
+//		dto.setTextbook(syllaBus.getTextbook());
+//		dto.setProgram(syllaBus.getProgram());
 
 		System.out.println(dto);
 		return dto;
