@@ -11,12 +11,14 @@ import com.green.university.service.SubjectService;
 import com.green.university.service.UserService;
 import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 교수 행정 페이지 (자기과목 조회, 학생 성적 기입)
@@ -39,13 +41,12 @@ public class ProfessorController {
 	private SubjectService subjectService;
 	
 	/**
-	 * 본인의 강의가 있는 년도 학기 조회하는 기능 조회한 년도 학기의 강의 리스트 출력(처음값은 현재학기)
-	 * 
-	 * @param model
+	 * 교수 본인의 강의가 있는 년도 학기 조회하는 기능 조회한 년도 학기의 강의 리스트 출력(처음값은 현재학기)
+	 *
 	 * @return 본인 강좌 조회 페이지
 	 */
 	@GetMapping("/subject")
-	public ResponseEntity<?> subjectList(Model model) {
+	public ResponseEntity<?> subjectList() {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 		List<SubjectPeriodForProfessorDto> semesterList = professorService.selectSemester(principal.getId());
@@ -55,38 +56,38 @@ public class ProfessorController {
 		subjectPeriodForProfessorDto.setId(principal.getId());
 		List<SubjectForProfessorDto> subjectList = professorService
 				.selectSubjectBySemester(subjectPeriodForProfessorDto);
-		model.addAttribute("semesterList", semesterList);
-		model.addAttribute("subjectList", subjectList);
 
-		return "/professor/professorSubjectList";
+        return ResponseEntity.ok(Map.of(
+                "semesterList", semesterList,
+                "subjectList", subjectList
+        ));
 	}
 
 	/**
 	 * 조회한 년도 학기의 강의 리스트 출력
-	 * 
-	 * @param model
+	 *
 	 * @param period: 조회할 년도 학기
 	 * @return 조회 신청한 학기의 본인 강좌 조회 페이지
 	 */
 	@PostMapping("/subject")
-	public ResponseEntity<?> subjectListProc( @RequestParam String period) {
+	public ResponseEntity<?> subjectListProc( @RequestParam String period) { // period는 "2023년도 1학기" 형식
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 		List<SubjectPeriodForProfessorDto> semesterList = professorService.selectSemester(principal.getId());
-		String[] strs = period.split("year");
+		String[] str = period.split("year");
 		SubjectPeriodForProfessorDto subjectPeriodForProfessorDto = new SubjectPeriodForProfessorDto();
-		subjectPeriodForProfessorDto.setSubYear(Long.valueOf(strs[0]));
-		subjectPeriodForProfessorDto.setSemester(Long.valueOf(strs[1]));
+		subjectPeriodForProfessorDto.setSubYear(Long.valueOf(str[0]));
+		subjectPeriodForProfessorDto.setSemester(Long.valueOf(str[1]));
 		subjectPeriodForProfessorDto.setId(principal.getId());
 		List<SubjectForProfessorDto> subjectList = professorService.selectSubjectBySemester(subjectPeriodForProfessorDto);
-		model.addAttribute("semesterList", semesterList);
-		model.addAttribute("subjectList", subjectList);
 
-		return "/professor/professorSubjectList";
+        return ResponseEntity.ok(Map.of(
+                "semesterList", semesterList,
+                "subjectList", subjectList
+        ));
 	}
 
 	/**
-	 * 
-	 * @param model
+	 *
 	 * @return 해당 과목을 듣는 학생 리스트
 	 */
 	@GetMapping("/subject/{subjectId}")
@@ -94,15 +95,14 @@ public class ProfessorController {
 		List<StudentInfoForProfessorDto> studentList = professorService.selectBySubjectId(subjectId);
 		Subject subject = professorService.selectSubjectById(subjectId);
 
-		model.addAttribute("studentList", studentList);
-		model.addAttribute("subject", subject);
-
-		return "/professor/subjectStudentList";
+        return ResponseEntity.ok(Map.of(
+                "subject", subject,
+                "studentList", studentList
+        ));
 	}
 
 	/**
-	 * 
-	 * @param model
+	 *
 	 * @param subjectId
 	 * @param studentId
 	 * @return 출결 및 성적 기입 페이지
@@ -111,12 +111,14 @@ public class ProfessorController {
 	public ResponseEntity<?> updateStudentDetail( @PathVariable Long subjectId, @PathVariable Long studentId) {
 
 		Student student = userService.readStudent(studentId);
-		model.addAttribute("student", student);
-		model.addAttribute("subjectId", subjectId);
 
-		return "/professor/updateStudentDetail";
+        return ResponseEntity.ok(Map.of(
+                "student", student,
+                "subjectId", subjectId
+        ));
 	}
-
+    
+    // 업데이트
 	@PutMapping("/subject/{subjectId}/{studentId}")
 	public ResponseEntity<?> updateStudentDetailProc( @PathVariable Long subjectId, @PathVariable Long studentId,
 			UpdateStudentGradeDto updateStudentGradeDto) {
@@ -131,35 +133,37 @@ public class ProfessorController {
 			Long subjectGrade = subjectService.readBySubjectId(subjectId).getGrades();
 			stuSubService.updateCompleteGrade(studentId, subjectId, subjectGrade);
 		}
-		
-		return "redirect:/professor/subject/ " + subjectId;
+
+        return ResponseEntity.ok(Map.of(
+                "studentId", studentId,
+                "subjectId", subjectId
+        ));
 	}
 
 	/**
-	 * 
-	 * @param model
-	 * @return 강의계획서 업데이트 창
+	 *
+	 * @return 강의계획서 조회 창
 	 */
 	@GetMapping("/syllabus/update/{subjectId}")
-	public ResponseEntity<?> createSyllabus( @PathVariable Long subjectId) {
+	public ResponseEntity<?> createSyllabus(@PathVariable Long subjectId) {
 		ReadSyllabusDto readSyllabusDto = professorService.readSyllabus(subjectId);
 
-		model.addAttribute("syllabus", readSyllabusDto);
-
-		return "/professor/updateSyllabus";
+        return ResponseEntity.ok(Map.of(
+                "syllabus", readSyllabusDto
+        ));
 	}
 
 	/**
 	 * 
 	 * @param syllaBusFormDto
-	 * @return 강의계획서창
+	 * @return 강의계획서 업데이트 창
 	 */
 	@PutMapping("/syllabus/update/{subjectId}")
 	public ResponseEntity<?> createSyllabusProc(SyllaBusFormDto syllaBusFormDto) {
 		System.out.println(syllaBusFormDto);
 		professorService.updateSyllabus(syllaBusFormDto);
 
-		return "redirect:/subject/syllabus/" + syllaBusFormDto.getSubjectId();
+        return ResponseEntity.ok().body("강의 계획서 수정이 정상적으로 처리되었습니다.");
 	}
 
 }

@@ -41,7 +41,7 @@ public class GradeController {
 	 * @return
 	 */
 	@GetMapping("/thisSemester")
-	public ResponseEntity<?> thisSemester(Model model) {
+	public ResponseEntity<?> thisSemester() {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 
@@ -72,7 +72,7 @@ public class GradeController {
 	 * @return
 	 */
 	@GetMapping("/semester")
-	public ResponseEntity<?> semester(Model model) {
+	public ResponseEntity<?> semester() {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 
@@ -134,7 +134,7 @@ public class GradeController {
 	 * @return
 	 */
 	@GetMapping("total")
-	public ResponseEntity<?> totalGrade(Model model) {
+	public ResponseEntity<?> totalGrade() {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 

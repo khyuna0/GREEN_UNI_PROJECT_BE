@@ -48,7 +48,7 @@ public class BreakAppController {
 
     //휴학 신청 페이지
     @GetMapping("/application")
-    public ResponseEntity<?> breakApplication(Model model) {
+    public ResponseEntity<?> breakApplication() {
 
         PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
         Student studentInfo = userService.readStudent(principal.getId());
@@ -110,7 +110,7 @@ public class BreakAppController {
      * @return 휴복학 신청 내역 페이지 (학생용)
      */
     @GetMapping("/list")
-    public ResponseEntity<?> breakAppListByStudentId(Model model) {
+    public ResponseEntity<?> breakAppListByStudentId() {
 
         PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 
@@ -125,7 +125,7 @@ public class BreakAppController {
      * @return 처리되지 않은 휴복학 신청 내역 페이지 (교직원용)
      */
     @GetMapping("/list/staff")
-    public ResponseEntity<?> breakAppListByState(Model model) {
+    public ResponseEntity<?> breakAppListByState() {
 
         List<BreakApp> breakAppList = breakAppService.readByStatus("처리중");
 
@@ -138,7 +138,7 @@ public class BreakAppController {
      * @return 휴학 신청서 확인 학생 / 교직원에 따라 옆에 카테고리 바뀌어야 함
      */
     @GetMapping("/detail/{id}")
-    public ResponseEntity<?> breakDetail(@PathVariable Long id, Model model) {
+    public ResponseEntity<?> breakDetail(@PathVariable Long id, ) {
 
         BreakApp breakApp = breakAppService.readById(id);
         model.addAttribute("breakApp", breakApp);
