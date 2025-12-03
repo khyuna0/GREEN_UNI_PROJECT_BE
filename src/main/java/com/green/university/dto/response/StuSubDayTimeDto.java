@@ -1,5 +1,6 @@
 package com.green.university.dto.response;
 
+import com.green.university.entity.StuSub;
 import com.green.university.entity.Subject;
 import lombok.Data;
 
@@ -16,13 +17,13 @@ public class StuSubDayTimeDto {
 	private Long startTime;
 	private Long endTime;
 
-    public StuSubDayTimeDto(Subject s) {
-        this.subjectId = s.getId();
-        this.subjectName = s.getName();
-        this.subDay = s.getSubDay();
-        this.startTime = s.getStartTime();
-        this.endTime = s.getEndTime();
-    }
+//    public StuSubDayTimeDto(Subject s) {
+//        this.subjectId = s.getId();
+//        this.subjectName = s.getName();
+//        this.subDay = s.getSubDay();
+//        this.startTime = s.getStartTime();
+//        this.endTime = s.getEndTime();
+//    }
 
 	// startTime ~ endTime을 정수형 배열로 생성
 	public List<Long> timeList() {
@@ -32,5 +33,16 @@ public class StuSubDayTimeDto {
 			resultList.add(i);
 		}
 		return resultList;
+	}
+
+	public static StuSubDayTimeDto fromEntity(StuSub stuSub) {
+		Subject subject = stuSub.getSubject();
+		StuSubDayTimeDto dto = new StuSubDayTimeDto();
+		dto.setSubjectId(stuSub.getSubject().getId());
+		dto.setSubjectName(stuSub.getSubject().getName());
+		dto.setSubDay(subject.getSubDay());
+		dto.setStartTime(subject.getStartTime());
+		dto.setEndTime(dto.getEndTime());
+		return dto;
 	}
 }

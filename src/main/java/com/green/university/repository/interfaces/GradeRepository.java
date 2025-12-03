@@ -1,11 +1,12 @@
 package com.green.university.repository.interfaces;
 
+import com.green.university.entity.Grade;
 import com.green.university.entity.StuSub;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface GradeRespository extends JpaRepository<StuSub, Long> {
+public interface GradeRepository extends JpaRepository<StuSub, Long> {
 
     // 학생의 전체 수강/성적 내역 (연도/학기 최신순)
     List<StuSub> findByStudent_IdOrderBySubject_SubYearDescSubject_SemesterDesc(Long studentId);
@@ -27,4 +28,6 @@ public interface GradeRespository extends JpaRepository<StuSub, Long> {
             Long semester,
             String type
     );
+
+    Grade findByGradeName(String grade);
 }

@@ -7,12 +7,9 @@ import com.green.university.dto.response.ReadSyllabusDto;
 import com.green.university.dto.response.StudentInfoForProfessorDto;
 import com.green.university.dto.response.SubjectForProfessorDto;
 import com.green.university.dto.response.SubjectPeriodForProfessorDto;
-import com.green.university.entity.StuSub;
-import com.green.university.entity.SyllaBus;
+import com.green.university.entity.*;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.*;
-import com.green.university.entity.Professor;
-import com.green.university.entity.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
@@ -42,6 +39,8 @@ public class ProfessorService {
 	private ProfessorRepository professorRepository;
 
     private static final int PAGE_SIZE = 20; // 교수 리스트 / 검색 페이징 용
+    @Autowired
+    private GradeRepository gradeRepository;
 
 	/**
 	 * 교수가 맡은 과목들의 학기 검색
@@ -134,18 +133,31 @@ public class ProfessorService {
 	 */
 	@Transactional
 	public void updateGrade(UpdateStudentGradeDto updateStudentGradeDto) {
+		// 1. 학생+과목으로 StuSub 찾기 (여기서 completeGrade도 업데이트 가능)
+		StuSub stuSub = stuSubRepository.findByStudent_IdAndSubject_Id(
+						updateStudentGradeDto.getStudentId(), updateStudentGradeDto.getSubjectId())
+				.orElseThrow(() -> new RuntimeException("학생 과목 정보 없음"));
 
-		Long resultRowCount = stuSubDetailRepository.updateGrade(updateStudentGradeDto);
+		// 2. stuSub으로 연결된 StuSubDetail 찾기
+		StuSubDetail detail = stuSubDetailRepository.findByStuSub(stuSub)
+				.orElseThrow(() -> new RuntimeException("출결 정보 없음"));
 
-		if (resultRowCount != 1) {
-			throw new CustomRestfullException("요청을 처리하지 못했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		detail.setAbsent(updateStudentGradeDto.getAbsent());
+		detail.setLateness(updateStudentGradeDto.getLateness());
+		detail.setHomework(updateStudentGradeDto.getHomework());
+		detail.setMildExam(updateStudentGradeDto.getMidExam());  // mildExam → midExam 맞는지 확인!
+		detail.setFinalExam(updateStudentGradeDto.getFinalExam());
+		detail.setConvertedMark(updateStudentGradeDto.getConvertedMark());
 
-		resultRowCount = stuSubRepository.updateGradeByStudentIdAndSubjectId(updateStudentGradeDto);
-		if (resultRowCount != 1) {
-			throw new CustomRestfullException("요청을 처리하지 못했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		// 3. StuSub의 최종학점도 업데이트 ?
+		stuSub.setCompleteGrade(updateStudentGradeDto.getConvertedMark());
 
+		// 4. 등급 변환해서 저장 (Grade 엔티티 매핑 필요)
+		Grade grade = gradeRepository.findByGradeName(updateStudentGradeDto.getGrade()); // gradeRepository 추가
+		stuSub.setGrade(grade);
+
+		stuSubDetailRepository.save(detail);
+		stuSubRepository.save(stuSub);
 	}
 
 	/**
