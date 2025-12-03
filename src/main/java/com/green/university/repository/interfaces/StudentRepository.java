@@ -10,22 +10,12 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-
 import java.util.List;
-
-/**
- * Student DAO
- * 
- * @author 김지현
- */
 
 public interface StudentRepository extends JpaRepository<Student,Long>,
 		JpaSpecificationExecutor<Student> {
 
-	/**
-	 * @author 서영
-	 * 전체 학생의 id만 가져오기
-	 */
+	// 전체 학생의 id만 가져오기
 	@Query ("SELECT s.id FROM Student s")
 	List<Long> findAllStudentIds();
 

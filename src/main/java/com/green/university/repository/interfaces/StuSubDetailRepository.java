@@ -9,20 +9,12 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-/**
- * stu_sub_detail_tb DAO
- * @author 김지현
- *
- */
-
+// stu_sub_detail_tb DAO
 public interface StuSubDetailRepository extends JpaRepository<StuSubDetail,Long> {
 	
 	// 학생 성적 업데이트
 	Long updateGrade(UpdateStudentGradeDto updateStudentGradeDto);
 
-	/**
-	 * @author 서영
-	 */
 	Long insert(@Param("id") Long id, @Param("studentId") Long studentId, @Param("subjectId") Long subjectId);
 
 	Optional<StuSubDetail> findByStuSub(StuSub stuSub);
