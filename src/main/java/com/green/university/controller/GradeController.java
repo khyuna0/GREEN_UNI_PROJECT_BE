@@ -37,12 +37,11 @@ public class GradeController {
 
 	/**
 	 * 금학기 성적조회
-	 * 
-	 * @param model
+	 *
 	 * @return
 	 */
 	@GetMapping("/thisSemester")
-	public ResponseEntity<?> thisSemester(Model model , @AuthenticationPrincipal CustomUserDetails principal) {
+	public ResponseEntity<?> thisSemester(@AuthenticationPrincipal CustomUserDetails principal) {
 
         Long studentId = principal.getId();
 
@@ -73,7 +72,7 @@ public class GradeController {
 	 * @return
 	 */
 	@GetMapping("/semester")
-	public ResponseEntity<?> semester(Model model) {
+	public ResponseEntity<?> semester() {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 
@@ -135,7 +134,7 @@ public class GradeController {
 	 * @return
 	 */
 	@GetMapping("total")
-	public ResponseEntity<?> totalGrade(Model model) {
+	public ResponseEntity<?> totalGrade() {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 

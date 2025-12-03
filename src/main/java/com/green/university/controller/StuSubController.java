@@ -104,7 +104,7 @@ public class StuSubController {
 		// 총 페이지 수
 		Long pageCount = (long) Math.ceil(subjectCount / 20.0);
 
-		// 현재 페이지
+		// 현재 페이지 Todo 페이지 타입 처리하기
 		List<SubjectDto> subjectListLimit = subjectService.readSubjectListByCurrentSemesterPage((page - 1) * 20);
 
 		// 필터에 사용할 전체 학과 정보
@@ -197,8 +197,8 @@ public class StuSubController {
 
 		// 총 페이지 수
 		Long pageCount = (long) Math.ceil(subjectCount / 20.0);
-		// 현재 페이지
 
+		// 현재 페이지 Todo 페이지 타입 처리하기
 		List<SubjectDto> subjectListLimit = subjectService.readSubjectListByCurrentSemesterPage((page - 1) * 20);
 		for (SubjectDto sub : subjectListLimit) {
 			// 현재 담겨 있는지 확인
@@ -349,7 +349,7 @@ public class StuSubController {
 		// 총 페이지 수
 		Long pageCount = (long) Math.ceil(subjectCount / 20.0);
 ;
-		// 현재 페이지
+		// 현재 페이지 Todo 페이지 타입 처리하기
 		List<SubjectDto> subjectListLimit = subjectService.readSubjectListByCurrentSemesterPage((page - 1) * 20);
 		for (SubjectDto sub : subjectListLimit) {
 			// 현재 담겨 있는지 확인

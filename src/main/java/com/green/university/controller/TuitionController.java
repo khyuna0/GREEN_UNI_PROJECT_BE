@@ -10,13 +10,18 @@ import com.green.university.utils.Define;
 import com.green.university.utils.StuStatUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import jakarta.servlet.http.HttpSession;
+import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -51,15 +56,15 @@ public class TuitionController {
 	 * @return 납부된 등록금 내역 조회 페이지
 	 */
 	@GetMapping("/list")
-	public ResponseEntity<?> tuitionList(Model model) {
+	public ResponseEntity<?> tuitionList() {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 
 		List<Tuition> tuitionList = tuitionService.readTuitionListByStatus(principal.getId(), true);
 
-		model.addAttribute("tuitionList", tuitionList);
-
-		return "/tuition/tuiList";
+        return ResponseEntity.ok(Map.of(
+                "tuitionList", tuitionList
+        ));
 	}
 
 	/**
@@ -68,12 +73,10 @@ public class TuitionController {
 	 *         해당 학기 (2023-1)에 등록금을 납부한 기록이 있다면 납부하기 버튼 제거
 	 */
 	@GetMapping("/payment")
-	public ResponseEntity<?> tuitionPayment(Model model) {
+	public ResponseEntity<?> tuitionPayment() {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 		Student studentInfo = userService.readStudent(principal.getId());
-		model.addAttribute("student", studentInfo);
-
 		// 등록금 납부 대상이 아니라면 진입 불가
 
 		// 해당 학생의 학적 상태가 '졸업' 또는 '자퇴'라면 X
@@ -85,13 +88,11 @@ public class TuitionController {
 		StuStatUtil.checkStuStat("등록금", stuStatEntity, breakAppList);
 
 		// 학과 이름
-		String deptName = collegeService.readDeptById(studentInfo.getDeptId()).getName();
-		model.addAttribute("deptName", deptName);
+		String deptName = collegeService.readDeptById(studentInfo.getDepartment().getId()).getName();
 
 		// 단과대 이름
 		String collName = collegeService
-				.readCollById(collegeService.readDeptById(studentInfo.getDeptId()).getCollegeId()).getName();
-		model.addAttribute("collName", collName);
+				.readCollById(collegeService.readDeptById(studentInfo.getDepartment().getId()).getCollege().getId()).getName();
 
 		// principal.getId()를 매개변수로
 		Tuition tuitionEntity = tuitionService.readByStudentIdAndSemester(principal.getId(), Define.CURRENT_YEAR,
@@ -102,9 +103,12 @@ public class TuitionController {
 			throw new CustomRestfullException("등록금 납부 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
 		}
 
-		model.addAttribute("tuition", tuitionEntity);
-
-		return "/tuition/payment";
+        return ResponseEntity.ok(Map.of(
+                "student", studentInfo,
+                "deptName", deptName,
+                "collName", collName,
+                "tuition", tuitionEntity
+        ));
 	}
 
 	/**
@@ -118,23 +122,26 @@ public class TuitionController {
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 		tuitionService.updateStatus(principal.getId());
 
-		return "redirect:/tuition/payment";
-	}
+        return ResponseEntity.ok().body("등록금 납부가 정상적으로 처리되었습니다.");
+
+    }
 
 	/**
 	 * 장학금 유형 설정 + 등록금 납부 고지서 생성 페이지
 	 */
 	@GetMapping("/bill")
-	public ResponseEntity<?> createPayment(Model model) {
+	public ResponseEntity<?> createPayment() {
+        // 얜뭘까 Todo 이 메서드 어디서 사용하는지 알아보기... 단순 페이지 보기 매핑일까?
+//		return "/tuition/createPayment";
 
-		return "/tuition/createPayment";
+        return ResponseEntity.ok().body("등록금 납부 고지서 생성 페이지.");
 	}
 
 	/**
 	 * 등록금 납부 고지서 생성 (학생 id를 가지고 와서 for문으로 돌려서 tuition을 생성하는 것 같은데)
 	 */
 	@GetMapping("/create")
-	public ResponseEntity<?> createTuiProc(Model model) {
+	public ResponseEntity<?> createTuiProc() {
 
 		List<Long> studentIdList = stuStatService.readIdList();
 
@@ -147,11 +154,9 @@ public class TuitionController {
 			insertCount += tuitionService.createTuition(studentId);
 		}
 
-		// jsp로 생성 개수 보내기
-		model.addAttribute("insertCount", insertCount);
-		System.out.println(insertCount);
-
-		return "/tuition/createPayment";
+        return ResponseEntity.ok(Map.of(
+                "insertCount", insertCount
+        ));
 	}
 
 }

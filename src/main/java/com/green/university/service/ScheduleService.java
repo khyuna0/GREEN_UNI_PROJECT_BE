@@ -8,7 +8,6 @@ import com.green.university.entity.Schedule;
 import com.green.university.repository.interfaces.StaffRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +15,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
-public class ScheduleService { // todo ScheduleService로 변경
+public class ScheduleService {
 
 	@Autowired
 	private ScheduleRepository scheduleRepository;
@@ -50,12 +49,12 @@ public class ScheduleService { // todo ScheduleService로 변경
 
 	}
 
-	// 학사일정 업데이트
+	// 학사일정 수정
 	@Transactional
-	public void updateSchedule(ScheduleFormDto dto) {
+	public void updateSchedule(ScheduleFormDto dto, Long id) {
 
-//        학사일정 아이디로 찾는거 업데이트 하기
-        Schedule schedule = scheduleRepository.findById(dto.getId()).orElseThrow(() -> new CustomRestfullException("해당 학사일정 없음", HttpStatus.NOT_FOUND));
+        //학사일정 아이디로 찾아 수정하기
+        Schedule schedule = scheduleRepository.findById(id).orElseThrow(() -> new CustomRestfullException("해당 학사일정 없음", HttpStatus.NOT_FOUND));
         schedule.setStartDay(dto.getStartDay());
         schedule.setEndDay(dto.getEndDay());
         schedule.setInformation(dto.getInformation());
