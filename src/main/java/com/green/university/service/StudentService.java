@@ -1,12 +1,18 @@
 package com.green.university.service;
 
 import com.green.university.dto.StudentListForm;
+import com.green.university.dto.response.StudentDto;
+import com.green.university.dto.response.StudentInfoDto;
 import com.green.university.entity.Department;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.DepartmentRepository;
 import com.green.university.repository.interfaces.StudentRepository;
 import com.green.university.entity.Student;
+import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,27 +39,12 @@ public class StudentService {
 	 * @return 학생 리스트
 	 */
 	@Transactional
-	public List<Student> readStudentList(StudentListForm studentListForm) {
-		Long studentId = studentListForm.getStudentId();
-		Long deptId = studentListForm.getDeptId();
+	public Page<StudentDto> readStudentList(StudentListForm studentListForm, Integer page) {
+		Pageable pageable = PageRequest.of(page, Define.STUDENT_PAGE_SIZE);
+		Page<Student> result = studentRepository.findByOptionalStudentIdAndDeptId(
+				studentListForm.getStudentId(), studentListForm.getDeptId(), pageable);
 
-		// id가 있으면 그걸로 조회, dept가 있으면 그걸로 조회 -> 둘 다 있으면 둘 다로 조회..
-		if (studentId != null && deptId != null) {
-			Department department = departmentRepository.findById(deptId)
-					.orElseThrow(() -> new CustomRestfullException("Department not found", HttpStatus.BAD_REQUEST));
-			return studentRepository.findByIdAndDepartment(studentId, department);
-		} else if (studentId != null) {
-			return studentRepository.findById(studentId)
-					.map(List::of)
-					.orElse(List.of());
-		} else if (deptId != null) {
-			Department department = departmentRepository.findById(deptId)
-					.orElseThrow(() -> new CustomRestfullException("Department not found", HttpStatus.BAD_REQUEST));
-			return studentRepository.findByDepartment(department);
-		} else {
-			// 조건이 하나도 없으면 전체 조회 or 빈 리스트 반환 가능
-			return List.of();
-		}
+		return result.map(StudentDto::fromEntity);
 	}
 
 	/**
