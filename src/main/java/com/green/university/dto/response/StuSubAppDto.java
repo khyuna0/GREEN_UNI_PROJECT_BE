@@ -1,6 +1,8 @@
 package com.green.university.dto.response;
 
 import com.green.university.entity.Professor;
+import com.green.university.entity.StuSub;
+import com.green.university.entity.Student;
 import com.green.university.entity.Subject;
 import lombok.Data;
 
@@ -37,6 +39,27 @@ public class StuSubAppDto {
         this.capacity = s.getCapacity();
         this.roomId = s.getRoom().getId();
         this.status = true;
+    }
+
+    public StuSubAppDto() {
+
+    }
+
+    public static StuSubAppDto fromEntity(StuSub stuSub) {
+        StuSubAppDto stuSubAppDto = new StuSubAppDto();
+        stuSubAppDto.setStudentId(stuSub.getStudent().getId());
+        stuSubAppDto.setSubjectId(stuSub.getSubject().getId());
+        stuSubAppDto.setSubjectName(stuSub.getSubject().getName());
+        stuSubAppDto.setProfessorName(stuSub.getSubject().getProfessor().getName());
+        stuSubAppDto.setGrades(stuSub.getSubject().getGrades());
+        stuSubAppDto.setSubDay(stuSub.getSubject().getSubDay());
+        stuSubAppDto.setStartTime(stuSub.getSubject().getStartTime());
+        stuSubAppDto.setEndTime(stuSub.getSubject().getEndTime());
+        stuSubAppDto.setNumOfStudent(stuSub.getSubject().getNumOfStudent());
+        stuSubAppDto.setCapacity(stuSub.getSubject().getCapacity());
+        stuSubAppDto.setRoomId(stuSub.getSubject().getRoom().getId());
+        stuSubAppDto.setStatus(true);
+        return stuSubAppDto;
     }
 }
 
