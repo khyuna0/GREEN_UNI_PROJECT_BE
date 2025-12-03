@@ -35,6 +35,9 @@ spring:
             include-stacktrace: always
             # development : always, deployment : never
 
+jwt:
+  secret: "zxcasdqwezxcasdqwezxcasdqwe"
+
 # 6. AI API
 app:
     ai:
