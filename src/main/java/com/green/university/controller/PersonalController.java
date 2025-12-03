@@ -32,7 +32,7 @@ import java.util.List;
  * 
  * @author 김지현
  */
-@Controller
+@RestController
 public class PersonalController {
 
 	@Autowired

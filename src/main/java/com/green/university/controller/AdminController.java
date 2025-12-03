@@ -18,7 +18,7 @@ import java.util.List;
  * @author 박성희 
  * Admin 수업 조회/입력 관련 Controller
  */
-@Controller
+@RestController
 @RequestMapping("/admin")
 public class AdminController {
 	@Autowired

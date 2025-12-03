@@ -23,7 +23,7 @@ import java.util.List;
  * 강의 목록
  */
 
-@Controller
+@RestController
 @RequestMapping("/subject")
 public class SubjectController {
 

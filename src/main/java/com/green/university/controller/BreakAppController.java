@@ -27,7 +27,7 @@ import java.util.List;
  * @author 서영
  * 휴학 신청 관련 컨트롤러
  */
-@Controller
+@RestController
 @RequestMapping("/break")
 public class BreakAppController {
 

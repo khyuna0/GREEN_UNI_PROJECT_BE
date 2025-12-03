@@ -24,7 +24,7 @@ import java.util.List;
  * 
  */
 
-@Controller
+@RestController
 @RequestMapping("/grade")
 public class GradeController {
 

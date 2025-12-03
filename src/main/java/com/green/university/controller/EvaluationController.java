@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/evaluation")
 public class EvaluationController {
 

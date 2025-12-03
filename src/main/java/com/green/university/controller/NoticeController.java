@@ -20,7 +20,7 @@ import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
-@Controller
+@RestController
 @RequestMapping("/notice")
 public class NoticeController {
     @Autowired

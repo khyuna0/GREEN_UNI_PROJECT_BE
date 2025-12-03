@@ -27,7 +27,7 @@ import java.util.List;
  *
  */
 
-@Controller
+@RestController
 @RequestMapping("/tuition")
 public class TuitionController {
 

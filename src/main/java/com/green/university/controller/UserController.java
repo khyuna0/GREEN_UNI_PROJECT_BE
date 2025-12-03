@@ -23,7 +23,7 @@ import java.util.List;
  * 
  * @author 김지현
  */
-@Controller
+@RestController
 @RequestMapping("/user")
 public class UserController {
 

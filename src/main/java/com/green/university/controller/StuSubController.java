@@ -11,6 +11,7 @@ import com.green.university.utils.Define;
 import com.green.university.utils.StuStatUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
@@ -19,13 +20,14 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 서영 
  * 수강 신청 관련 (preStuSub 포함) 강의 시간표는 SubjectController 대신 일부러 여기에 넣음
  */
 
-@Controller
+@RestController
 @RequestMapping("/sugang")
 public class StuSubController {
 
@@ -53,35 +55,48 @@ public class StuSubController {
 	@Autowired
 	private UserService userService;
 
+    /**
+     * 현재 수강 신청 기간 상태 확인, 수강 신청 기간 상태 변경
+     */
+
 	// 예비 수강신청 기간 : 0, 수강신청 기간 : 1, 수강신청 기간 종료 : 2
 	public static Long SUGANG_PERIOD = 0L;
 
-	// 예비 수강신청 기간에서 수강신청 기간으로 변경하는 페이지 (교직원용)
+	// 지금 SUGANG_PERIOD 상태 확인
 	@GetMapping("/period")
-	public String updatePeriod() {
+	public ResponseEntity<?> getPeriodStatus() {
 
-		return "/stuSub/updatePeriod";
+		return ResponseEntity.ok(Map.of("period", SUGANG_PERIOD));
 	}
 
-	// 예비 수강 신청 기간 -> 수강 신청 기간
-	@GetMapping("/updatePeriod1")
-	public String updatePeriodProc1() {
+    // ========= 수강 신청 기간 상태 변경
+
+	// 예비 수강 신청 기간 -> 수강 신청 기간으로 상태 변경 (버튼이든 뭐든... 호출 후 변경)
+	@PostMapping("/updatePeriod1")
+	public ResponseEntity<?> updatePeriodProc1() {
 		SUGANG_PERIOD = 1L;
 
 		stuSubService.createStuSubByPreStuSub();
 
-		return "/stuSub/updatePeriod";
+        return ResponseEntity.ok(Map.of("period", SUGANG_PERIOD));
 	}
 
-	// 수강 신청 기간 -> 종료
+	// 수강 신청 기간 -> 종료로 변경
 	@GetMapping("/updatePeriod2")
-	public String updatePeriodProc2() {
+	public ResponseEntity<?> updatePeriodProc2() {
 		SUGANG_PERIOD = 2L;
 
-		return "/stuSub/updatePeriod";
+        return ResponseEntity.ok(Map.of("period", SUGANG_PERIOD));
 	}
 
-	// 과목 조회 (현재 학기)
+    // ========= 수강 신청 기간 상태 변경 끝
+
+    /**
+     * 과목 조회 및 검색 (페이징)
+     */
+
+
+    // 과목 조회 (현재 학기)
 	@GetMapping("/subjectList/{page}")
 	public String readSubjectList(Model model, @PathVariable Long page) {
 
@@ -145,10 +160,11 @@ public class StuSubController {
 	}
 
 	/**
-	 * @return 예비 수강 신청
+	 * 예비 수강 신청
 	 */
+
 	@GetMapping("/pre/{page}")
-	public String preStuSubApplication(Model model, @PathVariable Long page) {
+	public String preStuSubApplication(Model model, @PathVariable int page) { // page 값 int로 변경함
 
 		// 예비 수강 신청 기간이 아니라면
 		if (SUGANG_PERIOD != 0) {
