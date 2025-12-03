@@ -11,6 +11,7 @@ import com.green.university.service.SubjectService;
 import com.green.university.service.UserService;
 import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -108,7 +109,7 @@ public class ProfessorController {
 	 * @return 출결 및 성적 기입 페이지
 	 */
 	@GetMapping("/subject/{subjectId}/{studentId}")
-	public ResponseEntity<?> updateStudentDetail( @PathVariable Long subjectId, @PathVariable Long studentId) {
+	public ResponseEntity<?> updateStudentDetail(@PathVariable Long subjectId, @PathVariable Long studentId) {
 
 		Student student = userService.readStudent(studentId);
 		model.addAttribute("student", student);
