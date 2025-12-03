@@ -7,6 +7,7 @@ import com.green.university.dto.response.ReadSyllabusDto;
 import com.green.university.dto.response.StudentInfoForProfessorDto;
 import com.green.university.dto.response.SubjectForProfessorDto;
 import com.green.university.dto.response.SubjectPeriodForProfessorDto;
+import com.green.university.entity.StuSub;
 import com.green.university.entity.SyllaBus;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.*;
@@ -86,16 +87,26 @@ public class ProfessorService {
 	}
 
 	/**
-	 * 해당 과목을 듣는 학생의 세부정보 리스트로 불러오기
+	 * 해당 과목을 듣는 학생의 세부정보 리스트로 불러오기 (교수 확인용)
 	 * 
 	 * @param subjectId
 	 * @return StudentInfoForProfessorDto list
 	 */
 	@Transactional
 	public List<StudentInfoForProfessorDto> selectBySubjectId(Long subjectId) {
-		List<StudentInfoForProfessorDto> list = stuSubRepository.selectBySubjectId(subjectId);
+		return stuSubRepository.findBySubject_Id(subjectId)
+				.stream()
+				.map(this::convertToDto)  // 각 StuSub → DTO 변환
+				.toList();  // Java 16+ , 아니면 collect(Collectors.toList())
 
-		return list;
+		List<StuSub> stuSubList = stuSubRepository.findBySubject_Id(subjectId);
+		StudentInfoForProfessorDto dto = new StudentInfoForProfessorDto();
+		stuSubList.forEach(stuSub -> {
+			dto.setId(stuSub.getId());
+			dto.setStudentId(stuSub.getStudent().getId());
+			dto.setStudentName(stuSub.getStudent().getName());
+		});
+		return dto;
 	}
 
 	/**

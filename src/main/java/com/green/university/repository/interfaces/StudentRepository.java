@@ -17,7 +17,8 @@ import java.util.List;
 public interface StudentRepository extends JpaRepository<Student,Long> {
 
 	/**
-	 * @author 서영 전체 학생의 id만 가져오기
+	 * @author 서영
+	 * 전체 학생의 id만 가져오기
 	 */
 	@Query ("SELECT s.id FROM Student s")
 	List<Long> findAllStudentIds();
