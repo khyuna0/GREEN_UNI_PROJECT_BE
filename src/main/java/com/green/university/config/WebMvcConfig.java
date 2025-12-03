@@ -10,6 +10,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
+    //스프링 MVC 설정 담당
+    //정적 리소스 매핑 , 공통 Bean 담당 (ex. PasswordEncoder)
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

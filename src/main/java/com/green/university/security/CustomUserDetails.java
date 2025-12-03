@@ -1,7 +1,6 @@
 package com.green.university.security;
 
 import com.green.university.entity.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,15 +10,29 @@ import java.util.List;
 
 public class CustomUserDetails implements UserDetails {
 
-    private final User user;  // 생성자로 받는 필드
+    private final User user;  // 로그인한 User 엔티티
 
     public CustomUserDetails(User user) {  // 생성자 추가
         this.user = user;
     }
 
+    // 컨트롤러, 서비스에서 편하게 쓰기위해 추가 -> 이거 안쓰면 더 번거로워지나? 보기
+    public Long getId() {
+        return user.getId();
+    }
+
+    public String getUserRole() {
+        return user.getUserRole();
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    // ================================================================
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF 형태로 맞춰줌
         String role = "ROLE_" + user.getUserRole().toUpperCase();
         return List.of(new SimpleGrantedAuthority(role));
     }

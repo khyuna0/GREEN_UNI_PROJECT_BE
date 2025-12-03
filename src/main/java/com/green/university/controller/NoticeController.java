@@ -9,6 +9,7 @@ import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -185,7 +186,7 @@ public class NoticeController {
 
     // 공지사항 삭제
     @GetMapping("/delete")
-    public ResponseEntity<?> delete( @RequestParam Long id) {
+    public ResponseEntity<?> delete(@RequestParam Long id) {
         model.addAttribute("id", id);
         noticeService.deleteNotice(id);
         return "redirect:/notice";

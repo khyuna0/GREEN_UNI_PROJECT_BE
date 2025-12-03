@@ -2,11 +2,12 @@ package com.green.university.controller;
 
 import com.green.university.dto.response.GradeDto;
 import com.green.university.dto.response.MyGradeDto;
-import com.green.university.dto.response.PrincipalDto;
+import com.green.university.security.CustomUserDetails;
 import com.green.university.service.GradeService;
 import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,9 +42,9 @@ public class GradeController {
 	 * @return
 	 */
 	@GetMapping("/thisSemester")
-	public ResponseEntity<?> thisSemester(Model model) {
+	public ResponseEntity<?> thisSemester(Model model , @AuthenticationPrincipal CustomUserDetails principal) {
 
-		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
+        Long studentId = principal.getId();
 
 		// 학생이 수강 신청한 연도 조회
 		List<GradeDto> yearList = gradeService.readGradeYearByStudentId(principal.getId());

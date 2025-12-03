@@ -15,7 +15,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     @Autowired
@@ -31,8 +30,17 @@ public class SecurityConfig {
                 .httpBasic(basic -> basic.disable());
 
         http.authorizeHttpRequests(auth -> auth
-                //로그인 정적 리소스 등 모두 허용
-                .requestMatchers("/api/login","/login","*").permitAll()
+                //  CORS preflight(OPTIONS) 전부 허용
+                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+
+                // 로그인, 메인, 에러, 정적 리소스 모두 허용
+                .requestMatchers(
+                        "/api/login",
+                        "/login",
+                        "/",
+                        "/error",
+                        "/images/**"
+                ).permitAll()
 
                 // 학생 전용
                 .requestMatchers(Define.STUDENT_PATHS).hasRole("STUDENT")
@@ -40,11 +48,10 @@ public class SecurityConfig {
                 .requestMatchers(Define.PROFESSOR_PATHS).hasRole("PROFESSOR")
                 // 직원 전용
                 .requestMatchers(Define.STAFF_PATHS).hasRole("STAFF")
-
                 .anyRequest().authenticated()
         );
 
-        //JWT 필터 등록
+        // JWT 필터 등록 (UsernamePasswordAuthenticationFilter 앞에)
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

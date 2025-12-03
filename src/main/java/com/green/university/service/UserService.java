@@ -1,5 +1,6 @@
 package com.green.university.service;
 
+import com.green.university.config.JwtUtil;
 import com.green.university.dto.*;
 import com.green.university.dto.response.*;
 import com.green.university.entity.*;
@@ -40,6 +41,8 @@ public class UserService {
     private StuStatRepository stuStatRepository;
     @Autowired
     private DepartmentRepository departmentRepository;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     /**
      * staff 생성 서비스로 먼저 staff_tb에 insert한 후 staff_tb에 생긴 id를 끌고와 user_tb에 생성함
@@ -86,7 +89,8 @@ public class UserService {
         professor.setEmail(dto.getEmail());
         professor.setTel(dto.getTel());
         professor.setAddress(dto.getAddress());
-        professor.setDepartment(departmentRepository.findById(dto.getDeptId()).orElseThrow(() -> new CustomRestfullException("없는 학과 정보입니다.", HttpStatus.NOT_FOUND)));
+        professor.setDepartment(departmentRepository.findById(dto.getDeptId())
+                .orElseThrow(() -> new CustomRestfullException("없는 학과 정보입니다.", HttpStatus.NOT_FOUND)));
         // 필요한 필드 모두 dto에서 옮기기
 
         // 저장 → PK 생성
@@ -143,21 +147,28 @@ public class UserService {
 
     }
 
+    // 로그인 -> JWT기반 변경
     @Transactional
-    public PrincipalDto login(LoginDto loginDto) {
+    public LoginResponseDto login(LoginDto loginDto) {
+        //유저 조회
         User user = userRepository.findById(loginDto.getId()).orElseThrow(
                 () -> new CustomRestfullException("아이디를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );
+        
+        //비밀번호 검증
         if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
             throw new CustomRestfullException(Define.WRONG_PASSWORD, HttpStatus.BAD_REQUEST);
         }
-        // 응답 dto로 내보내주기
-        PrincipalDto principalDto = new PrincipalDto();
-        principalDto.setId(user.getId());
-        principalDto.setPassword(user.getPassword());
-        principalDto.setUserRole(user.getUserRole());
-        // 근데 name은 어디서 내보내줘야함? name 없는 채로 return 하기
-        return principalDto;
+
+        //JWT 액세스 토큰 발급
+        String accessToken = jwtUtil.createAccessToken(user.getId(),user.getUserRole());
+
+        //응답 dto
+        return new LoginResponseDto(
+                user.getId(),
+                user.getUserRole(),
+                accessToken
+        );
     }
 
     /**
@@ -235,13 +246,13 @@ public class UserService {
         studentRepository.save(updatedStudent);
     }
 
-	/**
-	 * 직원 정보 수정
-	 * 
-	 * @param updateDto
-	 */
-	@Transactional
-	public void updateStaff(UserUpdateDto updateDto) {
+    /**
+     * 직원 정보 수정
+     *
+     * @param updateDto
+     */
+    @Transactional
+    public void updateStaff(UserUpdateDto updateDto) {
 
         Professor professor = professorRepository.findById(updateDto.getUserId()).orElseThrow(() -> new CustomRestfullException("없는 직원 정보입니다.", HttpStatus.NOT_FOUND));;
 

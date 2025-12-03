@@ -1,6 +1,5 @@
 package com.green.university.config;
 
-import com.green.university.config.JwtUtil;
 import com.green.university.security.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -37,9 +36,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
 
             try {
-                if (!jwtUtil.isExpired(token)) {
+                if (!jwtUtil.isExpired(token) &&
+                        SecurityContextHolder.getContext().getAuthentication() == null) {
+
                     Long userId = jwtUtil.getUserId(token);
-                    String role = jwtUtil.getRole(token);
 
                     UserDetails userDetails =
                             userDetailsService.loadUserByUsername(String.valueOf(userId));
@@ -54,7 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             } catch (Exception e) {
-                // 토큰 깨짐/만료 등 -> 그냥 인증 없이 통과, Security에서 막히게 둠
+                // 토큰 문제는 인증 없이 진행 -> 이후 Security에서 401 처리
             }
         }
 

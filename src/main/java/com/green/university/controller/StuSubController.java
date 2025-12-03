@@ -1,7 +1,6 @@
 package com.green.university.controller;
 
 import com.green.university.dto.CurrentSemesterSubjectSearchFormDto;
-import com.green.university.dto.response.PrincipalDto;
 import com.green.university.dto.response.StuSubAppDto;
 import com.green.university.dto.response.SubjectDto;
 import com.green.university.handler.exception.CustomRestfullException;
@@ -12,8 +11,6 @@ import com.green.university.utils.StuStatUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
