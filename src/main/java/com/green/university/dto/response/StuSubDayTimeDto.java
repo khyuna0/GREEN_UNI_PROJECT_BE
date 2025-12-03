@@ -17,14 +17,6 @@ public class StuSubDayTimeDto {
 	private Long startTime;
 	private Long endTime;
 
-//    public StuSubDayTimeDto(Subject s) {
-//        this.subjectId = s.getId();
-//        this.subjectName = s.getName();
-//        this.subDay = s.getSubDay();
-//        this.startTime = s.getStartTime();
-//        this.endTime = s.getEndTime();
-//    }
-
 	// startTime ~ endTime을 정수형 배열로 생성
 	public List<Long> timeList() {
 		List<Long> resultList = new ArrayList<>();
@@ -35,14 +27,17 @@ public class StuSubDayTimeDto {
 		return resultList;
 	}
 
+	// PreStuSub용 (예비 수강신청)
+	public StuSubDayTimeDto(Subject s) {
+		this.subjectId = s.getId();
+		this.subjectName = s.getName();
+		this.subDay = s.getSubDay();
+		this.startTime = s.getStartTime();
+		this.endTime = s.getEndTime();
+	}
+
+	//  StuSub용 (실제 수강신청)
 	public static StuSubDayTimeDto fromEntity(StuSub stuSub) {
-		Subject subject = stuSub.getSubject();
-		StuSubDayTimeDto dto = new StuSubDayTimeDto();
-		dto.setSubjectId(stuSub.getSubject().getId());
-		dto.setSubjectName(stuSub.getSubject().getName());
-		dto.setSubDay(subject.getSubDay());
-		dto.setStartTime(subject.getStartTime());
-		dto.setEndTime(dto.getEndTime());
-		return dto;
+		return new StuSubDayTimeDto(stuSub.getSubject());
 	}
 }

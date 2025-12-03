@@ -28,10 +28,9 @@ public interface StuSubRepository extends JpaRepository<StuSub,Long> {
 	 * @return 실행 결과 row 수
 	 * @author 김지현
 	 */
-	// 학생의 수강 신청 내역에 해당 강의가 있는지 조회 ===========
+	// 학생의 수강 신청 내역에 해당 강의가 있는지 조회
 	Optional<StuSub> findByStudent_IdAndSubject_Id(Long studentId, Long subjectId);
 
-	
 	/**
 	 * @author 서영
 	 * 수강 신청 관련
@@ -42,18 +41,14 @@ public interface StuSubRepository extends JpaRepository<StuSub,Long> {
 	// 학생의 이번 학기 수강 신청 내역 시간표 조회
 	List<StuSub> findByStudent_IdAndSubYearAndSemester(Long studentId, Long subYear, Long semester);
 
-	// 수강 신청 내역 추가
-	//Long insert(@Param("studentId") Long studentId, @Param("subjectId") Long subjectId);
-	
 	// 수강 신청 내역 삭제
-	Long delete(@Param("studentId") Long studentId, @Param("subjectId") Long subjectId);
-	
+	void deleteByStudent_IdAndSubject_Id(Long studentId, Long subjectId);
+
 	// 수강 신청 내역과 예비 수강 신청 내역 조인 후 조회 
 	// type == 1 : 수강 신청, 예비 수강 신청에 둘 다 존재
 	// type == 0 : 예비 수강 신청에만 존재
-	List<StuSubAppDto> selectJoinListByStudentId(Long studentId);
+	List<StuSub> findByStudent_Id(Long studentId);
 	
 	// 성적 입력 시 취득 학점 컬럼도 추가
-	Long updateCompleteGradeByStudentIdAndSubjectId(@Param("studentId") Long studentId, @Param("subjectId") Long subjectId, @Param("completeGrade") Long completeGrade);
 
 }

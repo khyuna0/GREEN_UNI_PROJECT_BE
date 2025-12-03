@@ -98,17 +98,8 @@ public class ProfessorService {
 	public List<StudentInfoForProfessorDto> selectBySubjectId(Long subjectId) {
 		return stuSubRepository.findBySubject_Id(subjectId)
 				.stream()
-				.map(this::convertToDto)  // 각 StuSub → DTO 변환
-				.toList();  // Java 16+ , 아니면 collect(Collectors.toList())
-
-		List<StuSub> stuSubList = stuSubRepository.findBySubject_Id(subjectId);
-		StudentInfoForProfessorDto dto = new StudentInfoForProfessorDto();
-		stuSubList.forEach(stuSub -> {
-			dto.setId(stuSub.getId());
-			dto.setStudentId(stuSub.getStudent().getId());
-			dto.setStudentName(stuSub.getStudent().getName());
-		});
-		return dto;
+				.map(StudentInfoForProfessorDto::fromEntity)  // 각 StuSub → DTO 변환
+				.collect(Collectors.toList());
 	}
 
 	/**

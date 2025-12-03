@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 /**
  * @author 서영
- *
  */
 @Service
 public class StuSubService {
@@ -42,12 +41,9 @@ public class StuSubService {
 
     // 학생의 수강신청 내역에 해당 강의가 존재하는지 확인
     public StuSub readStuSub(Long studentId, Long subjectId) {
-
-        StuSub stuSubEntity = stuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId).orElseThrow(
+        return stuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId).orElseThrow(
                 () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND)
         );
-
-        return stuSubEntity;
     }
 
     // 학생의 해당 학기 수강신청 내역 조회
@@ -84,7 +80,7 @@ public class StuSubService {
                 .mapToLong(stuSub -> stuSub.getSubject().getGrades())
                 .sum();
 
-        StuSubSumGradesDto stuSubSumGradesDto =  new StuSubSumGradesDto();
+        StuSubSumGradesDto stuSubSumGradesDto = new StuSubSumGradesDto();
         stuSubSumGradesDto.setStudentId(studentId);
         stuSubSumGradesDto.setSumGrades(currentTotalGrade);
 
@@ -111,66 +107,49 @@ public class StuSubService {
 
         // 해당 강의 현재인원 +1
         subjectService.updatePlusNumOfStudent(subjectId);
-
-        if (resultRowCount != 1) {
-            throw new CustomRestfullException("수강신청이 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
     }
 
     // 학생의 수강신청 내역 삭제
     @Transactional
     public void deleteStuSub(Long studentId, Long subjectId) {
-
         // 수강신청 내역 삭제
-        Long resultRowCount = stuSubRepository.delete(studentId, subjectId);
-
+        stuSubRepository.deleteByStudent_IdAndSubject_Id(studentId, subjectId);
         // 해당 강의 현재인원 -1
         subjectService.updateMinusNumOfStudent(subjectId);
-
-        if (resultRowCount != 1) {
-            throw new CustomRestfullException("예비 수강신청 취소가 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
     }
 
     // 예비 수강 신청 기간 -> 수강 신청 기간 변경 시 로직
     @Transactional
     public void createStuSubByPreStuSub() {
-
         // 1. 정원 >= 신청인원인 강의
         List<Long> idList1 = subjectRepository.findIdByCapacityGreaterThanOrEqualNumOfStudent();
-
         for (Long subjectId : idList1) {
-
             // 예비 수강 신청에서 해당 강의를 신청했던 내역 가져오기
             List<PreStuSub> preAppList = preStuSubRepository.findBySubject_Id(subjectId);
-
-            // 예비 수강 신청했던 인원들이 자동으로 수강 신청되도록
-            // 해당 내역 그대로 수강 신청 추가
+            // 예비 수강 신청했던 인원들이 자동으로 수강 신청되도록 해당 내역 그대로 수강 신청 추가
             for (PreStuSub pss : preAppList) {
-                // 수강 신청 내역이 없다면
-                if (stuSubRepository.findByStudent_IdAndSubject_Id(
-                        pss.getStudent().getId(), pss.getSubject().getId()).isEmpty()) {
-                    stuSubRepository.insert(pss.getStudent().getId(), pss.getSubject().getId());
+                StuSub stuSub = stuSubRepository.findByStudent_IdAndSubject_Id(
+                        pss.getStudent().getId(), pss.getSubject().getId()).orElseThrow(
+                        () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND)
+                );
+                stuSub.setStudent(pss.getStudent());
+                stuSub.setSubject(pss.getSubject());
+                stuSubRepository.save(stuSub);
 
-                    // 수강 상세 내역에도 데이터 추가
-                    StuSub stuSub = stuSubRepository.findByStudent_IdAndSubject_Id(
-                            pss.getStudent().getId(), pss.getSubject().getId()).orElseThrow(
-                            () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND)
-                    );
-                    stuSubDetailRepository.insert(stuSub.getId(), pss.getStudent().getId(), pss.getSubject().getId());
-                }
+                StuSubDetail stuSubDetail = stuSubDetailRepository.findByStuSub(stuSub).orElseThrow(
+                        () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND)
+                );
+                stuSubDetailRepository.save(stuSubDetail); // 수강 상세 내역에도 데이터 추가
             }
         }
 
         // 2. 정원 < 신청인원인 강의
         List<Long> idList2 = subjectRepository.findIdByCapacityLessThanNumOfStudent();
-        for (Long subjectId : idList2) {
-
+        for (
+                Long subjectId : idList2) {
             // 강의 엔티티 조회 후 현재 인원 초기화
             Subject subject = subjectRepository.findById(subjectId)
-                    .orElseThrow(() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
-
+                    .orElseThrow(() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
             subject.setNumOfStudent(0L);
         }
     }
@@ -178,13 +157,26 @@ public class StuSubService {
     // 수강 신청 내역과 예비 수강 신청 내역 조인 후 조회 -> 예비 수강 신청에만 존재
     @Transactional
     public List<StuSubAppDto> readPreStuSubByStuSub(Long studentId) {
-        List<StuSubAppDto> dtoList = stuSubRepository.selectJoinListByStudentId(studentId);
-        return dtoList;
+        List<StuSub> stuSubList = stuSubRepository.findByStudent_Id(studentId);
+        return stuSubList.stream().map(StuSubAppDto::fromEntity).collect(Collectors.toList());
     }
 
     // 점수 입력 시 F면 취득학점 0, F가 아니면 강의의 이수학점
     @Transactional
     public void updateCompleteGrade(Long studentId, Long subjectId, Long completeGrade) {
-        stuSubRepository.updateCompleteGradeByStudentIdAndSubjectId(studentId, subjectId, completeGrade);
+        StuSub stuSub = new StuSub();
+        Grade grade = new Grade();
+        Subject subject = subjectRepository.findById(subjectId).orElseThrow(
+                () -> new CustomRestfullException("과목을 찾을 수 없음", HttpStatus.NOT_FOUND)
+        );
+
+        if (stuSub.getGrade().getGrade().equals("F")) {
+            grade.setGradeValue(0L);
+        } else {
+            grade.setGradeValue(subject.getGrades());
+        }
+        stuSub.setGrade(grade);
+        stuSub.setCompleteGrade(completeGrade);
+        stuSubRepository.save(stuSub);
     }
 }

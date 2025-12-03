@@ -1,6 +1,7 @@
 package com.green.university.dto.response;
 
 import com.green.university.entity.StuSub;
+import com.green.university.entity.Student;
 import lombok.Data;
 
 /**
@@ -29,12 +30,14 @@ public class StudentInfoForProfessorDto {
 	private Long convertedMark;
 
 	// StuSub 엔티티 -> StudentInfoForProfessorDto로 변환
-	private StudentInfoForProfessorDto toEntity (StuSub stuSub) {
+	public static StudentInfoForProfessorDto fromEntity (StuSub stuSub) {
 		StudentInfoForProfessorDto  dto = new StudentInfoForProfessorDto();
+		Student student = stuSub.getStudent();
 		dto.setId(stuSub.getId());
 		dto.setStudentId(stuSub.getStudent().getId());
 		dto.setStudentName(stuSub.getStudent().getName());
-		dto.
+		dto.setDeptName(student.getDepartment().getName());
+		return dto;
 	}
 	
 }
