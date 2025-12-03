@@ -276,27 +276,29 @@ public class AdminService {
 	/**
 	 * 강의 수정 서비스
 	 */
-	public Long updateSubject(SubjectFormDto subjectFormDto) {
+	public void updateSubject(SubjectFormDto subjectFormDto) {
 		// ID로 연도 학기 조회
 		Subject subject = subjectRepository.findById(subjectFormDto.getId()).orElseThrow(
                 () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
-        );;
-		subjectFormDto.setSubYear(subject.getSubYear());
-		subjectFormDto.setSemester(subject.getSemester());
+        );
 		// 강의실, 강의시간 중복 검사
-		List<Subject> subjectList = subjectRepository.selectByRoomIdAndSubDayAndSubYearAndSemester(subjectFormDto);
+		List<Subject> subjectList = subjectRepository.findByRoom_IdAndSubDayAndSubYearAndSemester(
+                subject.getRoom().getId(), subject.getSubDay(), subject.getSubYear(), subject.getSemester()
+        );
 		if (subjectList != null) {
 			SubjectUtil subjectUtil = new SubjectUtil();
 			boolean result = subjectUtil.calculate(subjectFormDto, subjectList);
-			if (result == false) {
+			if (!result) {
 				throw new CustomRestfullException("해당 시간대는 강의실을 사용중입니다! 다시 선택해주세요", HttpStatus.BAD_REQUEST);
 			}
 		}
-		Long resultRowCount = subjectRepository.updateBySubjectDto(subjectFormDto);
-		if (resultRowCount != 1) {
-			System.out.println("강의 수정 서비스 오류");
-		}
-		return resultRowCount;
+        subject.setName(subjectFormDto.getName());
+        subject.setRoom(subject.getRoom());
+        subject.setSubDay(subjectFormDto.getSubDay());
+        subject.setStartTime(subjectFormDto.getStartTime());
+        subject.setEndTime(subjectFormDto.getEndTime());
+        subject.setNumOfStudent(subjectFormDto.getNumOfStudent());
+        subjectRepository.save(subject);
 	}
 
 }

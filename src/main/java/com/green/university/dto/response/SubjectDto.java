@@ -1,5 +1,6 @@
 package com.green.university.dto.response;
 
+import com.green.university.entity.Subject;
 import lombok.Data;
 
 /**
@@ -63,5 +64,36 @@ public class SubjectDto {
 	
 	// 신청 여부
 	private Boolean status;
-	
+
+	// Subject 엔티티 -> SubjectDto로 변환
+	public static SubjectDto fromEntity(Subject subject) {
+		SubjectDto dto = new SubjectDto();
+		dto.setId(subject.getId());
+		dto.setName(subject.getName());
+		if(subject.getProfessor() != null) {
+			dto.setProfessorId(subject.getProfessor().getId());
+			dto.setProfessorName(subject.getProfessor().getName());
+		}
+
+		if(subject.getRoom() != null) {
+			dto.setRoomId(subject.getRoom().getId());
+		}
+
+		if(subject.getDepartment() != null) {
+			dto.setDeptId(subject.getDepartment().getId());
+			dto.setDeptName(subject.getDepartment().getName());
+		}
+		dto.setType(subject.getType());
+		dto.setSubYear(subject.getSubYear());
+		dto.setSemester(subject.getSemester());
+		dto.setSubDay(subject.getSubDay());
+		dto.setStartTime(subject.getStartTime());
+		dto.setEndTime(subject.getEndTime());
+		dto.setGrades(subject.getGrades());
+		dto.setCapacity(subject.getCapacity());
+		dto.setNumOfStudent(subject.getNumOfStudent());
+		dto.setStatus(false);
+        return dto;
+    };
+
 }

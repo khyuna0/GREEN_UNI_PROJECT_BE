@@ -9,6 +9,10 @@ import com.green.university.dto.response.SubjectForProfessorDto;
 import com.green.university.dto.response.SubjectPeriodForProfessorDto;
 import com.green.university.entity.Subject;
 
+import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -23,10 +27,6 @@ import java.util.List;
 
 
 public interface SubjectRepository extends JpaRepository<Subject,Long> {
-	// 과목 insert
-
-	public Long updateBySubjectDto(SubjectFormDto subjectFormDto);
-	
 	/**
 	 * 성희 
 	 * 강의 입력 시 같은 강의실, 요일, 연도, 학기 정보 조회
@@ -43,15 +43,15 @@ public interface SubjectRepository extends JpaRepository<Subject,Long> {
 	 * @author 서영
 	 * @return 수강 신청에 사용할 강의 정보
 	 */
-	public List<SubjectDto> selectDtoBySemester(@Param("subYear") Long subYear, @Param("semester") Long semester);
-	public List<SubjectDto> selectDtoBySemesterLimit(@Param("subYear") Long subYear, @Param("semester") Long semester, @Param("page") Long page);
-	
+	List<Subject> findBySubYearAndSemester(Long subYear, Long semester);
+	// 추후에 아래 페이지용으로 변경해야함
+	Page<Subject> findBySubYearAndSemester(Long subYear, Long semester, Pageable pageable);
+
 	/**
 	 * @author 서영
 	 * @return 전체 강의 정보
 	 */
-	// 페이징 관련된 메서드 ...
-	public List<SubjectDto> selectDtoAllLimit(Long page);
+	Page<Subject> findAll(Pageable pageable);
 	
 	/**
 	 * @author 김지현
@@ -83,7 +83,8 @@ public interface SubjectRepository extends JpaRepository<Subject,Long> {
 	 * @author 서영
 	 * 현재 인원 수정 (1명 추가 or 삭제 or 0으로 초기화)
 	 */
-	public Long updateNumOfStudent(@Param("id") Long id, @Param("type") String type);
+	// ============================================== 수정 해야함
+	Long updateNumOfStudent(@Param("id") Long id, @Param("type") String type);
 
 	/**
 	 * @author 서영
