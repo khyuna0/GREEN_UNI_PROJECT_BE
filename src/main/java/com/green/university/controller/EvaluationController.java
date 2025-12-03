@@ -11,17 +11,16 @@ import com.green.university.utils.Define;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/evaluation")
 public class EvaluationController {
 
@@ -37,20 +36,21 @@ public class EvaluationController {
 	 * 
 	 * @return 강의평가 화면 클릭
 	 */
-	@GetMapping("")
-	public String evaluation(Model model, Long subjectId) {
+	@GetMapping
+	public ResponseEntity<?> evaluation(Long subjectId) {
 
-		QuestionDto dto = questionService.readQuestion();
-		model.addAttribute("subjectId", subjectId);
-		model.addAttribute("dto", dto);
-		return "evaluation/evaluation";
+		QuestionDto questionDto = questionService.readQuestion();
+        return ResponseEntity.ok(Map.of(
+                "subjectId", subjectId,
+                "questionDto", questionDto
+        ));
 	}
 
 	/*
 	 * 강의평가 post
 	 */
 	@PostMapping("/write/{subjectId}")
-	public String EvaluationProc(@PathVariable Long subjectId, EvaluationDto evaluationFormDto, Model model) {
+	public ResponseEntity<?> EvaluationProc(@PathVariable Long subjectId, EvaluationDto evaluationFormDto) {
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 
 		evaluationFormDto.setStudentId(principal.getId());
@@ -74,37 +74,39 @@ public class EvaluationController {
 			evaluationService.createEvanluation(evaluationFormDto);
 		}
 
-		// 창을 닫을 때 post가 작동이 안하는거 방지
-		model.addAttribute("type", 1);
-		return "evaluation/evaluation";
+//		// 창을 닫을 때 post가 작동이 안하는거 방지
+//		model.addAttribute("type", 1);
+		return ResponseEntity.ok().body("강의평가가 완료되었습니다");
 	}
 
 	// 강의 평가 처음화면 (교수)
 	@GetMapping("/read")
-	public String readEvaluation(Model model) {
+	public ResponseEntity<?> readEvaluation() {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 
 		List<MyEvaluationDto> subjectName = evaluationService.readSubjectName(principal.getId());
 		List<MyEvaluationDto> eval = evaluationService.readEvaluationByProfessorId(principal.getId());
-		model.addAttribute("subjectName", subjectName);
-		model.addAttribute("eval", eval);
 
-		return "evaluation/myEvaluation";
+        return ResponseEntity.ok(Map.of(
+                "subjectName", subjectName,
+                "eval", eval
+        ));
 	}
 
 	// 과목별 강의 평가 조회 (교수)
 	@PostMapping("/read")
-	public String readEvaluation(Model model, HttpServletRequest httpServletRequest) {
+	public ResponseEntity<?> readEvaluation(HttpServletRequest httpServletRequest) {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 		String name = httpServletRequest.getParameter("subjectId");
 
 		List<MyEvaluationDto> subjectName = evaluationService.readSubjectName(principal.getId());
 		List<MyEvaluationDto> eval = evaluationService.readEvaluationByProfessorIdAndName(principal.getId(), name);
-		model.addAttribute("subjectName", subjectName);
-		model.addAttribute("eval", eval);
-		return "evaluation/myEvaluation";
+        return ResponseEntity.ok(Map.of(
+                "subjectName", subjectName,
+                "eval", eval
+        ));
 	}
 
 }

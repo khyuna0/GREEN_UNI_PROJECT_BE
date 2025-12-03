@@ -23,7 +23,7 @@ import java.util.List;
  * 
  * @author 김지현
  */
-@Controller
+@RestController
 @RequestMapping("/user")
 public class UserController {
 
@@ -38,7 +38,7 @@ public class UserController {
 	 * @return staff 입력 페이지
 	 */
 	@GetMapping("/staff")
-	public String createStaff() {
+	public ResponseEntity<?> createStaff() {
 
 		return "/user/createStaff";
 	}
@@ -50,7 +50,7 @@ public class UserController {
 	 * @return "redirect:/user/staff"
 	 */
 	@PostMapping("/staff")
-	public String createStaffProc(@Valid CreateStaffDto createStaffDto, BindingResult bindingResult) {
+	public ResponseEntity<?> createStaffProc(@Valid CreateStaffDto createStaffDto, BindingResult bindingResult) {
 
 		if (bindingResult.hasErrors()) {
 			StringBuilder sb = new StringBuilder();
@@ -68,7 +68,7 @@ public class UserController {
 	 * @return professor 입력 페이지
 	 */
 	@GetMapping("/professor")
-	public String createProfessor() {
+	public ResponseEntity<?> createProfessor() {
 
 		return "/user/createProfessor";
 	}
@@ -80,7 +80,7 @@ public class UserController {
 	 * @return "redirect:/user/professor"
 	 */
 	@PostMapping("/professor")
-	public String createProfessorProc(@Valid CreateProfessorDto createProfessorDto, BindingResult bindingResult) {
+	public ResponseEntity<?> createProfessorProc(@Valid CreateProfessorDto createProfessorDto, BindingResult bindingResult) {
 
 		if (bindingResult.hasErrors()) {
 			StringBuilder sb = new StringBuilder();
@@ -99,7 +99,7 @@ public class UserController {
 	 * @return student 입력 페이지
 	 */
 	@GetMapping("/student")
-	public String createStudent() {
+	public ResponseEntity<?> createStudent() {
 
 		return "/user/createStudent";
 	}
@@ -111,7 +111,7 @@ public class UserController {
 	 * @return "redirect:/user/student"
 	 */
 	@PostMapping("/student")
-	public String createStudentProc(@Valid CreateStudentDto createStudentDto, BindingResult bindingResult) {
+	public ResponseEntity<?> createStudentProc(@Valid CreateStudentDto createStudentDto, BindingResult bindingResult) {
 
 		if (bindingResult.hasErrors()) {
 			StringBuilder sb = new StringBuilder();
@@ -133,7 +133,7 @@ public class UserController {
 	 * @return 교수 조회 페이지 (아래 showProfessorListByPage와 합칠 수 있을 것 같다)
 	 */
 	@GetMapping("/professorList")
-	public String showProfessorList(Model model, @RequestParam(required = false) Long professorId,
+	public ResponseEntity<?> showProfessorList( @RequestParam(required = false) Long professorId,
 			@RequestParam(required = false) Long deptId) {
 
 		ProfessorListForm professorListForm = new ProfessorListForm();
@@ -167,7 +167,7 @@ public class UserController {
 	 * @return 교수 조회 페이지
 	 */
 	@GetMapping("/professorList/{page}")
-	public String showProfessorListByPage(Model model, @PathVariable int page,
+	public ResponseEntity<?> showProfessorListByPage( @PathVariable int page,
 			@RequestParam(required = false) Long deptId) {
 
 		ProfessorListForm professorListForm = new ProfessorListForm();
@@ -195,7 +195,7 @@ public class UserController {
 	 * @return 학생 조회 페이지
 	 */
 	@GetMapping("/studentList")
-	public String showStudentList(Model model, @RequestParam(required = false) Long studentId,
+	public ResponseEntity<?> showStudentList( @RequestParam(required = false) Long studentId,
 			@RequestParam(required = false) Long deptId) {
 
 		StudentListForm studentListForm = new StudentListForm();
@@ -229,7 +229,7 @@ public class UserController {
 	 * @return 학생 조회 페이지
 	 */
 	@GetMapping("/studentList/{page}")
-	public String showStudentListByPage(Model model, @PathVariable Long page,
+	public ResponseEntity<?> showStudentListByPage( @PathVariable Long page,
 			@RequestParam(required = false) Long deptId) {
 
 		StudentListForm studentListForm = new StudentListForm();
@@ -253,7 +253,7 @@ public class UserController {
 	 * @return 학생 리스트 조회 페이지
 	 */
 	@GetMapping("/student/update")
-	public String updateStudentGradeAndSemester() {
+	public ResponseEntity<?> updateStudentGradeAndSemester() {
 		studentService.updateStudentGradeAndSemester();
 		return "redirect:/user/studentList";
 	}

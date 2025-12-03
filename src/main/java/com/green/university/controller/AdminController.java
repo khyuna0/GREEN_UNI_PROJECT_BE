@@ -7,18 +7,20 @@ import com.green.university.entity.Room;
 import com.green.university.entity.Subject;
 import com.green.university.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 
  * @author 박성희 
  * Admin 수업 조회/입력 관련 Controller
  */
-@Controller
+@RestController
 @RequestMapping("/admin")
 public class AdminController {
 	@Autowired
@@ -26,39 +28,37 @@ public class AdminController {
 
 	/**
 	 * 
-	 * @return 단과대 페이지
+	 * @return 단과대 페이지 - 단과대학 리스트 조회
 	 */
 	@GetMapping("/college")
-	public String college(Model model, @RequestParam(defaultValue = "select") String crud) {
-		model.addAttribute("crud", crud);
+	public ResponseEntity<?> college( @RequestParam(defaultValue = "select") String crud) {
+		// crud는 등록/삭제 시 ?crud=insert 처럼 파라미터로 붙어 무슨 작업하는지 상태를 나타낸다
 		List<College> collegeList = adminService.readCollege();
-		if (collegeList.isEmpty()) {
-			model.addAttribute("collegeList", null);
-		} else {
-			model.addAttribute("collegeList", collegeList);
-		}
-		return "/admin/college";
+        return ResponseEntity.ok(Map.of(
+                "collegeList", collegeList,
+                "crud", crud
+        ));
 	}
 
 	/**
 	 * 
-	 * @return 단과대학 입력 기능
+	 * @return 단과대학 입력 기능 / 등록 버튼 누르면 실행, crud=insert
 	 */
 	@PostMapping("/college")
-	public String collegeProc(CollegeFormDto collegeFormDto) {
+	public ResponseEntity<?> collegeProc(CollegeFormDto collegeFormDto) {
 		adminService.createCollege(collegeFormDto);
-		return "redirect:/admin/college";
+        return ResponseEntity.ok().body("단과대학 입력이 완료되었습니다");
 	}
 
 	/**
 	 * 
-	 * @return 단과대학 삭제 기능
+	 * @return 단과대학 삭제 기능 crud=delete
 	 */
 	@GetMapping("/collegeDelete")
-	public String deleteCollege(Model model, @RequestParam Long id) {
+	public ResponseEntity<?> deleteCollege(, @RequestParam Long id) {
 		model.addAttribute("id", id);
 		adminService.deleteCollege(id);
-		return "redirect:/admin/college";
+        return ResponseEntity.ok().body("단과대학 삭제가 완료되었습니다");
 	}
 
 	/**
@@ -66,31 +66,34 @@ public class AdminController {
 	 * @return 학과 페이지 페이지 이동 시, 단과대학 조회 후 이동
 	 */
 	@GetMapping("/department")
-	public String department(Model model, @RequestParam(defaultValue = "select") String crud) {
-		model.addAttribute("crud", crud);
-		List<Department> departmentList = adminService.readDepartment();
+	public ResponseEntity<?> department(@RequestParam(defaultValue = "select") String crud) {
+		List<Department> departmentList = adminService.readDepartment(); // 프론트에서 합쳐 찍는 형태일까?
 		List<College> collegeList = adminService.readCollege();
-		if (collegeList.isEmpty()) {
-			model.addAttribute("collegeList", null);
-		} else {
-			model.addAttribute("collegeList", collegeList);
-		}
-		if (departmentList.isEmpty()) {
-			model.addAttribute("departmentList", null);
-		} else {
-			model.addAttribute("departmentList", departmentList);
-		}
-		return "/admin/department";
+//		if (collegeList.isEmpty()) {
+//			model.addAttribute("collegeList", null);
+//		} else {
+//			model.addAttribute("collegeList", collegeList);
+//		}
+//		if (departmentList.isEmpty()) {
+//			model.addAttribute("departmentList", null);
+//		} else {
+//			model.addAttribute("departmentList", departmentList);
+//		}
+        return ResponseEntity.ok(Map.of(
+                "collegeList", collegeList,
+                "departmentList", departmentList,
+                "crud", crud
+        ));
 	}
 
 	/**
 	 * 
-	 * @return 학과 입력 기능
+	 * @return 학과 입력 기능 crud=insert
 	 */
 	@PostMapping("/department")
-	public String departmentProc(DepartmentFormDto departmentFormDto) {
+	public ResponseEntity<?> departmentProc(DepartmentFormDto departmentFormDto) {
 		adminService.createDepartment(departmentFormDto);
-		return "redirect:/admin/department";
+        return ResponseEntity.ok().body("학과 입력이 완료되었습니다");
 	}
 
 	/**
@@ -98,10 +101,9 @@ public class AdminController {
 	 * @return 학과 삭제 기능
 	 */
 	@GetMapping("/departmentDelete")
-	public String deleteDepartment(Model model, @RequestParam Long id) {
-		model.addAttribute("id", id);
+	public ResponseEntity<?> deleteDepartment(@RequestParam Long id) {
 		adminService.deleteDepartment(id);
-		return "redirect:/admin/department";
+        return ResponseEntity.ok().body("학과 삭제가 완료되었습니다");
 	}
 
 	/**
@@ -109,9 +111,9 @@ public class AdminController {
 	 * @return 학과 수정 기능
 	 */
 	@PutMapping("/department")
-	public String updateDepartment(DepartmentFormDto departmentFormDto) {
+	public ResponseEntity<?> updateDepartment(DepartmentFormDto departmentFormDto) {
 		adminService.updateDepartment(departmentFormDto);
-		return "redirect:/admin/department";
+        return ResponseEntity.ok().body("학과 수정이 완료되었습니다");
 	}
 
 	/**
@@ -119,21 +121,24 @@ public class AdminController {
 	 * @return 강의실 페이지
 	 */
 	@GetMapping("/room")
-	public String room(Model model, @RequestParam(defaultValue = "select") String crud) {
-		model.addAttribute("crud", crud);
+	public ResponseEntity<?> room(@RequestParam(defaultValue = "select") String crud) {
 		List<Room> roomList = adminService.readRoom();
 		List<College> collegeList = adminService.readCollege();
-		if (collegeList.isEmpty()) {
-			model.addAttribute("collegeList", null);
-		} else {
-			model.addAttribute("collegeList", collegeList);
-		}
-		if (roomList.isEmpty()) {
-			model.addAttribute("roomList", null);
-		} else {
-			model.addAttribute("roomList", roomList);
-		}
-		return "/admin/room";
+//		if (collegeList.isEmpty()) {
+//			model.addAttribute("collegeList", null);
+//		} else {
+//			model.addAttribute("collegeList", collegeList);
+//		}
+//		if (roomList.isEmpty()) {
+//			model.addAttribute("roomList", null);
+//		} else {
+//			model.addAttribute("roomList", roomList);
+//		}
+        return ResponseEntity.ok(Map.of(
+                "collegeList", collegeList,
+                "roomList", roomList,
+                "crud", crud
+        ));
 	}
 
 	/**
@@ -141,9 +146,9 @@ public class AdminController {
 	 * @return 강의실 입력 기능
 	 */
 	@PostMapping("/room")
-	public String roomProc(RoomFormDto roomFormDto) {
+	public ResponseEntity<?> roomProc(RoomFormDto roomFormDto) {
 		adminService.createRoom(roomFormDto);
-		return "redirect:/admin/room";
+        return ResponseEntity.ok().body("강의실 입력이 완료되었습니다");
 	}
 
 	/**
@@ -151,10 +156,9 @@ public class AdminController {
 	 * @return 강의실 삭제 기능
 	 */
 	@GetMapping("/roomDelete")
-	public String deleteRoom(Model model, @RequestParam String id) {
-		model.addAttribute("id", id);
+	public ResponseEntity<?> deleteRoom(@RequestParam String id) { // 강의실 기본키(id)는 E601 이런 형식임
 		adminService.deleteRoom(id);
-		return "redirect:/admin/room";
+        return ResponseEntity.ok().body("강의실 삭제가 완료되었습니다");
 	}
 
 	/**
@@ -162,21 +166,24 @@ public class AdminController {
 	 * @return 강의 페이지
 	 */
 	@GetMapping("/subject")
-	public String subject(Model model, @RequestParam(defaultValue = "select") String crud) {
-		model.addAttribute("crud", crud);
+    public ResponseEntity<?> subject(@RequestParam(defaultValue = "select") String crud) {
 		List<Subject> subjectList = adminService.readSubject();
 		List<College> collegeList = adminService.readCollege();
-		if (collegeList.isEmpty()) {
-			model.addAttribute("collegeList", null);
-		} else {
-			model.addAttribute("collegeList", collegeList);
-		}
-		if (subjectList.isEmpty()) {
-			model.addAttribute("subjectList", null);
-		} else {
-			model.addAttribute("subjectList", subjectList);
-		}
-		return "/admin/subject";
+//		if (collegeList.isEmpty()) {
+//			model.addAttribute("collegeList", null);
+//		} else {
+//			model.addAttribute("collegeList", collegeList);
+//		}
+//		if (subjectList.isEmpty()) {
+//			model.addAttribute("subjectList", null);
+//		} else {
+//			model.addAttribute("subjectList", subjectList);
+//		}
+        return ResponseEntity.ok(Map.of(
+                "collegeList", collegeList,
+                "subjectList", subjectList,
+                "crud", crud
+        ));
 	}
 
 	/**
@@ -184,9 +191,9 @@ public class AdminController {
 	 * @return 강의 입력 기능
 	 */
 	@PostMapping("/subject")
-	public String insertSubject(SubjectFormDto subjectFormDto) {
+    public ResponseEntity<?> insertSubject(SubjectFormDto subjectFormDto) {
 		adminService.createSubjectAndSyllabus(subjectFormDto);
-		return "redirect:/admin/subject";
+        return ResponseEntity.ok().body("강의 입력이 완료되었습니다");
 	}
 
 	/**
@@ -194,10 +201,9 @@ public class AdminController {
 	 * @return 강의 삭제 기능
 	 */
 	@GetMapping("/subjectDelete")
-	public String deleteSubject(Model model, @RequestParam Long id) {
-		model.addAttribute("id", id);
+    public ResponseEntity<?> deleteSubject( @RequestParam Long id) {
 		adminService.deleteSubject(id);
-		return "redirect:/admin/subject";
+        return ResponseEntity.ok().body("강의 삭제가 완료되었습니다");
 	}
 
 	/**
@@ -205,9 +211,9 @@ public class AdminController {
 	 * @return 강의 수정 기능
 	 */
 	@PutMapping("/subject")
-	public String updateSubject(SubjectFormDto subjectFormDto) {
+    public ResponseEntity<?> updateSubject(SubjectFormDto subjectFormDto) {
 		adminService.updateSubject(subjectFormDto);
-		return "redirect:/admin/subject";
+        return ResponseEntity.ok().body("강의 수정이 완료되었습니다");
 	}
 
 	/**
@@ -215,21 +221,24 @@ public class AdminController {
 	 * @return 단과대별 등록금 페이지
 	 */
 	@GetMapping("/tuition")
-	public String collTuit(Model model, @RequestParam(defaultValue = "select") String crud) {
-		model.addAttribute("crud", crud);
+	public ResponseEntity<?> collTuit(@RequestParam(defaultValue = "select") String crud) {
 		List<CollTuitFormDto> collTuitList = adminService.readCollTuit();
 		List<College> collegeList = adminService.readCollege();
-		if (collegeList.isEmpty()) {
-			model.addAttribute("collegeList", null);
-		} else {
-			model.addAttribute("collegeList", collegeList);
-		}
-		if (collTuitList.isEmpty()) {
-			model.addAttribute("collTuitList", null);
-		} else {
-			model.addAttribute("collTuitList", collTuitList);
-		}
-		return "/admin/collTuit";
+//		if (collegeList.isEmpty()) {
+//			model.addAttribute("collegeList", null);
+//		} else {
+//			model.addAttribute("collegeList", collegeList);
+//		}
+//		if (collTuitList.isEmpty()) {
+//			model.addAttribute("collTuitList", null);
+//		} else {
+//			model.addAttribute("collTuitList", collTuitList);
+//		}
+        return ResponseEntity.ok(Map.of(
+                "collegeList", collegeList,
+                "collTuitList", collTuitList,
+                "crud", crud
+        ));
 	}
 
 	/**
@@ -237,9 +246,9 @@ public class AdminController {
 	 * @return 단과대별 등록금 입력 기능
 	 */
 	@PostMapping("/tuition")
-	public String insertcollTuit(CollTuitFormDto collTuitFormDto) {
+	public ResponseEntity<?> insertcollTuit(CollTuitFormDto collTuitFormDto) {
 		adminService.createCollTuit(collTuitFormDto);
-		return "redirect:/admin/tuition";
+        return ResponseEntity.ok().body("단과대별 등록금 입력이 완료되었습니다");
 	}
 
 	/**
@@ -247,10 +256,9 @@ public class AdminController {
 	 * @return 단과대 등록금 삭제 기능
 	 */
 	@GetMapping("/tuitionDelete")
-	public String deleteCollTuit(Model model, @RequestParam Long collegeId) {
-		model.addAttribute("collegeId", collegeId);
+	public ResponseEntity<?> deleteCollTuit(@RequestParam Long collegeId) {
 		adminService.deleteCollTuit(collegeId);
-		return "redirect:/admin/tuition";
+        return ResponseEntity.ok().body("단과대별 등록금 삭제가 완료되었습니다");
 	}
 
 	/**
@@ -258,9 +266,9 @@ public class AdminController {
 	 * @return 단과대 등록금 수정 기능
 	 */
 	@PutMapping("/tuitionUpdate")
-	public String updateCollTuit(CollTuitFormDto collTuitFormDto) {
+	public ResponseEntity<?> updateCollTuit(CollTuitFormDto collTuitFormDto) {
 		adminService.updateCollTuit(collTuitFormDto);
-		return "redirect:/admin/tuition";
+        return ResponseEntity.ok().body("단과대별 등록금 수정이 완료되었습니다");
 	}
 
 }

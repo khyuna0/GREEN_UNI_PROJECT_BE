@@ -20,7 +20,7 @@ import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
-@Controller
+@RestController
 @RequestMapping("/notice")
 public class NoticeController {
     @Autowired
@@ -31,7 +31,7 @@ public class NoticeController {
      * @return 공지사항 페이지
      */
     @GetMapping("")
-    public String notice(Model model,
+    public ResponseEntity<?> notice(
                          @RequestParam(defaultValue = "select") String crud,
                          @RequestParam(defaultValue = "1") int page) {
 
@@ -56,7 +56,7 @@ public class NoticeController {
      * @return 공지사항 입력 기능
      */
     @PostMapping("/write")
-    public String insertNotice(@Validated NoticeFormDto noticeFormDto) {
+    public ResponseEntity<?> insertNotice(@Validated NoticeFormDto noticeFormDto) {
 
         MultipartFile file = noticeFormDto.getFile();
         if (file.isEmpty() == false) {
@@ -89,7 +89,7 @@ public class NoticeController {
      * @return 공지사항 상세 조회 기능
      */
     @GetMapping("/read")
-    public String selectByIdNotice(Model model, @RequestParam Long id) {
+    public ResponseEntity<?> selectByIdNotice( @RequestParam Long id) {
         model.addAttribute("crud", "read");
         model.addAttribute("id", id);
         Notice notice = noticeService.readByIdNotice(id);
@@ -105,7 +105,7 @@ public class NoticeController {
 
     // 공지사항 페이지 이동
     @GetMapping("/list/{page}")
-    public String showNoticeListByPage(Model model,
+    public ResponseEntity<?> showNoticeListByPage(
                                        @RequestParam(defaultValue = "select") String crud,
                                        @PathVariable int page) {
 
@@ -126,7 +126,7 @@ public class NoticeController {
 
     // 공지사항 검색 기능
     @GetMapping("/search")
-    public String showNoticeByKeyword(Model model, NoticePageFormDto noticePageFormDto) {
+    public ResponseEntity<?> showNoticeByKeyword( NoticePageFormDto noticePageFormDto) {
 
         noticePageFormDto.setPage(1); // 첫페이지는 1페이지
 
@@ -145,7 +145,7 @@ public class NoticeController {
 
     // 검색 + 페이지
     @GetMapping("/search/{page}")
-    public String showNoticeByKeywordAndPage(Model model, NoticePageFormDto noticePageFormDto,
+    public ResponseEntity<?> showNoticeByKeywordAndPage( NoticePageFormDto noticePageFormDto,
                                              @PathVariable int page, @RequestParam String keyword) {
 
         noticePageFormDto.setPage(page);
@@ -166,7 +166,7 @@ public class NoticeController {
     
     //  공지사항 수정 페이지
     @GetMapping("/update")
-    public String update(Model model, @RequestParam Long id) {
+    public ResponseEntity<?> update( @RequestParam Long id) {
         model.addAttribute("crud", "update");
         model.addAttribute("id", id);
 
@@ -178,14 +178,14 @@ public class NoticeController {
    
     // 공지사항 수정
     @PutMapping("/update")
-    public String update(@Validated NoticeFormDto noticeFormDto) {
+    public ResponseEntity<?> update(@Validated NoticeFormDto noticeFormDto) {
         noticeService.updateNotice(noticeFormDto);
         return "redirect:/notice";
     }
 
     // 공지사항 삭제
     @GetMapping("/delete")
-    public String delete(Model model, @RequestParam Long id) {
+    public ResponseEntity<?> delete( @RequestParam Long id) {
         model.addAttribute("id", id);
         noticeService.deleteNotice(id);
         return "redirect:/notice";

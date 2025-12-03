@@ -11,6 +11,7 @@ import com.green.university.utils.Define;
 import com.green.university.utils.StuStatUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
@@ -19,13 +20,14 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 서영 
  * 수강 신청 관련 (preStuSub 포함) 강의 시간표는 SubjectController 대신 일부러 여기에 넣음
  */
 
-@Controller
+@RestController
 @RequestMapping("/sugang")
 public class StuSubController {
 
@@ -53,55 +55,63 @@ public class StuSubController {
 	@Autowired
 	private UserService userService;
 
+    /**
+     * 현재 수강 신청 기간 상태 확인, 수강 신청 기간 상태 변경
+     */
+
 	// 예비 수강신청 기간 : 0, 수강신청 기간 : 1, 수강신청 기간 종료 : 2
 	public static Long SUGANG_PERIOD = 0L;
 
-	// 예비 수강신청 기간에서 수강신청 기간으로 변경하는 페이지 (교직원용)
+	// 지금 SUGANG_PERIOD 상태 확인
 	@GetMapping("/period")
-	public String updatePeriod() {
+	public ResponseEntity<?> getPeriodStatus() {
 
-		return "/stuSub/updatePeriod";
+		return ResponseEntity.ok(Map.of("period", SUGANG_PERIOD));
 	}
 
-	// 예비 수강 신청 기간 -> 수강 신청 기간
-	@GetMapping("/updatePeriod1")
-	public String updatePeriodProc1() {
+    // ========= 수강 신청 기간 상태 변경 (버튼이든 뭐든... 호출 해서 변경)
+
+	// 예비 수강 신청 기간 -> 수강 신청 기간으로 상태 변경
+	@PostMapping("/updatePeriod1")
+	public ResponseEntity<?> updatePeriodProc1() {
 		SUGANG_PERIOD = 1L;
 
 		stuSubService.createStuSubByPreStuSub();
 
-		return "/stuSub/updatePeriod";
+        return ResponseEntity.ok(Map.of("period", SUGANG_PERIOD));
 	}
 
-	// 수강 신청 기간 -> 종료
+	// 수강 신청 기간 -> 종료로 변경
 	@GetMapping("/updatePeriod2")
-	public String updatePeriodProc2() {
+	public ResponseEntity<?> updatePeriodProc2() {
 		SUGANG_PERIOD = 2L;
 
-		return "/stuSub/updatePeriod";
+        return ResponseEntity.ok(Map.of("period", SUGANG_PERIOD));
 	}
 
-	// 과목 조회 (현재 학기)
+
+    /**
+     * 과목 조회 및 검색 (페이징)
+     */
+
+
+    // 과목 조회 (현재 학기)
 	@GetMapping("/subjectList/{page}")
-	public String readSubjectList(Model model, @PathVariable Long page) {
+	public ResponseEntity<?> readSubjectList(@PathVariable Long page) {
 
 		// 강의 리스트
 		List<SubjectDto> subjectList = subjectService.readSubjectListByCurrentSemester();
 
-		Long subjectCount = (long) subjectList.size();
-		model.addAttribute("subjectCount", subjectCount);
+		Long subjectCount = (long) subjectList.size(); // 총 강의개수
+
 		// 총 페이지 수
 		Long pageCount = (long) Math.ceil(subjectCount / 20.0);
-		model.addAttribute("pageCount", pageCount);
-		// 현재 페이지
-		model.addAttribute("page", page);
 
+		// 현재 페이지
 		List<SubjectDto> subjectListLimit = subjectService.readSubjectListByCurrentSemesterPage((page - 1) * 20);
-		model.addAttribute("subjectList", subjectListLimit);
 
 		// 필터에 사용할 전체 학과 정보
 		List<Department> deptList = collegeService.readDeptAll();
-		model.addAttribute("deptList", deptList);
 
 		// 필터에 사용할 강의 이름 정보 (중복 값 제거)
 		List<String> subNameList = new ArrayList<>();
@@ -110,27 +120,42 @@ public class StuSubController {
 				subNameList.add(subject.getName());
 			}
 		}
-		model.addAttribute("subNameList", subNameList);
 
-		return "/stuSub/subList";
+        return ResponseEntity.ok(Map.of(
+                "subjectCount", subjectCount,
+                "pageCount", pageCount,
+                "page", page,
+                "subjectList", subjectListLimit,
+                "deptList", deptList,
+                "subNameList", subNameList
+        ));
 	}
 
 	// 과목 조회 (현재 학기)에서 필터링
 	@GetMapping("/subjectList/search")
-	public String readSubjectListSearch(Model model,
-			@Validated CurrentSemesterSubjectSearchFormDto currentSemesterSubjectSearchFormDto) {
+	public ResponseEntity<?> readSubjectListSearch(@Validated CurrentSemesterSubjectSearchFormDto currentSemesterSubjectSearchFormDto) {
+
+        // 프론트에서 매개변수 DTO는
+        //    api.get("/sugang/subjectList/search", {
+//        params: {
+//            type: selectedType,
+//                    deptId: selectedDept,
+//                    name: searchName,
+//                    subYear: 2025,
+//                    semester: 1,
+//                    page: 1
+//        }
+//    }); -> 이 형식으로 채워줘야 한다.
+
 
 		// 강의 리스트
 		List<SubjectDto> subjectList = subjectService
 				.readSubjectListSearchByCurrentSemester(currentSemesterSubjectSearchFormDto);
-		model.addAttribute("subjectList", subjectList);
 
 		Long subjectCount = (long) subjectList.size();
-		model.addAttribute("subjectCount", subjectCount);
 
 		// 필터에 사용할 전체 학과 정보
 		List<Department> deptList = collegeService.readDeptAll();
-		model.addAttribute("deptList", deptList);
 
 		// 필터에 사용할 강의 이름 정보 (중복 값 제거)
 		List<String> subNameList = new ArrayList<>();
@@ -139,16 +164,21 @@ public class StuSubController {
 				subNameList.add(subject.getName());
 			}
 		}
-		model.addAttribute("subNameList", subNameList);
 
-		return "/stuSub/subList";
+        return ResponseEntity.ok(Map.of(
+                "subjectList", subjectList,
+                "subjectCount", subjectCount,
+                "deptList", deptList,
+                "subNameList", subNameList
+        ));
 	}
 
 	/**
-	 * @return 예비 수강 신청
+	 * 예비 수강 신청
 	 */
+
 	@GetMapping("/pre/{page}")
-	public String preStuSubApplication(Model model, @PathVariable Long page) {
+	public ResponseEntity<?> preStuSubApplication(@PathVariable int page) { // page 값 int로 변경함
 
 		// 예비 수강 신청 기간이 아니라면
 		if (SUGANG_PERIOD != 0) {
@@ -166,14 +196,11 @@ public class StuSubController {
 
 		// 강의 리스트
 		List<SubjectDto> subjectList = subjectService.readSubjectListByCurrentSemester();
-
 		Long subjectCount = (long) subjectList.size();
-		model.addAttribute("subjectCount", subjectCount);
+
 		// 총 페이지 수
 		Long pageCount = (long) Math.ceil(subjectCount / 20.0);
-		model.addAttribute("pageCount", pageCount);
 		// 현재 페이지
-		model.addAttribute("page", page);
 
 		List<SubjectDto> subjectListLimit = subjectService.readSubjectListByCurrentSemesterPage((page - 1) * 20);
 		for (SubjectDto sub : subjectListLimit) {
@@ -185,11 +212,9 @@ public class StuSubController {
 				sub.setStatus(false);
 			}
 		}
-		model.addAttribute("subjectList", subjectListLimit);
 
 		// 필터에 사용할 전체 학과 정보
 		List<Department> deptList = collegeService.readDeptAll();
-		model.addAttribute("deptList", deptList);
 
 		// 필터에 사용할 강의 이름 정보 (중복 값 제거)
 		List<String> subNameList = new ArrayList<>();
@@ -198,9 +223,14 @@ public class StuSubController {
 				subNameList.add(subject.getName());
 			}
 		}
-		model.addAttribute("subNameList", subNameList);
-
-		return "/stuSub/preApplication";
+        return ResponseEntity.ok(Map.of(
+                "subjectCount", subjectCount,
+                "pageCount", pageCount,
+                "page", page,
+                "subjectList", subjectListLimit,
+                "deptList", deptList,
+                "subNameList", subNameList
+        ));
 	}
 
 	/**
@@ -208,7 +238,7 @@ public class StuSubController {
 	 */
 
 	@PostMapping("/pre/{subjectId}")
-	public String insertPreStuSubAppProc(@PathVariable Long subjectId) {
+	public ResponseEntity<?> insertPreStuSubAppProc(@PathVariable Long subjectId) { 
 
 		// 예비 수강 신청 기간이 아니라면
 		if (SUGANG_PERIOD != 0) {
@@ -218,8 +248,11 @@ public class StuSubController {
 		Long studentId = ((PrincipalDto) session.getAttribute(Define.PRINCIPAL)).getId();
 		preStuSubService.createPreStuSub(studentId, subjectId);
 
-		// 강의 검색 페이지에서 신청 시
-		return "redirect:/sugang/pre/1";
+//		// 강의 검색 페이지에서 신청 시  -> 이제 프론트에서 navigate 처리할 수 있기 때문에 아래로 통일했습니다.
+//		return "redirect:/sugang/pre/1";
+
+        // 결과 메세지만 반환
+        return ResponseEntity.ok().body("수강 신청이 정상적으로 처리되었습니다.");
 	}
 
 	/**
@@ -227,7 +260,8 @@ public class StuSubController {
 	 */
 
 	@DeleteMapping("/pre/{subjectId}")
-	public String deletePreStuSubAppProc(@PathVariable Long subjectId, @RequestParam Long type) {
+	public ResponseEntity<?> deletePreStuSubAppProc(@PathVariable Long subjectId, @RequestParam Long type) { 
+        // type은 어디에서 넘어왔냐? 인 것 같음...
 
 		// 예비 수강 신청 기간이 아니라면
 		if (SUGANG_PERIOD != 0) {
@@ -237,18 +271,21 @@ public class StuSubController {
 		Long studentId = ((PrincipalDto) session.getAttribute(Define.PRINCIPAL)).getId();
 		preStuSubService.deletePreStuSub(studentId, subjectId);
 
-		// 강의 검색 페이지에서 취소 시
-		if (type == 0) {
-			return "redirect:/sugang/pre/1";
-			// 수강 신청 내역 페이지에서 취소 시
-		} else {
-			return "redirect:/sugang/preAppList?type=0";
-		}
+//		// 강의 검색 페이지에서 취소 시 -> 이제 프론트에서 navigate 처리할 수 있기 때문에 아래로 통일했습니다.
+//		if (type == 0) { // 타입이 뭔지 알아보기...
+//			return "redirect:/sugang/pre/1";
+//			// 수강 신청 내역 페이지에서 취소 시
+//		} else {
+//			return "redirect:/sugang/preAppList?type=0";
+//		}
+
+        return ResponseEntity.ok().body("수강 신청이 정상적으로 처리되었습니다.");
+
 	}
 
 	// 예비 수강 신청 강의 목록에서 필터링
 	@GetMapping("/pre/search")
-	public String preStuSubApplicationSearch(Model model,
+	public ResponseEntity<?> preStuSubApplicationSearch(
 			@Validated CurrentSemesterSubjectSearchFormDto currentSemesterSubjectSearchFormDto) {
 
 		// 예비 수강 신청 기간이 아니라면
@@ -265,38 +302,35 @@ public class StuSubController {
 		for (SubjectDto sub : subjectList) {
 			// 현재 담겨 있는지 확인
 			PreStuSub preStuSub = preStuSubService.readPreStuSub(principal.getId(), sub.getId());
-			if (preStuSub != null) {
-				sub.setStatus(true);
-			} else {
-				sub.setStatus(false);
-			}
+            sub.setStatus(preStuSub != null);
 		}
 
 		Long subjectCount = (long) subjectList.size();
-		model.addAttribute("subjectCount", subjectCount);
-		model.addAttribute("subjectList", subjectList);
 
 		// 필터에 사용할 전체 학과 정보
 		List<Department> deptList = collegeService.readDeptAll();
-		model.addAttribute("deptList", deptList);
 
 		// 필터에 사용할 강의 이름 정보 (중복 값 제거)
 		List<String> subNameList = new ArrayList<>();
 		for (SubjectDto subject : subjectService.readSubjectListByCurrentSemester()) {
-			if (subNameList.contains(subject.getName()) == false) {
+			if (!subNameList.contains(subject.getName())) {
 				subNameList.add(subject.getName());
 			}
 		}
-		model.addAttribute("subNameList", subNameList);
 
-		return "/stuSub/preApplication";
+        return ResponseEntity.ok(Map.of(
+                "subjectCount", subjectCount,
+                "subjectList", subjectList,
+                "deptList", deptList,
+                "subNameList", subNameList
+        ));
 	}
 
 	/**
 	 * @return 수강 신청
 	 */
 	@GetMapping("/application/{page}")
-	public String stuSubApplication(Model model, @PathVariable Long page) {
+	public ResponseEntity<?> stuSubApplication(@PathVariable int page) { // page int로 변경함
 
 		// 수강 신청 기간이 아니라면
 		if (SUGANG_PERIOD != 1) {
@@ -313,15 +347,12 @@ public class StuSubController {
 
 		// 강의 리스트
 		List<SubjectDto> subjectList = subjectService.readSubjectListByCurrentSemester();
-
 		Long subjectCount = (long) subjectList.size();
-		model.addAttribute("subjectCount", subjectCount);
+
 		// 총 페이지 수
 		Long pageCount = (long) Math.ceil(subjectCount / 20.0);
-		model.addAttribute("pageCount", pageCount);
+;
 		// 현재 페이지
-		model.addAttribute("page", page);
-
 		List<SubjectDto> subjectListLimit = subjectService.readSubjectListByCurrentSemesterPage((page - 1) * 20);
 		for (SubjectDto sub : subjectListLimit) {
 			// 현재 담겨 있는지 확인
@@ -332,27 +363,31 @@ public class StuSubController {
 				sub.setStatus(false);
 			}
 		}
-		model.addAttribute("subjectList", subjectListLimit);
 
 		// 필터에 사용할 전체 학과 정보
 		List<Department> deptList = collegeService.readDeptAll();
-		model.addAttribute("deptList", deptList);
 
 		// 필터에 사용할 강의 이름 정보 (중복 값 제거)
 		List<String> subNameList = new ArrayList<>();
 		for (SubjectDto subject : subjectList) {
-			if (subNameList.contains(subject.getName()) == false) {
+			if (!subNameList.contains(subject.getName())) {
 				subNameList.add(subject.getName());
 			}
 		}
-		model.addAttribute("subNameList", subNameList);
 
-		return "stuSub/application";
+        return ResponseEntity.ok(Map.of(
+                "subjectCount", subjectCount,
+                "page", page,
+                "pageCount", pageCount,
+                "subjectList", subjectListLimit,
+                "deptList", deptList,
+                "subNameList", subNameList
+        ));
 	}
 
 	// 수강 신청 강의 목록에서 필터링
 	@GetMapping("/application/search")
-	public String stuSubApplicationSearch(Model model,
+	public ResponseEntity<?> stuSubApplicationSearch(
 			@Validated CurrentSemesterSubjectSearchFormDto currentSemesterSubjectSearchFormDto) {
 
 		// 수강 신청 기간이 아니라면
@@ -376,30 +411,31 @@ public class StuSubController {
 		}
 
 		Long subjectCount = (long) subjectList.size();
-		model.addAttribute("subjectCount", subjectCount);
-		model.addAttribute("subjectList", subjectList);
 
 		// 필터에 사용할 전체 학과 정보
 		List<Department> deptList = collegeService.readDeptAll();
-		model.addAttribute("deptList", deptList);
 
 		// 필터에 사용할 강의 이름 정보 (중복 값 제거)
 		List<String> subNameList = new ArrayList<>();
 		for (SubjectDto subject : subjectList) {
-			if (subNameList.contains(subject.getName()) == false) {
+			if (!subNameList.contains(subject.getName())) {
 				subNameList.add(subject.getName());
 			}
 		}
-		model.addAttribute("subNameList", subNameList);
 
-		return "/stuSub/application";
+        return ResponseEntity.ok(Map.of(
+                "subjectCount", subjectCount,
+                "subjectList", subjectList,
+                "deptList", deptList,
+                "subNameList", subNameList
+        ));
 	}
 
 	/**
 	 * 수강 신청 처리 (신청)
 	 */
 	@PostMapping("/insertApp/{subjectId}")
-	public String insertStuSubAppProc(@PathVariable Long subjectId, @RequestParam Long type) {
+	public ResponseEntity<?> insertStuSubAppProc(@PathVariable Long subjectId, @RequestParam Long type) {
 
 		// 수강 신청 기간이 아니라면
 		if (SUGANG_PERIOD != 1) {
@@ -409,20 +445,22 @@ public class StuSubController {
 		Long studentId = ((PrincipalDto) session.getAttribute(Define.PRINCIPAL)).getId();
 		stuSubService.createStuSub(studentId, subjectId);
 
-		// 강의 검색 페이지에서 신청 시
-		if (type == 0) {
-			return "redirect:/sugang/application/1";
-			// 예비 수강 신청 내역 페이지에서 신청 시
-		} else {
-			return "redirect:/sugang/preAppList?type=1";
-		}
+//		// 강의 검색 페이지에서 신청 시 -> 이제 프론트에서 navigate 처리할 수 있기 때문에 아래로 통일했습니다.
+//		if (type == 0) {
+//			return "redirect:/sugang/application/1";
+//			// 예비 수강 신청 내역 페이지에서 신청 시
+//		} else {
+//			return "redirect:/sugang/preAppList?type=1";
+//		}
+
+        return ResponseEntity.ok().body("수강 신청이 정상적으로 처리되었습니다.");
 	}
 
 	/**
 	 * 수강 신청 처리 (취소)
 	 */
 	@DeleteMapping("/deleteApp/{subjectId}")
-	public String deleteStuSubAppProc(@PathVariable Long subjectId, @RequestParam Long type) {
+	public ResponseEntity<?> deleteStuSubAppProc(@PathVariable Long subjectId, @RequestParam Long type) {
 
 		// 수강 신청 기간이 아니라면
 		if (SUGANG_PERIOD != 1) {
@@ -432,20 +470,22 @@ public class StuSubController {
 		Long studentId = ((PrincipalDto) session.getAttribute(Define.PRINCIPAL)).getId();
 		stuSubService.deleteStuSub(studentId, subjectId);
 
-		// 강의 검색 페이지에서 취소 시
-		if (type == 0) {
-			return "redirect:/sugang/application/1";
-			// 예비 수강 신청 내역 페이지에서 취소 시
-		} else {
-			return "redirect:/sugang/preAppList?type=1";
-		}
+		// 강의 검색 페이지에서 취소 시  -> 이제 프론트에서 navigate 처리할 수 있기 때문에 아래로 통일했습니다.
+//		if (type == 0) {
+//			return "redirect:/sugang/application/1";
+//			// 예비 수강 신청 내역 페이지에서 취소 시
+//		} else {
+//			return "redirect:/sugang/preAppList?type=1";
+//		}
+
+        return ResponseEntity.ok().body("수강 신청 취소가 정상적으로 처리되었습니다.");
 	}
 
 	/**
 	 * @return 예비 수강 신청 내역
 	 */
 	@GetMapping("/preAppList")
-	public String preStuSubAppList(Model model, @RequestParam Long type) {
+	public ResponseEntity<?> preStuSubAppList(@RequestParam Long type) {
 
 		// 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
@@ -455,24 +495,24 @@ public class StuSubController {
 		List<BreakApp> breakAppList = breakAppService.readByStudentId(studentInfo.getId()); // 최근 순으로 정렬되어 있음
 		StuStatUtil.checkStuStat("수강신청", stuStatEntity, breakAppList);
 
-		model.addAttribute("type", type);
-
 		// 예비 수강 신청 기간에 조회 시
 		if (type == 0) {
 			List<StuSubAppDto> preStuSubList = preStuSubService.readPreStuSubList(principal.getId());
-			model.addAttribute("stuSubList", preStuSubList);
 
 			Long sumGrades = 0L;
 			for (StuSubAppDto s : preStuSubList) {
 				sumGrades += s.getGrades();
 			}
-			model.addAttribute("sumGrades", sumGrades);
 
-			return "/stuSub/preAppList";
+            return ResponseEntity.ok(Map.of(
+                    "type", type,
+                    "stuSubList", preStuSubList,
+                    "sumGrades", sumGrades
+            ));
 		}
 
-		// 수강 신청 기간에 조회 시 (예비 수강 신청 목록에서 수강 신청으로 자동으로 넘어간 강의와, 직접 신청해야 하는 강의를 분리해서 보여줄
-		// 것)
+		// 수강 신청 기간에 조회 시
+        // (예비 수강 신청 목록에서 수강 신청으로 자동으로 넘어간 강의와, 직접 신청해야 하는 강의를 분리해서 보여줄것)
 
 		// 수강 신청 기간이 아니라면
 		if (SUGANG_PERIOD != 1) {
@@ -481,26 +521,27 @@ public class StuSubController {
 
 		// 수강 신청이 완료되지 않은 예비 수강 신청 내역
 		List<StuSubAppDto> preStuSubList1 = stuSubService.readPreStuSubByStuSub(principal.getId());
-		model.addAttribute("stuSubList", preStuSubList1);
 
 		// 수강 신청 내역
 		List<StuSubAppDto> stuSubList = stuSubService.readStuSubList(principal.getId());
-		model.addAttribute("stuSubListC", stuSubList);
 
 		Long sumGrades = 0L;
 		for (StuSubAppDto s : stuSubList) {
 			sumGrades += s.getGrades();
 		}
-		model.addAttribute("sumGrades", sumGrades);
 
-		return "/stuSub/preAppList";
+        return ResponseEntity.ok(Map.of(
+                "type", type,
+                "stuSubList", preStuSubList1,
+                "sumGrades", sumGrades
+        ));
 	}
 
 	/**
 	 * @return 수강 신청 내역
 	 */
 	@GetMapping("/list")
-	public String stuSubAppList(Model model) {
+	public ResponseEntity<?> stuSubAppList() {
 
 		// 예비 수강 신청 기간이라면
 		if (SUGANG_PERIOD == 0) {
@@ -518,15 +559,16 @@ public class StuSubController {
 		StuStatUtil.checkStuStat("수강신청", stuStatEntity, breakAppList);
 
 		List<StuSubAppDto> stuSubList = stuSubService.readStuSubList(principal.getId());
-		model.addAttribute("stuSubList", stuSubList);
 
 		Long sumGrades = 0L;
 		for (StuSubAppDto s : stuSubList) {
 			sumGrades += s.getGrades();
 		}
-		model.addAttribute("sumGrades", sumGrades);
 
-		return "/stuSub/appList";
+        return ResponseEntity.ok(Map.of(
+                "stuSubList", stuSubList,
+                "sumGrades", sumGrades
+        ));
 	}
 
 }

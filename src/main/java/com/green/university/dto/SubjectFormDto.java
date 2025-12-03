@@ -13,7 +13,7 @@ import jakarta.validation.constraints.Size;
  *
  */
 @Data
-public class SubjectFormDto {
+public class SubjectFormDto { // 강의 입력과 수정 시 사용하는 DTO
 	private Long id;
 	@NotEmpty
 	@Size(min=2, max=20)
