@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,13 +39,32 @@ public class StudentService {
 	 * @param studentListForm
 	 * @return 학생 리스트
 	 */
-	@Transactional
+	@Transactional (readOnly = true)
 	public Page<StudentDto> readStudentList(StudentListForm studentListForm, Integer page) {
 		Pageable pageable = PageRequest.of(page, Define.STUDENT_PAGE_SIZE);
-		Page<Student> result = studentRepository.findByOptionalStudentIdAndDeptId(
-				studentListForm.getStudentId(), studentListForm.getDeptId(), pageable);
 
-		return result.map(StudentDto::fromEntity);
+		// 1. Specification 사용하기
+		Long studentId = studentListForm.getStudentId();
+		Long deptId = studentListForm.getDeptId();
+
+		Specification<Student> spec = Specification.where(null); // 조건 없이 전체 조회
+		if (studentId != null && deptId != null) {
+			spec = spec.and(StudentRepository.StudentSpecification.hasStudentId(studentId))
+					.and(StudentRepository.StudentSpecification.hasDepartment(deptId));
+		} else if (studentId != null) {
+			spec = spec.and(StudentRepository.StudentSpecification.hasStudentId(studentId));
+		} else if (deptId != null) {
+			spec = spec.and(StudentRepository.StudentSpecification.hasDepartment(deptId));
+		}
+
+		Page<Student> studentPage = studentRepository.findAll(spec, pageable);
+		return studentPage.map(StudentDto::fromEntity);
+
+//		2. @Query문 사용하기
+//		Page<Student> result = studentRepository.findByOptionalStudentIdAndDeptId(
+//				studentListForm.getStudentId(), studentListForm.getDeptId(), pageable);
+//
+//		return result.map(StudentDto::fromEntity);
 	}
 
 	/**
@@ -52,7 +72,7 @@ public class StudentService {
 	 * @param studentListForm
 	 * @return 학생 수
 	 */
-	@Transactional
+	@Transactional (readOnly = true)
 	public Long readStudentAmount(StudentListForm studentListForm) {
 
 		Long amount = null;
