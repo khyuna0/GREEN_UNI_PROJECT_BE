@@ -27,10 +27,7 @@ public class Notice {
     private Timestamp createdTime;
 
 
-    // 이미지 관련.. 필드를 써야할 것 같은데..
-    // private NoticeFile noticeFile
-
-    //파일목록
+    // 파일목록
     @OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NoticeFile> files = new ArrayList<>();
 

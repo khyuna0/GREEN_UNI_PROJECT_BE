@@ -37,4 +37,6 @@ public class Define {
 	// 수강 가능한 최대 학점
 	public final static Long MAX_GRADES = 18L;
 
+
+
 }

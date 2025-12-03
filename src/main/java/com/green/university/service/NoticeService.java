@@ -2,13 +2,23 @@ package com.green.university.service;
 
 import com.green.university.dto.NoticeFormDto;
 import com.green.university.dto.NoticePageFormDto;
+import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.NoticeRepository;
 import com.green.university.entity.Notice;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class NoticeService {
@@ -16,96 +26,118 @@ public class NoticeService {
     @Autowired
     private NoticeRepository noticeRepository;
 
-    /**
-     * 공지 입력 서비스
-     */
+    private static final int PAGE_SIZE = 10;
+
+    // 공지 입력
     public void readNotice(@Validated NoticeFormDto noticeFormDto) {
-        Long resultRowCount = noticeRepository.insert(noticeFormDto);
-        if (resultRowCount != 1) {
-            System.out.println("공지 입력 서비스 오류");
+
+        Notice notice = new Notice();
+        notice.setCategory(noticeFormDto.getCategory());
+        notice.setTitle(noticeFormDto.getTitle());
+        notice.setContent(noticeFormDto.getContent());
+
+        Long views =  noticeFormDto.getViews();
+        notice.setViews(views != null ? views : 0L);
+
+        // createTime 비었으면 지금 시간으로
+        notice.setCreatedTime(noticeFormDto.getCreatedTime() != null
+                ? noticeFormDto.getCreatedTime() : Timestamp.from(Instant.now()));
+
+        Notice saved = noticeRepository.save(notice);
+        noticeFormDto.setNoticeId(saved.getId());
+    }
+
+
+    // 검색 + 페이징 처리
+    public Page<Notice> readNoticePage(NoticePageFormDto noticePageFormDto){
+
+        Long pageParam = noticePageFormDto.getPage();
+        Long page = (pageParam == null || pageParam < 1) ? 1L : pageParam;
+
+        String keyword = noticePageFormDto.getKeyword();
+        String type = noticePageFormDto.getType();
+
+        Pageable pageable = PageRequest.of(
+                (int)(page - 1),          // 1페이지 -> 0, 2페이지 -> 1 ...
+                PAGE_SIZE,
+                Sort.by(Sort.Direction.DESC,"id") // 최신 글 순
+        );
+
+        // 검색어 없으면 전체 조회
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return noticeRepository.findAll(pageable);
         }
-        Long noticeId = noticeRepository.selectLimit(noticeFormDto);
-        noticeFormDto.setNoticeId(noticeId);
-        if (noticeFormDto.getOriginFilename() != null) {
-            noticeRepository.insertFile(noticeFormDto);
+
+        // 검색어 있으면 타입에 따라 나눔
+        if ("title".equals(type)) {
+            // 제목으로만 검색
+            return noticeRepository.findByTitleContainingIgnoreCase(keyword, pageable);
+        } else {
+            // 제목 + 내용으로 검색
+            return noticeRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
+                    keyword, keyword, pageable
+            );
         }
     }
 
-    /**
-     * 공지 조회 서비스
-     */
-    public List<Notice> readNotice(NoticePageFormDto noticePageFormDto) {
-        List<Notice> noticeList = noticeRepository.selectByNoticeDto(noticePageFormDto);
-        return noticeList;
-    }
 
-    /**
-     *
-     * @param noticePageFormDto
-     * @return 공지 갯수 확인 서비스
-     */
+    // 공지 갯수 확인
     public Long readNoticeAmount(NoticePageFormDto noticePageFormDto) {
-        Long amount = null;
-        if (noticePageFormDto.getKeyword() == null) {
-            amount = noticeRepository.selectNoticeCount(noticePageFormDto);
-        } else {
-            if ("title".equals(noticePageFormDto.getType())) {
-                amount = noticeRepository.selectNoticeCountByTitle(noticePageFormDto);
-            } else {
-                amount = noticeRepository.selectNoticeCountByKeyword(noticePageFormDto);
-            }
-        }
-        return amount;
+        return readNoticePage(noticePageFormDto).getTotalElements();
     }
 
-    /**
-     * 공지 검색 서비스
-     */
+
+    // 공지 검색
     public List<Notice> readNoticeByKeyword(NoticePageFormDto noticePageFormDto) {
-        List<Notice> noticeList = null;
-
-        if ("title".equals(noticePageFormDto.getType())) {
-            noticeList = noticeRepository.selectNoticeByTitle(noticePageFormDto);
-        } else {
-            noticeList = noticeRepository.selectNoticeByKeyword(noticePageFormDto);
-        }
-        return noticeList;
+        return readNoticePage(noticePageFormDto).getContent();
     }
 
-    /**
-     * 공지 상세 조회 서비스
-     */
+
+    // 공지 상세 조회 + 조회수 증가
+    @Transactional
     public Notice readByIdNotice(Long id) {
-        Notice notice = noticeRepository.selectById(id);
-        Long views = noticeRepository.updateViews(id);
-        notice.setViews(views);
+        Notice notice = noticeRepository.findById(id)
+                .orElseThrow(() -> new CustomRestfullException("공지 없음", HttpStatus.NOT_FOUND));
+
+        Long currentViews = notice.getViews();
+        notice.setViews(currentViews + 1);
+
         return notice;
     }
 
-    /**
-     * 공지 수정 서비스
-     */
-    public Long updateNotice(NoticeFormDto noticeFormDto) {
-        Long resultRowCount = noticeRepository.updateByNoticeDto(noticeFormDto);
-        if (resultRowCount != 1) {
-            System.out.println("공지 수정 서비스 오류");
-        }
-        return resultRowCount;
+    // 공지 수정
+    public void updateNotice(NoticeFormDto noticeFormDto) {
+        Notice notice = noticeRepository.findById(noticeFormDto.getId())
+                .orElseThrow(() -> new CustomRestfullException("공지 없음", HttpStatus.NOT_FOUND));
+
+        notice.setCategory(noticeFormDto.getCategory());
+        notice.setTitle(noticeFormDto.getTitle());
+        notice.setContent(noticeFormDto.getContent());
     }
 
-    /**
-     * 공지 삭제 서비스
-     */
+
+    // 공지 삭제
     public void deleteNotice(Long id) {
         noticeRepository.deleteById(id);
     }
 
-    /**
-     * 최근 글 5개 조회
-     */
+    // 최근글 5개 조회
     public List<NoticeFormDto> readCurrentNotice() {
-        List<NoticeFormDto> noticeList = noticeRepository.selectLimit5();
-        return noticeList;
+        List<Notice> noticeList = noticeRepository.findTop5ByOrderByCreatedTimeDesc();
+
+        return noticeList.stream()
+                .map(n -> {
+                    NoticeFormDto dto = new NoticeFormDto();
+                    dto.setId(n.getId());
+                    dto.setNoticeId(n.getId());
+                    dto.setCategory(n.getCategory());
+                    dto.setTitle(n.getTitle());
+                    dto.setContent(n.getContent());
+                    dto.setViews(n.getViews());
+                    dto.setCreatedTime(n.getCreatedTime());
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
 }
