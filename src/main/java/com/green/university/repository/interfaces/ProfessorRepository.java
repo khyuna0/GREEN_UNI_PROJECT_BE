@@ -16,10 +16,6 @@ public interface ProfessorRepository extends JpaRepository<Professor, Long> {
     Staff findByIdAndNameAndEmail(Long id, String name, String email);
 
     // 페이지, 과별 교수 조회 (검색 용)
-    Page<Professor> findByDepartment_id(Long departmentId, Pageable pageable);
-
-    // 페이징 처리 위한 과 교수 수 조회 (컨트롤러 수정할 때 삭제)
-    Long countByDepartment_id(Long departmentId);
-
+    Page<Professor> findByDepartmentId(Long departmentId, Pageable pageable);
 
 }
