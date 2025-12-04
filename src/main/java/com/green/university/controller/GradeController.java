@@ -2,15 +2,13 @@ package com.green.university.controller;
 
 import com.green.university.dto.response.GradeDto;
 import com.green.university.dto.response.MyGradeDto;
-import com.green.university.security.CustomUserDetails;
+import com.green.university.config.security.CustomUserDetails;
 import com.green.university.service.GradeService;
-import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 import java.util.List;

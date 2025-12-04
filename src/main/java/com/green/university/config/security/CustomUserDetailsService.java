@@ -1,11 +1,8 @@
-package com.green.university.security;
+package com.green.university.config.security;
 
 import com.green.university.entity.User;
-import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

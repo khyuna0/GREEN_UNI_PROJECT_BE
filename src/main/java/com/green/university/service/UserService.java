@@ -1,6 +1,6 @@
 package com.green.university.service;
 
-import com.green.university.config.JwtUtil;
+import com.green.university.config.security.JwtUtil;
 import com.green.university.dto.*;
 import com.green.university.dto.response.*;
 import com.green.university.entity.*;

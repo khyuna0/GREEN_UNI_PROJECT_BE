@@ -1,4 +1,4 @@
-package com.green.university.config;
+package com.green.university.config.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

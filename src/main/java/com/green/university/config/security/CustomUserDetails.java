@@ -1,4 +1,4 @@
-package com.green.university.security;
+package com.green.university.config.security;
 
 import com.green.university.entity.User;
 import org.springframework.security.core.GrantedAuthority;

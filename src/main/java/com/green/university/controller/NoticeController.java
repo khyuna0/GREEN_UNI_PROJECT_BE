@@ -5,7 +5,7 @@ import com.green.university.dto.NoticePageFormDto;
 import com.green.university.dto.response.NoticeDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.entity.Notice;
-import com.green.university.security.CustomUserDetails;
+import com.green.university.config.security.CustomUserDetails;
 import com.green.university.service.NoticeService;
 import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 

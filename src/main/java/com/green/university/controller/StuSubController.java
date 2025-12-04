@@ -7,9 +7,8 @@ import com.green.university.dto.response.StudentDto;
 import com.green.university.dto.response.SubjectDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.entity.*;
-import com.green.university.security.CustomUserDetails;
+import com.green.university.config.security.CustomUserDetails;
 import com.green.university.service.*;
-import com.green.university.utils.Define;
 import com.green.university.utils.StuStatUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,7 +18,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
