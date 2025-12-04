@@ -29,7 +29,7 @@ spring:
             hibernate:
                 format_sql: true
                 show_sql: true
-                dialect: org.hibernate.dialect.MySQL8Dialect
+                dialect: org.hibernate.dialect.MySQLDialect
     web:
         error:
             include-exception: true
