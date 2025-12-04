@@ -23,6 +23,7 @@ public class PaginationUtil {
         );
     }
 
+    // 페이지네이션 결과를 담는 전용 DTO (데이터 묶음 객체)
     public record PaginationResult(
             int currentPage,
             int totalPage,

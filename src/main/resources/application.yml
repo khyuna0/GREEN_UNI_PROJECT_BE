@@ -1,51 +1,53 @@
 server:
-    port: 80
+  port: 80
 
 spring:
-    jackson:
-        time-zone: Asia/Seoul
+  jackson:
+    time-zone: Asia/Seoul
 
-    # 2. file upload setting
-    servlet:
-        multipart:
-            max-file-size: 20MB
-            max-request-size: 20MB
-        encoding:
-            charset: utf-8
-            force: true
+  # 2. file upload setting
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+    encoding:
+      charset: utf-8
+      force: true
 
-    # 3. DB
-    datasource:
-        driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://localhost:3306/green_uni?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-        username: root
-        password: 12345
+  # 3. DB
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/green_uni?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: 12345
 
-    # 4. JPA
-    jpa:
-        hibernate:
-            ddl-auto: update
-        properties:
-            hibernate:
-                format_sql: true
-                show_sql: true
-                dialect: org.hibernate.dialect.MySQL8Dialect
-    web:
-        error:
-            include-exception: true
-            include-stacktrace: always
-            # development : always, deployment : never
+  # 4. JPA
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
 
+  web:
+    error:
+      include-exception: true
+      include-stacktrace: always
+      # development : always, deployment : never
+
+# 5. JWT
 jwt:
   secret: "zxcasdqwezxcasdqwezxcasdqwe"
 
 # 6. AI API
 app:
-    ai:
-        mistral:
-            api-key: pKbMQn1v6YnlXIstF1iEjl6kvFchQfwt
-            url: https://api.mistral.ai/v1/chat/completions
-            model: mistral-small-latest
-        gemini:
-            api-key: AIzaSyCVI8L1DO7xueSnvuOBF1K5plZIetiPQwQ
-            url: https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent
+  ai:
+    mistral:
+      api-key: pKbMQn1v6YnlXIstF1iEjl6kvFchQfwt
+      url: https://api.mistral.ai/v1/chat/completions
+      model: mistral-small-latest
+    gemini:
+      api-key: AIzaSyCVI8L1DO7xueSnvuOBF1K5plZIetiPQwQ
+      url: https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent
