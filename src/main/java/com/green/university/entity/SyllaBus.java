@@ -7,7 +7,7 @@ import lombok.Data;
 @Entity
 public class SyllaBus { // 강의 계획서
 
-    @Id // 기존 복합키 테이블에서 기본키 만듬
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

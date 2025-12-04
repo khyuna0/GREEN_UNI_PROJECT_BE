@@ -48,7 +48,7 @@ public class StuSubService {
 
     // 학생의 해당 학기 수강신청 내역 조회
     public List<StuSubAppDto> readStuSubList(Long studentId) {
-        List<StuSub> stuSubList = stuSubRepository.findByStudent_IdAndSubYearAndSemester(
+        List<StuSub> stuSubList = stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(
                 studentId, Define.CURRENT_YEAR, Define.CURRENT_SEMESTER);
         return stuSubList.stream()
                 .map(StuSubAppDto::fromEntity)
@@ -72,7 +72,13 @@ public class StuSubService {
             throw new CustomRestfullException("정원이 초과되었습니다.", HttpStatus.NOT_FOUND);
         }
 
-        List<StuSub> stuSubList = stuSubRepository.findByStudent_IdAndSubYearAndSemester(
+        // 이번 학기 과목인지 확인!
+        if (!targetSubject.getSubYear().equals(Define.CURRENT_YEAR) ||
+                !targetSubject.getSemester().equals(Define.CURRENT_SEMESTER)) {
+            throw new CustomRestfullException("이번 학기 과목만 신청 가능", HttpStatus.BAD_REQUEST);
+        }
+
+        List<StuSub> stuSubList = stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(
                 studentId, Define.CURRENT_YEAR, Define.CURRENT_SEMESTER);
         // 1. 현재 총 신청 학점 계산
         // StuSub 리스트 → Subject 학점 숫자들 → grade 총합

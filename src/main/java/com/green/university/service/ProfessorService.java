@@ -144,7 +144,7 @@ public class ProfessorService {
 		stuSub.setCompleteGrade(updateStudentGradeDto.getConvertedMark());
 
 		// 4. 등급 변환해서 저장 (Grade 엔티티 매핑 필요)
-		Grade grade = gradeRepository.findByGradeName(updateStudentGradeDto.getGrade()); // gradeRepository 추가
+		Grade grade = gradeRepository.findByGrade(updateStudentGradeDto.getGrade()); // gradeRepository 추가
 		stuSub.setGrade(grade);
 
 		stuSubDetailRepository.save(detail);
