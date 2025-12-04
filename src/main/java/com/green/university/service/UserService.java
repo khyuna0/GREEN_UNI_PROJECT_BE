@@ -14,8 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 유저 서비스
@@ -44,15 +44,9 @@ public class UserService {
     @Autowired
     private JwtUtil jwtUtil;
 
-    /**
-     * staff 생성 서비스로 먼저 staff_tb에 insert한 후 staff_tb에 생긴 id를 끌고와 user_tb에 생성함
-     *
-     * @param createStaffDto
-     */
+    // staff 생성 서비스로 먼저 staff_tb에 insert한 후 staff_tb에 생긴 id를 끌고와 user_tb에 생성함
     @Transactional
     public void createStaffToStaffAndUser(CreateStaffDto createStaffDto) {
-
-        // Staff 저장
         Staff staff = new Staff();
         staff.setName(createStaffDto.getName());
         staff.setGender(createStaffDto.getGender());
@@ -61,28 +55,15 @@ public class UserService {
         staff.setEmail(createStaffDto.getEmail());
 
         Staff savedStaff = staffRepository.save(staff);
+        Long staffId = savedStaff.getId();
 
-        Long staffId = savedStaff.getId(); // 저장한 값으로 유저 테이블 값 생성하기 (로그인 위한 테이블!)
-
-        // User 저장
-        User user = new User();
-        user.setId(staffId);
-        user.setPassword(passwordEncoder.encode(staffId + ""));
-        user.setUserRole("staff");
-
-        userRepository.save(user); // INSERT 실행
+        // User 엔티티 생성 및 저장 (공통 메서드 이용)
+        createUser(staffId, "staff");
     }
 
-    /**
-     * professor 생성 서비스 / 먼저 professor_tb에 insert한 후 professor_tb에 생긴 id를 끌고와 user_tb에
-     * 생성함
-     *
-     * @param dto
-     */
+    // professor 생성 서비스로 먼저 professor_tb에 insert한 후 professor_tb에 생긴 id를 끌고와 user_tb에
     @Transactional
     public void createProfessorToProfessorAndUser(CreateProfessorDto dto) {
-
-        // Professor 엔티티 생성
         Professor professor = new Professor();
         professor.setName(dto.getName());
         professor.setGender(dto.getGender());
@@ -93,58 +74,34 @@ public class UserService {
                 .orElseThrow(() -> new CustomRestfullException("없는 학과 정보입니다.", HttpStatus.NOT_FOUND)));
         // 필요한 필드 모두 dto에서 옮기기
 
-        // 저장 → PK 생성
         Professor savedProfessor = professorRepository.save(professor);
         Long professorId = savedProfessor.getId();
 
-        // User 엔티티 생성
-        User user = new User();
-        user.setId(professorId);
-        user.setPassword(passwordEncoder.encode(professorId + ""));
-        user.setUserRole("professor");
-
-        // 저장
-        userRepository.save(user);
+        // User 엔티티 생성 및 저장 (공통 메서드 이용)
+        createUser(professorId, "professor");
     }
 
-    /**
-     * professor 생성 서비스 먼저 professor_tb에 insert한 후 professor_tb에 생긴 id를 끌고와 user_tb에
-     * 생성함
-     *
-     * @param createStudentDto
-     */
+    // student 생성 서비스로 먼저 student_tb에 insert한 후 student_tb에 생긴 id를 끌고와 user_tb에
     @Transactional
     public void createStudentToStudentAndUser(CreateStudentDto createStudentDto) {
-        Department dept = departmentRepository.findById(createStudentDto.getDeptId())
-                .orElseThrow(() -> new RuntimeException("학과가 없습니다."));
         Student student = new Student();
         student.setName(createStudentDto.getName());
         student.setBirthDate(createStudentDto.getBirthDate());
         student.setGender(createStudentDto.getGender());
         student.setAddress(createStudentDto.getAddress());
         student.setTel(createStudentDto.getTel());
-        student.setDepartment(dept);
         student.setEntranceDate(createStudentDto.getEntranceDate());
         student.setEmail(createStudentDto.getEmail());
+        student.setDepartment(departmentRepository.findById(createStudentDto.getDeptId())
+                .orElseThrow(() -> new CustomRestfullException("없는 학과 정보입니다.", HttpStatus.NOT_FOUND)));
+
         Student savedStudent = studentRepository.save(student);
-
         Long studentId = savedStudent.getId();
-        if (studentId == null) {
-            throw new CustomRestfullException(Define.CREATE_FAIL, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        // 학적 상태 생성 (재학)
-        stuStatService.createFirstStatus(studentId);
 
-        User user = new User();
-        user.setId(studentId);
-        user.setPassword(passwordEncoder.encode(studentId + ""));
-        user.setUserRole("student");
-        userRepository.save(user);
+        stuStatService.createFirstStatus(studentId); // 학적 상태 생성 (재학)
 
-        if (user.getUserRole().equals("student")) {
-            throw new CustomRestfullException(Define.CREATE_FAIL, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
+        // User 엔티티 생성 및 저장 (공통 메서드 이용)
+        createUser(studentId, "student");
     }
 
     // 로그인 -> JWT기반 변경
@@ -154,14 +111,14 @@ public class UserService {
         User user = userRepository.findById(loginDto.getId()).orElseThrow(
                 () -> new CustomRestfullException("아이디를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );
-        
+
         //비밀번호 검증
         if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
             throw new CustomRestfullException(Define.WRONG_PASSWORD, HttpStatus.BAD_REQUEST);
         }
 
         //JWT 액세스 토큰 발급
-        String accessToken = jwtUtil.createAccessToken(user.getId(),user.getUserRole());
+        String accessToken = jwtUtil.createAccessToken(user.getId(), user.getUserRole());
 
         //응답 dto
         return new LoginResponseDto(
@@ -171,15 +128,10 @@ public class UserService {
         );
     }
 
-    /**
-     * 학생 수정 대상 정보 불러오기
-     *
-     * @param userId
-     * @return 수정 대상 정보
-     */
+    // 수정 할 학생 정보 불러오기
     public UserInfoForUpdateDto readStudentInfoForUpdate(Long userId) {
         Student student = studentRepository.findById(userId).orElseThrow(
-                () -> new CustomRestfullException("학생 정보를 불러올 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR)
+                () -> new CustomRestfullException("학생 정보가 없습니다.", HttpStatus.NOT_FOUND)
         );
         UserInfoForUpdateDto userInfoForUpdateDto = new UserInfoForUpdateDto();
         userInfoForUpdateDto.setAddress(student.getAddress());
@@ -188,104 +140,67 @@ public class UserService {
         return userInfoForUpdateDto;
     }
 
-    /**
-     * 직원 수정 대상 정보 불러오기
-     *
-     * @param userId
-     * @return 수정 대상 정보
-     */
+    // 수정 할 직원 정보 불러오기
     public UserInfoForUpdateDto readStaffInfoForUpdate(Long userId) {
-
-        Staff staff = staffRepository.findById(userId).orElseThrow(() -> new CustomRestfullException("없는 직원 정보입니다.", HttpStatus.NOT_FOUND));
-
+        Staff staff = staffRepository.findById(userId).orElseThrow(
+                () -> new CustomRestfullException("직원 정보가 없습니다.", HttpStatus.NOT_FOUND)
+        );
         UserInfoForUpdateDto userInfoForUpdateDto = new UserInfoForUpdateDto();
         userInfoForUpdateDto.setAddress(staff.getAddress());
         userInfoForUpdateDto.setTel(staff.getTel());
         userInfoForUpdateDto.setEmail(staff.getEmail());
-
         return userInfoForUpdateDto;
     }
 
-    /**
-     * 교수 수정 대상 정보 불러오기
-     *
-     * @param userId
-     * @return 수정 대상 정보
-     */
+    // 수정 할 교수 정보 불러오기
     public UserInfoForUpdateDto readProfessorInfoForUpdate(Long userId) {
-
-        Professor professor = professorRepository.findById(userId).orElseThrow(() -> new CustomRestfullException("없는 교수 정보입니다.", HttpStatus.NOT_FOUND));
-
+        Professor professor = professorRepository.findById(userId).orElseThrow(
+                () -> new CustomRestfullException("교수 정보가 없습니다.", HttpStatus.NOT_FOUND)
+        );
         UserInfoForUpdateDto userInfoForUpdateDto = new UserInfoForUpdateDto();
         userInfoForUpdateDto.setAddress(professor.getAddress());
         userInfoForUpdateDto.setTel(professor.getTel());
         userInfoForUpdateDto.setEmail(professor.getEmail());
-
         return userInfoForUpdateDto;
     }
 
-    /**
-     * 학생 정보 수정
-     *
-     * @param updateDto
-     */
+    // 학생 정보 수정
     @Transactional
     public void updateStudent(UserUpdateDto updateDto) {
-        // User 테이블의 userid 찾아서 -> 그 userid로 Student 객체 찾기
-        Long userId = updateDto.getUserId();
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new CustomRestfullException(Define.NOT_FOUND_ID, HttpStatus.NOT_FOUND)
-        );
-        Student student = studentRepository.findById(user.getId()).orElseThrow(
-                () -> new CustomRestfullException(Define.NOT_FOUND_ID, HttpStatus.NOT_FOUND)
+        Student student = studentRepository.findById(updateDto.getUserId()).orElseThrow(
+                () -> new CustomRestfullException("학생 정보가 없습니다.", HttpStatus.NOT_FOUND)
         );
         student.setAddress(updateDto.getAddress());
         student.setTel(updateDto.getTel());
         student.setEmail(updateDto.getEmail());
-        Student updatedStudent = studentRepository.save(student);
-        studentRepository.save(updatedStudent);
+        studentRepository.save(student);
     }
 
-    /**
-     * 직원 정보 수정
-     *
-     * @param updateDto
-     */
+    // 직원 정보 수정
     @Transactional
     public void updateStaff(UserUpdateDto updateDto) {
-
-        Professor professor = professorRepository.findById(updateDto.getUserId()).orElseThrow(() -> new CustomRestfullException("없는 직원 정보입니다.", HttpStatus.NOT_FOUND));;
-
-        professor.setAddress(updateDto.getAddress());
-        professor.setTel(updateDto.getTel());
-        professor.setEmail(updateDto.getEmail());
-
-        professorRepository.save(professor);
+        Staff staff = staffRepository.findById(updateDto.getUserId()).orElseThrow(
+                () -> new CustomRestfullException("직원 정보가 없습니다.", HttpStatus.NOT_FOUND)
+        );
+        staff.setAddress(updateDto.getAddress());
+        staff.setTel(updateDto.getTel());
+        staff.setEmail(updateDto.getEmail());
+        staffRepository.save(staff);
     }
 
-    /**
-     * 교수 정보 수정
-     *
-     * @param updateDto
-     */
+    // 교수 정보 수정
     @Transactional
     public void updateProfessor(UserUpdateDto updateDto) {
-
-        Professor professor = professorRepository.findById(updateDto.getUserId()).orElseThrow(() -> new CustomRestfullException("없는 직원 정보입니다.", HttpStatus.NOT_FOUND));
-
+        Professor professor = professorRepository.findById(updateDto.getUserId()).orElseThrow(
+                () -> new CustomRestfullException("교수 정보가 없습니다.", HttpStatus.NOT_FOUND)
+        );
         professor.setAddress(updateDto.getAddress());
         professor.setTel(updateDto.getTel());
         professor.setEmail(updateDto.getEmail());
-
         professorRepository.save(professor);
-
     }
 
-    /**
-     * 비밀번호 변경
-     *
-     * @param changePasswordDto
-     */
+    // 비밀번호 변경
     @Transactional
     public void updatePassword(ChangePasswordDto changePasswordDto) {
         User user = userRepository.findById(changePasswordDto.getId()).orElseThrow(
@@ -295,194 +210,114 @@ public class UserService {
         userRepository.save(user);
     }
 
-    /**
-     * 학생 조회
-     *
-     * @param studentId
-     * @return studentEntity
-     */
+    // 학생 조회
     @Transactional
-    public Student readStudent(Long studentId) {
-        return studentRepository.findById(studentId).orElseThrow(
+    public Student readStudent(Long id) {
+        return studentRepository.findById(id).orElseThrow(
                 () -> new CustomRestfullException("학생을 조회할 수 없습니다.", HttpStatus.NOT_FOUND)
         );
     }
 
-    /**
-     * 직원 조회
-     *
-     * @param id
-     * @return staffEntity
-     */
+    // 직원 조회
     @Transactional
     public Staff readStaff(Long id) {
-        Staff staffEntity = staffRepository.findById(id).orElseThrow(() -> new CustomRestfullException("없는 직원 정보입니다.", HttpStatus.NOT_FOUND));
-        return staffEntity;
+        return staffRepository.findById(id).orElseThrow(
+                () -> new CustomRestfullException("직원을 조회할 수 없습니다.", HttpStatus.NOT_FOUND));
     }
 
-    /**
-     * 교수 정보 조회
-     *
-     * @param id
-     * @return professorEntity
-     */
+    // 교수 조회
     @Transactional
     public ProfessorInfoDto readProfessorInfo(Long id) {
-
-        Professor professor = professorRepository.findById(id).orElseThrow(() -> new CustomRestfullException("없는 교수 정보입니다.", HttpStatus.NOT_FOUND));
-
-        ProfessorInfoDto dto = new ProfessorInfoDto(professor); // dto 생성자 추가함
-//        dto.setId(professor.getId());
-//        dto.setName(professor.getName());
-//        dto.setBirthDate(professor.getBirthDate());
-//        dto.setGender(professor.getGender());
-//        dto.setAddress(professor.getAddress());
-//        dto.setTel(professor.getTel());
-//        dto.setEmail(professor.getEmail());
-//        dto.setHireDate(professor.getHireDate());
-//
-//        dto.setCollegeName(professor.getDepartment().getCollege().getName());
-//        dto.setDeptName(professor.getDepartment().getName());
-
-        return dto;
+        Professor professor = professorRepository.findById(id).orElseThrow(
+                () -> new CustomRestfullException("교수을 조회할 수 없습니다.", HttpStatus.NOT_FOUND));
+        return new ProfessorInfoDto(professor); // dto 생성자 추가함
     }
 
-    /**
-     * 학생 정보 조회
-     *
-     * @param id
-     * @return StudentEntity
-     */
+    // 학생 정보 조회 (StudentInfoDto)
     @Transactional
     public StudentInfoDto readStudentInfo(Long id) {
-        // id로 student 엔티티 찾아서 dto로 변환해서 반환
         Student student = studentRepository.findById(id).orElseThrow(
-                () -> new CustomRestfullException("학생 정보를 찾을 수 없습니다", HttpStatus.INTERNAL_SERVER_ERROR)
+                () -> new CustomRestfullException("학생 정보를 찾을 수 없습니다", HttpStatus.NOT_FOUND)
         );
         return StudentInfoDto.fromEntity(student);
     }
 
-    /**
-     * 아이디 찾기
-     *
-     * @param findIdFormDto
-     * @return
-     */
+    // 아이디 찾기
     @Transactional
     public Long readIdByNameAndEmail(FindIdFormDto findIdFormDto) {
-        Long findId = null;
-        if (findIdFormDto.getUserRole().equals("student")) {
-            findId = studentRepository.findByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail());
-        } else if (findIdFormDto.getUserRole().equals("professor")) {
-            findId = professorRepository.findByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail()).getId();
-        } else if (findIdFormDto.getUserRole().equals("staff")) {
-            findId = staffRepository.findByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail()).getId();
-        }
-
-        if (findId == null) {
-            throw new CustomRestfullException("아이디를 찾을 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return findId;
-
+        return switch (findIdFormDto.getUserRole()) {
+            case "student" ->
+                    studentRepository.findByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail());
+            case "professor" ->
+                    professorRepository.findByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail());
+            case "staff" ->
+                    staffRepository.findByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail());
+            default -> throw new CustomRestfullException("잘못된 userRole 입니다.", HttpStatus.BAD_REQUEST);
+        };
     }
 
-    /**
-     * 비밀번호 찾기
-     *
-     * @param findPasswordFormDto
-     * @return
-     */
+    // 비밀번호 찾기
     @Transactional
     public String updateTempPassword(FindPasswordFormDto findPasswordFormDto) {
-        // dto에 userrole과 user의 userrole을 어떻게 잘 맞춰서 쓸 수 있을까..
         Long userId = findPasswordFormDto.getId();
         String userName = findPasswordFormDto.getName();
         String userEmail = findPasswordFormDto.getEmail();
 
         Long findId = 0L;
-
-        // 추후에 역할별 ID 조회용 함수 맵을 생성할 수도 있다
-        if (findPasswordFormDto.getUserRole().equals("student")) {
-            findId = studentRepository.findByIdAndNameAndEmail(userId, userName, userEmail);
-            if (findId == null) {
-                throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+        switch (findPasswordFormDto.getUserRole()) {
+            case "student" -> {
+                findId = studentRepository.findByIdAndNameAndEmail(userId, userName, userEmail);
+                if (findId == null) {
+                    throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST);
+                }
             }
-        } else if (findPasswordFormDto.getUserRole().equals("professor")) {
-            findId = professorRepository.findByIdAndNameAndEmail(findPasswordFormDto.getId(), findPasswordFormDto.getName(), findPasswordFormDto.getEmail()).getId();
-            if (findId == null) {
-                throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+            case "professor" -> {
+                findId = professorRepository.findByIdAndNameAndEmail(findPasswordFormDto.getId(), findPasswordFormDto.getName(), findPasswordFormDto.getEmail());
+                if (findId == null) {
+                    throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST);
+                }
             }
-        } else if (findPasswordFormDto.getUserRole().equals("staff")) {
-            findId = staffRepository.findByIdAndNameAndEmail(findPasswordFormDto.getId(), findPasswordFormDto.getName(), findPasswordFormDto.getEmail()).getId();
-            if (findId == null) {
-                throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+            case "staff" -> {
+                findId = staffRepository.findByIdAndNameAndEmail(findPasswordFormDto.getId(), findPasswordFormDto.getName(), findPasswordFormDto.getEmail());
+                if (findId == null) {
+                    throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST);
+                }
             }
         }
 
         String tempPassword = new TempPassword().returnTempPassword(); // 임시 비밀번호 생성
         System.out.println(tempPassword);
 
-        User user = userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findById(findId).orElseThrow(
                 () -> new CustomRestfullException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );
         user.setPassword(passwordEncoder.encode(tempPassword));
         userRepository.save(user);
 
         return tempPassword;
-
     }
 
     // studentId로 학생의 학적 변동 내역(StuStat)을 StudentInfoStatListDto로 가져오기
     public List<StudentInfoStatListDto> readStudentInfoStatListByStudentId(Long studentId) {
-        //sta를 찾아 2개 나옴 -> 이걸 모두 찍어줄거임
         List<StuStat> stuStatList = stuStatRepository.findByStudent_IdOrderByIdDesc(studentId);
-
-        // 찍어줘야하는 dto
-        List<StudentInfoStatListDto> result = new ArrayList<>();
-
-        for (StuStat stuStat : stuStatList) {
-            StudentInfoStatListDto dto = new StudentInfoStatListDto();
-            dto.setFromDate(stuStat.getFromDate());
-            dto.setStatus(stuStat.getStatus());
-
-            // 휴학 신청 여부 확인
-            BreakApp breakApp = stuStat.getBreakApp();
-            if (breakApp != null) {
-                dto.setDetail(breakApp.getType());
-                dto.setAdopt(breakApp.getStatus());
-                dto.setToYear(breakApp.getToYear());
-                dto.setToSemester(breakApp.getToSemester());
-            } else {
-                dto.setDetail(null);
-                dto.setAdopt(null);
-                dto.setToYear(null);
-                dto.setToSemester(null);
-            }
-
-            result.add(dto);
-        }
-
-        return result;
-
-        /* 간단버전
-         return stuStatList.stream()
-            .map(stuStat -> {
-                StudentInfoStatListDto dto = new StudentInfoStatListDto();
-                dto.setFromDate(stuStat.getFromDate());
-                dto.setStatus(stuStat.getStatus());
-
-                BreakApp breakApp = stuStat.getBreakApp();
-                if (breakApp != null) {
-                    dto.setDetail(breakApp.getType());
-                    dto.setAdopt(breakApp.getStatus());
-                    dto.setToYear(breakApp.getToYear());
-                    dto.setToSemester(breakApp.getToSemester());
-                }
-                return dto;
-            })
-            .collect(Collectors.toList());
-        */
+        return stuStatList.stream()
+                .map(StudentInfoStatListDto::fromEntity)
+                .collect(Collectors.toList());
     }
+
+
+    // =================================
+    // 공통 메서드
+    // =================================
+    // id와 userRole 이용해서 User에 저장
+    private void createUser(Long id, String userRole) {
+        User user = new User();
+        user.setId(id);
+        user.setPassword(passwordEncoder.encode(id + ""));
+        user.setUserRole(userRole);
+        userRepository.save(user);
+    }
+
+
 
 }

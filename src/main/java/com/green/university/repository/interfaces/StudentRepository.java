@@ -17,10 +17,10 @@ public interface StudentRepository extends JpaRepository<Student,Long>,
 	@Query ("SELECT s.id FROM Student s")
 	List<Long> findAllStudentIds();
 
-	// id 찾기 - FindIdFormDto
+	// id 찾기
     Long findByNameAndEmail(String name, String email);
 
-	// password 발급용 model 확인 - FindPasswordFormDto
+	// password 찾기
     Long findByIdAndNameAndEmail(Long id, String name, String email);
 
 	// =============== 페이징 하는 방법 1. @Query 쓰기 2. SpecificationExecutor 만들기

@@ -111,18 +111,15 @@ public class UserController {
      */
     @PostMapping("/student")
     public ResponseEntity<?> createStudentProc(@Valid CreateStudentDto createStudentDto, BindingResult bindingResult) {
-
         if (bindingResult.hasErrors()) {
-            StringBuilder sb = new StringBuilder();
+            Map<String, Object> errors = new HashMap<>();
             bindingResult.getAllErrors().forEach(error -> {
-                sb.append(error.getDefaultMessage()).append("\\n");
+                errors.put(error.getDefaultMessage(), error.getDefaultMessage());
             });
-            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException(errors.toString(), HttpStatus.BAD_REQUEST);
         }
-
         userService.createStudentToStudentAndUser(createStudentDto);
-
-        return "redirect:/user/student";
+        return ResponseEntity.ok("학생이 등록되었습니다.");
     }
 
     /**
