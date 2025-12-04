@@ -6,7 +6,6 @@ import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.entity.Schedule;
 import com.green.university.security.CustomUserDetails;
 import com.green.university.service.ScheduleService;
-import com.green.university.utils.Define;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,7 +24,7 @@ import java.util.Map;
  */
 
 @RestController
-@RequestMapping("/schedule")
+@RequestMapping("/api/schedule")
 public class ScheduleController {
 
 	@Autowired

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/error")
+@RequestMapping("/api/error")
 public class CustomErrorController {
 
     @GetMapping

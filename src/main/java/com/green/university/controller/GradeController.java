@@ -18,7 +18,7 @@ import java.util.Map;
 
  // 금학기,학기별 성적, 누계성적 조회
 @RestController
-@RequestMapping("/grade")
+@RequestMapping("/api/grade")
 public class GradeController {
 
 	@Autowired

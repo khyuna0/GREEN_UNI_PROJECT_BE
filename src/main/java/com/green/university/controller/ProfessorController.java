@@ -28,7 +28,7 @@ import java.util.Map;
  * @author 김지현
  */
 @RestController
-@RequestMapping("/professor")
+@RequestMapping("/api/professor")
 public class ProfessorController {
 
 	@Autowired

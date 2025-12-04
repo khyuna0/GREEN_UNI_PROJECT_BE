@@ -35,7 +35,7 @@ import java.util.Map;
  */
 
 @RestController
-@RequestMapping("/tuition")
+@RequestMapping("/api/tuition")
 public class TuitionController {
 
 	@Autowired

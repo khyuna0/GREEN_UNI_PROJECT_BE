@@ -22,7 +22,7 @@ import java.util.Map;
  * Admin 수업 조회/입력 관련 Controller
  */
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 public class AdminController {
 	@Autowired
 	private AdminService adminService;
@@ -127,7 +127,7 @@ public class AdminController {
 	 * @return 강의실 입력 기능
 	 */
 	@PostMapping("/room")
-	public ResponseEntity<?> roomProc(RoomFormDto roomFormDto) {
+	public ResponseEntity<?> roomProc(@Valid RoomFormDto roomFormDto) {
 		adminService.createRoom(roomFormDto);
         return ResponseEntity.ok().body("강의실 입력이 완료되었습니다");
 	}
@@ -163,7 +163,7 @@ public class AdminController {
 	 * @return 강의 입력 기능
 	 */
 	@PostMapping("/subject")
-    public ResponseEntity<?> insertSubject(SubjectFormDto subjectFormDto) {
+    public ResponseEntity<?> insertSubject(@Valid SubjectFormDto subjectFormDto) {
 		adminService.createSubjectAndSyllabus(subjectFormDto);
         return ResponseEntity.ok().body("강의 입력이 완료되었습니다");
 	}

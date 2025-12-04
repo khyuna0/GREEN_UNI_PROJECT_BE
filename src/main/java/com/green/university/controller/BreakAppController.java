@@ -30,7 +30,7 @@ import java.util.Objects;
  * 휴학 신청 관련 컨트롤러
  */
 @RestController
-@RequestMapping("/break")
+@RequestMapping("/api/break")
 public class BreakAppController {
 
     @Autowired
