@@ -5,12 +5,14 @@ import com.green.university.entity.BreakApp;
 import com.green.university.entity.StuStat;
 import com.green.university.entity.Student;
 import com.green.university.entity.Tuition;
+import com.green.university.security.CustomUserDetails;
 import com.green.university.service.*;
 import com.green.university.utils.Define;
 import com.green.university.utils.StuStatUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,11 +58,10 @@ public class TuitionController {
 	 * @return 납부된 등록금 내역 조회 페이지
 	 */
 	@GetMapping("/list")
-	public ResponseEntity<?> tuitionList() {
+	public ResponseEntity<?> tuitionList(@AuthenticationPrincipal CustomUserDetails principal) {
 
-		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
-
-		List<Tuition> tuitionList = tuitionService.readTuitionListByStatus(principal.getId(), true);
+        Long studentId = principal.getId();
+		List<Tuition> tuitionList = tuitionService.readTuitionListByStatus(studentId, true);
 
         return ResponseEntity.ok(Map.of(
                 "tuitionList", tuitionList
@@ -73,11 +74,11 @@ public class TuitionController {
 	 *         해당 학기 (2023-1)에 등록금을 납부한 기록이 있다면 납부하기 버튼 제거
 	 */
 	@GetMapping("/payment")
-	public ResponseEntity<?> tuitionPayment() {
+	public ResponseEntity<?> tuitionPayment(@AuthenticationPrincipal CustomUserDetails principal) {
 
-		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
+		Long studentId = principal.getId();;
         // Todo 엔티티 말고 따로 dto 만들어서 처리
-		Student studentInfo = userService.readStudent(principal.getId());
+		Student studentInfo = userService.readStudent(studentId);
 		// 등록금 납부 대상이 아니라면 진입 불가
 
 		// 해당 학생의 학적 상태가 '졸업' 또는 '자퇴'라면 X
@@ -119,13 +120,12 @@ public class TuitionController {
 	 * @return 등록금 납부 페이지로 다시 돌아가서 납부 완료됨을 보여주기
 	 */
 	@PostMapping("/payment")
-	public ResponseEntity<?> tuitionPaymentProc() {
+	public ResponseEntity<?> tuitionPaymentProc(@AuthenticationPrincipal CustomUserDetails principal) {
 
-		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
-		tuitionService.updateStatus(principal.getId());
+		Long studentId = principal.getId();
+		tuitionService.updateStatus(studentId);
 
         return ResponseEntity.ok().body("등록금 납부가 정상적으로 처리되었습니다.");
-
     }
 
 	/**
