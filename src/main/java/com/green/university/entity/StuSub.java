@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Entity
-public class StuSub {
+public class StuSub { // 학생의 과목과 학점
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,10 +19,9 @@ public class StuSub {
     @JoinColumn(name = "subject_id")
     private Subject subject;
 
-    //grade
     @ManyToOne
     @JoinColumn(name = "grade_grade")
     private Grade grade;
 
-    private Long completeGrade;
+    private Long completeGrade; // 최종학점?
 }

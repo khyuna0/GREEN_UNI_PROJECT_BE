@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User 로그인, 정보수정
@@ -52,7 +53,7 @@ public class PersonalController {
 	 * @author 서영 메인 홈페이지
 	 */
 	@GetMapping("")
-	public ResponseEntity<?> home(Model model) {
+	public ResponseEntity<?> home() {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 
@@ -64,8 +65,12 @@ public class PersonalController {
 		// 샘플이므로, 2월달로 고정함
 		List<Schedule> scheduleList = scheuleService.readScheduleListByMonth(2023,2);
 		model.addAttribute("scheduleList", scheduleList);
-		
+
+        // null로 초기화한 사용자 엔티티들
+
+
 		if (principal.getUserRole().equals("student")) {
+            // Todo 엔티티 말고 따로 dto 만들어서 처리
 			StudentInfoDto studentInfo = userService.readStudentInfo(principal.getId());
 			StuStat stuStat = stuStatService.readCurrentStatus(principal.getId());
 			model.addAttribute("userInfo", studentInfo);
@@ -82,7 +87,13 @@ public class PersonalController {
 			model.addAttribute("userInfo", professorInfo);
 		}
 
-		return "/main";
+        return ResponseEntity.ok(Map.of(
+                "noticeList", noticeList,
+                "scheduleList", scheduleList,
+                "userInfo", studentInfo,
+                "currentStatus", stuStat.getStatus()
+
+        ));
 	}
 
 	/**
@@ -144,7 +155,7 @@ public class PersonalController {
 	 * @return updateUser.jsp
 	 */
 	@GetMapping("/update")
-	public ResponseEntity<?> updateUser(Model model) {
+	public ResponseEntity<?> updateUser() {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 		UserInfoForUpdateDto userInfoForUpdateDto = null;
@@ -270,7 +281,7 @@ public class PersonalController {
 	 * @return 학생 정보 조회 페이지
 	 */
 	@GetMapping("/info/student")
-	public ResponseEntity<?> readStudentInfo(Model model) {
+	public ResponseEntity<?> readStudentInfo() {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 		StudentInfoDto student = userService.readStudentInfo(principal.getId());
@@ -288,7 +299,7 @@ public class PersonalController {
 	 * @return 직원 정보조회 페이지
 	 */
 	@GetMapping("/info/staff")
-	public ResponseEntity<?> readStaffInfo(Model model) {
+	public ResponseEntity<?> readStaffInfo() {
 
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 		Staff staff = userService.readStaff(principal.getId());
@@ -304,7 +315,7 @@ public class PersonalController {
 	 * @return 교수 정보 조회 페이지
 	 */
 	@GetMapping("/info/professor")
-	public ResponseEntity<?> readProfessorInfo(Model model) {
+	public ResponseEntity<?> readProfessorInfo() {
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
 		ProfessorInfoDto professor = userService.readProfessorInfo(principal.getId());
 		model.addAttribute("professor", professor);

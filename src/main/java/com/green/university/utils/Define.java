@@ -40,4 +40,7 @@ public class Define {
 	// Subject 관련 페이지당 개수
 	public final static Integer SUBJECT_PAGE_SIZE = 20;
 
+	// Student 조회 페이지당 개수
+	public final static Integer STUDENT_PAGE_SIZE = 20;
+
 }

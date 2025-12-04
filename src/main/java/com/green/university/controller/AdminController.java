@@ -56,7 +56,6 @@ public class AdminController {
 	 */
 	@GetMapping("/collegeDelete")
 	public ResponseEntity<?> deleteCollege(@RequestParam Long id) {
-		//model.addAttribute("id", id);
 		adminService.deleteCollege(id);
         return ResponseEntity.ok().body("단과대학 삭제가 완료되었습니다");
 	}

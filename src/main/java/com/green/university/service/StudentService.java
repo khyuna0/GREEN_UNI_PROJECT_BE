@@ -1,12 +1,19 @@
 package com.green.university.service;
 
 import com.green.university.dto.StudentListForm;
+import com.green.university.dto.response.StudentDto;
+import com.green.university.dto.response.StudentInfoDto;
 import com.green.university.entity.Department;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.DepartmentRepository;
 import com.green.university.repository.interfaces.StudentRepository;
 import com.green.university.entity.Student;
+import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,28 +39,32 @@ public class StudentService {
 	 * @param studentListForm
 	 * @return 학생 리스트
 	 */
-	@Transactional
-	public List<Student> readStudentList(StudentListForm studentListForm) {
+	@Transactional (readOnly = true)
+	public Page<StudentDto> readStudentList(StudentListForm studentListForm, Integer page) {
+		Pageable pageable = PageRequest.of(page, Define.STUDENT_PAGE_SIZE);
+
+		// 1. Specification 사용하기
 		Long studentId = studentListForm.getStudentId();
 		Long deptId = studentListForm.getDeptId();
 
-		// id가 있으면 그걸로 조회, dept가 있으면 그걸로 조회 -> 둘 다 있으면 둘 다로 조회..
+		Specification<Student> spec = Specification.where(null); // 조건 없이 전체 조회
 		if (studentId != null && deptId != null) {
-			Department department = departmentRepository.findById(deptId)
-					.orElseThrow(() -> new CustomRestfullException("Department not found", HttpStatus.BAD_REQUEST));
-			return studentRepository.findByIdAndDepartment(studentId, department);
+			spec = spec.and(StudentRepository.StudentSpecification.hasStudentId(studentId))
+					.and(StudentRepository.StudentSpecification.hasDepartment(deptId));
 		} else if (studentId != null) {
-			return studentRepository.findById(studentId)
-					.map(List::of)
-					.orElse(List.of());
+			spec = spec.and(StudentRepository.StudentSpecification.hasStudentId(studentId));
 		} else if (deptId != null) {
-			Department department = departmentRepository.findById(deptId)
-					.orElseThrow(() -> new CustomRestfullException("Department not found", HttpStatus.BAD_REQUEST));
-			return studentRepository.findByDepartment(department);
-		} else {
-			// 조건이 하나도 없으면 전체 조회 or 빈 리스트 반환 가능
-			return List.of();
+			spec = spec.and(StudentRepository.StudentSpecification.hasDepartment(deptId));
 		}
+
+		Page<Student> studentPage = studentRepository.findAll(spec, pageable);
+		return studentPage.map(StudentDto::fromEntity);
+
+//		2. @Query문 사용하기
+//		Page<Student> result = studentRepository.findByOptionalStudentIdAndDeptId(
+//				studentListForm.getStudentId(), studentListForm.getDeptId(), pageable);
+//
+//		return result.map(StudentDto::fromEntity);
 	}
 
 	/**
@@ -61,7 +72,7 @@ public class StudentService {
 	 * @param studentListForm
 	 * @return 학생 수
 	 */
-	@Transactional
+	@Transactional (readOnly = true)
 	public Long readStudentAmount(StudentListForm studentListForm) {
 
 		Long amount = null;

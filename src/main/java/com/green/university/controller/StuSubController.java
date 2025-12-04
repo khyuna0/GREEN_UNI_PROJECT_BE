@@ -104,7 +104,7 @@ public class StuSubController {
 		// 총 페이지 수
 		Long pageCount = (long) Math.ceil(subjectCount / 20.0);
 
-		// 현재 페이지
+		// 현재 페이지 Todo 페이지 타입 처리하기
 		List<SubjectDto> subjectListLimit = subjectService.readSubjectListByCurrentSemesterPage((page - 1) * 20);
 
 		// 필터에 사용할 전체 학과 정보
@@ -184,8 +184,11 @@ public class StuSubController {
 
 		// 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
+
+        // Todo 엔티티 말고 따로 dto 만들어서 처리
 		Student studentInfo = userService.readStudent(principal.getId());
 
+        // Todo 엔티티 말고 따로 dto 만들어서 처리
 		StuStat stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
 		List<BreakApp> breakAppList = breakAppService.readByStudentId(studentInfo.getId()); // 최근 순으로 정렬되어 있음
 
@@ -197,8 +200,8 @@ public class StuSubController {
 
 		// 총 페이지 수
 		Long pageCount = (long) Math.ceil(subjectCount / 20.0);
-		// 현재 페이지
 
+		// 현재 페이지 Todo 페이지 타입 처리하기
 		List<SubjectDto> subjectListLimit = subjectService.readSubjectListByCurrentSemesterPage((page - 1) * 20);
 		for (SubjectDto sub : subjectListLimit) {
 			// 현재 담겨 있는지 확인
@@ -336,8 +339,9 @@ public class StuSubController {
 
 		// 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
+        // Todo 엔티티 말고 따로 dto 만들어서 처리
 		Student studentInfo = userService.readStudent(principal.getId());
-
+        // Todo 엔티티 말고 따로 dto 만들어서 처리
 		StuStat stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
 		List<BreakApp> breakAppList = breakAppService.readByStudentId(studentInfo.getId()); // 최근 순으로 정렬되어 있음
 		StuStatUtil.checkStuStat("수강신청", stuStatEntity, breakAppList);
@@ -349,7 +353,7 @@ public class StuSubController {
 		// 총 페이지 수
 		Long pageCount = (long) Math.ceil(subjectCount / 20.0);
 ;
-		// 현재 페이지
+		// 현재 페이지 Todo 페이지 타입 처리하기
 		List<SubjectDto> subjectListLimit = subjectService.readSubjectListByCurrentSemesterPage((page - 1) * 20);
 		for (SubjectDto sub : subjectListLimit) {
 			// 현재 담겨 있는지 확인
@@ -486,8 +490,10 @@ public class StuSubController {
 
 		// 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
-		Student studentInfo = userService.readStudent(principal.getId());
+        // Todo 엔티티 말고 따로 dto 만들어서 처리
+        Student studentInfo = userService.readStudent(principal.getId());
 
+        // Todo 엔티티 말고 따로 dto 만들어서 처리
 		StuStat stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
 		List<BreakApp> breakAppList = breakAppService.readByStudentId(studentInfo.getId()); // 최근 순으로 정렬되어 있음
 		StuStatUtil.checkStuStat("수강신청", stuStatEntity, breakAppList);
@@ -549,8 +555,10 @@ public class StuSubController {
 		// 해당 학생의 학적 상태가 '졸업' 또는 '자퇴'라면 X
 		// 해당 학생이 이번 학기 휴학을 승인받은 상태라면 X
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
+        // Todo 엔티티 말고 따로 dto 만들어서 처리
 		Student studentInfo = userService.readStudent(principal.getId());
 
+        // Todo 엔티티 말고 따로 dto 만들어서 처리
 		StuStat stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
 		List<BreakApp> breakAppList = breakAppService.readByStudentId(studentInfo.getId()); // 최근 순으로 정렬되어 있음
 		StuStatUtil.checkStuStat("수강신청", stuStatEntity, breakAppList);

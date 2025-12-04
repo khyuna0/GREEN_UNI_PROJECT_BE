@@ -254,7 +254,7 @@ public class AdminService {
         subject.setNumOfStudent(subjectFormDto.getNumOfStudent());
         subjectRepository.save(subject);
 
-		// 강의계획서에 강의 ID 저장 (수정해야함)
+		// 강의계획서에 강의 ID 저장 (수정해야함?)
 		Long subjectId = subjectRepository.findIdOrderById(subjectFormDto.getId());
         
         SyllaBus syllaBus = new SyllaBus(); // 강의 아이디로 강의 찾아 엔티티에 강의만 저장함

@@ -1,7 +1,5 @@
 package com.green.university.repository.interfaces;
 
-import com.green.university.dto.EvaluationDto;
-import com.green.university.dto.MyEvaluationDto;
 import com.green.university.entity.Evaluation;
 
 import com.green.university.entity.Subject;
@@ -12,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface EvaluationRepository extends JpaRepository<Evaluation,Long> {
+public interface EvaluationRepository extends JpaRepository<Evaluation, Long> {
 
     //  엔티티에 studentId, subjectId 필드가 없고
     //  student, subject 객체가 있기 때문에 연관관계 경로 (student.id, subject.id)를 이렇게 씀

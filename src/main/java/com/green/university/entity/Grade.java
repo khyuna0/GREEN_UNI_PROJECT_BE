@@ -9,8 +9,7 @@ import lombok.Data;
 public class Grade {
 
     @Id
-    private String grade;
+    private String grade; // 등급 (A, B, C)
 
-    // 학점
-    private Long gradeValue;
+    private Long gradeValue; // 학점 (4.5, 3.0)
 }

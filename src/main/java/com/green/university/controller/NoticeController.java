@@ -93,7 +93,7 @@ public class NoticeController {
     public ResponseEntity<?> selectByIdNotice( @RequestParam Long id) {
         model.addAttribute("crud", "read");
         model.addAttribute("id", id);
-        Notice notice = noticeService.readByIdNotice(id);
+        Notice notice = noticeService.readByIdNotice(id); // Todo 엔티티 말고 따로 dto 만들어서 처리
         if (notice == null) {
             model.addAttribute("notice", null);
         } else {

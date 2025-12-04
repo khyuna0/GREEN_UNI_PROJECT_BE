@@ -1,12 +1,12 @@
 package com.green.university.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Getter
-@Setter
+@Data
 public class Subject {
 
     @Id
@@ -36,7 +36,7 @@ public class Subject {
     private Long startTime;
     private Long endTime;
     private Long grades;
-    private Long capacity;
+    private Long capacity; // 정원
     private Long numOfStudent;
 
 

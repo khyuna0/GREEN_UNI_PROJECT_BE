@@ -11,7 +11,6 @@ public class Room {
     @Column(length = 5)
     private String id;   // PK = 문자열 그대로 사용
 
-    //  College엔티티
     @ManyToOne
     @JoinColumn(name = "college_id")
     private College college;
