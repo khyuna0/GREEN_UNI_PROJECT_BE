@@ -7,6 +7,7 @@ import com.green.university.entity.Schedule;
 import com.green.university.security.CustomUserDetails;
 import com.green.university.service.ScheduleService;
 import com.green.university.utils.Define;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +52,7 @@ public class ScheduleController {
     // 원본 홈페이지 기준 학사정보 사이드 네비 - 학사일정 등록의 학사일정 리스트 단순 조회
     // crud의 상태에 따라 보기, 입력, 추가... 버튼 누르면 crud 파라미터 값이 변화함 (페이징처럼)
 	@GetMapping("/list")
-	public ResponseEntity<?> ScheduleList( @RequestParam(defaultValue = "select") String crud) {
+	public ResponseEntity<?> ScheduleList(@RequestParam(defaultValue = "select") String crud) {
 		List<Schedule> schedules = scheduleService.readSchedule();
 
         return ResponseEntity.ok(Map.of(
@@ -62,12 +63,12 @@ public class ScheduleController {
 
 	// 학사 일정 추가 crud=insert
 	@PostMapping("/write")
-	public ResponseEntity<?> ScheduleProc(ScheduleFormDto scheduleFormDto,
+	public ResponseEntity<?> ScheduleProc(@Valid ScheduleFormDto scheduleFormDto,
                                           @AuthenticationPrincipal CustomUserDetails principal) {
 
 		Long staffId = principal.getId();
-		System.out.println("write");
-		System.out.println(scheduleFormDto);
+//		System.out.println("write");
+//		System.out.println(scheduleFormDto);
 		
 		if (scheduleFormDto.getStartDay().equals("")){ // 값이 없을 때 처리
 			throw new CustomRestfullException("날짜를 입력해주세요", HttpStatus.BAD_REQUEST);
@@ -82,7 +83,7 @@ public class ScheduleController {
 	}
 
     // 학사 일정 삭제 crud=delete
-	@GetMapping("/delete/{id}")
+	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<?> deleteSchedule(@PathVariable("id") Long id) {
         scheduleService.deleteSchedule(id);
 
@@ -90,9 +91,9 @@ public class ScheduleController {
 	}
 
     // 학사 일정 수정
-    @PatchMapping("/update/{id}") // Todo 다른 것도 dto에 id 값 넣어 주지 말고 엔드포인트로 넣어주기
+    @PatchMapping("/update/{id}")
     public ResponseEntity<?> updateSchedule(@RequestBody ScheduleFormDto scheduleFormDto, @PathVariable("id") Long id) {
-        scheduleService.updateSchedule(scheduleFormDto, id); // Todo 서비스에 id를 매개변수 추가해주기
+        scheduleService.updateSchedule(scheduleFormDto, id);
 
         return ResponseEntity.ok().body("학사 일정 수정이 완료되었습니다.");
     }

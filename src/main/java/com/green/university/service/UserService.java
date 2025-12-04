@@ -212,10 +212,13 @@ public class UserService {
 
     // 학생 조회
     @Transactional
-    public Student readStudent(Long id) {
-        return studentRepository.findById(id).orElseThrow(
+    public StudentDto readStudent(Long studentId) {
+        Student student = studentRepository.findById(studentId).orElseThrow(
                 () -> new CustomRestfullException("학생을 조회할 수 없습니다.", HttpStatus.NOT_FOUND)
         );
+
+        return StudentDto.fromEntity(student);
+
     }
 
     // 직원 조회

@@ -207,9 +207,9 @@ public class ProfessorService {
 	 * @param syllaBusFormDto
 	 */
 	@Transactional
-	public void updateSyllabus(SyllaBusFormDto syllaBusFormDto) {
+	public void updateSyllabus(Long id , SyllaBusFormDto syllaBusFormDto) {
 
-        SyllaBus syllaBus = syllaBusRepository.findBySubject_Id(syllaBusFormDto.getSubjectId()).orElseThrow(
+        SyllaBus syllaBus = syllaBusRepository.findBySubject_Id(id).orElseThrow(
                 () -> new CustomRestfullException("강의 계획서를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
         syllaBus.setOverview(syllaBusFormDto.getOverview());
         syllaBus.setObjective(syllaBusFormDto.getObjective());
@@ -228,48 +228,42 @@ public class ProfessorService {
     public Page<Professor> readProfessorList(ProfessorListForm professorListForm, int page) {
 
         if (page < 1) page = 1;
-
         int realPage = page - 1; // 페이지 번호가 1부터 시작하게 보정함
-
         Pageable pageable = PageRequest.of(realPage, PAGE_SIZE, Sort.by("id").descending());
 
         // 1) professorId로 단일 검색 (PK는 유니크라 단건 조회)
         if (professorListForm.getProfessorId() != null) {
-
             Professor p = professorRepository.findById(professorListForm.getProfessorId())
                     .orElse(null);
             List<Professor> result = (p == null) ? List.of() : List.of(p);
-
-            return new PageImpl<>(result, pageable, result.size());
-            // 고유키 검색 - 단건 반환
+            return new PageImpl<>(result, pageable, result.size()); // 고유키 검색 -> 단권 반환 -> 리스트 형식
         }
 
         // 2) deptId로 검색 (특정 학과 교수 목록 조회)
         if (professorListForm.getDeptId() != null) {
-            return professorRepository.findByDepartment_id(professorListForm.getDeptId(), pageable);
+            return professorRepository.findByDepartmentId(professorListForm.getDeptId(), pageable);
         }
 
         // 3) 조건 없음 → 전체 교수 목록 조회
         return professorRepository.findAll(pageable);
     }
 
-
-	/**
-	 * 
-	 * @param professorListForm
-	 * @return 교수 수 (페이징?) 나중엔 필요없을듯, 컨트롤러에서 처리
-	 */
-	@Transactional
-	public Long readProfessorAmount(ProfessorListForm professorListForm) {
-
-		Long amount = null;
-		if (professorListForm.getDeptId() != null) {
-			amount = professorRepository.countByDepartment_id(professorListForm.getDeptId());
-		} else {
-			amount = professorRepository.count(); // .count() -> 테이블의 전체 row 개수를 long 타입으로 반환하는 메서드
-		}
-
-		return amount;
-	}
+//	/**
+//	 *
+//	 * @param professorListForm
+//	 * @return 교수 수 (페이징?) 나중엔 필요없을듯, 컨트롤러에서 처리
+//	 */
+//	@Transactional
+//	public Long readProfessorAmount(ProfessorListForm professorListForm) {
+//
+//		Long amount = null;
+//		if (professorListForm.getDeptId() != null) {
+//			amount = professorRepository.countByDepartment_id(professorListForm.getDeptId());
+//		} else {
+//			amount = professorRepository.count(); // .count() -> 테이블의 전체 row 개수를 long 타입으로 반환하는 메서드
+//		}
+//
+//		return amount;
+//	}
 
 }

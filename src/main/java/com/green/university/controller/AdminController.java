@@ -6,6 +6,7 @@ import com.green.university.entity.Department;
 import com.green.university.entity.Room;
 import com.green.university.entity.Subject;
 import com.green.university.service.AdminService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -54,9 +55,9 @@ public class AdminController {
 	 * 
 	 * @return 단과대학 삭제 기능 crud=delete
 	 */
-	@GetMapping("/collegeDelete")
-	public ResponseEntity<?> deleteCollege(@RequestParam Long id) {
-		adminService.deleteCollege(id);
+	@DeleteMapping("/collegeDelete/{collegeId}")
+	public ResponseEntity<?> deleteCollege(@PathVariable("collegeId") Long collegeId) {
+		adminService.deleteCollege(collegeId);
         return ResponseEntity.ok().body("단과대학 삭제가 완료되었습니다");
 	}
 
@@ -68,16 +69,6 @@ public class AdminController {
 	public ResponseEntity<?> department(@RequestParam(defaultValue = "select") String crud) {
 		List<Department> departmentList = adminService.readDepartment(); // 프론트에서 합쳐 찍는 형태일까?
 		List<College> collegeList = adminService.readCollege();
-//		if (collegeList.isEmpty()) {
-//			model.addAttribute("collegeList", null);
-//		} else {
-//			model.addAttribute("collegeList", collegeList);
-//		}
-//		if (departmentList.isEmpty()) {
-//			model.addAttribute("departmentList", null);
-//		} else {
-//			model.addAttribute("departmentList", departmentList);
-//		}
         return ResponseEntity.ok(Map.of(
                 "collegeList", collegeList,
                 "departmentList", departmentList,
@@ -99,9 +90,9 @@ public class AdminController {
 	 * 
 	 * @return 학과 삭제 기능
 	 */
-	@GetMapping("/departmentDelete")
-	public ResponseEntity<?> deleteDepartment(@RequestParam Long id) {
-		adminService.deleteDepartment(id);
+	@GetMapping("/departmentDelete/{deptId}")
+	public ResponseEntity<?> deleteDepartment(@PathVariable("deptId") Long deptId) {
+		adminService.deleteDepartment(deptId);
         return ResponseEntity.ok().body("학과 삭제가 완료되었습니다");
 	}
 
@@ -109,30 +100,21 @@ public class AdminController {
 	 * 
 	 * @return 학과 수정 기능
 	 */
-	@PutMapping("/department")
-	public ResponseEntity<?> updateDepartment(DepartmentFormDto departmentFormDto) {
-		adminService.updateDepartment(departmentFormDto);
+	@PatchMapping("/department/{deptId}")
+	public ResponseEntity<?> updateDepartment(@PathVariable("deptId") Long deptId, @Valid DepartmentFormDto departmentFormDto) {
+		adminService.updateDepartment(deptId, departmentFormDto);
         return ResponseEntity.ok().body("학과 수정이 완료되었습니다");
 	}
 
 	/**
 	 * 
-	 * @return 강의실 페이지
+	 * @return 강의실 페이지 - 리스트 보기
 	 */
 	@GetMapping("/room")
 	public ResponseEntity<?> room(@RequestParam(defaultValue = "select") String crud) {
 		List<Room> roomList = adminService.readRoom();
 		List<College> collegeList = adminService.readCollege();
-//		if (collegeList.isEmpty()) {
-//			model.addAttribute("collegeList", null);
-//		} else {
-//			model.addAttribute("collegeList", collegeList);
-//		}
-//		if (roomList.isEmpty()) {
-//			model.addAttribute("roomList", null);
-//		} else {
-//			model.addAttribute("roomList", roomList);
-//		}
+
         return ResponseEntity.ok(Map.of(
                 "collegeList", collegeList,
                 "roomList", roomList,
@@ -154,30 +136,21 @@ public class AdminController {
 	 * 
 	 * @return 강의실 삭제 기능
 	 */
-	@GetMapping("/roomDelete")
-	public ResponseEntity<?> deleteRoom(@RequestParam String id) { // 강의실 기본키(id)는 E601 이런 형식임
-		adminService.deleteRoom(id);
+	@DeleteMapping("/roomDelete/{roomId}")
+	public ResponseEntity<?> deleteRoom(@RequestParam String roomId) { // 강의실 기본키(id)는 E601 이런 형식임
+		adminService.deleteRoom(roomId);
         return ResponseEntity.ok().body("강의실 삭제가 완료되었습니다");
 	}
 
 	/**
 	 * 
-	 * @return 강의 페이지
+	 * @return 강의 페이지 - 리스트 조회
 	 */
 	@GetMapping("/subject")
     public ResponseEntity<?> subject(@RequestParam(defaultValue = "select") String crud) {
 		List<Subject> subjectList = adminService.readSubject();
 		List<College> collegeList = adminService.readCollege();
-//		if (collegeList.isEmpty()) {
-//			model.addAttribute("collegeList", null);
-//		} else {
-//			model.addAttribute("collegeList", collegeList);
-//		}
-//		if (subjectList.isEmpty()) {
-//			model.addAttribute("subjectList", null);
-//		} else {
-//			model.addAttribute("subjectList", subjectList);
-//		}
+
         return ResponseEntity.ok(Map.of(
                 "collegeList", collegeList,
                 "subjectList", subjectList,
@@ -199,9 +172,9 @@ public class AdminController {
 	 * 
 	 * @return 강의 삭제 기능
 	 */
-	@GetMapping("/subjectDelete")
-    public ResponseEntity<?> deleteSubject( @RequestParam Long id) {
-		adminService.deleteSubject(id);
+	@DeleteMapping("/subjectDelete/{subjectId}")
+    public ResponseEntity<?> deleteSubject(@PathVariable("subjectId") Long subjectId) {
+		adminService.deleteSubject(subjectId);
         return ResponseEntity.ok().body("강의 삭제가 완료되었습니다");
 	}
 
@@ -209,9 +182,9 @@ public class AdminController {
 	 * 
 	 * @return 강의 수정 기능
 	 */
-	@PutMapping("/subject")
-    public ResponseEntity<?> updateSubject(SubjectFormDto subjectFormDto) {
-		adminService.updateSubject(subjectFormDto);
+	@PatchMapping("/subject/{subjectId}")
+    public ResponseEntity<?> updateSubject(@PathVariable("subjectId") Long subjectId, @Valid SubjectFormDto subjectFormDto) {
+		adminService.updateSubject(subjectId, subjectFormDto);
         return ResponseEntity.ok().body("강의 수정이 완료되었습니다");
 	}
 
@@ -223,16 +196,7 @@ public class AdminController {
 	public ResponseEntity<?> collTuit(@RequestParam(defaultValue = "select") String crud) {
 		List<CollTuitFormDto> collTuitList = adminService.readCollTuit();
 		List<College> collegeList = adminService.readCollege();
-//		if (collegeList.isEmpty()) {
-//			model.addAttribute("collegeList", null);
-//		} else {
-//			model.addAttribute("collegeList", collegeList);
-//		}
-//		if (collTuitList.isEmpty()) {
-//			model.addAttribute("collTuitList", null);
-//		} else {
-//			model.addAttribute("collTuitList", collTuitList);
-//		}
+
         return ResponseEntity.ok(Map.of(
                 "collegeList", collegeList,
                 "collTuitList", collTuitList,
@@ -245,7 +209,7 @@ public class AdminController {
 	 * @return 단과대별 등록금 입력 기능
 	 */
 	@PostMapping("/tuition")
-	public ResponseEntity<?> insertcollTuit(CollTuitFormDto collTuitFormDto) {
+	public ResponseEntity<?> insertcollTuit(@Valid CollTuitFormDto collTuitFormDto) {
 		adminService.createCollTuit(collTuitFormDto);
         return ResponseEntity.ok().body("단과대별 등록금 입력이 완료되었습니다");
 	}
@@ -254,8 +218,8 @@ public class AdminController {
 	 * 
 	 * @return 단과대 등록금 삭제 기능
 	 */
-	@GetMapping("/tuitionDelete")
-	public ResponseEntity<?> deleteCollTuit(@RequestParam Long collegeId) {
+	@DeleteMapping("/tuitionDelete/{collegeId}")
+	public ResponseEntity<?> deleteCollTuit(@PathVariable("collegeId") Long collegeId) {
 		adminService.deleteCollTuit(collegeId);
         return ResponseEntity.ok().body("단과대별 등록금 삭제가 완료되었습니다");
 	}
@@ -264,9 +228,9 @@ public class AdminController {
 	 * 
 	 * @return 단과대 등록금 수정 기능
 	 */
-	@PutMapping("/tuitionUpdate")
-	public ResponseEntity<?> updateCollTuit(CollTuitFormDto collTuitFormDto) {
-		adminService.updateCollTuit(collTuitFormDto);
+	@PatchMapping("/tuitionUpdate/{collegeId}")
+	public ResponseEntity<?> updateCollTuit(@PathVariable("collegeId") Long collegeId ,@Valid CollTuitFormDto collTuitFormDto) {
+		adminService.updateCollTuit(collegeId, collTuitFormDto);
         return ResponseEntity.ok().body("단과대별 등록금 수정이 완료되었습니다");
 	}
 

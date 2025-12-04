@@ -145,7 +145,7 @@ public class NoticeController {
     // 검색 + 페이지
     @GetMapping("/search/{page}")
     public ResponseEntity<?> showNoticeByKeywordAndPage( NoticePageFormDto noticePageFormDto,
-                                                         @PathVariable int page, @RequestParam String keyword) {
+                                                         @PathVariable("page") int page, @RequestParam String keyword) {
 
         noticePageFormDto.setPage(page);
 
@@ -164,10 +164,10 @@ public class NoticeController {
 
 
     //  공지사항 수정 페이지
-    @GetMapping("/update/{id}")
-    public ResponseEntity<?> update(@PathVariable("id") Long id) {
+    @GetMapping("/update/{NoticeId}")
+    public ResponseEntity<?> update(@PathVariable("NoticeId") Long NoticeId) {
 
-        NoticeDto notice = noticeService.readByIdNotice(id);
+        NoticeDto notice = noticeService.readByIdNotice(NoticeId);
         return ResponseEntity.ok(Map.of(
                 "crud","update",
                 "notice", notice
@@ -176,16 +176,16 @@ public class NoticeController {
 
 
     // 공지사항 수정
-    @PutMapping("/update/{id}")
-    public ResponseEntity<?> update(@PathVariable("id") Long id, @Validated NoticeFormDto noticeFormDto) {
-        noticeService.updateNotice(id, noticeFormDto);
+    @PatchMapping("/update/{NoticeId}")
+    public ResponseEntity<?> update(@PathVariable("NoticeId") Long NoticeId, @Validated NoticeFormDto noticeFormDto) {
+        noticeService.updateNotice(NoticeId, noticeFormDto);
         return ResponseEntity.ok().body("공지사항 수정이 완료되었습니다.");
     }
 
     // 공지사항 삭제
-    @GetMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
-        noticeService.deleteNotice(id);
+    @DeleteMapping("/delete/{NoticeId}")
+    public ResponseEntity<?> delete(@PathVariable("NoticeId") Long NoticeId) {
+        noticeService.deleteNotice(NoticeId);
         return ResponseEntity.ok().body("공지사항 삭제가 완료되었습니다.");
     }
 }

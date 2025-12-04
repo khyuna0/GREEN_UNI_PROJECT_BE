@@ -104,7 +104,7 @@ public class SubjectController {
 	 * @return 강의계획서 조회
 	 */
 	@GetMapping("/syllabus/{subjectId}")
-	public ResponseEntity<?> readSyllabus(@PathVariable("id") Long subjectId) {
+	public ResponseEntity<?> readSyllabus(@PathVariable("subjectId") Long subjectId) {
 		ReadSyllabusDto readSyllabusDto = professorService.readSyllabus(subjectId);
 		if (readSyllabusDto.getOverview() != null) {
 			readSyllabusDto.setOverview(readSyllabusDto.getOverview().replace("\r\n", "<br>"));

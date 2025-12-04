@@ -5,6 +5,7 @@ import com.green.university.entity.*;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.*;
 import com.green.university.utils.SubjectUtil;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -57,8 +58,8 @@ public class AdminService {
     }
 
     // 단과대 삭제
-    public void deleteCollege(Long id) {
-        collegeRepository.deleteById(id);
+    public void deleteCollege(Long collegeId) {
+        collegeRepository.deleteById(collegeId);
     }
 
     /**
@@ -91,16 +92,16 @@ public class AdminService {
     }
 
     // 학과 삭제
-    public void deleteDepartment(Long collegeId) {
-        departmentRepository.deleteById(collegeId);
+    public void deleteDepartment(Long deptId) {
+        departmentRepository.deleteById(deptId);
     }
 
     // 학과 수정
     @Transactional
-    public void updateDepartment(DepartmentFormDto departmentFormDto) {
+    public void updateDepartment(Long id, DepartmentFormDto departmentFormDto) {
 
         // 기존 학과 엔티티 가져오기
-        Department department = departmentRepository.findById(departmentFormDto.getId())
+        Department department = departmentRepository.findById(id)
                 .orElseThrow(() -> new CustomRestfullException("해당 학과를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
 
         // 학과 이름 수정
@@ -165,10 +166,10 @@ public class AdminService {
     }
 
     //단과대 등록금 수정
-    public void updateCollTuit(CollTuitFormDto collTuitFormDto) {
+    public void updateCollTuit(Long id, CollTuitFormDto collTuitFormDto) {
 
         // 기존 등록금 엔티티 조회
-        CollTuit collTuit = collTuitRepository.findByCollege_Id(collTuitFormDto.getCollegeId())
+        CollTuit collTuit = collTuitRepository.findByCollege_Id(id)
                 .orElseThrow(() ->
                         new CustomRestfullException("해당 단과대의 등록금 정보가 없습니다.",
                                 HttpStatus.NOT_FOUND));
@@ -281,9 +282,9 @@ public class AdminService {
 	/**
 	 * 강의 수정 서비스
 	 */
-	public void updateSubject(SubjectFormDto subjectFormDto) {
+	public void updateSubject(Long id, SubjectFormDto subjectFormDto) {
 		// ID로 연도 학기 조회
-		Subject subject = subjectRepository.findById(subjectFormDto.getId()).orElseThrow(
+		Subject subject = subjectRepository.findById(id).orElseThrow(
                 () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );
 		// 강의실, 강의시간 중복 검사

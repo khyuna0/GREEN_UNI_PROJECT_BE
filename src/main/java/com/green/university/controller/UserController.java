@@ -7,6 +7,7 @@ import com.green.university.entity.Professor;
 import com.green.university.service.ProfessorService;
 import com.green.university.service.StudentService;
 import com.green.university.service.UserService;
+import com.green.university.utils.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -96,27 +97,25 @@ public class UserController {
 			@RequestParam(required = false) Long deptId) {
 
         int currentPage = ( page == null  || page < 1) ? 1 : page;
+
 		ProfessorListForm professorListForm = new ProfessorListForm();
 		professorListForm.setPage((currentPage - 1) * 20);
 
         // 검색어가 있는 경우
-		if (professorId != null) {
-			professorListForm.setProfessorId(professorId);
-		} else if (deptId != null) {
-			professorListForm.setDeptId(deptId);
-		}
+		if (professorId != null) professorListForm.setProfessorId(professorId);
+        if (deptId != null) professorListForm.setDeptId(deptId);
 
-		Long amount = professorService.readProfessorAmount(professorListForm);
-		if (professorId != null) {
-			amount = 1L;
-		}
-		Page<Professor> list = professorService.readProfessorList(professorListForm, page);
+        Page<Professor> list = professorService.readProfessorList(professorListForm, currentPage);
+		/**
+		 * @author 서영 1페이지가 선택되어 있음을 보여주기 위함
+		 */
+
+        PaginationUtil.PaginationResult paginationResult = PaginationUtil.build(list, currentPage, 10 );
 
         return ResponseEntity.ok(Map.of(
-                "listCount", Math.ceil(amount / 20.0),
                 "professorList", list,
-                "deptId", deptId,
-                "page", 1
+                "paginationResult", paginationResult
+                // "deptId", deptId,
         ));
 	}
 

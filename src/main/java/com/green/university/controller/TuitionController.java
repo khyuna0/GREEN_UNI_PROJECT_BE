@@ -1,6 +1,7 @@
 package com.green.university.controller;
 
 import com.green.university.dto.response.StuStatDto;
+import com.green.university.dto.response.StudentDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.entity.BreakApp;
 import com.green.university.entity.StuStat;
@@ -78,8 +79,7 @@ public class TuitionController {
 	public ResponseEntity<?> tuitionPayment(@AuthenticationPrincipal CustomUserDetails principal) {
 
 		Long studentId = principal.getId();;
-        // Todo 엔티티 말고 따로 dto 만들어서 처리
-		Student studentInfo = userService.readStudent(studentId);
+        StudentDto studentInfo = userService.readStudent(studentId);
 		// 등록금 납부 대상이 아니라면 진입 불가
 
 		// 해당 학생의 학적 상태가 '졸업' 또는 '자퇴'라면 X
@@ -133,8 +133,6 @@ public class TuitionController {
 	 */
 	@GetMapping("/bill")
 	public ResponseEntity<?> createPayment() {
-        // 얜뭘까 Todo 이 메서드 어디서 사용하는지 알아보기... 단순 페이지 보기 매핑일까?
-//		return "/tuition/createPayment";
 
         return ResponseEntity.ok().body("등록금 납부 고지서 생성 페이지.");
 	}

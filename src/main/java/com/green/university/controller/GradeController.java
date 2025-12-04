@@ -44,7 +44,7 @@ public class GradeController {
         MyGradeDto mygrade = null;
 
 		// 수강한 연도가 없으면 금학기 성적조회 x
-		if (yearList.size() != 0) {
+		if (!yearList.isEmpty()) {
 
 			// 금학기 성적조회 기능
 			thisSemester = gradeService.readThisSemesterByStudentId(studentId);
@@ -85,7 +85,7 @@ public class GradeController {
 	}
 
 	/**
-	 * 학기별 성적 조회 Todo 성적조회 기능 정리하기
+	 * 학기별 성적 조회
 	 *
 	 * @return
 	 */
