@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 /**
  * staff_tb insert용
