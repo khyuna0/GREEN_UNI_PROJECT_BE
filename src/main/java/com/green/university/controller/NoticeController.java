@@ -4,12 +4,14 @@ import com.green.university.dto.NoticeFormDto;
 import com.green.university.dto.NoticePageFormDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.entity.Notice;
+import com.green.university.security.CustomUserDetails;
 import com.green.university.service.NoticeService;
 import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,8 +35,9 @@ public class NoticeController {
      */
     @GetMapping("")
     public ResponseEntity<?> notice(
-                         @RequestParam(defaultValue = "select") String crud,
-                         @RequestParam(defaultValue = "1") int page) {
+            @RequestParam(defaultValue = "select") String crud,
+            @RequestParam(defaultValue = "1") int page,
+            @AuthenticationPrincipal CustomUserDetails principal) {
 
         model.addAttribute("crud", crud);
 
@@ -107,8 +110,8 @@ public class NoticeController {
     // 공지사항 페이지 이동
     @GetMapping("/list/{page}")
     public ResponseEntity<?> showNoticeListByPage(
-                                       @RequestParam(defaultValue = "select") String crud,
-                                       @PathVariable int page) {
+            @RequestParam(defaultValue = "select") String crud,
+            @PathVariable int page) {
 
         model.addAttribute("crud", crud);
 
@@ -147,7 +150,7 @@ public class NoticeController {
     // 검색 + 페이지
     @GetMapping("/search/{page}")
     public ResponseEntity<?> showNoticeByKeywordAndPage( NoticePageFormDto noticePageFormDto,
-                                             @PathVariable int page, @RequestParam String keyword) {
+                                                         @PathVariable int page, @RequestParam String keyword) {
 
         noticePageFormDto.setPage(page);
 
@@ -161,10 +164,10 @@ public class NoticeController {
         model.addAttribute("currentPage",page);
 
         return "/board/notice";
-       
+
     }
 
-    
+
     //  공지사항 수정 페이지
     @GetMapping("/update")
     public ResponseEntity<?> update( @RequestParam Long id) {
@@ -176,7 +179,7 @@ public class NoticeController {
         return "/board/notice";
     }
 
-   
+
     // 공지사항 수정
     @PutMapping("/update")
     public ResponseEntity<?> update(@Validated NoticeFormDto noticeFormDto) {

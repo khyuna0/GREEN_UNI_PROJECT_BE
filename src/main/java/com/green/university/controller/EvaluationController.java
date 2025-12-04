@@ -4,6 +4,7 @@ import com.green.university.dto.EvaluationDto;
 import com.green.university.dto.MyEvaluationDto;
 import com.green.university.dto.response.QuestionDto;
 import com.green.university.handler.exception.CustomRestfullException;
+import com.green.university.security.CustomUserDetails;
 import com.green.university.service.EvaluationService;
 import com.green.university.service.QuestionService;
 import com.green.university.utils.Define;
@@ -11,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpSession;
@@ -47,10 +49,12 @@ public class EvaluationController {
      * 강의평가 post
      */
     @PostMapping("/write/{subjectId}")
-    public ResponseEntity<?> EvaluationProc(@PathVariable Long subjectId, EvaluationDto evaluationFormDto) {
-        PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
+    public ResponseEntity<?> EvaluationProc(@PathVariable Long subjectId, EvaluationDto evaluationFormDto,
+                                            @AuthenticationPrincipal CustomUserDetails principal) {
 
-        evaluationFormDto.setStudentId(principal.getId());
+        Long studentId = principal.getId();
+
+        evaluationFormDto.setStudentId(studentId);
         evaluationFormDto.setSubjectId(subjectId);
 
         if (evaluationFormDto.getAnswer1() == null) {
@@ -78,12 +82,12 @@ public class EvaluationController {
 
     // 강의 평가 처음화면 (교수)
     @GetMapping("/read")
-    public ResponseEntity<?> readEvaluation() {
+    public ResponseEntity<?> readEvaluation(@AuthenticationPrincipal CustomUserDetails principal) {
 
-        PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
+        Long professorId = principal.getId();
 
-        List<MyEvaluationDto> subjectName = evaluationService.readSubjectName(principal.getId());
-        List<MyEvaluationDto> eval = evaluationService.readEvaluationByProfessorId(principal.getId());
+        List<MyEvaluationDto> subjectName = evaluationService.readSubjectName(professorId);
+        List<MyEvaluationDto> eval = evaluationService.readEvaluationByProfessorId(professorId);
 
         return ResponseEntity.ok(Map.of(
                 "subjectName", subjectName,
@@ -93,13 +97,14 @@ public class EvaluationController {
 
     // 과목별 강의 평가 조회 (교수)
     @PostMapping("/read")
-    public ResponseEntity<?> readEvaluation(HttpServletRequest httpServletRequest) {
+    public ResponseEntity<?> readEvaluation( @RequestParam("subjectId") String name,   // 기존 request.getParameter("subjectId") 대체
+                                             @AuthenticationPrincipal CustomUserDetails principal) {
 
-        PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
-        String name = httpServletRequest.getParameter("subjectId");
+        Long professorId = principal.getId();
+        //String name = httpServletRequest.getParameter("subjectId");
 
-        List<MyEvaluationDto> subjectName = evaluationService.readSubjectName(principal.getId());
-        List<MyEvaluationDto> eval = evaluationService.readEvaluationByProfessorIdAndName(principal.getId(), name);
+        List<MyEvaluationDto> subjectName = evaluationService.readSubjectName(professorId);
+        List<MyEvaluationDto> eval = evaluationService.readEvaluationByProfessorIdAndName(professorId, name);
         return ResponseEntity.ok(Map.of(
                 "subjectName", subjectName,
                 "eval", eval

@@ -8,25 +8,15 @@ import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
 
-/**
- * 
- * @author 편용림
- * 
- *         금학기,학기별 성적, 누계성적 조회
- * 
- */
-
+ // 금학기,학기별 성적, 누계성적 조회
 @RestController
 @RequestMapping("/grade")
 public class GradeController {
@@ -48,7 +38,7 @@ public class GradeController {
         Long studentId = principal.getId();
 
 		// 학생이 수강 신청한 연도 조회
-		List<GradeDto> yearList = gradeService.readGradeYearByStudentId(principal.getId());
+		List<GradeDto> yearList = gradeService.readGradeYearByStudentId(studentId);
 
         List<GradeDto> thisSemester = null; // 값 보내주기 위해 선언부만 만듬
         MyGradeDto mygrade = null;
@@ -57,10 +47,10 @@ public class GradeController {
 		if (yearList.size() != 0) {
 
 			// 금학기 성적조회 기능
-			thisSemester = gradeService.readThisSemesterByStudentId(principal.getId());
+			thisSemester = gradeService.readThisSemesterByStudentId(studentId);
 
 			// 누계 성적 조회
-			mygrade = gradeService.readMyGradeByStudentId(principal.getId());
+			mygrade = gradeService.readMyGradeByStudentId(studentId);
 		}
 
         return ResponseEntity.ok(Map.of(
@@ -76,16 +66,16 @@ public class GradeController {
 	 * @return
 	 */
 	@GetMapping("/semester")
-	public ResponseEntity<?> semester() {
+	public ResponseEntity<?> semester(@AuthenticationPrincipal CustomUserDetails principal) {
 
-		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
+		Long studentId = principal.getId();
 
 		// 학생이 수강 신청한 연도 조회
-		List<GradeDto> yearList = gradeService.readGradeYearByStudentId(principal.getId());
+		List<GradeDto> yearList = gradeService.readGradeYearByStudentId(studentId);
 		// 전체 성적 조회
-		List<GradeDto> gradeAllList = gradeService.readAllGradeByStudentId(principal.getId());
+		List<GradeDto> gradeAllList = gradeService.readAllGradeByStudentId(studentId);
 		// 학생이 신청한 학기가 있는지 찾는 기능
-		List<GradeDto> semesterList = gradeService.readGradeSemesterByStudentId(principal.getId());
+		List<GradeDto> semesterList = gradeService.readGradeSemesterByStudentId(studentId);
 
         return ResponseEntity.ok(Map.of(
                 "yearList", yearList,
@@ -97,42 +87,54 @@ public class GradeController {
 	/**
 	 * 학기별 성적 조회 Todo 성적조회 기능 정리하기
 	 *
-	 * @param httpServletRequest
 	 * @return
 	 */
-	@PostMapping("/read")
-	public ResponseEntity<?> readGradeProc(HttpServletRequest httpServletRequest) {
+    @PostMapping("/read")
+    public ResponseEntity<?> readGradeProc(@RequestParam("type") String type,
+                                           @RequestParam("subyear") Long subYear,
+                                           @RequestParam("semester") Long semester,
+                                           @AuthenticationPrincipal CustomUserDetails principal) {
 
-		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
+        Long studentId = principal.getId();
 
-		// 학생이 수강 신청한 연도 조회
-		List<GradeDto> yearList = gradeService.readGradeYearByStudentId(principal.getId());
+        // 학생이 수강 신청한 연도 조회
+        List<GradeDto> yearList = gradeService.readGradeYearByStudentId(studentId);
 
-		// 학생이 수강 신청한 학기 조회
-		List<GradeDto> semesterList = gradeService.readGradeSemesterByStudentId(principal.getId());
+        // 학생이 수강 신청한 학기 조회
+        List<GradeDto> semesterList = gradeService.readGradeSemesterByStudentId(studentId);
 
-		// 조회 할때 값을 들고옴
-		String type = httpServletRequest.getParameter("type"); // 파라미터로 받는데... 따로 조회용 DTO를 만들어야 할까? (보류)
-		Long subYear = Long.valueOf(httpServletRequest.getParameter("subYear"));
-		Long sesmeter = Long.valueOf(httpServletRequest.getParameter("sesmeter"));
+        //실제 조회할 성적 리스트
+        List<GradeDto> gradeList;
 
-		if (type.equals("전체")) {
-			List<GradeDto> gradeAllList = gradeService.readGradeByStudentId(principal.getId(), subYear, sesmeter);
-			model.addAttribute("gradeList", gradeAllList);
-		} else {
-			List<GradeDto> gradeList = gradeService.readGradeByType(principal.getId(), subYear, sesmeter, type);
-			model.addAttribute("gradeList", gradeList);
-		}
+        if ("전체".equals(type)) {
+            gradeList = gradeService.readGradeByStudentId(studentId, subYear, semester);
+        } else {
+            gradeList = gradeService.readGradeByType(studentId, subYear, semester, type);
+        }
 
-		model.addAttribute("yearList", yearList);
-		model.addAttribute("semesterList", semesterList);
-
+        // Model -> JSON 응답으로 한번에 내려주기
         return ResponseEntity.ok(Map.of(
                 "yearList", yearList,
-                "gradeList", gradeAllList,
-                "semesterList", semesterList
+                "semesterList", semesterList,
+                "gradeList", gradeList
         ));
-	};
+
+        //        if (type.equals("전체")) {
+//            List<GradeDto> gradeAllList = gradeService.readGradeByStudentId(studentId, subYear, semester);
+//            model.addAttribute("gradeList", gradeAllList);
+//        } else {
+//            List<GradeDto> gradeList = gradeService.readGradeByType(studentId, subYear, semester, type);
+//            model.addAttribute("gradeList", gradeList);
+//        }
+        //        model.addAttribute("yearList", yearList);
+//        model.addAttribute("semesterList", semesterList);
+//
+//        return ResponseEntity.ok(Map.of(
+//                "yearList", yearList,
+//                "gradeList", gradeAllList,
+//                "semesterList", semesterList
+//        ));
+    };
 
 	/**
 	 * 총 누계성적 조회
@@ -140,13 +142,13 @@ public class GradeController {
 	 * @return
 	 */
 	@GetMapping("total")
-	public ResponseEntity<?> totalGrade() {
+	public ResponseEntity<?> totalGrade( @AuthenticationPrincipal CustomUserDetails principal) {
 
-		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
+		Long studentId = principal.getId();
 
 		// 학생이 수강 신청한 연도 조회
-		List<GradeDto> yearList = gradeService.readGradeYearByStudentId(principal.getId());
-		List<MyGradeDto> mygradeList = gradeService.readgradeinquiryList(principal.getId());
+		List<GradeDto> yearList = gradeService.readGradeYearByStudentId(studentId);
+		List<MyGradeDto> mygradeList = gradeService.readgradeinquiryList(studentId);
 
         return ResponseEntity.ok(Map.of(
                 "yearList", yearList,

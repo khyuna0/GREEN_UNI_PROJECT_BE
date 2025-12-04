@@ -5,6 +5,7 @@ import com.green.university.dto.UpdateStudentGradeDto;
 import com.green.university.dto.response.*;
 import com.green.university.entity.Student;
 import com.green.university.entity.Subject;
+import com.green.university.security.CustomUserDetails;
 import com.green.university.service.ProfessorService;
 import com.green.university.service.StuSubService;
 import com.green.university.service.SubjectService;
@@ -12,6 +13,7 @@ import com.green.university.service.UserService;
 import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -46,14 +48,15 @@ public class ProfessorController {
 	 * @return 본인 강좌 조회 페이지
 	 */
 	@GetMapping("/subject")
-	public ResponseEntity<?> subjectList() {
+	public ResponseEntity<?> subjectList(@AuthenticationPrincipal CustomUserDetails principal) {
 
-		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
-		List<SubjectPeriodForProfessorDto> semesterList = professorService.selectSemester(principal.getId());
+        Long professorId = principal.getId();
+
+		List<SubjectPeriodForProfessorDto> semesterList = professorService.selectSemester(professorId);
 		SubjectPeriodForProfessorDto subjectPeriodForProfessorDto = new SubjectPeriodForProfessorDto();
 		subjectPeriodForProfessorDto.setSubYear(Define.CURRENT_YEAR);
 		subjectPeriodForProfessorDto.setSemester(Define.CURRENT_SEMESTER);
-		subjectPeriodForProfessorDto.setId(principal.getId());
+		subjectPeriodForProfessorDto.setId(professorId);
 		List<SubjectForProfessorDto> subjectList = professorService
 				.selectSubjectBySemester(subjectPeriodForProfessorDto);
 
@@ -70,14 +73,15 @@ public class ProfessorController {
 	 * @return 조회 신청한 학기의 본인 강좌 조회 페이지
 	 */
 	@PostMapping("/subject")
-	public ResponseEntity<?> subjectListProc( @RequestParam String period) { // period는 "2023년도 1학기" 형식
-		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
-		List<SubjectPeriodForProfessorDto> semesterList = professorService.selectSemester(principal.getId());
+	public ResponseEntity<?> subjectListProc( @RequestParam String period,
+                                              @AuthenticationPrincipal CustomUserDetails principal) { // period는 "2023년도 1학기" 형식
+		Long professorId = principal.getId();
+		List<SubjectPeriodForProfessorDto> semesterList = professorService.selectSemester(professorId);
 		String[] str = period.split("year");
 		SubjectPeriodForProfessorDto subjectPeriodForProfessorDto = new SubjectPeriodForProfessorDto();
 		subjectPeriodForProfessorDto.setSubYear(Long.valueOf(str[0]));
 		subjectPeriodForProfessorDto.setSemester(Long.valueOf(str[1]));
-		subjectPeriodForProfessorDto.setId(principal.getId());
+		subjectPeriodForProfessorDto.setId(professorId);
 		List<SubjectForProfessorDto> subjectList = professorService.selectSubjectBySemester(subjectPeriodForProfessorDto);
 
         return ResponseEntity.ok(Map.of(
