@@ -13,8 +13,8 @@ public class Tuition {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 기존 복합 키 테이블을 기존 방식으로 수정함
 
-    @ManyToOne
-    @JoinColumn(name = "student_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
     private Long tuiYear; // 등록 연도

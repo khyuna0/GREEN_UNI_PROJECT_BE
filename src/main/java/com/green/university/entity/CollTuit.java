@@ -6,14 +6,10 @@ import lombok.Data;
 @Entity
 @Data
 public class CollTuit {
-//    @Id
-//    @OneToOne(cascade = CascadeType.ALL)
-//    private College college;
-//    // college id와 외래키
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;    // CollTuit PK
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "college_id", nullable = false, unique = true)
