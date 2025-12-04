@@ -59,7 +59,7 @@ public class BreakAppService {
         breakApp.setToYear(dto.getToYear());
         breakApp.setToSemester(dto.getToSemester());
         breakApp.setType(dto.getType());
-        breakApp.setAppDate(Date.valueOf(LocalDate.now()));   // 신청일 오늘
+        breakApp.setAppDate(LocalDate.now());   // 신청일 오늘
         breakApp.setStatus("처리중");
 
         // 저장
