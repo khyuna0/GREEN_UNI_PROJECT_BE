@@ -37,7 +37,7 @@ spring:
             # development : always, deployment : never
 
 jwt:
-  secret: "zxcasdqwezxcasdqwezxcasdqwe"
+  secret: "zxcasdqwezxcasdsdkfjeifjklsdjfklsfjlkdsjflkdsjfldsfdsqwezxcasdqwe"
 
 # 6. AI API
 app:

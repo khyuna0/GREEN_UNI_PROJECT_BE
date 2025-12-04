@@ -8,6 +8,9 @@ import lombok.Data;
 public class StuSubDetail {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @ManyToOne
     @JoinColumn(name = "stu_sub_id")
     private StuSub stuSub;

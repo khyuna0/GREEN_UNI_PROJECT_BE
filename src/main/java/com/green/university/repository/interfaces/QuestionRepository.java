@@ -1,9 +1,9 @@
 package com.green.university.repository.interfaces;
 
-import com.green.university.dto.response.QuestionDto;
+import com.green.university.entity.Question;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
-public interface QuestionRepository extends JpaRepository<QuestionDto, Long> {
+public interface QuestionRepository extends JpaRepository<Question, Long> {
 
 }
