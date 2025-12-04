@@ -4,8 +4,7 @@ import com.green.university.dto.BreakAppFormDto;
 import com.green.university.dto.response.StudentDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.entity.BreakApp;
-import com.green.university.entity.Student;
-import com.green.university.security.CustomUserDetails;
+import com.green.university.config.security.CustomUserDetails;
 import com.green.university.service.BreakAppService;
 import com.green.university.service.CollegeService;
 import com.green.university.service.StuStatService;
@@ -16,8 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 

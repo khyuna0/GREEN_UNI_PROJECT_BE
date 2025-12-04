@@ -7,7 +7,7 @@ import com.green.university.dto.response.StudentDto;
 import com.green.university.dto.response.SubjectDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.entity.*;
-import com.green.university.security.CustomUserDetails;
+import com.green.university.config.security.CustomUserDetails;
 import com.green.university.service.*;
 import com.green.university.utils.StuStatUtil;
 import org.springframework.beans.factory.annotation.Autowired;

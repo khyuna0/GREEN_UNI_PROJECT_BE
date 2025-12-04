@@ -1,5 +1,6 @@
 package com.green.university.config;
 
+import com.green.university.config.security.JwtAuthenticationFilter;
 import com.green.university.utils.Define;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;

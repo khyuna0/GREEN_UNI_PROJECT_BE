@@ -1,6 +1,5 @@
-package com.green.university.config;
+package com.green.university.config.security;
 
-import com.green.university.security.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

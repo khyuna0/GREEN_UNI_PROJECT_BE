@@ -39,7 +39,6 @@ public interface StudentRepository extends JpaRepository<Student,Long>,
 			"JOIN Tuition t ON s.id = t.student.id " +
 			"GROUP BY s.id")
 	List<Object[]> findStudentTuitionCounts();
-	int updateGradeAndSemesterById(Long studentId, int grade, int semester);
 
 	/**
 	@Modifying(clearAutomatically = true)

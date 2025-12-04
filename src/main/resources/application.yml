@@ -39,7 +39,7 @@ spring:
 
 # 5. JWT
 jwt:
-  secret: "zxcasdqwezxcasdqwezxcasdqwe"
+  secret: "zxcasdqwezxcasdsdkfjeifjklsdjfklsfjlkdsjflkdsjfldsfdsqwezxcasdqwe"
 
 # 6. AI API
 app:

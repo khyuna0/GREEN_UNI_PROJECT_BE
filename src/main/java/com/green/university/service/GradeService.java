@@ -31,7 +31,7 @@ public class GradeService {
     public List<GradeDto> readGradeYearByStudentId(Long studentId) {
 
         List<StuSub> stuSubs =
-                gradeRepository.findByStudent_IdOrderBySubject_SubYearDescSubject_SemesterDesc(studentId);
+                stuSubRepository.findByStudent_IdOrderBySubject_SubYearDescSubject_SemesterDesc(studentId);
 
         // 연도만 추출해 중복 제거
         List<Long> years = stuSubs.stream()
@@ -53,7 +53,7 @@ public class GradeService {
     // 학생이 수강 신청한 학기 조회
     public List<GradeDto> readGradeSemesterByStudentId(Long studentId) {
 
-        List<StuSub> stuSubs = gradeRepository.findByStudent_IdOrderBySubject_SubYearDescSubject_SemesterDesc(studentId);
+        List<StuSub> stuSubs = stuSubRepository.findByStudent_IdOrderBySubject_SubYearDescSubject_SemesterDesc(studentId);
 
         // 연도, 학기 중복 제거
         Set<String> seen = new HashSet<>();
@@ -84,7 +84,7 @@ public class GradeService {
         Long currentYear = Long.valueOf(Define.CURRENT_YEAR);
         Long currentSemester = Long.valueOf(Define.CURRENT_SEMESTER);
 
-        List<StuSub> stuSubs = gradeRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(studentId, currentYear, currentSemester);
+        List<StuSub> stuSubs = stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(studentId, currentYear, currentSemester);
 
         return stuSubs.stream()
                 .map(this::toGradeDto)
@@ -97,7 +97,7 @@ public class GradeService {
         Long currentYear = Long.valueOf(Define.CURRENT_YEAR);
         Long currentSemester = Long.valueOf(Define.CURRENT_SEMESTER);
 
-        List<StuSub> stuSubs = gradeRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(studentId, currentYear, currentSemester);
+        List<StuSub> stuSubs = stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(studentId, currentYear, currentSemester);
 
         if(stuSubs.isEmpty()){
             return null;
@@ -110,7 +110,7 @@ public class GradeService {
     public List<MyGradeDto> readgradeinquiryList(Long studentId) {
 
         List<StuSub> stuSubs =
-                gradeRepository.findByStudent_IdOrderBySubject_SubYearDescSubject_SemesterDesc(studentId);
+                stuSubRepository.findByStudent_IdOrderBySubject_SubYearDescSubject_SemesterDesc(studentId);
 
         if (stuSubs.isEmpty()) {
             return Collections.emptyList();
@@ -139,7 +139,7 @@ public class GradeService {
     // 학기별 성적 조회 (전체 조회)
     public List<GradeDto> readAllGradeByStudentId(Long studentId) {
 
-        List<StuSub> stuSubs = gradeRepository.findByStudent_Id(studentId);
+        List<StuSub> stuSubs = stuSubRepository.findByStudent_Id(studentId);
 
         return stuSubs.stream()
                 .map(this::toGradeDto)
@@ -149,7 +149,7 @@ public class GradeService {
     // 학기별 성적 조회 (선택 조회 - type 필터)
     public List<GradeDto> readGradeByType(Long studentId, Long subYear, Long semester, String type) {
 
-       List<StuSub> stuSubs = gradeRepository.findByStudent_IdAndSubject_SubYearAndSubject_SemesterAndSubject_Type(studentId, subYear, semester, type);
+       List<StuSub> stuSubs = stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_SemesterAndSubject_Type(studentId, subYear, semester, type);
 
        return stuSubs.stream()
                .map(this::toGradeDto)
@@ -161,7 +161,7 @@ public class GradeService {
     public List<GradeDto> readGradeByStudentId(Long studentId, Long subYear, Long semester) {
 
         List<StuSub> stuSubs =
-                gradeRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(
+                stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(
                         studentId, subYear, semester
                 );
 
@@ -173,7 +173,7 @@ public class GradeService {
     // 장학금용 평균 성적 조회
     public GradeForScholarshipDto readAvgGrade(Long studentId, Long subYear, Long semester) {
 
-        List<StuSub> stuSubs = gradeRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(studentId, subYear, semester);
+        List<StuSub> stuSubs = stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(studentId, subYear, semester);
 
         if(stuSubs.isEmpty()) {
             return null;

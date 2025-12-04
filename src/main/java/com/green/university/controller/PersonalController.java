@@ -6,7 +6,7 @@ import com.green.university.entity.BreakApp;
 import com.green.university.entity.Schedule;
 import com.green.university.entity.Staff;
 import com.green.university.handler.exception.CustomRestfullException;
-import com.green.university.security.CustomUserDetails;
+import com.green.university.config.security.CustomUserDetails;
 import com.green.university.service.*;
 import com.green.university.utils.Define;
 import jakarta.validation.Valid;
