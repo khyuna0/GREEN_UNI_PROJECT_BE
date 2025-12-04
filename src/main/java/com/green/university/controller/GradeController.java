@@ -146,11 +146,11 @@ public class GradeController {
 
 		// 학생이 수강 신청한 연도 조회
 		List<GradeDto> yearList = gradeService.readGradeYearByStudentId(principal.getId());
-		List<MyGradeDto> mygradeList = gradeService.readgradeinquiryList(principal.getId());
+		List<MyGradeDto> gradeList = gradeService.readgradeinquiryList(principal.getId());
 
         return ResponseEntity.ok(Map.of(
                 "yearList", yearList,
-                "mygradeList", mygradeList
+                "gradeList", gradeList
         ));
 	}
 

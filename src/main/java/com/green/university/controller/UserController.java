@@ -8,6 +8,7 @@ import com.green.university.service.ProfessorService;
 import com.green.university.service.StudentService;
 import com.green.university.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 유저 페이지
@@ -34,14 +36,14 @@ public class UserController {
 	@Autowired
 	private ProfessorService professorService;
 
-	/**
-	 * @return staff 입력 페이지
-	 */
-	@GetMapping("/staff")
-	public ResponseEntity<?> createStaff() {
-
-		return "/user/createStaff";
-	}
+//	/**
+//	 * @return staff 입력 페이지
+//	 */
+//	@GetMapping("/staff")
+//	public ResponseEntity<?> createStaff() {
+//
+//        return ResponseEntity.ok().body("staff 입력 페이지");
+//	}
 
 	/**
 	 * staff 입력 post 처리
@@ -61,17 +63,17 @@ public class UserController {
 		}
 		userService.createStaffToStaffAndUser(createStaffDto);
 
-		return "redirect:/user/staff";
+        return ResponseEntity.ok().body("직원 입력이 완료되었습니다.");
 	}
 
-	/**
-	 * @return professor 입력 페이지
-	 */
-	@GetMapping("/professor")
-	public ResponseEntity<?> createProfessor() {
-
-		return "/user/createProfessor";
-	}
+//	/**
+//	 * @return professor 입력 페이지
+//	 */
+//	@GetMapping("/professor")
+//	public ResponseEntity<?> createProfessor() {
+//
+//        return ResponseEntity.ok().body("교수 입력이 완료되었습니다.");
+//	}
 
 	/**
 	 * staff 입력 post 처리
@@ -92,17 +94,17 @@ public class UserController {
 
 		userService.createProfessorToProfessorAndUser(createProfessorDto);
 
-		return "redirect:/user/professor";
+        return ResponseEntity.ok().body("교수 입력이 완료되었습니다.");
 	}
 
-	/**
-	 * @return student 입력 페이지
-	 */
-	@GetMapping("/student")
-	public ResponseEntity<?> createStudent() {
-
-		return "/user/createStudent";
-	}
+//	/**
+//	 * @return student 입력 페이지
+//	 */
+//	@GetMapping("/student")
+//	public ResponseEntity<?> createStudent() {
+//
+//        return ResponseEntity.ok().body("학생 입력이 완료되었습니다.");
+//	}
 
 	/**
 	 * student 입력 post 처리
@@ -123,65 +125,72 @@ public class UserController {
 
 		userService.createStudentToStudentAndUser(createStudentDto);
 
-		return "redirect:/user/student";
+        return ResponseEntity.ok().body("학생 입력이 완료되었습니다.");
 	}
 
 	/**
-	 * 교수 조회 (검색인 듯?)
+	 * 교수 조회+검색+페이징
 	 *
 	 * @return 교수 조회 페이지 (아래 showProfessorListByPage와 합칠 수 있을 것 같다)
 	 */
-	@GetMapping("/professorList")
-	public ResponseEntity<?> showProfessorList( @RequestParam(required = false) Long professorId,
+	@GetMapping({"/professorList", "/professorList/{page}"})
+	public ResponseEntity<?> showProfessorList(
+            @PathVariable(value = "page", required = false) Integer page,
+            @RequestParam(required = false) Long professorId,
 			@RequestParam(required = false) Long deptId) {
 
+        int currentPage = ( page == null  || page < 1) ? 1 : page;
 		ProfessorListForm professorListForm = new ProfessorListForm();
-		professorListForm.setPage(0);
+		professorListForm.setPage((currentPage - 1) * 20);
+
+        // 검색어가 있는 경우
 		if (professorId != null) {
 			professorListForm.setProfessorId(professorId);
 		} else if (deptId != null) {
 			professorListForm.setDeptId(deptId);
 		}
+
 		Long amount = professorService.readProfessorAmount(professorListForm);
 		if (professorId != null) {
 			amount = 1L;
 		}
-		List<Professor> list = professorService.readProfessorList(professorListForm);
+		Page<Professor> list = professorService.readProfessorList(professorListForm, page);
 
-		model.addAttribute("listCount", Math.ceil(amount / 20.0));
-		model.addAttribute("professorList", list);
-		model.addAttribute("deptId", deptId);
 		/**
 		 * @author 서영 1페이지가 선택되어 있음을 보여주기 위함
 		 */
-		model.addAttribute("page", 1);
 
-		return "/user/professorList";
+        return ResponseEntity.ok(Map.of(
+                "listCount", Math.ceil(amount / 20.0),
+                "professorList", list,
+                "deptId", deptId,
+                "page", 1
+        ));
 	}
 
-	/**
-	 * 교수 조회
-	 *
-	 * @return 교수 조회 페이지
-	 */
-	@GetMapping("/professorList/{page}")
-	public ResponseEntity<?> showProfessorListByPage( @PathVariable int page,
-			@RequestParam(required = false) Long deptId) {
-
-		ProfessorListForm professorListForm = new ProfessorListForm();
-		if (deptId != null) {
-			professorListForm.setDeptId(deptId);
-		}
-		professorListForm.setPage((page - 1) * 20);
-		Long amount = professorService.readProfessorAmount(professorListForm);
-		List<Professor> list = professorService.readProfessorList(professorListForm);
-
-		model.addAttribute("listCount", Math.ceil(amount / 20.0));
-		model.addAttribute("professorList", list);
-		model.addAttribute("page", page);
-
-		return "/user/professorList";
-	}
+//	/**
+//	 * 교수 조회
+//	 *
+//	 * @return 교수 조회 페이지
+//	 */
+//	@GetMapping("/professorList/{page}")
+//	public ResponseEntity<?> showProfessorListByPage( @PathVariable int page,
+//			@RequestParam(required = false) Long deptId) {
+//
+//		ProfessorListForm professorListForm = new ProfessorListForm();
+//		if (deptId != null) {
+//			professorListForm.setDeptId(deptId);
+//		}
+//		professorListForm.setPage((page - 1) * 20);
+//		Long amount = professorService.readProfessorAmount(professorListForm);
+//		List<Professor> list = professorService.readProfessorList(professorListForm);
+//
+//        return ResponseEntity.ok(Map.of(
+//                "listCount", Math.ceil(amount / 20.0),
+//                "professorList", list,
+//                "page", page
+//        ));
+//	}
 
 
 
@@ -208,15 +217,16 @@ public class UserController {
 		}
 		List<Student> list = studentService.readStudentList(studentListForm);
 
-		model.addAttribute("listCount", Math.ceil(amount / 20.0));
-		model.addAttribute("studentList", list);
-		model.addAttribute("deptId", deptId);
 		/**
 		 * @author 서영 1페이지가 선택되어 있음을 보여주기 위함
 		 */
-		model.addAttribute("page", 1);
 
-		return "/user/studentList";
+        return ResponseEntity.ok(Map.of(
+                "listCount", Math.ceil(amount / 20.0),
+                "studentList", list,
+                "deptId", deptId,
+                "page", 1
+        ));
 	}
 
 	/**
@@ -236,11 +246,12 @@ public class UserController {
 		Long amount = studentService.readStudentAmount(studentListForm);
 		List<Student> list = studentService.readStudentList(studentListForm);
 
-		model.addAttribute("listCount", Math.ceil(amount / 20.0));
-		model.addAttribute("studentList", list);
-		model.addAttribute("page", page);
-
-		return "/user/studentList";
+        return ResponseEntity.ok(Map.of(
+                "listCount", Math.ceil(amount / 20.0),
+                "studentList", list,
+                "deptId", deptId,
+                "page", 1
+        ));
 	}
 
 	/**
@@ -251,7 +262,7 @@ public class UserController {
 	@GetMapping("/student/update")
 	public ResponseEntity<?> updateStudentGradeAndSemester() {
 		studentService.updateStudentGradeAndSemester();
-		return "redirect:/user/studentList";
+        return ResponseEntity.ok().body("학생 조회가 완료되었습니다.");
 	}
 
 }

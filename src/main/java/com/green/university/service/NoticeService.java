@@ -107,8 +107,8 @@ public class NoticeService {
 
     // 공지 수정
     @Transactional
-    public void updateNotice(NoticeFormDto noticeFormDto) {
-        Notice notice = noticeRepository.findById(noticeFormDto.getId())
+    public void updateNotice(Long id, NoticeFormDto noticeFormDto) {
+        Notice notice = noticeRepository.findById(id)
                 .orElseThrow(() -> new CustomRestfullException("공지 없음", HttpStatus.NOT_FOUND));
 
         notice.setCategory(noticeFormDto.getCategory());

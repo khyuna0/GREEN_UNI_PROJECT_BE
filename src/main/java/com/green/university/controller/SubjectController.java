@@ -8,6 +8,7 @@ import com.green.university.service.CollegeService;
 import com.green.university.service.ProfessorService;
 import com.green.university.service.SubjectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 서영 
@@ -40,72 +42,69 @@ public class SubjectController {
 
 	// 모든 강의 조회 (모든 연도-학기에 대해서)
 	@GetMapping("/list/{page}")
-	public ResponseEntity<?> readSubjectList(@PathVariable Long page) {
-
+	public ResponseEntity<?> readSubjectList(@PathVariable int page) {
 		// 강의 리스트 (전체)
 		List<SubjectDto> subjectList = subjectService.readSubjectList();
 
-		Long subjectCount = (long) subjectList.size();
-		model.addAttribute("subjectCount", subjectCount);
+		int subjectCount = subjectList.size(); // 기존 long에서 int로 변경
 		// 총 페이지 수
-		Long pageCount = (long) Math.ceil(subjectCount / 20.0);
-		model.addAttribute("pageCount", pageCount);
+		int pageCount = (int) Math.ceil(subjectCount / 20.0);
 		// 현재 페이지
-		model.addAttribute("page", page);
-
-		List<SubjectDto> subjectListLimit = subjectService.readSubjectListPage((page - 1) * 20);
-		model.addAttribute("subjectList", subjectListLimit);
+		Page<SubjectDto> subjectListLimit = subjectService.readSubjectListPage((page - 1) * 20);
 
 		// 필터에 사용할 전체 학과 정보
 		List<Department> deptList = collegeService.readDeptAll();
-		model.addAttribute("deptList", deptList);
 
 		// 필터에 사용할 강의 이름 정보 (중복 값 제거)
 		List<String> subNameList = new ArrayList<>();
 		for (SubjectDto subject : subjectList) {
-			if (subNameList.contains(subject.getName()) == false) {
+			if (!subNameList.contains(subject.getName())) {
 				subNameList.add(subject.getName());
 			}
 		}
-		model.addAttribute("subNameList", subNameList);
-
-		return "/subject/allSubList";
+        return ResponseEntity.ok(Map.of(
+                "subjectCount", subjectCount,
+                "pageCount", pageCount,
+                "page", page,
+                "subjectList", subjectListLimit,
+                "deptList", deptList
+        ));
 	}
 
 	// 전체 강의 목록에서 필터링
 	@GetMapping("/list/search")
-	public ResponseEntity<?> readSubjectListSearch( @Validated AllSubjectSearchFormDto allSubjectSearchFormDto) {
+	public ResponseEntity<?> readSubjectListSearch(@Validated AllSubjectSearchFormDto allSubjectSearchFormDto) {
 
 		// 강의 리스트
 		List<SubjectDto> subjectList = subjectService.readSubjectListSearch(allSubjectSearchFormDto);
-		Long subjectCount = (long) subjectList.size();
-		model.addAttribute("subjectCount", subjectCount);
-		model.addAttribute("subjectList", subjectList);
+		int subjectCount = subjectList.size(); // int로 변경
 
 		// 필터에 사용할 전체 학과 정보
 		List<Department> deptList = collegeService.readDeptAll();
-		model.addAttribute("deptList", deptList);
 
 		// 필터에 사용할 강의 이름 정보 (중복 값 제거)
 		List<String> subNameList = new ArrayList<>();
 		for (SubjectDto subject : subjectService.readSubjectList()) {
-			if (subNameList.contains(subject.getName()) == false) {
+			if (!subNameList.contains(subject.getName())) {
 				subNameList.add(subject.getName());
 			}
 		}
-		model.addAttribute("subNameList", subNameList);
 
-		return "/subject/allSubList";
+        return ResponseEntity.ok(Map.of(
+                "subjectCount", subjectCount,
+                "subjectList", subjectList,
+                "deptList", deptList,
+                "subNameList", subNameList
+        ));
 	}
 
 	/**
 	 * @author 김지현
-	 * @param model
 	 * @param subjectId
 	 * @return 강의계획서 조회
 	 */
 	@GetMapping("/syllabus/{subjectId}")
-	public ResponseEntity<?> readSyllabus( @PathVariable Long subjectId) {
+	public ResponseEntity<?> readSyllabus(@PathVariable("id") Long subjectId) {
 		ReadSyllabusDto readSyllabusDto = professorService.readSyllabus(subjectId);
 		if (readSyllabusDto.getOverview() != null) {
 			readSyllabusDto.setOverview(readSyllabusDto.getOverview().replace("\r\n", "<br>"));
@@ -116,9 +115,10 @@ public class SubjectController {
 		if (readSyllabusDto.getProgram() != null) {
 			readSyllabusDto.setProgram(readSyllabusDto.getProgram().replace("\r\n", "<br>"));
 		}
-		model.addAttribute("syllabus", readSyllabusDto);
 
-		return "/professor/readSyllabus";
+        return ResponseEntity.ok(Map.of(
+                "syllabus", readSyllabusDto
+        ));
 	}
 
 }

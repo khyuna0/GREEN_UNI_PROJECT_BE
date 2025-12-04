@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -31,12 +32,11 @@ public class NoticeController {
      *
      * @return 공지사항 페이지
      */
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<?> notice(
                          @RequestParam(defaultValue = "select") String crud,
                          @RequestParam(defaultValue = "1") int page) {
 
-        model.addAttribute("crud", crud);
 
         NoticePageFormDto dto = new NoticePageFormDto();
         dto.setPage(page);          // 1페이지부터 시작
@@ -45,11 +45,12 @@ public class NoticeController {
 
         Page<Notice> noticePage = noticeService.readNoticePage(dto);
 
-        model.addAttribute("noticeList", noticePage.getContent());
-        model.addAttribute("listCount", noticePage.getTotalPages());   // 총 페이지 수
-        model.addAttribute("currentPage", page);
-
-        return "/board/notice";
+        return ResponseEntity.ok(Map.of(
+                "crud", crud,
+                "noticeList", noticePage.getContent(),
+                "listCount", noticePage.getTotalPages(), // 총 페이지 수
+                "currentPage", page
+        ));
     }
 
     /**
@@ -82,26 +83,22 @@ public class NoticeController {
             }
         }
         noticeService.readNotice(noticeFormDto);
-        return "redirect:/notice";
+        return ResponseEntity.ok().body("공지사항 입력이 완료되었습니다");
     }
 
     /**
      *
      * @return 공지사항 상세 조회 기능
      */
-    @GetMapping("/read")
-    public ResponseEntity<?> selectByIdNotice( @RequestParam Long id) {
-        model.addAttribute("crud", "read");
-        model.addAttribute("id", id);
+    @GetMapping("/read/{id}")
+    public ResponseEntity<?> selectByIdNotice( @PathVariable("id") Long id) {
         Notice notice = noticeService.readByIdNotice(id); // Todo 엔티티 말고 따로 dto 만들어서 처리
-        if (notice == null) {
-            model.addAttribute("notice", null);
-        } else {
-            model.addAttribute("notice", notice);
-        }
         notice.setContent(notice.getContent().replace("\r\n", "<br>"));
 
-        return "/board/notice";
+        return ResponseEntity.ok(Map.of(
+                "crud", "read",
+                "notice", notice
+        ));
     }
 
     // 공지사항 페이지 이동
@@ -110,39 +107,39 @@ public class NoticeController {
                                        @RequestParam(defaultValue = "select") String crud,
                                        @PathVariable int page) {
 
-        model.addAttribute("crud", crud);
-
         NoticePageFormDto noticeFormDto = new NoticePageFormDto();
         noticeFormDto.setPage(page);
         noticeFormDto.setKeyword(null);
         noticeFormDto.setType(null);
 
         Page<Notice> noticePage = noticeService.readNoticePage(noticeFormDto);
-        model.addAttribute("noticeList",noticePage.getContent());
-        model.addAttribute("listCount",noticePage.getTotalPages());
-        model.addAttribute("currentPage",page);
 
-        return "/board/notice";
+        return ResponseEntity.ok(Map.of(
+                "crud", crud,
+                "noticeList",noticePage.getContent(),
+                "listCount",noticePage.getTotalPages(),
+                "currentPage",page
+        ));
     }
 
-    // 공지사항 검색 기능
-    @GetMapping("/search")
-    public ResponseEntity<?> showNoticeByKeyword( NoticePageFormDto noticePageFormDto) {
-
-        noticePageFormDto.setPage(1); // 첫페이지는 1페이지
-
-        Page<Notice> noticePage = noticeService.readNoticePage(noticePageFormDto);
-        model.addAttribute("crud", "selectKeyword");
-        model.addAttribute("keyword", noticePageFormDto.getKeyword());
-        model.addAttribute("type",noticePageFormDto.getType());
-        noticePageFormDto.setPage(0);
-
-        model.addAttribute("noticeList",noticePage.getContent());
-        model.addAttribute("listCount",noticePage.getTotalPages());
-        model.addAttribute("currentPage",1);
-
-        return "/board/notice";
-    }
+//    // 공지사항 검색 기능
+//    @GetMapping("/search")
+//    public ResponseEntity<?> showNoticeByKeyword( NoticePageFormDto noticePageFormDto) {
+//
+//        noticePageFormDto.setPage(1); // 첫페이지는 1페이지
+//
+//        Page<Notice> noticePage = noticeService.readNoticePage(noticePageFormDto);
+//        model.addAttribute("crud", "selectKeyword");
+//        model.addAttribute("keyword", noticePageFormDto.getKeyword());
+//        model.addAttribute("type",noticePageFormDto.getType());
+//        noticePageFormDto.setPage(0);
+//
+//        model.addAttribute("noticeList",noticePage.getContent());
+//        model.addAttribute("listCount",noticePage.getTotalPages());
+//        model.addAttribute("currentPage",1);
+//
+//        return "/board/notice";
+//    }
 
     // 검색 + 페이지
     @GetMapping("/search/{page}")
@@ -152,43 +149,42 @@ public class NoticeController {
         noticePageFormDto.setPage(page);
 
         Page<Notice> noticePage = noticeService.readNoticePage(noticePageFormDto);
-        model.addAttribute("crud","selectKeyword");
-        model.addAttribute("keyword",noticePageFormDto.getKeyword());
-        model.addAttribute("type",noticePageFormDto.getType());
 
-        model.addAttribute("noticeList",noticePage.getContent());
-        model.addAttribute("listCount",noticePage.getTotalPages());
-        model.addAttribute("currentPage",page);
-
-        return "/board/notice";
+        return ResponseEntity.ok(Map.of(
+                "crud","selectKeyword",
+                "keyword",noticePageFormDto.getKeyword(),
+                "type",noticePageFormDto.getType(),
+                "noticeList",noticePage.getContent(),
+                "listCount",noticePage.getTotalPages(),
+                "currentPage",page
+        ));
        
     }
 
     
     //  공지사항 수정 페이지
-    @GetMapping("/update")
-    public ResponseEntity<?> update( @RequestParam Long id) {
-        model.addAttribute("crud", "update");
-        model.addAttribute("id", id);
+    @GetMapping("/update/{id}")
+    public ResponseEntity<?> update(@PathVariable("id") Long id) {
 
         Notice notice = noticeService.readByIdNotice(id);
-        model.addAttribute("notice", notice);
-        return "/board/notice";
+        return ResponseEntity.ok(Map.of(
+                "crud","update",
+                "notice", notice
+        ));
     }
 
    
     // 공지사항 수정
-    @PutMapping("/update")
-    public ResponseEntity<?> update(@Validated NoticeFormDto noticeFormDto) {
-        noticeService.updateNotice(noticeFormDto);
-        return "redirect:/notice";
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> update(@PathVariable("id") Long id, @Validated NoticeFormDto noticeFormDto) {
+        noticeService.updateNotice(id, noticeFormDto);
+        return ResponseEntity.ok().body("공지사항 수정이 완료되었습니다.");
     }
 
     // 공지사항 삭제
-    @GetMapping("/delete")
-    public ResponseEntity<?> delete(@RequestParam Long id) {
-        model.addAttribute("id", id);
+    @GetMapping("/delete/{id}")
+    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
         noticeService.deleteNotice(id);
-        return "redirect:/notice";
+        return ResponseEntity.ok().body("공지사항 삭제가 완료되었습니다.");
     }
 }

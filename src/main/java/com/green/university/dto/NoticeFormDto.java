@@ -11,9 +11,9 @@ import java.sql.Timestamp;
 
 
 @Data
-public class NoticeFormDto {
+public class NoticeFormDto { // 공지사항 수정, 입력, 출력 시 사용 
 
-    private Long id;
+    private Long id; // 프론트 호출용으로 사용하는게 있어서 남겨놓음
     private Long noticeId;
     private String category;
     @NotEmpty
