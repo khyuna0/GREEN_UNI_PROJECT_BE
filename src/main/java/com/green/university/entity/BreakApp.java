@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 /**
  * @author 서영
@@ -35,7 +36,7 @@ public class BreakApp {
     private String type;
 
     // 날짜 .. 유틸 ..
-    private Date appDate;
+    private LocalDate appDate;
     private String status;
 
     public String appDateFormat() {

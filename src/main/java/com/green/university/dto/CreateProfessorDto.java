@@ -4,6 +4,7 @@ import lombok.Data;
 
 import jakarta.validation.constraints.*;
 import java.sql.Date;
+import java.time.LocalDate;
 
 /**
  * professor_tb insert용
@@ -16,7 +17,7 @@ public class CreateProfessorDto {
 	@NotEmpty
 	@Size(min = 2, max= 30)
 	private String name;
-	private Date birthDate;
+	private LocalDate birthDate;
 	private String gender;
 	@NotEmpty
 	private String address;

@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import lombok.*;
 
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -17,11 +18,11 @@ public class Staff {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private Date birthDate;
+    private LocalDate birthDate;
     private String gender;
     private String address;
     private String tel;
     private String email;
-    private Date hireDate;
+    private LocalDate hireDate;
 
 }

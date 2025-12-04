@@ -5,6 +5,7 @@ import com.green.university.entity.Subject;
 import com.green.university.entity.SyllaBus;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 //import java.sql.Date; 타입 오류 때문에 위로 변경
@@ -14,13 +15,13 @@ public class ProfessorInfoDto {
 
 	private Long id;
 	private String name;
-	private Date birthDate;
+	private LocalDate birthDate;
 	private String gender;
 	private String address;
 	private String tel;
 	private String email;
 	private Long deptId;
-	private Date hireDate;
+	private LocalDate hireDate;
 	private String deptName;
 	private String collegeName;
 

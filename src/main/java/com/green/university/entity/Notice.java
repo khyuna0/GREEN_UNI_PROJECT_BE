@@ -23,7 +23,7 @@ public class Notice {
     private Long views;
 
     // 타임스탬프 ..?
-    private Timestamp createdTime;
+    private Timestamp createdTime; // 공지 생성시간
 
     // 파일목록
     @OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true)

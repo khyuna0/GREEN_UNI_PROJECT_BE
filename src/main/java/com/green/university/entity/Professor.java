@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -17,7 +18,7 @@ public class Professor {
 
     private String name;
 
-    private Date birthDate;
+    private LocalDate birthDate;
 
     private String gender;
 
@@ -29,5 +30,5 @@ public class Professor {
     @JoinColumn(name = "department_id")
     private Department department;
 
-    private Date hireDate;
+    private LocalDate hireDate;
 }
