@@ -2,403 +2,312 @@ package com.green.university.controller;
 
 import com.green.university.dto.*;
 import com.green.university.dto.response.*;
-import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.entity.BreakApp;
 import com.green.university.entity.Schedule;
 import com.green.university.entity.Staff;
-import com.green.university.entity.StuStat;
+import com.green.university.handler.exception.CustomRestfullException;
+import com.green.university.security.CustomUserDetails;
 import com.green.university.service.*;
 import com.green.university.utils.Define;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 
-/**
- * User 로그인, 정보수정
- * 
- * @author 김지현
- */
 @RestController
+@RequestMapping("/api/personal")
 public class PersonalController {
 
-	@Autowired
-	private UserService userService;
-	@Autowired
-	private HttpSession session;
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-	@Autowired
-	private StuStatService stuStatService;
-	@Autowired
-	private BreakAppService breakAppService;
-	@Autowired
-	private NoticeService noticeService;
-	@Autowired
-	private ScheduleService scheuleService;
-	
-	/**
-	 * @author 서영 메인 홈페이지
-	 */
-	@GetMapping("")
-	public ResponseEntity<?> home() {
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private StuStatService stuStatService;
+    @Autowired
+    private BreakAppService breakAppService;
+    @Autowired
+    private NoticeService noticeService;
+    @Autowired
+    private ScheduleService scheuleService;
 
-		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
+    // 메인 홈에 필요한 데이터 (공지, 일정, 사용자 정보)
+    @GetMapping("")
+    public ResponseEntity<?> home(@AuthenticationPrincipal CustomUserDetails principal) {
 
-		// 공지사항 최신 글 5개
-		List<NoticeFormDto> noticeList = noticeService.readCurrentNotice();
-		model.addAttribute("noticeList", noticeList);
-		
-		// 학사일정
-		// 샘플이므로, 2월달로 고정함
-		List<Schedule> scheduleList = scheuleService.readScheduleListByMonth(2023,2);
-		model.addAttribute("scheduleList", scheduleList);
+        Long userId = principal.getId();
+        String userRole = principal.getUserRole();
 
-        // null로 초기화한 사용자 엔티티들
+        // 공지사항 최신 글 5개
+        List<NoticeFormDto> noticeList = noticeService.readCurrentNotice();
 
+        // 학사일정 (기존 로직 : 2023년 2월 고정)
+        List<Schedule> scheduleList = scheuleService.readScheduleListByMonth(2023, 2);
 
-		if (principal.getUserRole().equals("student")) {
-			StudentInfoDto studentInfo = userService.readStudentInfo(principal.getId());
-			StuStatDto stuStat = stuStatService.readCurrentStatus(principal.getId());
-			model.addAttribute("userInfo", studentInfo);
-			model.addAttribute("currentStatus", stuStat.getStatus());
-		} else if (principal.getUserRole().equals("staff")) {
-			Staff staffInfo = userService.readStaff(principal.getId());
-			model.addAttribute("userInfo", staffInfo);
+        Object userInfo = null;
+        String currentStatus = null;
+        Integer breakAppSize = null;
 
-			List<BreakApp> breakAppList = breakAppService.readByStatus("처리중");
-			model.addAttribute("breakAppSize", breakAppList.size());
+        if ("student".equals(userRole)) {
+            StudentInfoDto studentInfo = userService.readStudentInfo(userId);
+            StuStatDto stuStat = stuStatService.readCurrentStatus(userId);
+            userInfo = studentInfo;
+            currentStatus = stuStat.getStatus();
 
-		} else {
-			ProfessorInfoDto professorInfo = userService.readProfessorInfo(principal.getId());
-			model.addAttribute("userInfo", professorInfo);
-		}
+        } else if ("staff".equals(userRole)) {
+            Staff staffInfo = userService.readStaff(userId);
+            userInfo = staffInfo;
+
+            List<BreakApp> breakAppList = breakAppService.readByStatus("처리중");
+            breakAppSize = breakAppList.size();
+
+        } else if ("professor".equals(userRole)) {
+            ProfessorInfoDto professorInfo = userService.readProfessorInfo(userId);
+            userInfo = professorInfo;
+        }
 
         return ResponseEntity.ok(Map.of(
+                "userId", userId,
+                "userRole", userRole,
                 "noticeList", noticeList,
                 "scheduleList", scheduleList,
-                "userInfo", studentInfo,
-                "currentStatus", stuStat.getStatus()
-
+                "userInfo", userInfo,
+                "currentStatus", currentStatus,
+                "breakAppSize", breakAppSize
         ));
-	}
+    }
 
-	/**
-	 * 로그인 폼
-	 * 
-	 * @return login.jsp
-	 */
-	@GetMapping("/login")
-	public ResponseEntity<?> login() {
+    // 내 정보 수정 페이지용 데이터
+    @GetMapping("/update")
+    public ResponseEntity<?> getUserInfoForUpdate(@AuthenticationPrincipal CustomUserDetails principal) {
 
-		return "/user/login";
-	}
+        if (principal == null) {
+            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+        }
 
-	/*
-	 * 로그인 post 처리
-	 * 
-	 * @param loginDto
-	 * 
-	 * @return 메인 페이지 이동(수정 예정)
-	 */
-	@PostMapping("/login")
-	public ResponseEntity<?> signInProc(@Valid LoginDto loginDto, BindingResult bindingResult, HttpServletResponse response,
-							 HttpServletRequest request) {
+        Long userId = principal.getId();
+        String role = principal.getUserRole();
 
-		if (bindingResult.hasErrors()) {
-			StringBuilder sb = new StringBuilder();
-			bindingResult.getAllErrors().forEach(error -> {
-				sb.append(error.getDefaultMessage()).append("\\n");
-			});
-			throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
-		}
+        UserInfoForUpdateDto userInfoForUpdateDto;
 
-		PrincipalDto principal = userService.login(loginDto);
-		if ("on".equals(loginDto.getRememberId())) {
-			Cookie cookie = new Cookie("id", loginDto.getId() + "");
-			cookie.setMaxAge(60 * 60 * 24 * 7);
-			response.addCookie(cookie);
-		} else {
-			Cookie[] cookies = request.getCookies();
-			if (cookies != null) {
-				for (Cookie c : cookies) {
-					if (c.getName().equals("id")) {
-						c.setMaxAge(0);
-						response.addCookie(c);
-						break;
-					}
-				}
-			}
-		}
-		session.setAttribute(Define.PRINCIPAL, principal);
+        if ("staff".equals(role)) {
+            userInfoForUpdateDto = userService.readStaffInfoForUpdate(userId);
+        } else if ("student".equals(role)) {
+            userInfoForUpdateDto = userService.readStudentInfoForUpdate(userId);
+        } else if ("professor".equals(role)) {
+            userInfoForUpdateDto = userService.readProfessorInfoForUpdate(userId);
+        } else {
+            throw new CustomRestfullException("알 수 없는 사용자 권한입니다.", HttpStatus.BAD_REQUEST);
+        }
 
-		return "redirect:/";
-	}
+        return ResponseEntity.ok(Map.of(
+                "userRole", role,
+                "userInfo", userInfoForUpdateDto
+        ));
+    }
 
-	/**
-	 * 개인정보 수정 페이지
-	 * 
-	 * @param model
-	 * @return updateUser.jsp
-	 */
-	@GetMapping("/update")
-	public ResponseEntity<?> updateUser() {
+    // 3) 내 정보 수정 처리
+    @PatchMapping("/update")
+    public ResponseEntity<?> updateUserProc(
+            @Valid @RequestBody UserInfoForUpdateDto userInfoForUpdateDto,
+            BindingResult bindingResult,
+            @RequestParam String password,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder sb = new StringBuilder();
+            bindingResult.getAllErrors().forEach(error -> {
+                sb.append(error.getDefaultMessage()).append("\\n");
+            });
+            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
+        }
 
-		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
-		UserInfoForUpdateDto userInfoForUpdateDto = null;
-		if ("staff".equals(principal.getUserRole())) {
-			userInfoForUpdateDto = userService.readStaffInfoForUpdate(principal.getId());
-		}
-		if ("student".equals(principal.getUserRole())) {
-			userInfoForUpdateDto = userService.readStudentInfoForUpdate(principal.getId());
-		}
-		if ("professor".equals(principal.getUserRole())) {
-			userInfoForUpdateDto = userService.readProfessorInfoForUpdate(principal.getId());
-		}
-		model.addAttribute("userInfo", userInfoForUpdateDto);
+        if (principal == null) {
+            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+        }
 
-		return "/user/updateUser";
-	}
+        Long userId = principal.getId();
+        String role = principal.getUserRole();
 
-	/**
-	 * 개인정보 수정 페이지
-	 * 
-	 * @param userInfoForUpdateDto, password
-	 * @return updateUser.jsp
-	 */
-	@PutMapping("/update")
-	public ResponseEntity<?> updateUserProc(@Valid UserInfoForUpdateDto userInfoForUpdateDto, BindingResult bindingResult,
-			@RequestParam String password) {
+        // 현재 비밀번호 확인
+        if (!passwordEncoder.matches(password, principal.getPassword())) {
+            throw new CustomRestfullException(Define.WRONG_PASSWORD, HttpStatus.BAD_REQUEST);
+        }
 
-		if (bindingResult.hasErrors()) {
-			StringBuilder sb = new StringBuilder();
-			bindingResult.getAllErrors().forEach(error -> {
-				sb.append(error.getDefaultMessage()).append("\\n");
-			});
-			throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
-		}
+        UserUpdateDto updateDto = new UserUpdateDto();
+        updateDto.setUserId(userId);
+        updateDto.setAddress(userInfoForUpdateDto.getAddress());
+        updateDto.setEmail(userInfoForUpdateDto.getEmail());
+        updateDto.setTel(userInfoForUpdateDto.getTel());
 
-		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
-		// 패스워드 인코더 적용 후
-		if (!passwordEncoder.matches(password, principal.getPassword())) {
-			throw new CustomRestfullException(Define.WRONG_PASSWORD, HttpStatus.BAD_REQUEST);
-		}
+        if ("staff".equals(role)) {
+            userService.updateStaff(updateDto);
+        } else if ("student".equals(role)) {
+            userService.updateStudent(updateDto);
+        } else if ("professor".equals(role)) {
+            userService.updateProfessor(updateDto);
+        } else {
+            throw new CustomRestfullException("알 수 없는 사용자 권한입니다.", HttpStatus.BAD_REQUEST);
+        }
 
-		UserUpdateDto updateDto = new UserUpdateDto();
-		updateDto.setUserId(principal.getId());
-		updateDto.setAddress(userInfoForUpdateDto.getAddress());
-		updateDto.setEmail(userInfoForUpdateDto.getEmail());
-		updateDto.setTel(userInfoForUpdateDto.getTel());
-		if ("staff".equals(principal.getUserRole())) {
-			userService.updateStaff(updateDto);
-			return "redirect:/info/staff";
-		}
-		if ("student".equals(principal.getUserRole())) {
-			userService.updateStudent(updateDto);
-			return "redirect:/info/student";
-		}
-		if ("professor".equals(principal.getUserRole())) {
-			userService.updateProfessor(updateDto);
-			return "redirect:/info/professor";
-		}
+        return ResponseEntity.ok(Map.of(
+                "message", "개인정보가 수정되었습니다."
+        ));
+    }
 
-		return "redirect:/";
-	}
+    // 비밀번호 변경 페이지
+    @GetMapping("/password")
+    public ResponseEntity<?> getPasswordPage(@AuthenticationPrincipal CustomUserDetails principal) {
+        if (principal == null) {
+            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+        }
+        return ResponseEntity.ok(Map.of(
+                "userId", principal.getId(),
+                "userRole", principal.getUserRole()
+        ));
+    }
 
-	/**
-	 * 비밀번호 수정 페이지
-	 * 
-	 * @param model
-	 * @return updatePasword.jsp
-	 */
-	@GetMapping("/password")
-	public ResponseEntity<?> updatePassword() {
+    // 5) 비밀번호 변경 처리
+    @PutMapping("/password")
+    public ResponseEntity<?> updatePasswordProc(
+            @Valid @RequestBody ChangePasswordDto changePasswordDto,
+            BindingResult bindingResult,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
 
-		return "/user/updatePassword";
-	}
+        if (bindingResult.hasErrors()) {
+            StringBuilder sb = new StringBuilder();
+            bindingResult.getAllErrors().forEach(error -> {
+                sb.append(error.getDefaultMessage()).append("\\n");
+            });
+            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
+        }
 
-	/**
-	 * 비밀번호 수정 post 페이지
-	 * 
-	 * @param userInfoForUpdateDto, password
-	 * @return updateUser.jsp
-	 */
-	@PutMapping("/password")
-	public ResponseEntity<?> updatePasswordProc(@Valid ChangePasswordDto changePasswordDto, BindingResult bindingResult) {
+        if (principal == null) {
+            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+        }
 
-		if (bindingResult.hasErrors()) {
-			StringBuilder sb = new StringBuilder();
-			bindingResult.getAllErrors().forEach(error -> {
-				sb.append(error.getDefaultMessage()).append("\\n");
-			});
-			throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
-		}
+        Long userId = principal.getId();
 
-		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
-		// 패스워드 인코더 적용 후
-		if (!passwordEncoder.matches(changePasswordDto.getBeforePassword(), principal.getPassword())) {
-			throw new CustomRestfullException(Define.WRONG_PASSWORD, HttpStatus.BAD_REQUEST);
-		}
-		if (!changePasswordDto.getAfterPassword().equals(changePasswordDto.getPasswordCheck())) {
-			throw new CustomRestfullException("변경할 비밀번호와 비밀번호 확인은 같아야합니다.", HttpStatus.BAD_REQUEST);
-		}
-		changePasswordDto.setId(principal.getId());
-		changePasswordDto.setAfterPassword(passwordEncoder.encode(changePasswordDto.getAfterPassword()));
-		userService.updatePassword(changePasswordDto);
+        // 현재 비밀번호 확인
+        if (!passwordEncoder.matches(changePasswordDto.getBeforePassword(), principal.getPassword())) {
+            throw new CustomRestfullException(Define.WRONG_PASSWORD, HttpStatus.BAD_REQUEST);
+        }
+        // 새 비밀번호 & 확인 일치 확인
+        if (!changePasswordDto.getAfterPassword().equals(changePasswordDto.getPasswordCheck())) {
+            throw new CustomRestfullException("변경할 비밀번호와 비밀번호 확인은 같아야합니다.", HttpStatus.BAD_REQUEST);
+        }
 
-		return "redirect:/password";
-	}
+        changePasswordDto.setId(userId);
+        changePasswordDto.setAfterPassword(passwordEncoder.encode(changePasswordDto.getAfterPassword()));
+        userService.updatePassword(changePasswordDto);
 
-	/**
-	 * 로그아웃
-	 * 
-	 * @return 로그인 페이지
-	 */
-	@GetMapping("/logout")
-	public ResponseEntity<?> logout() {
-		session.invalidate();
+        return ResponseEntity.ok(Map.of(
+                "message", "비밀번호가 변경되었습니다."
+        ));
+    }
 
-		return "redirect:/login";
-	}
+    // 학생 정보 조회
+    @GetMapping("/info/student")
+    public ResponseEntity<?> readStudentInfo(@AuthenticationPrincipal CustomUserDetails principal) {
 
-	/**
-	 * 학생 정보 조회
-	 * 
-	 * @param model
-	 * @return 학생 정보 조회 페이지
-	 */
-	@GetMapping("/info/student")
-	public ResponseEntity<?> readStudentInfo() {
+        if (principal == null) {
+            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+        }
 
-		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
-		StudentInfoDto student = userService.readStudentInfo(principal.getId());
-		model.addAttribute("student", student);
-		List<StudentInfoStatListDto> list = userService.readStudentInfoStatListByStudentId(principal.getId());
-		model.addAttribute("stustatList", list);
+        Long userId = principal.getId();
 
-		return "/user/studentInfo";
-	}
+        StudentInfoDto student = userService.readStudentInfo(userId);
+        List<StudentInfoStatListDto> list = userService.readStudentInfoStatListByStudentId(userId);
 
-	/**
-	 * 직원 정보 조회
-	 * 
-	 * @param model
-	 * @return 직원 정보조회 페이지
-	 */
-	@GetMapping("/info/staff")
-	public ResponseEntity<?> readStaffInfo() {
+        return ResponseEntity.ok(Map.of(
+                "student", student,
+                "studentList", list
+        ));
+    }
 
-		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
-		Staff staff = userService.readStaff(principal.getId());
-		model.addAttribute("staff", staff);
+    // 직원 정보 조회
+    @GetMapping("/info/staff")
+    public ResponseEntity<?> readStaffInfo(@AuthenticationPrincipal CustomUserDetails principal) {
 
-		return "/user/staffInfo";
-	}
+        if (principal == null) {
+            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+        }
 
-	/**
-	 * 교수 정보 조회
-	 * 
-	 * @param model
-	 * @return 교수 정보 조회 페이지
-	 */
-	@GetMapping("/info/professor")
-	public ResponseEntity<?> readProfessorInfo() {
-		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
-		ProfessorInfoDto professor = userService.readProfessorInfo(principal.getId());
-		model.addAttribute("professor", professor);
-		return "/user/professorInfo";
-	}
+        Long userId = principal.getId();
+        Staff staff = userService.readStaff(userId);
 
-	/**
-	 * 아이디 찾기
-	 * 
-	 * @return 아이디 찾기 페이지
-	 */
-	@GetMapping("/find/id")
-	public ResponseEntity<?> findId() {
+        return ResponseEntity.ok(Map.of(
+                "staff", staff
+        ));
+    }
 
-		return "/user/findId";
-	}
+    // 교수 정보 조회
+    @GetMapping("/info/professor")
+    public ResponseEntity<?> readProfessorInfo(@AuthenticationPrincipal CustomUserDetails principal) {
 
-	/**
-	 * 아이디 찾기 포스트
-	 * 
-	 * @param findIdFormDto
-	 * @return 찾은 아이디 표시 페이지
-	 */
-	@PostMapping("/find/id")
-	public ResponseEntity<?> findIdProc( @Valid FindIdFormDto findIdFormDto, BindingResult bindingResult) {
-		if (bindingResult.hasErrors()) {
-			StringBuilder sb = new StringBuilder();
-			bindingResult.getAllErrors().forEach(error -> {
-				sb.append(error.getDefaultMessage()).append("\\n");
-			});
-			throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
-		}
-		Long findId = userService.readIdByNameAndEmail(findIdFormDto);
-		model.addAttribute("id", findId);
-		model.addAttribute("name", findIdFormDto.getName());
+        if (principal == null) {
+            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+        }
 
-		return "/user/findIdComplete";
-	}
+        Long userId = principal.getId();
+        ProfessorInfoDto professor = userService.readProfessorInfo(userId);
 
-	/**
-	 * 비밀번호 찾기
-	 * 
-	 * @return 아이디 찾기 페이지
-	 */
-	@GetMapping("/find/password")
-	public ResponseEntity<?> findPassword() {
+        return ResponseEntity.ok(Map.of(
+                "professor", professor
+        ));
+    }
 
-		return "/user/findPassword";
-	}
+    // 아이디 찾기
+    @PostMapping("/find/id")
+    public ResponseEntity<?> findIdProc(
+            @Valid @RequestBody FindIdFormDto findIdFormDto,
+            BindingResult bindingResult
+    ) {
 
-	/**
-	 * 비밀번호 찾기 포스트
-	 * 
-	 * @param findIdFormDto
-	 * @return 비밀번호 표시 페이지
-	 */
-	@PostMapping("/find/password")
-	public ResponseEntity<?> findPasswordProc( @Valid FindPasswordFormDto findPasswordFormDto,
-			BindingResult bindingResult) {
-		if (bindingResult.hasErrors()) {
-			StringBuilder sb = new StringBuilder();
-			bindingResult.getAllErrors().forEach(error -> {
-				sb.append(error.getDefaultMessage()).append("\\n");
-			});
-			throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
-		}
-		String password = userService.updateTempPassword(findPasswordFormDto);
-		model.addAttribute("name", findPasswordFormDto.getName());
-		model.addAttribute("password", password);
+        if (bindingResult.hasErrors()) {
+            StringBuilder sb = new StringBuilder();
+            bindingResult.getAllErrors().forEach(error -> {
+                sb.append(error.getDefaultMessage()).append("\\n");
+            });
+            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
+        }
 
-		return "/user/findPasswordComplete";
-	}
+        Long findId = userService.readIdByNameAndEmail(findIdFormDto);
 
-	@GetMapping("/guide")
-	public ResponseEntity<?> pop() {
+        return ResponseEntity.ok(Map.of(
+                "id", findId,
+                "name", findIdFormDto.getName()
+        ));
+    }
 
-		return "/user/passwordPop";
-	}
+    // 비밀번호 찾기
+    @PostMapping("/find/password")
+    public ResponseEntity<?> findPasswordProc(
+            @Valid @RequestBody FindPasswordFormDto findPasswordFormDto,
+            BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder sb = new StringBuilder();
+            bindingResult.getAllErrors().forEach(error -> {
+                sb.append(error.getDefaultMessage()).append("\\n");
+            });
+            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
+        }
 
-	/**
-	 * @return 에러페이지
-	 */
-	@GetMapping("/error")
-	public ResponseEntity<?> handleError() {
-		return "/error/errorPage";
-	}
+        String password = userService.updateTempPassword(findPasswordFormDto);
+
+        return ResponseEntity.ok(Map.of(
+                "name", findPasswordFormDto.getName(),
+                "password", password
+        ));
+    }
+
 }
