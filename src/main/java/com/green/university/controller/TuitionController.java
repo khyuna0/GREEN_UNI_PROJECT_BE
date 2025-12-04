@@ -133,8 +133,6 @@ public class TuitionController {
 	 */
 	@GetMapping("/bill")
 	public ResponseEntity<?> createPayment() {
-        // 얜뭘까 Todo 이 메서드 어디서 사용하는지 알아보기... 단순 페이지 보기 매핑일까?
-//		return "/tuition/createPayment";
 
         return ResponseEntity.ok().body("등록금 납부 고지서 생성 페이지.");
 	}

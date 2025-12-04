@@ -95,7 +95,7 @@ public class ProfessorController {
 	 * @return 해당 과목을 듣는 학생 리스트
 	 */
 	@GetMapping("/subject/{subjectId}")
-	public ResponseEntity<?> subjectStudentList( @PathVariable Long subjectId) {
+	public ResponseEntity<?> subjectStudentList( @PathVariable("subjectId") Long subjectId) {
 		List<StudentInfoForProfessorDto> studentList = professorService.selectBySubjectId(subjectId);
 		Subject subject = professorService.selectSubjectById(subjectId);
 
@@ -112,7 +112,7 @@ public class ProfessorController {
 	 * @return 출결 및 성적 기입 페이지
 	 */
 	@GetMapping("/subject/{subjectId}/{studentId}")
-	public ResponseEntity<?> updateStudentDetail(@PathVariable Long subjectId, @PathVariable Long studentId) {
+	public ResponseEntity<?> updateStudentDetail(@PathVariable("subjectId") Long subjectId, @PathVariable ("studentId")Long studentId) {
 
         StudentDto student = userService.readStudent(studentId);
 
@@ -123,8 +123,8 @@ public class ProfessorController {
 	}
     
     // 업데이트
-	@PutMapping("/subject/{subjectId}/{studentId}")
-	public ResponseEntity<?> updateStudentDetailProc( @PathVariable Long subjectId, @PathVariable Long studentId,
+	@PatchMapping("/subject/{subjectId}/{studentId}")
+	public ResponseEntity<?> updateStudentDetailProc(@PathVariable("subjectId") Long subjectId, @PathVariable ("studentId")Long studentId,
 			UpdateStudentGradeDto updateStudentGradeDto) {
 
 		// 점수 입력
@@ -149,7 +149,7 @@ public class ProfessorController {
 	 * @return 강의계획서 조회 창
 	 */
 	@GetMapping("/syllabus/update/{subjectId}")
-	public ResponseEntity<?> createSyllabus(@PathVariable Long subjectId) {
+	public ResponseEntity<?> createSyllabus(@PathVariable("subjectId") Long subjectId) {
 		ReadSyllabusDto readSyllabusDto = professorService.readSyllabus(subjectId);
 
         return ResponseEntity.ok(Map.of(
@@ -162,10 +162,10 @@ public class ProfessorController {
 	 * @param syllaBusFormDto
 	 * @return 강의계획서 업데이트 창
 	 */
-	@PutMapping("/syllabus/update/{subjectId}")
-	public ResponseEntity<?> createSyllabusProc(SyllaBusFormDto syllaBusFormDto) {
-		System.out.println(syllaBusFormDto);
-		professorService.updateSyllabus(syllaBusFormDto);
+	@PatchMapping("/syllabus/update/{subjectId}")
+	public ResponseEntity<?> createSyllabusProc(@PathVariable("subjectId") Long subjectId, SyllaBusFormDto syllaBusFormDto) {
+//		System.out.println(syllaBusFormDto);
+		professorService.updateSyllabus(subjectId, syllaBusFormDto);
 
         return ResponseEntity.ok().body("강의 계획서 수정이 정상적으로 처리되었습니다.");
 	}

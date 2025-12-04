@@ -49,7 +49,7 @@ public class EvaluationController {
      * 강의평가 post
      */
     @PostMapping("/write/{subjectId}")
-    public ResponseEntity<?> EvaluationProc(@PathVariable Long subjectId, EvaluationDto evaluationFormDto,
+    public ResponseEntity<?> EvaluationProc(@PathVariable("subjectId") Long subjectId, EvaluationDto evaluationFormDto,
                                             @AuthenticationPrincipal CustomUserDetails principal) {
 
         Long studentId = principal.getId();
@@ -96,15 +96,13 @@ public class EvaluationController {
     }
 
     // 과목별 강의 평가 조회 (교수)
-    @PostMapping("/read")
-    public ResponseEntity<?> readEvaluation( @RequestParam("subjectId") String name,   // 기존 request.getParameter("subjectId") 대체
+    @PostMapping("/read/{subject_Name}")
+    public ResponseEntity<?> readEvaluation( @RequestParam("subject_Name") String subject_Name,   // 기존 request.getParameter("subjectId") 대체
                                              @AuthenticationPrincipal CustomUserDetails principal) {
 
         Long professorId = principal.getId();
-        //String name = httpServletRequest.getParameter("subjectId");
-
         List<MyEvaluationDto> subjectName = evaluationService.readSubjectName(professorId);
-        List<MyEvaluationDto> eval = evaluationService.readEvaluationByProfessorIdAndName(professorId, name);
+        List<MyEvaluationDto> eval = evaluationService.readEvaluationByProfessorIdAndName(professorId, subject_Name);
         return ResponseEntity.ok(Map.of(
                 "subjectName", subjectName,
                 "eval", eval

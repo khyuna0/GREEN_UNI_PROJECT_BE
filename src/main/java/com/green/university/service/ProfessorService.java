@@ -207,9 +207,9 @@ public class ProfessorService {
 	 * @param syllaBusFormDto
 	 */
 	@Transactional
-	public void updateSyllabus(SyllaBusFormDto syllaBusFormDto) {
+	public void updateSyllabus(Long id , SyllaBusFormDto syllaBusFormDto) {
 
-        SyllaBus syllaBus = syllaBusRepository.findBySubject_Id(syllaBusFormDto.getSubjectId()).orElseThrow(
+        SyllaBus syllaBus = syllaBusRepository.findBySubject_Id(id).orElseThrow(
                 () -> new CustomRestfullException("강의 계획서를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
         syllaBus.setOverview(syllaBusFormDto.getOverview());
         syllaBus.setObjective(syllaBusFormDto.getObjective());

@@ -96,7 +96,7 @@ public class StuSubController {
 
     // 과목 조회 (현재 학기)
     @GetMapping("/subjectList/{page}")
-    public ResponseEntity<?> readSubjectList(@PathVariable int page) {
+    public ResponseEntity<?> readSubjectList(@PathVariable("page") int page) {
 
         // 강의 리스트
         List<SubjectDto> subjectList = subjectService.readSubjectListByCurrentSemester();
@@ -115,7 +115,7 @@ public class StuSubController {
         // 필터에 사용할 강의 이름 정보 (중복 값 제거)
         List<String> subNameList = new ArrayList<>();
         for (SubjectDto subject : subjectList) {
-            if (subNameList.contains(subject.getName()) == false) {
+            if (!subNameList.contains(subject.getName())) {
                 subNameList.add(subject.getName());
             }
         }
@@ -159,7 +159,7 @@ public class StuSubController {
         // 필터에 사용할 강의 이름 정보 (중복 값 제거)
         List<String> subNameList = new ArrayList<>();
         for (SubjectDto subject : subjectService.readSubjectListByCurrentSemester()) {
-            if (subNameList.contains(subject.getName()) == false) {
+            if (!subNameList.contains(subject.getName())) {
                 subNameList.add(subject.getName());
             }
         }
@@ -177,7 +177,7 @@ public class StuSubController {
      */
 
     @GetMapping("/pre/{page}")
-    public ResponseEntity<?> preStuSubApplication(@PathVariable int page,
+    public ResponseEntity<?> preStuSubApplication(@PathVariable("page") int page,
                                                   @AuthenticationPrincipal CustomUserDetails principal) { // page 값 int로 변경함
 
         // 예비 수강 신청 기간이 아니라면
@@ -262,7 +262,7 @@ public class StuSubController {
      */
 
     @DeleteMapping("/pre/{subjectId}")
-    public ResponseEntity<?> deletePreStuSubAppProc(@PathVariable Long subjectId, @RequestParam Long type,
+    public ResponseEntity<?> deletePreStuSubAppProc(@PathVariable("subjectId") Long subjectId, @RequestParam Long type,
                                                     @AuthenticationPrincipal CustomUserDetails principal) {
         // type은 어디에서 넘어왔냐? 인 것 같음...
 
@@ -442,7 +442,7 @@ public class StuSubController {
      * 수강 신청 처리 (신청)
      */
     @PostMapping("/insertApp/{subjectId}")
-    public ResponseEntity<?> insertStuSubAppProc(@PathVariable Long subjectId, @RequestParam Long type,
+    public ResponseEntity<?> insertStuSubAppProc(@PathVariable("subjectId") Long subjectId, @RequestParam Long type,
                                                  @AuthenticationPrincipal CustomUserDetails principal) {
 
         // 수강 신청 기간이 아니라면
@@ -468,7 +468,7 @@ public class StuSubController {
      * 수강 신청 처리 (취소)
      */
     @DeleteMapping("/deleteApp/{subjectId}")
-    public ResponseEntity<?> deleteStuSubAppProc(@PathVariable Long subjectId, @RequestParam Long type,
+    public ResponseEntity<?> deleteStuSubAppProc(@PathVariable("subjectId") Long subjectId, @RequestParam Long type,
                                                  @AuthenticationPrincipal CustomUserDetails principal) {
 
         // 수강 신청 기간이 아니라면
@@ -478,14 +478,6 @@ public class StuSubController {
 
         Long studentId = principal.getId();
         stuSubService.deleteStuSub(studentId, subjectId);
-
-        // 강의 검색 페이지에서 취소 시  -> 이제 프론트에서 navigate 처리할 수 있기 때문에 아래로 통일했습니다.
-//		if (type == 0) {
-//			return "redirect:/sugang/application/1";
-//			// 예비 수강 신청 내역 페이지에서 취소 시
-//		} else {
-//			return "redirect:/sugang/preAppList?type=1";
-//		}
 
         return ResponseEntity.ok().body("수강 신청 취소가 정상적으로 처리되었습니다.");
     }
@@ -499,7 +491,6 @@ public class StuSubController {
 
         // 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가
         Long studentId = principal.getId();
-        // Todo 엔티티 말고 따로 dto 만들어서 처리
         StudentDto studentInfo = userService.readStudent(studentId);
 
 		StuStatDto stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
@@ -563,7 +554,7 @@ public class StuSubController {
         // 해당 학생의 학적 상태가 '졸업' 또는 '자퇴'라면 X
         // 해당 학생이 이번 학기 휴학을 승인받은 상태라면 X
         Long studentId = principal.getId();
-        // Todo 엔티티 말고 따로 dto 만들어서 처리
+
         StudentDto studentInfo = userService.readStudent(studentId);
 
 		StuStatDto stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
