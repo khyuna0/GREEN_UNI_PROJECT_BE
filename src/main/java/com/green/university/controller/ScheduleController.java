@@ -4,11 +4,13 @@ import com.green.university.dto.ScheduleDto;
 import com.green.university.dto.ScheduleFormDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.entity.Schedule;
+import com.green.university.security.CustomUserDetails;
 import com.green.university.service.ScheduleService;
 import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpSession;
@@ -60,8 +62,10 @@ public class ScheduleController {
 
 	// 학사 일정 추가 crud=insert
 	@PostMapping("/write")
-	public ResponseEntity<?> ScheduleProc(ScheduleFormDto scheduleFormDto) {
-		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
+	public ResponseEntity<?> ScheduleProc(ScheduleFormDto scheduleFormDto,
+                                          @AuthenticationPrincipal CustomUserDetails principal) {
+
+		Long staffId = principal.getId();
 		System.out.println("write");
 		System.out.println(scheduleFormDto);
 		
@@ -72,7 +76,7 @@ public class ScheduleController {
 		}else if(scheduleFormDto.getInformation().equals("")){
 			throw new CustomRestfullException("내용을 입력해주세요", HttpStatus.BAD_REQUEST);
 		}else {
-            scheduleService.createSchedule(principal.getId(), scheduleFormDto);
+            scheduleService.createSchedule(staffId, scheduleFormDto);
 		}
 		return ResponseEntity.ok().body("학사 일정 추가가 완료되었습니다.");
 	}

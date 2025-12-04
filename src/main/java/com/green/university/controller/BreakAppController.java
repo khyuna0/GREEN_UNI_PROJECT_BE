@@ -4,6 +4,7 @@ import com.green.university.dto.BreakAppFormDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.entity.BreakApp;
 import com.green.university.entity.Student;
+import com.green.university.security.CustomUserDetails;
 import com.green.university.service.BreakAppService;
 import com.green.university.service.CollegeService;
 import com.green.university.service.StuStatService;
@@ -13,6 +14,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
@@ -47,10 +49,11 @@ public class BreakAppController {
 
     //휴학 신청 페이지
     @GetMapping("/application")
-    public ResponseEntity<?> breakApplication() {
+    public ResponseEntity<?> breakApplication(@AuthenticationPrincipal CustomUserDetails principal) {
 
-        PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
-        Student studentInfo = userService.readStudent(principal.getId());
+        // JWT 에서 꺼낸 현재 로그인 학생 ID
+        Long studentId = principal.getId();
+        Student studentInfo = userService.readStudent(studentId);
 
         // 학과 이름
         String deptName = collegeService.readDeptById(studentInfo.getDepartment().getId()).getName();
@@ -88,9 +91,10 @@ public class BreakAppController {
      * @return 휴복학 신청 내역 페이지
      */
     @PostMapping("/application")
-    public ResponseEntity<?> breakApplicationProc(@Validated BreakAppFormDto breakAppFormDto) {
+    public ResponseEntity<?> breakApplicationProc(@Validated BreakAppFormDto breakAppFormDto,
+                                                  @AuthenticationPrincipal CustomUserDetails principal) {
 
-        PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
+        Long studentId = principal.getId();
 
         // 선택한 종료 연도-학기가 시작 연도-학기보다 이전이라면 신청 불가능
         // ex) 시작 연도-학기 : 2023-2 / 종료 연도-학기 2023-1
@@ -98,7 +102,7 @@ public class BreakAppController {
                 && Define.CURRENT_SEMESTER > breakAppFormDto.getToSemester()) {
             throw new CustomRestfullException("종료 학기가 시작 학기 이전입니다.", HttpStatus.BAD_REQUEST);
         }
-        breakAppFormDto.setStudentId(principal.getId());
+        breakAppFormDto.setStudentId(studentId);
         breakAppFormDto.setFromYear(Define.CURRENT_YEAR);
         breakAppFormDto.setFromSemester(Define.CURRENT_SEMESTER);
 
@@ -112,11 +116,11 @@ public class BreakAppController {
      * @return 휴복학 신청 내역 페이지 (학생용)
      */
     @GetMapping("/list")
-    public ResponseEntity<?> breakAppListByStudentId() {
+    public ResponseEntity<?> breakAppListByStudentId(@AuthenticationPrincipal CustomUserDetails principal) {
 
-        PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
+        Long studentId = principal.getId();
 
-        List<BreakApp> breakAppList = breakAppService.readByStudentId(principal.getId());
+        List<BreakApp> breakAppList = breakAppService.readByStudentId(studentId);
 
         return ResponseEntity.ok(Map.of(
                 "breakAppList", breakAppList
@@ -167,11 +171,13 @@ public class BreakAppController {
      * 휴학 신청 취소 (학생)
      */
     @PostMapping("/delete/{id}")
-    public ResponseEntity<?> deleteBreakApp(@PathVariable("id") Long id) {
+    public ResponseEntity<?> deleteBreakApp(@PathVariable("id") Long id,
+                                            @AuthenticationPrincipal CustomUserDetails principal) {
+
+        Long studentId = principal.getId();
 
         // 신청서의 학번과 현재 로그인된 아이디가 일치하는지 확인
-        PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
-        if (!breakAppService.readById(id).getStudent().getId().equals(principal.getId())) {
+        if (!breakAppService.readById(id).getStudent().getId().equals(studentId)) {
             throw new CustomRestfullException("해당 신청자만 신청을 취소할 수 있습니다.", HttpStatus.UNAUTHORIZED);
         }
 
