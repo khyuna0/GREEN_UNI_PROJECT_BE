@@ -154,7 +154,7 @@ public class UserController {
 		 * @author 서영 1페이지가 선택되어 있음을 보여주기 위함
 		 */
 
-        PaginationUtil.PaginationResult paginationResult = PaginationUtil.build(list, currentPage, 10 )
+        PaginationUtil.PaginationResult paginationResult = PaginationUtil.build(list, currentPage, 10 );
 
         return ResponseEntity.ok(Map.of(
                 "professorList", list,
@@ -196,7 +196,7 @@ public class UserController {
 	 * @return 학생 조회 페이지
 	 */
 	@GetMapping("/studentList")
-	public ResponseEntity<?> showStudentList( @RequestParam(required = false) Long studentId,
+	public ResponseEntity<?> showStudentList(@RequestParam(required = false) Long studentId,
 			@RequestParam(required = false) Long deptId) {
 
 		StudentListForm studentListForm = new StudentListForm();
@@ -230,7 +230,7 @@ public class UserController {
 	 * @return 학생 조회 페이지
 	 */
 	@GetMapping("/studentList/{page}")
-	public ResponseEntity<?> showStudentListByPage( @PathVariable Long page,
+	public ResponseEntity<?> showStudentListByPage(@PathVariable Long page,
 			@RequestParam(required = false) Long deptId) {
 
 		StudentListForm studentListForm = new StudentListForm();
