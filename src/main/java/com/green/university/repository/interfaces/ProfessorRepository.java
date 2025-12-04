@@ -10,10 +10,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ProfessorRepository extends JpaRepository<Professor, Long> {
 
     // id 찾기
-    Professor findByNameAndEmail(String name, String email);
+    Long findByNameAndEmail(String name, String email);
 
-    // password 발급용 엔티티? 확인
-    Staff findByIdAndNameAndEmail(Long id, String name, String email);
+    // password 찾기
+    Long findByIdAndNameAndEmail(Long id, String name, String email);
 
     // 페이지, 과별 교수 조회 (검색 용)
     Page<Professor> findByDepartment_id(Long departmentId, Pageable pageable);
