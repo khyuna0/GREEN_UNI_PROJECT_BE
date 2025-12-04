@@ -1,6 +1,7 @@
 package com.green.university.controller;
 
 import com.green.university.dto.CurrentSemesterSubjectSearchFormDto;
+import com.green.university.dto.response.StuStatDto;
 import com.green.university.dto.response.StuSubAppDto;
 import com.green.university.dto.response.SubjectDto;
 import com.green.university.handler.exception.CustomRestfullException;
@@ -188,8 +189,7 @@ public class StuSubController {
         // Todo 엔티티 말고 따로 dto 만들어서 처리
 		Student studentInfo = userService.readStudent(principal.getId());
 
-        // Todo 엔티티 말고 따로 dto 만들어서 처리
-		StuStat stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
+		StuStatDto stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
 		List<BreakApp> breakAppList = breakAppService.readByStudentId(studentInfo.getId()); // 최근 순으로 정렬되어 있음
 
 		StuStatUtil.checkStuStat("수강신청", stuStatEntity, breakAppList);
@@ -341,8 +341,7 @@ public class StuSubController {
 		PrincipalDto principal = (PrincipalDto) session.getAttribute(Define.PRINCIPAL);
         // Todo 엔티티 말고 따로 dto 만들어서 처리
 		Student studentInfo = userService.readStudent(principal.getId());
-        // Todo 엔티티 말고 따로 dto 만들어서 처리
-		StuStat stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
+		StuStatDto stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
 		List<BreakApp> breakAppList = breakAppService.readByStudentId(studentInfo.getId()); // 최근 순으로 정렬되어 있음
 		StuStatUtil.checkStuStat("수강신청", stuStatEntity, breakAppList);
 
@@ -493,8 +492,7 @@ public class StuSubController {
         // Todo 엔티티 말고 따로 dto 만들어서 처리
         Student studentInfo = userService.readStudent(principal.getId());
 
-        // Todo 엔티티 말고 따로 dto 만들어서 처리
-		StuStat stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
+		StuStatDto stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
 		List<BreakApp> breakAppList = breakAppService.readByStudentId(studentInfo.getId()); // 최근 순으로 정렬되어 있음
 		StuStatUtil.checkStuStat("수강신청", stuStatEntity, breakAppList);
 
@@ -558,8 +556,7 @@ public class StuSubController {
         // Todo 엔티티 말고 따로 dto 만들어서 처리
 		Student studentInfo = userService.readStudent(principal.getId());
 
-        // Todo 엔티티 말고 따로 dto 만들어서 처리
-		StuStat stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
+		StuStatDto stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
 		List<BreakApp> breakAppList = breakAppService.readByStudentId(studentInfo.getId()); // 최근 순으로 정렬되어 있음
 		StuStatUtil.checkStuStat("수강신청", stuStatEntity, breakAppList);
 

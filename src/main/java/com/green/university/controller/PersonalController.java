@@ -70,9 +70,8 @@ public class PersonalController {
 
 
 		if (principal.getUserRole().equals("student")) {
-            // Todo 엔티티 말고 따로 dto 만들어서 처리
 			StudentInfoDto studentInfo = userService.readStudentInfo(principal.getId());
-			StuStat stuStat = stuStatService.readCurrentStatus(principal.getId());
+			StuStatDto stuStat = stuStatService.readCurrentStatus(principal.getId());
 			model.addAttribute("userInfo", studentInfo);
 			model.addAttribute("currentStatus", stuStat.getStatus());
 		} else if (principal.getUserRole().equals("staff")) {

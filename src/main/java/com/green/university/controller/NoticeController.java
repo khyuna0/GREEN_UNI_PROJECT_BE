@@ -2,6 +2,7 @@ package com.green.university.controller;
 
 import com.green.university.dto.NoticeFormDto;
 import com.green.university.dto.NoticePageFormDto;
+import com.green.university.dto.response.NoticeDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.entity.Notice;
 import com.green.university.service.NoticeService;
@@ -61,14 +62,14 @@ public class NoticeController {
     public ResponseEntity<?> insertNotice(@Validated NoticeFormDto noticeFormDto) {
 
         MultipartFile file = noticeFormDto.getFile();
-        if (file.isEmpty() == false) {
+        if (!file.isEmpty()) {
             if (file.getSize() > Define.MAX_FILE_SIZE) {
                 throw new CustomRestfullException("파일 크기는 20MB 이상 클 수 없습니다.", HttpStatus.BAD_REQUEST);
             }
             try {
                 String saveDirectory = Define.UPLOAD_DIRECTORY;
                 File dir = new File(saveDirectory);
-                if (dir.exists() == false) {
+                if (!dir.exists()) {
                     dir.mkdirs();
                 }
                 UUID uuid = UUID.randomUUID();
@@ -92,7 +93,7 @@ public class NoticeController {
      */
     @GetMapping("/read/{id}")
     public ResponseEntity<?> selectByIdNotice( @PathVariable("id") Long id) {
-        Notice notice = noticeService.readByIdNotice(id); // Todo 엔티티 말고 따로 dto 만들어서 처리
+        NoticeDto notice = noticeService.readByIdNotice(id);
         notice.setContent(notice.getContent().replace("\r\n", "<br>"));
 
         return ResponseEntity.ok(Map.of(
@@ -166,7 +167,7 @@ public class NoticeController {
     @GetMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable("id") Long id) {
 
-        Notice notice = noticeService.readByIdNotice(id);
+        NoticeDto notice = noticeService.readByIdNotice(id);
         return ResponseEntity.ok(Map.of(
                 "crud","update",
                 "notice", notice

@@ -303,9 +303,12 @@ public class UserService {
      */
     @Transactional
     public Student readStudent(Long studentId) {
-        return studentRepository.findById(studentId).orElseThrow(
+        Student student = studentRepository.findById(studentId).orElseThrow(
                 () -> new CustomRestfullException("학생을 조회할 수 없습니다.", HttpStatus.NOT_FOUND)
         );
+
+        StudentDto studentDto = new StudentDto(student);
+        return
     }
 
     /**

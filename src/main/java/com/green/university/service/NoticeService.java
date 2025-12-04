@@ -2,6 +2,7 @@ package com.green.university.service;
 
 import com.green.university.dto.NoticeFormDto;
 import com.green.university.dto.NoticePageFormDto;
+import com.green.university.dto.response.NoticeDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.NoticeRepository;
 import com.green.university.entity.Notice;
@@ -95,14 +96,15 @@ public class NoticeService {
 
     // 공지 상세 조회 + 조회수 증가
     @Transactional
-    public Notice readByIdNotice(Long id) {
+    public NoticeDto readByIdNotice(Long id) {
         Notice notice = noticeRepository.findById(id)
                 .orElseThrow(() -> new CustomRestfullException("공지 없음", HttpStatus.NOT_FOUND));
 
-        Long currentViews = notice.getViews() == null ? 0: notice.getViews();
+        long currentViews = notice.getViews() == null ? 0: notice.getViews();
         notice.setViews(currentViews + 1);
 
-        return notice;
+        NoticeDto noticeDto = new NoticeDto(notice);
+        return noticeDto;
     }
 
     // 공지 수정

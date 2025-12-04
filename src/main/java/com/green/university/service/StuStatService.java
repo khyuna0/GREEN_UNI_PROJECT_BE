@@ -1,5 +1,6 @@
 package com.green.university.service;
 
+import com.green.university.dto.response.StuStatDto;
 import com.green.university.entity.BreakApp;
 import com.green.university.entity.Student;
 import com.green.university.handler.exception.CustomRestfullException;
@@ -35,8 +36,10 @@ public class StuStatService {
 	 * @return 해당 학생의 현재 학적 상태 (.getStatus())
 	 */
 	@Transactional
-	public StuStat readCurrentStatus(Long studentId) {
-		return stuStatRepository.findAllByStudentIdOrderByIdDesc(studentId).get(0);
+	public StuStatDto readCurrentStatus(Long studentId) {
+
+        StuStatDto stuStatDto = new StuStatDto(stuStatRepository.findAllByStudentIdOrderByIdDesc(studentId).get(0));
+		return stuStatDto;
 	}
 
 	/**

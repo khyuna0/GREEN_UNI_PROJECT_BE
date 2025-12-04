@@ -1,5 +1,6 @@
 package com.green.university.controller;
 
+import com.green.university.dto.response.StuStatDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.entity.BreakApp;
 import com.green.university.entity.StuStat;
@@ -83,8 +84,7 @@ public class TuitionController {
 		// 해당 학생의 학적 상태가 '졸업' 또는 '자퇴'라면 X
 		// 해당 학생이 이번 학기 휴학을 승인받은 상태라면 X
 
-        // Todo 엔티티 말고 따로 dto 만들어서 처리
-		StuStat stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
+		StuStatDto stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
 		List<BreakApp> breakAppList = breakAppService.readByStudentId(studentInfo.getId()); // 최근 순으로 정렬되어 있음
 
 		StuStatUtil.checkStuStat("등록금", stuStatEntity, breakAppList);

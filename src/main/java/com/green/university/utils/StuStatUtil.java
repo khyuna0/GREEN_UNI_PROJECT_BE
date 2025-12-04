@@ -1,5 +1,6 @@
 package com.green.university.utils;
 
+import com.green.university.dto.response.StuStatDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.entity.BreakApp;
 import com.green.university.entity.StuStat;
@@ -10,7 +11,7 @@ import java.util.List;
 public class StuStatUtil {
 
 	// 이번 학기 재학 상태인지 확인
-	public static void checkStuStat(String type, StuStat stuStatEntity, List<BreakApp> breakAppList) {
+	public static void checkStuStat(String type, StuStatDto stuStatEntity, List<BreakApp> breakAppList) {
 		
 		// 해당 학생의 학적 상태가 '졸업' 또는 '자퇴'라면
 		if (stuStatEntity.getStatus().equals("졸업") || stuStatEntity.getStatus().equals("자퇴")) {
