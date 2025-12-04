@@ -68,16 +68,6 @@ public class AdminController {
 	public ResponseEntity<?> department(@RequestParam(defaultValue = "select") String crud) {
 		List<Department> departmentList = adminService.readDepartment(); // 프론트에서 합쳐 찍는 형태일까?
 		List<College> collegeList = adminService.readCollege();
-//		if (collegeList.isEmpty()) {
-//			model.addAttribute("collegeList", null);
-//		} else {
-//			model.addAttribute("collegeList", collegeList);
-//		}
-//		if (departmentList.isEmpty()) {
-//			model.addAttribute("departmentList", null);
-//		} else {
-//			model.addAttribute("departmentList", departmentList);
-//		}
         return ResponseEntity.ok(Map.of(
                 "collegeList", collegeList,
                 "departmentList", departmentList,

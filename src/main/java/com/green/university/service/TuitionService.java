@@ -1,6 +1,8 @@
 package com.green.university.service;
 
 import com.green.university.dto.response.GradeForScholarshipDto;
+import com.green.university.dto.response.StuStatDto;
+import com.green.university.dto.response.StudentDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.*;
 import com.green.university.entity.*;
@@ -46,6 +48,8 @@ public class TuitionService {
     @Autowired
     private CollTuitRepository collTuitRepository;
 
+    @Autowired
+    private StuStatRepository stuStatRepository;
 
 	/**
 	 * @param studentId (principal의 id와 동일)
@@ -87,15 +91,18 @@ public class TuitionService {
 	 */
 	public Long createCurrentSchType(Long studentId) {
 
-        Student studentEntity = userService.readStudent(studentId); // 예외처리 완료된 유저 조회
-
+        // 기존 서비스에서 프론트 호출용으로 DTO로 변경 -> 리포 통해 id로 찾는 방식으로 변경함
+//        StudentDto studentEntity = userService.readStudent(studentId); // 예외처리 완료된 유저 조회
+        Student student = studentRepository.findById(studentId).orElseThrow(
+                () -> new CustomRestfullException("학생 정보를 찾을 수 없습니다", HttpStatus.NOT_FOUND)
+        );
 		StuSch stuSch = new StuSch();
-		stuSch.setStudent(studentEntity);
+		stuSch.setStudent(student);
 		stuSch.setSchYear(Define.CURRENT_YEAR);
 		stuSch.setSemester(Define.CURRENT_SEMESTER);
 
 		// 1학년 2학기 이상의 학생이라면
-		if (studentEntity.getGrade() > 1 || studentEntity.getSemester() == 2) {
+		if (student.getGrade() > 1 || student.getSemester() == 2) {
 			// 직전 학기 성적 평균
 			// 상수로 선언해둬서 노란줄 뜨는 거니까 무시하기
 			GradeForScholarshipDto gradeDto = null;
@@ -136,8 +143,9 @@ public class TuitionService {
 	public Long createTuition(Long studentId) { // 고지서 생성 버튼 누르면 실행됨
 
 		// 해당 학생의 학적 상태가 '졸업' 또는 '자퇴'라면 생성하지 않음
-		StuStat stuStatEntity = stuStatService.readCurrentStatus(studentId);
-		if (stuStatEntity.getStatus().equals("졸업") || stuStatEntity.getStatus().equals("자퇴")) {
+        StuStat stuStat = stuStatRepository.findAllByStudentIdOrderByIdDesc(studentId).get(0);
+
+        if (stuStat.getStatus().equals("졸업") || stuStat.getStatus().equals("자퇴")) {
 			return 0L;
 		}
 

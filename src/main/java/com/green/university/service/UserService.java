@@ -302,13 +302,13 @@ public class UserService {
      * @return studentEntity
      */
     @Transactional
-    public Student readStudent(Long studentId) {
+    public StudentDto readStudent(Long studentId) {
         Student student = studentRepository.findById(studentId).orElseThrow(
                 () -> new CustomRestfullException("학생을 조회할 수 없습니다.", HttpStatus.NOT_FOUND)
         );
 
-        StudentDto studentDto = new StudentDto(student);
-        return
+        return StudentDto.fromEntity(student);
+
     }
 
     /**
@@ -360,7 +360,7 @@ public class UserService {
     public StudentInfoDto readStudentInfo(Long id) {
         // id로 student 엔티티 찾아서 dto로 변환해서 반환
         Student student = studentRepository.findById(id).orElseThrow(
-                () -> new CustomRestfullException("학생 정보를 찾을 수 없습니다", HttpStatus.INTERNAL_SERVER_ERROR)
+                () -> new CustomRestfullException("학생 정보를 찾을 수 없습니다", HttpStatus.NOT_FOUND)
         );
         return StudentInfoDto.fromEntity(student);
     }

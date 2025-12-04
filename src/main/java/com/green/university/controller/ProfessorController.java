@@ -114,7 +114,7 @@ public class ProfessorController {
 	@GetMapping("/subject/{subjectId}/{studentId}")
 	public ResponseEntity<?> updateStudentDetail(@PathVariable Long subjectId, @PathVariable Long studentId) {
 
-		Student student = userService.readStudent(studentId);
+        StudentDto student = userService.readStudent(studentId);
 
         return ResponseEntity.ok(Map.of(
                 "student", student,

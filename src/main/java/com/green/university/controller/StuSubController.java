@@ -3,6 +3,7 @@ package com.green.university.controller;
 import com.green.university.dto.CurrentSemesterSubjectSearchFormDto;
 import com.green.university.dto.response.StuStatDto;
 import com.green.university.dto.response.StuSubAppDto;
+import com.green.university.dto.response.StudentDto;
 import com.green.university.dto.response.SubjectDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.entity.*;
@@ -187,8 +188,7 @@ public class StuSubController {
         // 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가
         Long studentId = principal.getId();
 
-        // Todo 엔티티 말고 따로 dto 만들어서 처리
-        Student studentInfo = userService.readStudent(studentId);
+        StudentDto studentInfo = userService.readStudent(studentId);
 
         StuStatDto stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
         List<BreakApp> breakAppList = breakAppService.readByStudentId(studentInfo.getId()); // 최근 순으로 정렬되어 있음
@@ -344,8 +344,8 @@ public class StuSubController {
 
         // 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가
         Long studentId = principal.getId();
-        // Todo 엔티티 말고 따로 dto 만들어서 처리
-        Student studentInfo = userService.readStudent(studentId);
+
+        StudentDto studentInfo = userService.readStudent(studentId);
 
 		StuStatDto stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
 		List<BreakApp> breakAppList = breakAppService.readByStudentId(studentInfo.getId()); // 최근 순으로 정렬되어 있음
@@ -500,7 +500,7 @@ public class StuSubController {
         // 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가
         Long studentId = principal.getId();
         // Todo 엔티티 말고 따로 dto 만들어서 처리
-        Student studentInfo = userService.readStudent(studentId);
+        StudentDto studentInfo = userService.readStudent(studentId);
 
 		StuStatDto stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
 		List<BreakApp> breakAppList = breakAppService.readByStudentId(studentInfo.getId()); // 최근 순으로 정렬되어 있음
@@ -564,7 +564,7 @@ public class StuSubController {
         // 해당 학생이 이번 학기 휴학을 승인받은 상태라면 X
         Long studentId = principal.getId();
         // Todo 엔티티 말고 따로 dto 만들어서 처리
-        Student studentInfo = userService.readStudent(studentId);
+        StudentDto studentInfo = userService.readStudent(studentId);
 
 		StuStatDto stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
 		List<BreakApp> breakAppList = breakAppService.readByStudentId(studentInfo.getId()); // 최근 순으로 정렬되어 있음

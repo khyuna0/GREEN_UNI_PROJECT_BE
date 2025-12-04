@@ -1,6 +1,7 @@
 package com.green.university.controller;
 
 import com.green.university.dto.BreakAppFormDto;
+import com.green.university.dto.response.StudentDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.entity.BreakApp;
 import com.green.university.entity.Student;
@@ -53,7 +54,7 @@ public class BreakAppController {
 
         // JWT 에서 꺼낸 현재 로그인 학생 ID
         Long studentId = principal.getId();
-        Student studentInfo = userService.readStudent(studentId);
+        StudentDto studentInfo = userService.readStudent(studentId);
 
         // 학과 이름
         String deptName = collegeService.readDeptById(studentInfo.getDepartment().getId()).getName();
@@ -150,7 +151,7 @@ public class BreakAppController {
         BreakApp breakApp = breakAppService.readById(id);
 
         // 신청한 학생
-        Student studentInfo = userService.readStudent(breakApp.getStudent().getId());
+        StudentDto studentInfo = userService.readStudent(breakApp.getStudent().getId());
 
         // 학과 이름
         String deptName = collegeService.readDeptById(studentInfo.getDepartment().getId()).getName();
