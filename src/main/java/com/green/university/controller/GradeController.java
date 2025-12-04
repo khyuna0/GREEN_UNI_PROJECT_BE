@@ -119,21 +119,6 @@ public class GradeController {
                 "gradeList", gradeList
         ));
 
-        //        if (type.equals("전체")) {
-//            List<GradeDto> gradeAllList = gradeService.readGradeByStudentId(studentId, subYear, semester);
-//            model.addAttribute("gradeList", gradeAllList);
-//        } else {
-//            List<GradeDto> gradeList = gradeService.readGradeByType(studentId, subYear, semester, type);
-//            model.addAttribute("gradeList", gradeList);
-//        }
-        //        model.addAttribute("yearList", yearList);
-//        model.addAttribute("semesterList", semesterList);
-//
-//        return ResponseEntity.ok(Map.of(
-//                "yearList", yearList,
-//                "gradeList", gradeAllList,
-//                "semesterList", semesterList
-//        ));
     };
 
 	/**
@@ -148,7 +133,7 @@ public class GradeController {
 
 		// 학생이 수강 신청한 연도 조회
 		List<GradeDto> yearList = gradeService.readGradeYearByStudentId(studentId);
-		List<MyGradeDto> mygradeList = gradeService.readgradeinquiryList(studentId);
+		List<MyGradeDto> gradeList = gradeService.readgradeinquiryList(studentId);
 
         return ResponseEntity.ok(Map.of(
                 "yearList", yearList,
