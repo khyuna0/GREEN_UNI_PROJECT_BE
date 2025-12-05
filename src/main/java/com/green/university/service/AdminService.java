@@ -11,9 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  *
@@ -216,10 +216,12 @@ public class AdminService {
      * 강의 입력 서비스
      */
     @Transactional
-    public List<Subject> createSubjectAndSyllabus(@Validated SubjectFormDto subjectFormDto) {
+    public void createSubjectAndSyllabus(@Valid @RequestBody SubjectFormDto subjectFormDto) {
         // 강의실, 강의시간 중복 검사
+        System.out.println("subjectFormDto = " + subjectFormDto);
         List<Subject> subjectList = subjectRepository.findByRoom_IdAndSubDayAndSubYearAndSemester(
                 subjectFormDto.getRoomId(), subjectFormDto.getSubDay(), subjectFormDto.getSubYear(), subjectFormDto.getSemester());
+        System.out.println("subjectList = " + subjectList);
         if (subjectList != null) {
             SubjectUtil subjectUtil = new SubjectUtil();
             boolean result = subjectUtil.calculate(subjectFormDto, subjectList);
@@ -236,10 +238,8 @@ public class AdminService {
         Department department = departmentRepository.findById(subjectFormDto.getDeptId()).orElseThrow(
                 () -> new CustomRestfullException("해당 학과가 존재하지 않습니다.", HttpStatus.NOT_FOUND)
         );
-
         // 과목 추가 하고, 그 과목 키로 강의 계획서 생성(내용은 없음, 회원가입과 비슷한 느낌?)
         Subject subject = new Subject();
-        subject.setId(subjectFormDto.getId()); // 기본키 자동생성인데, 새 엔티티 생성 시 아이디 넣어줘야 할 필요 있을까?
         subject.setName(subjectFormDto.getName());
         subject.setProfessor(professor);
         subject.setRoom(room);
@@ -255,14 +255,13 @@ public class AdminService {
         subject.setNumOfStudent(subjectFormDto.getNumOfStudent());
         subjectRepository.save(subject);
 
-		// 강의계획서에 강의 ID 저장 (수정해야함?)
-		Long subjectId = subjectRepository.findIdOrderById(subjectFormDto.getId());
-        
+        Long subjectId = subject.getId();
+
         SyllaBus syllaBus = new SyllaBus(); // 강의 아이디로 강의 찾아 엔티티에 강의만 저장함
-        syllaBus.setSubject(subjectRepository.findById(subjectId).orElseThrow(() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)));
+        syllaBus.setSubject(subjectRepository.findById(subjectId).orElseThrow(
+                () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)));
 		syllaBusRepository.save(syllaBus);
-		return subjectList;
-	}
+    }
 
 	/**
 	 * 강의 조회 서비스

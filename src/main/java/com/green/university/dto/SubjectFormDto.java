@@ -18,37 +18,37 @@ public class SubjectFormDto { // 강의 입력과 수정 시 사용하는 DTO
 	@NotEmpty
 	@Size(min=2, max=20)
 	private String name;
-	@NotEmpty
-	@Min(10000000)
-	@Max(99999999)
+//	@NotEmpty
+//	@Min(10000000)
+//	@Max(99999999)
 	private Long professorId;
-	@Size(max = 5)
+//	@Size(max = 5)
 	private String roomId;
-	@NotEmpty
+//	@NotEmpty
 	private Long deptId;
-	@NotEmpty
-	@Size(max = 2)
+//	@NotEmpty
+//	@Size(max = 2)
 	private String type;
-	@NotEmpty
+//	@NotEmpty
 	private Long subYear;
-	@NotEmpty
-	@Min(1)
-	@Max(2)
+//	@NotEmpty
+//	@Min(1)
+//	@Max(2)
 	private Long semester;
-	@NotEmpty
-	@Size(max = 1)
+//	@NotEmpty
+//	@Size(max = 1)
 	private String subDay;
-	@NotEmpty
-	@Min(9)
-	@Max(18)
+//	@NotEmpty
+//	@Min(9)
+//	@Max(18)
 	private Long startTime;
-	@NotEmpty
-	@Min(9)
-	@Max(18)
+//	@NotEmpty
+//	@Min(9)
+//	@Max(18)
 	private Long endTime;
-	@NotEmpty
+//	@NotEmpty
 	private Long grades;
-	@NotEmpty
+//	@NotEmpty
 	private Long capacity;
 	private Long numOfStudent;
 }

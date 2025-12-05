@@ -163,7 +163,7 @@ public class AdminController {
 	 * @return 강의 입력 기능
 	 */
 	@PostMapping("/subject")
-    public ResponseEntity<?> insertSubject(@Valid SubjectFormDto subjectFormDto) {
+    public ResponseEntity<?> insertSubject(@Valid @RequestBody SubjectFormDto subjectFormDto) {
 		adminService.createSubjectAndSyllabus(subjectFormDto);
         return ResponseEntity.ok().body("강의 입력이 완료되었습니다");
 	}
