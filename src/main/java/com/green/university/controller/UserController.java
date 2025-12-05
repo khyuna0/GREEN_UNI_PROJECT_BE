@@ -8,17 +8,20 @@ import com.green.university.service.ProfessorService;
 import com.green.university.service.StudentService;
 import com.green.university.service.UserService;
 import com.green.university.utils.PaginationUtil;
+import org.aspectj.apache.bcel.generic.ClassGen;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 // 유저 페이지
@@ -36,7 +39,7 @@ public class UserController {
 
     // staff 입력
     @PostMapping("/staff")
-    public ResponseEntity<?> createStaffProc(@Valid CreateStaffDto createStaffDto, BindingResult bindingResult) {
+    public ResponseEntity<?> createStaffProc(@Valid @RequestBody CreateStaffDto createStaffDto, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             StringBuilder sb = new StringBuilder();
@@ -48,12 +51,12 @@ public class UserController {
         userService.createStaffToStaffAndUser(createStaffDto);
 
         return ResponseEntity.ok().body("직원 입력이 완료되었습니다.");
-	}
+    }
 
 
-	// professor 입력
-	@PostMapping("/professor")
-	public ResponseEntity<?> createProfessorProc(@Valid CreateProfessorDto createProfessorDto, BindingResult bindingResult) {
+    // professor 입력
+    @PostMapping("/professor")
+    public ResponseEntity<?> createProfessorProc(@Valid @RequestBody CreateProfessorDto createProfessorDto, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             StringBuilder sb = new StringBuilder();
@@ -66,57 +69,58 @@ public class UserController {
         userService.createProfessorToProfessorAndUser(createProfessorDto);
 
         return ResponseEntity.ok().body("교수 입력이 완료되었습니다.");
-	}
-
+    }
 
 
     // student 입력
     @PostMapping("/student")
-    public ResponseEntity<?> createStudentProc(@Valid CreateStudentDto createStudentDto, BindingResult bindingResult) {
+    public ResponseEntity<?> createStudentProc(@Valid @RequestBody CreateStudentDto createStudentDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            Map<String, Object> errors = new HashMap<>();
-            bindingResult.getAllErrors().forEach(error -> {
-                errors.put(error.getDefaultMessage(), error.getDefaultMessage());
-            });
-            throw new CustomRestfullException(errors.toString(), HttpStatus.BAD_REQUEST);
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(err -> {
+                        errors.put(err.getField(), err.getDefaultMessage());
+                    }
+            );
+            System.out.println("학생오류" + errors);
         }
+
         userService.createStudentToStudentAndUser(createStudentDto);
         return ResponseEntity.ok().body("학생 입력이 완료되었습니다.");
     }
 
-	/**
-	 * 교수 조회+검색+페이징
-	 *
-	 * @return 교수 조회 페이지 (아래 showProfessorListByPage와 합칠 수 있을 것 같다)
-	 */
-	@GetMapping({"/professorList", "/professorList/{page}"})
-	public ResponseEntity<?> showProfessorList(
+    /**
+     * 교수 조회+검색+페이징
+     *
+     * @return 교수 조회 페이지 (아래 showProfessorListByPage와 합칠 수 있을 것 같다)
+     */
+    @GetMapping({"/professorList", "/professorList/{page}"})
+    public ResponseEntity<?> showProfessorList(
             @PathVariable(value = "page", required = false) Integer page,
             @RequestParam(required = false) Long professorId,
-			@RequestParam(required = false) Long deptId) {
+            @RequestParam(required = false) Long deptId) {
 
-        int currentPage = ( page == null  || page < 1) ? 1 : page;
+        int currentPage = (page == null || page < 1) ? 1 : page;
 
-		ProfessorListForm professorListForm = new ProfessorListForm();
-		professorListForm.setPage((currentPage - 1) * 20);
+        ProfessorListForm professorListForm = new ProfessorListForm();
+        professorListForm.setPage((currentPage - 1) * 20);
 
         // 검색어가 있는 경우
-		if (professorId != null) professorListForm.setProfessorId(professorId);
+        if (professorId != null) professorListForm.setProfessorId(professorId);
         if (deptId != null) professorListForm.setDeptId(deptId);
 
         Page<Professor> list = professorService.readProfessorList(professorListForm, currentPage);
-		/**
-		 * @author 서영 1페이지가 선택되어 있음을 보여주기 위함
-		 */
+        /**
+         * @author 서영 1페이지가 선택되어 있음을 보여주기 위함
+         */
 
-        PaginationUtil.PaginationResult paginationResult = PaginationUtil.build(list, currentPage, 10 );
+        PaginationUtil.PaginationResult paginationResult = PaginationUtil.build(list, currentPage, 10);
 
         return ResponseEntity.ok(Map.of(
                 "professorList", list,
                 "paginationResult", paginationResult
                 // "deptId", deptId,
         ));
-	}
+    }
 
     // 학생 조회 페이지 ("/user/studentList")
     @GetMapping("/studentList")

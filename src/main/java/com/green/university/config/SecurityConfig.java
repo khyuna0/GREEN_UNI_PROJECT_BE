@@ -42,9 +42,8 @@ public class SecurityConfig {
                         )
                         .logoutSuccessHandler((req, res, auth) ->
                                 res.setStatus(HttpServletResponse.SC_OK))
-                );
-
-        http.authorizeHttpRequests(auth -> auth
+                )
+                .authorizeHttpRequests(auth -> auth
                 // CORS preflight(OPTIONS) 전부 허용
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
 
@@ -56,13 +55,16 @@ public class SecurityConfig {
                         "/error",
                         "/images/**"
                 ).permitAll()
-
+                // 개발중이라 일단 다 열어두기
+                .requestMatchers("/**").permitAll()
+                /**
                 // 학생 전용
                 .requestMatchers(Define.STUDENT_PATHS).hasRole("STUDENT")
                 // 교수 전용
                 .requestMatchers(Define.PROFESSOR_PATHS).hasRole("PROFESSOR")
                 // 직원 전용
                 .requestMatchers(Define.STAFF_PATHS).hasRole("STAFF")
+                 */
 
                 .anyRequest().authenticated()
         );

@@ -26,13 +26,18 @@ public class Define {
 
 	/**
 	 * 로그인 해야 접속 가능한 페이지 목록
-	 * 
-	 * @author 김지현
-	 */
-	public final static String[] PATHS = { "/update", "/password", "/info/**", "/guide", "/notice/**"};
-	public final static String[] PROFESSOR_PATHS = { "/professor/**" };
-	public final static String[] STUDENT_PATHS = {"/grade/**"};
-	public final static String[] STAFF_PATHS = { "/user/**" };
+	 *
+     */
+//	public final static String[] PATHS = { "/update", "/password", "/info/**", "/guide", "/notice/**"};
+//	public final static String[] PROFESSOR_PATHS = { "/professor/**" };
+//	public final static String[] STUDENT_PATHS = {"/grade/**"};
+//	public final static String[] STAFF_PATHS = { "/user/**" };
+
+	public final static String[] PATHS = { "/api/update", "/api/password", "/api/info/**", "/api/guide", "/api/notice/**"};
+	public final static String[] PROFESSOR_PATHS = { "/api/professor/**" };
+	public final static String[] STUDENT_PATHS = {"/api/grade/**"};
+	public final static String[] STAFF_PATHS = { "/api/user/**", "/api/personal/**" };
+
 
 	// 수강 가능한 최대 학점
 	public final static Long MAX_GRADES = 18L;

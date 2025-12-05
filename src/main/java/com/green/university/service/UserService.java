@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,15 +48,20 @@ public class UserService {
     // staff 생성 서비스로 먼저 staff_tb에 insert한 후 staff_tb에 생긴 id를 끌고와 user_tb에 생성함
     @Transactional
     public void createStaffToStaffAndUser(CreateStaffDto createStaffDto) {
+        System.out.println(createStaffDto.getName());
         Staff staff = new Staff();
         staff.setName(createStaffDto.getName());
         staff.setGender(createStaffDto.getGender());
         staff.setAddress(createStaffDto.getAddress());
         staff.setTel(createStaffDto.getTel());
         staff.setEmail(createStaffDto.getEmail());
-
+        staff.setBirthDate(createStaffDto.getBirthDate());
+        staff.setHireDate(null);
+        System.out.println("staff: " + staff);
         Staff savedStaff = staffRepository.save(staff);
+        System.out.println("savedStaff: " + savedStaff);
         Long staffId = savedStaff.getId();
+        System.out.println("staffId: " + staffId);
 
         // User 엔티티 생성 및 저장 (공통 메서드 이용)
         createUser(staffId, "staff");
@@ -67,6 +73,7 @@ public class UserService {
         Professor professor = new Professor();
         professor.setName(dto.getName());
         professor.setGender(dto.getGender());
+        professor.setBirthDate(dto.getBirthDate());
         professor.setEmail(dto.getEmail());
         professor.setTel(dto.getTel());
         professor.setAddress(dto.getAddress());
@@ -94,9 +101,9 @@ public class UserService {
         student.setEmail(createStudentDto.getEmail());
         student.setDepartment(departmentRepository.findById(createStudentDto.getDeptId())
                 .orElseThrow(() -> new CustomRestfullException("없는 학과 정보입니다.", HttpStatus.NOT_FOUND)));
-
         Student savedStudent = studentRepository.save(student);
         Long studentId = savedStudent.getId();
+        System.out.println(studentId);
 
         stuStatService.createFirstStatus(studentId); // 학적 상태 생성 (재학)
 
