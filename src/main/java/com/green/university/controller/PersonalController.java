@@ -229,7 +229,7 @@ public class PersonalController {
 
         return ResponseEntity.ok(Map.of(
                 "student", student,
-                "studentList", list
+                "stuStat", list
         ));
     }
 

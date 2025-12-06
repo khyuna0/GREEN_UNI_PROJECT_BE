@@ -1,20 +1,23 @@
 package com.green.university.controller;
 
+import com.green.university.config.security.CustomUserDetails;
 import com.green.university.dto.LoginDto;
 import com.green.university.dto.response.LoginResponseDto;
+import com.green.university.entity.User;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -48,6 +51,23 @@ public class AuthController {
         }
 
         return ResponseEntity.ok(loginResponse);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> me(@AuthenticationPrincipal CustomUserDetails principal) {
+        if (principal == null) {
+            throw new CustomRestfullException("로그인이 정보가 없습니다.", HttpStatus.UNAUTHORIZED);
+        }
+        User user = principal.getUser();
+        System.out.println("user: " + user);
+        Long id = principal.getId();
+        System.out.println("id: " + id); // 이것도 학번 나오고
+        String userRole = principal.getUserRole();
+        System.out.println("userRole: " + userRole); // 롤은 잘 나옴
+        String username = principal.getUsername();
+        System.out.println("username: " + username); // 이것도 학번 나옴
+
+        return ResponseEntity.ok(Map.of("id", id, "username", username, "role", userRole));
     }
 
 }

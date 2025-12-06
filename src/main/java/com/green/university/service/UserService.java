@@ -121,7 +121,7 @@ public class UserService {
 
         //비밀번호 검증
         if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
-            throw new CustomRestfullException(Define.WRONG_PASSWORD, HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("비밀번호가 틀렸습니다.", HttpStatus.BAD_REQUEST);
         }
 
         //JWT 액세스 토큰 발급
