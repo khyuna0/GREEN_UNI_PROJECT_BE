@@ -98,7 +98,7 @@ public class NoticeService {
     @Transactional
     public NoticeDto readByIdNotice(Long id) {
         Notice notice = noticeRepository.findById(id)
-                .orElseThrow(() -> new CustomRestfullException("공지 없음", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomRestfullException("공지 없음", HttpStatus.NOT_FOUND, "/break/appList"));
 
         long currentViews = notice.getViews() == null ? 0: notice.getViews();
         notice.setViews(currentViews + 1);
@@ -111,7 +111,7 @@ public class NoticeService {
     @Transactional
     public void updateNotice(Long id, NoticeFormDto noticeFormDto) {
         Notice notice = noticeRepository.findById(id)
-                .orElseThrow(() -> new CustomRestfullException("공지 없음", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomRestfullException("공지 없음", HttpStatus.NOT_FOUND, "/break/appList"));
 
         notice.setCategory(noticeFormDto.getCategory());
         notice.setTitle(noticeFormDto.getTitle());

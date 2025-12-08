@@ -8,7 +8,7 @@ public class CustomRestfullException extends RuntimeException {
 
 	private HttpStatus status;
 	
-	public CustomRestfullException(String message, HttpStatus status) {
+	public CustomRestfullException(String message, HttpStatus status, String path) {
 		super(message);
 		this.status = status;
 	}

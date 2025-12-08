@@ -2,7 +2,6 @@ package com.green.university.service;
 
 import com.green.university.dto.BreakAppFormDto;
 import com.green.university.entity.Student;
-import com.green.university.exception.CustomPathException;
 import com.green.university.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.BreakAppRepository;
 import com.green.university.entity.BreakApp;
@@ -38,13 +37,13 @@ public class BreakAppService {
 
         // 학생 엔티티 조회 (기존: studentId Long만 다님 → JPA는 객체로!)
         Student student = studentRepository.findById(dto.getStudentId())
-                .orElseThrow(() -> new CustomRestfullException("학생을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomRestfullException("학생을 찾을 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList"));
 
         // 이미 처리중인 휴학 신청이 있는지 검사
         List<BreakApp> breakAppList = breakAppRepository.findByStudent_IdOrderByIdDesc(dto.getStudentId());
         for (BreakApp b : breakAppList) {
             if ("처리중".equals(b.getStatus())) {
-                throw new CustomPathException("이미 처리중인 신청 내역이 존재합니다.",
+                throw new CustomRestfullException("이미 처리중인 신청 내역이 존재합니다.",
                         HttpStatus.BAD_REQUEST, "/break/appList");
             }
         }
@@ -82,7 +81,7 @@ public class BreakAppService {
     public BreakApp readById(Long id) {
         return breakAppRepository.findById(id)
                 .orElseThrow(() ->
-                        new CustomRestfullException("휴학 신청을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+                        new CustomRestfullException("휴학 신청을 찾을 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList"));
     }
 
     // 처리되지 않은 휴학 신청 취소, 삭제
@@ -91,7 +90,7 @@ public class BreakAppService {
         BreakApp breakApp = readById(id);
         if (!"처리중".equals(breakApp.getStatus())) {
             throw new CustomRestfullException("이미 처리가 완료되어, 신청이 취소되지 않았습니다.",
-                    HttpStatus.BAD_REQUEST);
+                    HttpStatus.BAD_REQUEST, "/break/appList");
         }
         breakAppRepository.delete(breakApp);
     }

@@ -62,7 +62,7 @@ public class BreakAppController {
 
         // 학생이 재학 상태가 아니라면 신청 불가능
         if (!stuStatService.readCurrentStatus(principal.getId()).getStatus().equals("재학")) {
-            throw new CustomRestfullException("휴학 신청 대상이 아닙니다.", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("휴학 신청 대상이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
         }
 
         List<BreakApp> breakList = breakAppService.readByStudentId(principal.getId());
@@ -72,7 +72,7 @@ public class BreakAppController {
             if (Objects.equals(breakList.get(0).getFromYear(), Define.CURRENT_YEAR)
                     && Objects.equals(breakList.get(0).getFromSemester(), Define.CURRENT_SEMESTER)
                     && !breakList.get(0).getStatus().equals("반려")) {
-                throw new CustomRestfullException("이미 휴학 신청 내역이 존재합니다.", HttpStatus.BAD_REQUEST);
+                throw new CustomRestfullException("이미 휴학 신청 내역이 존재합니다.", HttpStatus.BAD_REQUEST, "/break/appList");
             }
         }
 
@@ -98,7 +98,7 @@ public class BreakAppController {
         // ex) 시작 연도-학기 : 2023-2 / 종료 연도-학기 2023-1
         if (Define.CURRENT_YEAR.equals(breakAppFormDto.getToYear())  // 숫자 객체를 == 이 아닌 equals 로 비교하게 변경
                 && Define.CURRENT_SEMESTER > breakAppFormDto.getToSemester()) {
-            throw new CustomRestfullException("종료 학기가 시작 학기 이전입니다.", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("종료 학기가 시작 학기 이전입니다.", HttpStatus.BAD_REQUEST, "/break/appList");
         }
         breakAppFormDto.setStudentId(studentId);
         breakAppFormDto.setFromYear(Define.CURRENT_YEAR);
@@ -176,7 +176,7 @@ public class BreakAppController {
 
         // 신청서의 학번과 현재 로그인된 아이디가 일치하는지 확인
         if (!breakAppService.readById(id).getStudent().getId().equals(studentId)) {
-            throw new CustomRestfullException("해당 신청자만 신청을 취소할 수 있습니다.", HttpStatus.UNAUTHORIZED);
+            throw new CustomRestfullException("해당 신청자만 신청을 취소할 수 있습니다.", HttpStatus.UNAUTHORIZED, "/break/appList");
         }
 
         breakAppService.deleteById(id);

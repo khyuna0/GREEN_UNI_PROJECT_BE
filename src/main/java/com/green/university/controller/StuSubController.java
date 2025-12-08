@@ -180,7 +180,7 @@ public class StuSubController {
 
         // 예비 수강 신청 기간이 아니라면
         if (SUGANG_PERIOD != 0) {
-            throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
         }
 
         // 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가
@@ -242,7 +242,7 @@ public class StuSubController {
 
         // 예비 수강 신청 기간이 아니라면
         if (SUGANG_PERIOD != 0) {
-            throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
         }
 
         Long studentId = principal.getId();
@@ -266,7 +266,7 @@ public class StuSubController {
 
         // 예비 수강 신청 기간이 아니라면
         if (SUGANG_PERIOD != 0) {
-            throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
         }
 
         Long studentId = principal.getId();
@@ -292,7 +292,7 @@ public class StuSubController {
 
         // 예비 수강 신청 기간이 아니라면
         if (SUGANG_PERIOD != 0) {
-            throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
         }
 
         Long studentId = principal.getId();
@@ -337,7 +337,7 @@ public class StuSubController {
 
         // 수강 신청 기간이 아니라면
         if (SUGANG_PERIOD != 1) {
-            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
         }
 
         // 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가
@@ -397,7 +397,7 @@ public class StuSubController {
 
         // 수강 신청 기간이 아니라면
         if (SUGANG_PERIOD != 1) {
-            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
         }
 
         Long studentId = principal.getId();
@@ -445,7 +445,7 @@ public class StuSubController {
 
         // 수강 신청 기간이 아니라면
         if (SUGANG_PERIOD != 1) {
-            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
         }
 
         Long studentId = principal.getId();
@@ -471,7 +471,7 @@ public class StuSubController {
 
         // 수강 신청 기간이 아니라면
         if (SUGANG_PERIOD != 1) {
-            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
         }
 
         Long studentId = principal.getId();
@@ -516,7 +516,7 @@ public class StuSubController {
 
         // 수강 신청 기간이 아니라면
         if (SUGANG_PERIOD != 1) {
-            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
         }
 
         // 수강 신청이 완료되지 않은 예비 수강 신청 내역
@@ -545,7 +545,7 @@ public class StuSubController {
 
         // 예비 수강 신청 기간이라면
         if (SUGANG_PERIOD == 0) {
-            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
         }
 
         // 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가

@@ -191,7 +191,7 @@ public class SubjectService {
     @Transactional
     public void updatePlusNumOfStudent(Long id) {
         Subject subject =  subjectRepository.findById(id)
-                .orElseThrow(() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.",HttpStatus.NOT_FOUND, "/break/appList"));
 
         Long current = subject.getNumOfStudent();
         if(current == null) {
@@ -207,7 +207,7 @@ public class SubjectService {
     @Transactional
     public void updateMinusNumOfStudent(Long id) {
         Subject subject =  subjectRepository.findById(id)
-                .orElseThrow(() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.",HttpStatus.NOT_FOUND, "/break/appList"));
 
         Long current = subject.getNumOfStudent();
         if(current == null || current <= 0){
@@ -220,7 +220,7 @@ public class SubjectService {
     @Transactional
     public Subject readBySubjectId(Long id) {
         Subject subjectEntity = subjectRepository.findById(id).orElseThrow(
-                () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+                () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
         );;
         return subjectEntity;
     }

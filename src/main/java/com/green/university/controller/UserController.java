@@ -43,7 +43,7 @@ public class UserController {
             bindingResult.getAllErrors().forEach(error -> {
                 sb.append(error.getDefaultMessage()).append("\\n");
             });
-            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST, "/break/appList");
         }
         userService.createStaffToStaffAndUser(createStaffDto);
 
@@ -60,7 +60,7 @@ public class UserController {
             bindingResult.getAllErrors().forEach(error -> {
                 sb.append(error.getDefaultMessage()).append("\\n");
             });
-            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST, "/break/appList");
         }
 
         userService.createProfessorToProfessorAndUser(createProfessorDto);

@@ -67,7 +67,7 @@ public class StuStatService {
 	@Transactional
 	public void createFirstStatus(Long studentId) {
 		Student student = studentRepository.findById(studentId).orElseThrow(
-				() -> new CustomRestfullException("학생을 조회할 수 없습니다.", HttpStatus.NOT_FOUND)
+				() -> new CustomRestfullException("학생을 조회할 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
 		);
 		StuStat stuStat = new StuStat();
 		// 기본값 세팅을 이렇게 해야할까 ..?
@@ -87,11 +87,11 @@ public class StuStatService {
 		Long targetId = stuStatRepository.findAllByStudentIdOrderByIdDesc(studentId).get(0).getId();
 		// 이렇게 찾는 게 맞는지 + 에러도 잘 구현한 건지 확인 할 것
 		Student student = studentRepository.findById(studentId).orElseThrow(
-				() -> new CustomRestfullException("학생을 조회할 수 없습니다.", HttpStatus.NOT_FOUND)
+				() -> new CustomRestfullException("학생을 조회할 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
 		);
 		// breakApp 찾기
 		BreakApp breakApp = breakAppRepository.findById(breakAppId).orElseThrow(
-				() -> new CustomRestfullException("휴학 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+				() -> new CustomRestfullException("휴학 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
 		);
 		StuStat stuStat = new StuStat();
 		// 기본값 세팅을 이렇게 해야할까 ..?
