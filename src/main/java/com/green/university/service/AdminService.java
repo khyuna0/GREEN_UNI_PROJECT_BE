@@ -2,7 +2,7 @@ package com.green.university.service;
 
 import com.green.university.dto.*;
 import com.green.university.entity.*;
-import com.green.university.handler.exception.CustomRestfullException;
+import com.green.university.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.*;
 import com.green.university.utils.SubjectUtil;
 import jakarta.validation.Valid;

@@ -1,6 +1,6 @@
 package com.green.university.service;
 
-import com.green.university.handler.exception.CustomRestfullException;
+import com.green.university.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.CollegeRepository;
 import com.green.university.repository.interfaces.DepartmentRepository;
 import com.green.university.entity.College;

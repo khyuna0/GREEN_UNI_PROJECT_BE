@@ -3,14 +3,12 @@ package com.green.university.service;
 import com.green.university.dto.response.StuSubAppDto;
 import com.green.university.dto.response.StuSubDayTimeDto;
 import com.green.university.dto.response.StuSubSumGradesDto;
-import com.green.university.entity.Student;
-import com.green.university.handler.exception.CustomRestfullException;
+import com.green.university.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.PreStuSubRepository;
 import com.green.university.repository.interfaces.StudentRepository;
 import com.green.university.repository.interfaces.SubjectRepository;
 import com.green.university.entity.PreStuSub;
 import com.green.university.entity.Subject;
-import com.green.university.utils.Define;
 import com.green.university.utils.StuSubUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author 서영

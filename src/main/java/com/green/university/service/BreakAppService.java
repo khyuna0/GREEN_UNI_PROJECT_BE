@@ -2,8 +2,8 @@ package com.green.university.service;
 
 import com.green.university.dto.BreakAppFormDto;
 import com.green.university.entity.Student;
-import com.green.university.handler.exception.CustomPathException;
-import com.green.university.handler.exception.CustomRestfullException;
+import com.green.university.exception.CustomPathException;
+import com.green.university.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.BreakAppRepository;
 import com.green.university.entity.BreakApp;
 import com.green.university.repository.interfaces.StudentRepository;
@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 

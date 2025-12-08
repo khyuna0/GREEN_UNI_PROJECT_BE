@@ -5,7 +5,7 @@ import com.green.university.dto.response.StuStatDto;
 import com.green.university.dto.response.StuSubAppDto;
 import com.green.university.dto.response.StudentDto;
 import com.green.university.dto.response.SubjectDto;
-import com.green.university.handler.exception.CustomRestfullException;
+import com.green.university.exception.CustomRestfullException;
 import com.green.university.entity.*;
 import com.green.university.config.security.CustomUserDetails;
 import com.green.university.service.*;

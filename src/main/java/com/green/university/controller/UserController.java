@@ -2,26 +2,23 @@ package com.green.university.controller;
 
 import com.green.university.dto.*;
 import com.green.university.dto.response.StudentDto;
-import com.green.university.handler.exception.CustomRestfullException;
+import com.green.university.exception.CustomRestfullException;
 import com.green.university.entity.Professor;
 import com.green.university.service.ProfessorService;
 import com.green.university.service.StudentService;
 import com.green.university.service.UserService;
 import com.green.university.utils.PaginationUtil;
-import org.aspectj.apache.bcel.generic.ClassGen;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 
 // 유저 페이지

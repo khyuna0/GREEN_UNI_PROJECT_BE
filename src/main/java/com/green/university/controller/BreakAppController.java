@@ -2,7 +2,7 @@ package com.green.university.controller;
 
 import com.green.university.dto.BreakAppFormDto;
 import com.green.university.dto.response.StudentDto;
-import com.green.university.handler.exception.CustomRestfullException;
+import com.green.university.exception.CustomRestfullException;
 import com.green.university.entity.BreakApp;
 import com.green.university.config.security.CustomUserDetails;
 import com.green.university.service.BreakAppService;

@@ -3,7 +3,7 @@ package com.green.university.service;
 import com.green.university.dto.AllSubjectSearchFormDto;
 import com.green.university.dto.CurrentSemesterSubjectSearchFormDto;
 import com.green.university.dto.response.SubjectDto;
-import com.green.university.handler.exception.CustomRestfullException;
+import com.green.university.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.SubjectRepository;
 import com.green.university.entity.Subject;
 import com.green.university.utils.Define;
@@ -11,13 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

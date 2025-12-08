@@ -1,9 +1,8 @@
 package com.green.university.utils;
 
 import com.green.university.dto.response.StuStatDto;
-import com.green.university.handler.exception.CustomRestfullException;
+import com.green.university.exception.CustomRestfullException;
 import com.green.university.entity.BreakApp;
-import com.green.university.entity.StuStat;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;

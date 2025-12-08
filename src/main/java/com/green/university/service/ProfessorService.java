@@ -8,7 +8,7 @@ import com.green.university.dto.response.StudentInfoForProfessorDto;
 import com.green.university.dto.response.SubjectForProfessorDto;
 import com.green.university.dto.response.SubjectPeriodForProfessorDto;
 import com.green.university.entity.*;
-import com.green.university.handler.exception.CustomRestfullException;
+import com.green.university.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 

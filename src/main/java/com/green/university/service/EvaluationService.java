@@ -4,7 +4,7 @@ import com.green.university.dto.EvaluationDto;
 import com.green.university.dto.MyEvaluationDto;
 import com.green.university.entity.Student;
 import com.green.university.entity.Subject;
-import com.green.university.handler.exception.CustomRestfullException;
+import com.green.university.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.EvaluationRepository;
 import com.green.university.entity.Evaluation;
 import com.green.university.repository.interfaces.StudentRepository;
@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service

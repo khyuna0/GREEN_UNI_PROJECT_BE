@@ -2,7 +2,6 @@ package com.green.university.service;
 
 import com.green.university.dto.StudentListForm;
 import com.green.university.dto.response.StudentDto;
-import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.DepartmentRepository;
 import com.green.university.repository.interfaces.StudentRepository;
 import com.green.university.entity.Student;
@@ -13,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

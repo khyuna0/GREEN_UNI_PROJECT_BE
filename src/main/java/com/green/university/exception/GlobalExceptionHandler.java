@@ -1,4 +1,4 @@
-package com.green.university.handler.exception;
+package com.green.university.exception;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;

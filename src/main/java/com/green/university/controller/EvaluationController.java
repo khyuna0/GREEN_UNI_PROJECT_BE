@@ -3,7 +3,7 @@ package com.green.university.controller;
 import com.green.university.dto.EvaluationDto;
 import com.green.university.dto.MyEvaluationDto;
 import com.green.university.dto.response.QuestionDto;
-import com.green.university.handler.exception.CustomRestfullException;
+import com.green.university.exception.CustomRestfullException;
 import com.green.university.config.security.CustomUserDetails;
 import com.green.university.service.EvaluationService;
 import com.green.university.service.QuestionService;

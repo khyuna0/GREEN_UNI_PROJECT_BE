@@ -2,7 +2,7 @@ package com.green.university.controller;
 
 import com.green.university.dto.ScheduleDto;
 import com.green.university.dto.ScheduleFormDto;
-import com.green.university.handler.exception.CustomRestfullException;
+import com.green.university.exception.CustomRestfullException;
 import com.green.university.entity.Schedule;
 import com.green.university.config.security.CustomUserDetails;
 import com.green.university.service.ScheduleService;

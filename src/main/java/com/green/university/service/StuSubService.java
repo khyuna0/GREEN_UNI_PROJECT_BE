@@ -4,7 +4,7 @@ import com.green.university.dto.response.StuSubAppDto;
 import com.green.university.dto.response.StuSubDayTimeDto;
 import com.green.university.dto.response.StuSubSumGradesDto;
 import com.green.university.entity.*;
-import com.green.university.handler.exception.CustomRestfullException;
+import com.green.university.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.*;
 import com.green.university.utils.Define;
 import com.green.university.utils.StuSubUtil;

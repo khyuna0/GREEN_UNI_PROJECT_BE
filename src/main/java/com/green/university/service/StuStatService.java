@@ -3,7 +3,7 @@ package com.green.university.service;
 import com.green.university.dto.response.StuStatDto;
 import com.green.university.entity.BreakApp;
 import com.green.university.entity.Student;
-import com.green.university.handler.exception.CustomRestfullException;
+import com.green.university.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.BreakAppRepository;
 import com.green.university.repository.interfaces.StuStatRepository;
 import com.green.university.repository.interfaces.StudentRepository;
