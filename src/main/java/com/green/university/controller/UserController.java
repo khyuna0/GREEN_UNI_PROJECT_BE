@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 
+import java.io.Console;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -115,16 +116,18 @@ public class UserController {
     }
 
     // 학생 조회 페이지 ("/user/studentList")
-    @GetMapping("/studentList")
+    @GetMapping("/studentList/{page}")
     public ResponseEntity<?> showStudentList(
             @RequestParam(required = false) Long studentId,
             @RequestParam(required = false) Long deptId,
             @PathVariable int page) {
 
         if(page < 0) page = 0; // 페이지 유효성 검사
+
         Pageable pageable = PageRequest.of(page ,PAGE_SIZE, Sort.by("id").descending());
 
         Page<StudentDto> list = studentService.readStudentList(studentId, deptId, pageable);
+        System.out.println(list);
 
         Map<String, Object> pagingResponse = new HashMap<>();
         pagingResponse.put("listCount", list.getTotalElements()); // 전체 글 수
