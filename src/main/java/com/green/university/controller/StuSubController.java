@@ -9,9 +9,14 @@ import com.green.university.exception.CustomRestfullException;
 import com.green.university.entity.*;
 import com.green.university.config.security.CustomUserDetails;
 import com.green.university.service.*;
+import com.green.university.utils.Define;
 import com.green.university.utils.StuStatUtil;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,6 +24,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -92,40 +98,22 @@ public class StuSubController {
      */
 
 
-    // 과목 조회 (현재 학기)
-    @GetMapping("/subjectList/{page}")
-    public ResponseEntity<?> readSubjectList(@PathVariable("page") int page) {
+    // 수강 신청에 사용할 강의 정보 (학생용) 현재 연도-학기에 해당하는 강의만 출력 + 페이징 처리 + 검색
+    @GetMapping("/subjectList")
+    public ResponseEntity<?> readSubjectList(
+            @ModelAttribute CurrentSemesterSubjectSearchFormDto dto,
+            @PageableDefault(page = 0, size = Define.SUBJECT_PAGE_SIZE, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        // 강의 리스트
-        List<SubjectDto> subjectList = subjectService.readSubjectListByCurrentSemester();
+        // 현재 학기에 맞는 강의 목록
+        Page<SubjectDto> subjectList = subjectService.readSubjectListByCurrentSemesterPage(dto, pageable);
 
-        Long subjectCount = (long) subjectList.size(); // 총 강의개수
+        Map<String, Object> pagingResponse = new HashMap<>();
+        pagingResponse.put("listCount", subjectList.getTotalElements());
+        pagingResponse.put("totalPages", subjectList.getTotalPages());
+        pagingResponse.put("currentPage", subjectList.getNumber());
+        pagingResponse.put("lists", subjectList.getContent());
 
-        // 총 페이지 수
-        Long pageCount = (long) Math.ceil(subjectCount / 20.0);
-
-        // 현재 페이지 Todo 페이지 타입 처리하기
-        Page<SubjectDto> subjectListLimit = subjectService.readSubjectListByCurrentSemesterPage((page - 1) * 20);
-
-        // 필터에 사용할 전체 학과 정보
-        List<Department> deptList = collegeService.readDeptAll();
-
-        // 필터에 사용할 강의 이름 정보 (중복 값 제거)
-        List<String> subNameList = new ArrayList<>();
-        for (SubjectDto subject : subjectList) {
-            if (!subNameList.contains(subject.getName())) {
-                subNameList.add(subject.getName());
-            }
-        }
-
-        return ResponseEntity.ok(Map.of(
-                "subjectCount", subjectCount,
-                "pageCount", pageCount,
-                "page", page,
-                "subjectList", subjectListLimit,
-                "deptList", deptList,
-                "subNameList", subNameList
-        ));
+        return ResponseEntity.ok(pagingResponse);
     }
 
     // 과목 조회 (현재 학기)에서 필터링
@@ -201,16 +189,16 @@ public class StuSubController {
         Long pageCount = (long) Math.ceil(subjectCount / 20.0);
 
         // 현재 페이지 Todo 페이지 타입 처리하기
-        Page<SubjectDto> subjectListLimit = subjectService.readSubjectListByCurrentSemesterPage((page - 1) * 20);
-        for (SubjectDto sub : subjectListLimit) {
-            // 현재 담겨 있는지 확인
-            PreStuSub preStuSub = preStuSubService.readPreStuSub(principal.getId(), sub.getId());
-            if (preStuSub != null) {
-                sub.setStatus(true);
-            } else {
-                sub.setStatus(false);
-            }
-        }
+//        Page<SubjectDto> subjectListLimit = subjectService.readSubjectListByCurrentSemesterPage((page - 1) * 20);
+//        for (SubjectDto sub : subjectListLimit) {
+//            // 현재 담겨 있는지 확인
+//            PreStuSub preStuSub = preStuSubService.readPreStuSub(principal.getId(), sub.getId());
+//            if (preStuSub != null) {
+//                sub.setStatus(true);
+//            } else {
+//                sub.setStatus(false);
+//            }
+//        }
 
         // 필터에 사용할 전체 학과 정보
         List<Department> deptList = collegeService.readDeptAll();
@@ -226,7 +214,7 @@ public class StuSubController {
                 "subjectCount", subjectCount,
                 "pageCount", pageCount,
                 "page", page,
-                "subjectList", subjectListLimit,
+                //"subjectList", subjectListLimit,
                 "deptList", deptList,
                 "subNameList", subNameList
         ));
@@ -357,16 +345,16 @@ public class StuSubController {
         Long pageCount = (long) Math.ceil(subjectCount / 20.0);
         ;
         // 현재 페이지 Todo 페이지 타입 처리하기
-        Page<SubjectDto> subjectListLimit = subjectService.readSubjectListByCurrentSemesterPage((page - 1) * 20);
-        for (SubjectDto sub : subjectListLimit) {
-            // 현재 담겨 있는지 확인
-            StuSub stuSub = stuSubService.readStuSub(principal.getId(), sub.getId());
-            if (stuSub != null) {
-                sub.setStatus(true);
-            } else {
-                sub.setStatus(false);
-            }
-        }
+//        Page<SubjectDto> subjectListLimit = subjectService.readSubjectListByCurrentSemesterPage(subjectList, page);
+//        for (SubjectDto sub : subjectListLimit) {
+//            // 현재 담겨 있는지 확인
+//            StuSub stuSub = stuSubService.readStuSub(principal.getId(), sub.getId());
+//            if (stuSub != null) {
+//                sub.setStatus(true);
+//            } else {
+//                sub.setStatus(false);
+//            }
+//        }
 
         // 필터에 사용할 전체 학과 정보
         List<Department> deptList = collegeService.readDeptAll();
@@ -383,7 +371,7 @@ public class StuSubController {
                 "subjectCount", subjectCount,
                 "page", page,
                 "pageCount", pageCount,
-                "subjectList", subjectListLimit,
+                //"subjectList", subjectListLimit,
                 "deptList", deptList,
                 "subNameList", subNameList
         ));

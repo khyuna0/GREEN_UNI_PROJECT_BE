@@ -5,11 +5,13 @@ import com.green.university.entity.Subject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface SubjectRepository extends JpaRepository<Subject,Long> {
+public interface SubjectRepository extends JpaRepository<Subject,Long>,
+        JpaSpecificationExecutor<Subject> {
 
     // 강의 입력 시 같은 강의실, 요일, 연도, 학기 정보 조회
     List<Subject> findByRoom_IdAndSubDayAndSubYearAndSemester(String room_id, String subDay, Long subYear, Long semester);

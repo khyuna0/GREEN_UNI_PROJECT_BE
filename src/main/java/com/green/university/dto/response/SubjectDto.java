@@ -10,15 +10,8 @@ import lombok.Data;
  */
 @Data
 public class SubjectDto {
+	
 
-	// 단과대 이름
-	private String collName;
-	
-	// 학과 id
-	private Long deptId;
-	
-	// 학과 이름
-	private String deptName;
 	
 	// 과목 id
 	private Long id;
@@ -34,6 +27,15 @@ public class SubjectDto {
 	
 	// 강의실 id (==이름)
 	private String roomId;
+
+	// 단과대 이름
+	private String collName;
+
+	// 학과 id
+	private Long deptId;
+
+	// 학과 이름
+	private String deptName;
 	
 	// 강의 구분 (전공/교양)
 	private String type;
@@ -77,8 +79,8 @@ public class SubjectDto {
 
 		if(subject.getRoom() != null) {
 			dto.setRoomId(subject.getRoom().getId());
+			dto.setCollName(subject.getRoom().getCollege().getName());
 		}
-
 		if(subject.getDepartment() != null) {
 			dto.setDeptId(subject.getDepartment().getId());
 			dto.setDeptName(subject.getDepartment().getName());
