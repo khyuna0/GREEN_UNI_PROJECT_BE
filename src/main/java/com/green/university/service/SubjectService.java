@@ -13,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -211,7 +210,7 @@ public class SubjectService {
     @Transactional
     public void updatePlusNumOfStudent(Long id) {
         Subject subject =  subjectRepository.findById(id)
-                .orElseThrow(() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.",HttpStatus.NOT_FOUND, "/break/appList"));
+                .orElseThrow(() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
 
         Long current = subject.getNumOfStudent();
         if(current == null) {
@@ -227,7 +226,7 @@ public class SubjectService {
     @Transactional
     public void updateMinusNumOfStudent(Long id) {
         Subject subject =  subjectRepository.findById(id)
-                .orElseThrow(() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.",HttpStatus.NOT_FOUND, "/break/appList"));
+                .orElseThrow(() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
 
         Long current = subject.getNumOfStudent();
         if(current == null || current <= 0){
@@ -240,7 +239,7 @@ public class SubjectService {
     @Transactional
     public Subject readBySubjectId(Long id) {
         Subject subjectEntity = subjectRepository.findById(id).orElseThrow(
-                () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );;
         return subjectEntity;
     }

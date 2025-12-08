@@ -43,8 +43,7 @@ public class BreakAppService {
         List<BreakApp> breakAppList = breakAppRepository.findByStudent_IdOrderByIdDesc(dto.getStudentId());
         for (BreakApp b : breakAppList) {
             if ("처리중".equals(b.getStatus())) {
-                throw new CustomRestfullException("이미 처리중인 신청 내역이 존재합니다.", HttpStatus.CONFLICT
-                );
+                throw new CustomRestfullException("이미 처리중인 신청 내역이 존재합니다.", HttpStatus.CONFLICT);
             }
         }
 

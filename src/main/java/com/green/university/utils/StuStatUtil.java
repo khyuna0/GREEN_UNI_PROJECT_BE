@@ -16,9 +16,9 @@ public class StuStatUtil {
 		if (stuStatEntity.getStatus().equals("졸업") || stuStatEntity.getStatus().equals("자퇴")) {
 			System.out.println("졸업 또는 자퇴한 학생입니다.");
 			if (type.equals("등록금")) {
-				throw new CustomRestfullException("등록금 납부 대상이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+				throw new CustomRestfullException("등록금 납부 대상이 아닙니다.", HttpStatus.BAD_REQUEST);
 			} else if (type.equals("수강신청")) {
-				throw new CustomRestfullException("수강 신청 대상이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+				throw new CustomRestfullException("수강 신청 대상이 아닙니다.", HttpStatus.BAD_REQUEST);
 			}
 		}
 		
@@ -29,17 +29,17 @@ public class StuStatUtil {
 				// 휴학 종료 연도가 현재 연도보다 이후라면 생성하지 않음
 				if (b.getToYear() > Define.CURRENT_YEAR) {
 					if (type.equals("등록금")) {
-						throw new CustomRestfullException("등록금 납부 대상이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+						throw new CustomRestfullException("등록금 납부 대상이 아닙니다.", HttpStatus.BAD_REQUEST);
 					} else if (type.equals("수강신청")) {
-						throw new CustomRestfullException("수강 신청 대상이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+						throw new CustomRestfullException("수강 신청 대상이 아닙니다.", HttpStatus.BAD_REQUEST);
 					}
 				// 휴학 종료 연도가 현재 연도와 같을 경우
 				} else if (b.getToYear() == Define.CURRENT_YEAR) {
 					if (b.getToSemester() >= Define.CURRENT_SEMESTER) {
 						if (type.equals("등록금")) {
-							throw new CustomRestfullException("등록금 납부 대상이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+							throw new CustomRestfullException("등록금 납부 대상이 아닙니다.", HttpStatus.BAD_REQUEST);
 						} else if (type.equals("수강신청")) {
-							throw new CustomRestfullException("수강 신청 대상이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+							throw new CustomRestfullException("수강 신청 대상이 아닙니다.", HttpStatus.BAD_REQUEST);
 						}
 					}
 				}

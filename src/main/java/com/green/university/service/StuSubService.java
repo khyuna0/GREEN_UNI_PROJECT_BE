@@ -42,7 +42,7 @@ public class StuSubService {
     // 학생의 수강신청 내역에 해당 강의가 존재하는지 확인
     public StuSub readStuSub(Long studentId, Long subjectId) {
         return stuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId).orElseThrow(
-                () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND)
         );
     }
 
@@ -60,22 +60,22 @@ public class StuSubService {
     public void createStuSub(Long studentId, Long subjectId) {
         // 신청 학생 정보
         Student targetStudent = studentRepository.findById(studentId).orElseThrow(
-                () -> new CustomRestfullException("학생을 찾을 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("학생을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );
         // 신청 대상 과목 정보
         Subject targetSubject = subjectRepository.findById(subjectId).orElseThrow(
-                () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );
 
         // 신청 대상 과목의 정원이 다 찼다면 신청 불가
         if (targetSubject.getNumOfStudent() >= targetSubject.getCapacity()) {
-            throw new CustomRestfullException("정원이 초과되었습니다.", HttpStatus.NOT_FOUND, "/break/appList");
+            throw new CustomRestfullException("정원이 초과되었습니다.", HttpStatus.NOT_FOUND);
         }
 
         // 이번 학기 과목인지 확인!
         if (!targetSubject.getSubYear().equals(Define.CURRENT_YEAR) ||
                 !targetSubject.getSemester().equals(Define.CURRENT_SEMESTER)) {
-            throw new CustomRestfullException("이번 학기 과목만 신청 가능", HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException("이번 학기 과목만 신청 가능", HttpStatus.BAD_REQUEST);
         }
 
         List<StuSub> stuSubList = stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(
@@ -100,10 +100,10 @@ public class StuSubService {
         StuSubUtil.checkDayTime(targetSubject, dayTimeList);
 
         StuSub stuSub = stuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId).orElseThrow(
-                () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND)
         );
         StuSubDetail stuSubDetail = stuSubDetailRepository.findByStuSub(stuSub).orElseThrow(
-                () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND)
         );
         stuSub.setSubject(targetSubject);
         stuSub.setStudent(targetStudent);
@@ -136,14 +136,14 @@ public class StuSubService {
             for (PreStuSub pss : preAppList) {
                 StuSub stuSub = stuSubRepository.findByStudent_IdAndSubject_Id(
                         pss.getStudent().getId(), pss.getSubject().getId()).orElseThrow(
-                        () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND, "/break/appList")
+                        () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND)
                 );
                 stuSub.setStudent(pss.getStudent());
                 stuSub.setSubject(pss.getSubject());
                 stuSubRepository.save(stuSub);
 
                 StuSubDetail stuSubDetail = stuSubDetailRepository.findByStuSub(stuSub).orElseThrow(
-                        () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND, "/break/appList")
+                        () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND)
                 );
                 stuSubDetailRepository.save(stuSubDetail); // 수강 상세 내역에도 데이터 추가
             }
@@ -155,7 +155,7 @@ public class StuSubService {
                 Long subjectId : idList2) {
             // 강의 엔티티 조회 후 현재 인원 초기화
             Subject subject = subjectRepository.findById(subjectId)
-                    .orElseThrow(() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList"));
+                    .orElseThrow(() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
             subject.setNumOfStudent(0L);
         }
     }
@@ -173,7 +173,7 @@ public class StuSubService {
         StuSub stuSub = new StuSub();
         Grade grade = new Grade();
         Subject subject = subjectRepository.findById(subjectId).orElseThrow(
-                () -> new CustomRestfullException("과목을 찾을 수 없음", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("과목을 찾을 수 없음", HttpStatus.NOT_FOUND)
         );
 
         if (stuSub.getGrade().getGrade().equals("F")) {

@@ -99,7 +99,7 @@ public class TuitionController {
 
 		// 등록금 고지서가 생성되어 있지 않다면 들어올 수 없음
 		if (tuitionEntity == null) {
-			throw new CustomRestfullException("등록금 납부 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+			throw new CustomRestfullException("등록금 납부 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
 		}
 
         return ResponseEntity.ok(Map.of(

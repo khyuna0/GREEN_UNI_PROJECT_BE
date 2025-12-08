@@ -92,7 +92,7 @@ public class PersonalController {
     public ResponseEntity<?> getUserInfoForUpdate(@AuthenticationPrincipal CustomUserDetails principal) {
 
         if (principal == null) {
-            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED, "/break/appList");
+            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
         }
 
         Long userId = principal.getId();
@@ -107,7 +107,7 @@ public class PersonalController {
         } else if ("professor".equals(role)) {
             userInfoForUpdateDto = userService.readProfessorInfoForUpdate(userId);
         } else {
-            throw new CustomRestfullException("알 수 없는 사용자 권한입니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException("알 수 없는 사용자 권한입니다.", HttpStatus.BAD_REQUEST);
         }
 
         return ResponseEntity.ok(Map.of(
@@ -131,11 +131,11 @@ public class PersonalController {
             bindingResult.getAllErrors().forEach(error -> {
                 sb.append(error.getDefaultMessage()).append("\\n");
             });
-            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
         }
 
         if (principal == null) {
-            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED, "/break/appList");
+            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
         }
 
         Long userId = principal.getId();
@@ -143,7 +143,7 @@ public class PersonalController {
 
         // 현재 비밀번호 확인
         if (!passwordEncoder.matches(password, principal.getPassword())) {
-            throw new CustomRestfullException(Define.WRONG_PASSWORD, HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException(Define.WRONG_PASSWORD, HttpStatus.BAD_REQUEST);
         }
 
         UserUpdateDto updateDto = new UserUpdateDto();
@@ -159,7 +159,7 @@ public class PersonalController {
         } else if ("professor".equals(role)) {
             userService.updateProfessor(updateDto);
         } else {
-            throw new CustomRestfullException("알 수 없는 사용자 권한입니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException("알 수 없는 사용자 권한입니다.", HttpStatus.BAD_REQUEST);
         }
 
 
@@ -173,7 +173,7 @@ public class PersonalController {
     @GetMapping("/password")
     public ResponseEntity<?> getPasswordPage(@AuthenticationPrincipal CustomUserDetails principal) {
         if (principal == null) {
-            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED, "/break/appList");
+            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
         }
         return ResponseEntity.ok(Map.of(
                 "userId", principal.getId(),
@@ -194,22 +194,22 @@ public class PersonalController {
             bindingResult.getAllErrors().forEach(error -> {
                 sb.append(error.getDefaultMessage()).append("\\n");
             });
-            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
         }
 
         if (principal == null) {
-            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED, "/break/appList");
+            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
         }
 
         Long userId = principal.getId();
 
         // 현재 비밀번호 확인
         if (!passwordEncoder.matches(changePasswordDto.getBeforePassword(), principal.getPassword())) {
-            throw new CustomRestfullException(Define.WRONG_PASSWORD, HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException(Define.WRONG_PASSWORD, HttpStatus.BAD_REQUEST);
         }
         // 새 비밀번호 & 확인 일치 확인
         if (!changePasswordDto.getAfterPassword().equals(changePasswordDto.getPasswordCheck())) {
-            throw new CustomRestfullException("변경할 비밀번호와 비밀번호 확인은 같아야합니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException("변경할 비밀번호와 비밀번호 확인은 같아야합니다.", HttpStatus.BAD_REQUEST);
         }
 
         changePasswordDto.setId(userId);
@@ -226,7 +226,7 @@ public class PersonalController {
     public ResponseEntity<?> readStudentInfo(@AuthenticationPrincipal CustomUserDetails principal) {
 
         if (principal == null) {
-            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED, "/break/appList");
+            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
         }
 
         Long userId = principal.getId();
@@ -245,7 +245,7 @@ public class PersonalController {
     public ResponseEntity<?> readStaffInfo(@AuthenticationPrincipal CustomUserDetails principal) {
 
         if (principal == null) {
-            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED, "/break/appList");
+            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
         }
 
         Long userId = principal.getId();
@@ -261,7 +261,7 @@ public class PersonalController {
     public ResponseEntity<?> readProfessorInfo(@AuthenticationPrincipal CustomUserDetails principal) {
 
         if (principal == null) {
-            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED, "/break/appList");
+            throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
         }
 
         Long userId = principal.getId();
@@ -284,7 +284,7 @@ public class PersonalController {
             bindingResult.getAllErrors().forEach(error -> {
                 sb.append(error.getDefaultMessage()).append("\\n");
             });
-            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
         }
 
         Long findId = userService.readIdByNameAndEmail(findIdFormDto);
@@ -306,7 +306,7 @@ public class PersonalController {
             bindingResult.getAllErrors().forEach(error -> {
                 sb.append(error.getDefaultMessage()).append("\\n");
             });
-            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
         }
 
         String password = userService.updateTempPassword(findPasswordFormDto);

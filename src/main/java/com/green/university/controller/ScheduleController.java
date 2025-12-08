@@ -70,11 +70,11 @@ public class ScheduleController {
 //		System.out.println(scheduleFormDto);
 		
 		if (scheduleFormDto.getStartDay().equals("")){ // 값이 없을 때 처리
-			throw new CustomRestfullException("날짜를 입력해주세요", HttpStatus.BAD_REQUEST, "/break/appList");
+			throw new CustomRestfullException("날짜를 입력해주세요", HttpStatus.BAD_REQUEST);
 		}else if(scheduleFormDto.getEndDay().equals("")){
-			throw new CustomRestfullException("날짜를 입력해주세요", HttpStatus.BAD_REQUEST, "/break/appList");
+			throw new CustomRestfullException("날짜를 입력해주세요", HttpStatus.BAD_REQUEST);
 		}else if(scheduleFormDto.getInformation().equals("")){
-			throw new CustomRestfullException("내용을 입력해주세요", HttpStatus.BAD_REQUEST, "/break/appList");
+			throw new CustomRestfullException("내용을 입력해주세요", HttpStatus.BAD_REQUEST);
 		}else {
             scheduleService.createSchedule(staffId, scheduleFormDto);
 		}

@@ -1,6 +1,5 @@
 package com.green.university.service;
 
-import com.green.university.dto.ProfessorListForm;
 import com.green.university.dto.SyllaBusFormDto;
 import com.green.university.dto.UpdateStudentGradeDto;
 import com.green.university.dto.response.ReadSyllabusDto;
@@ -110,7 +109,7 @@ public class ProfessorService {
 	@Transactional
 	public Subject selectSubjectById(Long id) {
 		Subject subjectEntity = subjectRepository.findById(id).orElseThrow(
-				() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
+				() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
 		);;
 
 		return subjectEntity;
@@ -160,13 +159,13 @@ public class ProfessorService {
 	public ReadSyllabusDto readSyllabus(Long subjectId) {
 		// Subject로 찾은 후 이걸로 SyllaBus도 찾고, Professor도 찾기
 		Subject subject = subjectRepository.findById(subjectId).orElseThrow(
-				() -> new CustomRestfullException("과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
+				() -> new CustomRestfullException("과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
 		);
 		SyllaBus syllaBus = syllaBusRepository.findBySubject_Id(subjectId).orElseThrow(
-				() -> new CustomRestfullException("강의 계획서를 찾을 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList"));
+				() -> new CustomRestfullException("강의 계획서를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 		Professor professor = subject.getProfessor();
 		if (professor == null) {
-			throw new CustomRestfullException("교수 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList");
+			throw new CustomRestfullException("교수 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 		}
 		ReadSyllabusDto dto = new ReadSyllabusDto(subject, professor, syllaBus); // Dto에 생성자 추가함
 
@@ -209,7 +208,7 @@ public class ProfessorService {
 	public void updateSyllabus(Long id , SyllaBusFormDto syllaBusFormDto) {
 
         SyllaBus syllaBus = syllaBusRepository.findBySubject_Id(id).orElseThrow(
-                () -> new CustomRestfullException("강의 계획서를 찾을 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList"));
+                () -> new CustomRestfullException("강의 계획서를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
         syllaBus.setOverview(syllaBusFormDto.getOverview());
         syllaBus.setObjective(syllaBusFormDto.getObjective());
         syllaBus.setTextbook(syllaBusFormDto.getTextbook());

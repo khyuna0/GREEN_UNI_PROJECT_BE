@@ -63,7 +63,7 @@ public class NoticeController {
         MultipartFile file = noticeFormDto.getFile();
         if (file != null && !file.isEmpty()) {
             if (file.getSize() > Define.MAX_FILE_SIZE) {
-                throw new CustomRestfullException("파일 크기는 20MB 이상 클 수 없습니다.", HttpStatus.BAD_REQUEST, "/notice");
+                throw new CustomRestfullException("파일 크기는 20MB 이상 클 수 없습니다.", HttpStatus.BAD_REQUEST);
             }
             try {
                 String saveDirectory = Define.UPLOAD_DIRECTORY;

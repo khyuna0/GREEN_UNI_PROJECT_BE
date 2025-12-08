@@ -76,7 +76,7 @@ public class UserService {
         professor.setTel(dto.getTel());
         professor.setAddress(dto.getAddress());
         professor.setDepartment(departmentRepository.findById(dto.getDeptId())
-                .orElseThrow(() -> new CustomRestfullException("없는 학과 정보입니다.", HttpStatus.NOT_FOUND, "/break/appList")));
+                .orElseThrow(() -> new CustomRestfullException("없는 학과 정보입니다.", HttpStatus.NOT_FOUND)));
         // 필요한 필드 모두 dto에서 옮기기
 
         Professor savedProfessor = professorRepository.save(professor);
@@ -98,7 +98,7 @@ public class UserService {
         student.setEntranceDate(createStudentDto.getEntranceDate());
         student.setEmail(createStudentDto.getEmail());
         student.setDepartment(departmentRepository.findById(createStudentDto.getDeptId())
-                .orElseThrow(() -> new CustomRestfullException("없는 학과 정보입니다.", HttpStatus.NOT_FOUND, "/break/appList")));
+                .orElseThrow(() -> new CustomRestfullException("없는 학과 정보입니다.", HttpStatus.NOT_FOUND)));
         Student savedStudent = studentRepository.save(student);
         Long studentId = savedStudent.getId();
         System.out.println(studentId);
@@ -114,12 +114,12 @@ public class UserService {
     public LoginResponseDto login(LoginDto loginDto) {
         //유저 조회
         User user = userRepository.findById(loginDto.getId()).orElseThrow(
-                () -> new CustomRestfullException("아이디를 찾을 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("아이디를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );
 
         //비밀번호 검증
         if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
-            throw new CustomRestfullException("비밀번호가 틀렸습니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException("비밀번호가 틀렸습니다.", HttpStatus.BAD_REQUEST);
         }
 
         //JWT 액세스 토큰 발급
@@ -136,7 +136,7 @@ public class UserService {
     // 수정 할 학생 정보 불러오기
     public UserInfoForUpdateDto readStudentInfoForUpdate(Long userId) {
         Student student = studentRepository.findById(userId).orElseThrow(
-                () -> new CustomRestfullException("학생 정보가 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("학생 정보가 없습니다.", HttpStatus.NOT_FOUND)
         );
         UserInfoForUpdateDto userInfoForUpdateDto = new UserInfoForUpdateDto();
         userInfoForUpdateDto.setAddress(student.getAddress());
@@ -148,7 +148,7 @@ public class UserService {
     // 수정 할 직원 정보 불러오기
     public UserInfoForUpdateDto readStaffInfoForUpdate(Long userId) {
         Staff staff = staffRepository.findById(userId).orElseThrow(
-                () -> new CustomRestfullException("직원 정보가 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("직원 정보가 없습니다.", HttpStatus.NOT_FOUND)
         );
         UserInfoForUpdateDto userInfoForUpdateDto = new UserInfoForUpdateDto();
         userInfoForUpdateDto.setAddress(staff.getAddress());
@@ -160,7 +160,7 @@ public class UserService {
     // 수정 할 교수 정보 불러오기
     public UserInfoForUpdateDto readProfessorInfoForUpdate(Long userId) {
         Professor professor = professorRepository.findById(userId).orElseThrow(
-                () -> new CustomRestfullException("교수 정보가 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("교수 정보가 없습니다.", HttpStatus.NOT_FOUND)
         );
         UserInfoForUpdateDto userInfoForUpdateDto = new UserInfoForUpdateDto();
         userInfoForUpdateDto.setAddress(professor.getAddress());
@@ -173,7 +173,7 @@ public class UserService {
     @Transactional
     public void updateStudent(UserUpdateDto updateDto) {
         Student student = studentRepository.findById(updateDto.getUserId()).orElseThrow(
-                () -> new CustomRestfullException("학생 정보가 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("학생 정보가 없습니다.", HttpStatus.NOT_FOUND)
         );
         student.setAddress(updateDto.getAddress());
         student.setTel(updateDto.getTel());
@@ -185,7 +185,7 @@ public class UserService {
     @Transactional
     public void updateStaff(UserUpdateDto updateDto) {
         Staff staff = staffRepository.findById(updateDto.getUserId()).orElseThrow(
-                () -> new CustomRestfullException("직원 정보가 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("직원 정보가 없습니다.", HttpStatus.NOT_FOUND)
         );
         staff.setAddress(updateDto.getAddress());
         staff.setTel(updateDto.getTel());
@@ -197,7 +197,7 @@ public class UserService {
     @Transactional
     public void updateProfessor(UserUpdateDto updateDto) {
         Professor professor = professorRepository.findById(updateDto.getUserId()).orElseThrow(
-                () -> new CustomRestfullException("교수 정보가 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("교수 정보가 없습니다.", HttpStatus.NOT_FOUND)
         );
         professor.setAddress(updateDto.getAddress());
         professor.setTel(updateDto.getTel());
@@ -209,7 +209,7 @@ public class UserService {
     @Transactional
     public void updatePassword(ChangePasswordDto changePasswordDto) {
         User user = userRepository.findById(changePasswordDto.getId()).orElseThrow(
-                () -> new CustomRestfullException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );
         user.setPassword(changePasswordDto.getAfterPassword());
         userRepository.save(user);
@@ -219,7 +219,7 @@ public class UserService {
     @Transactional
     public StudentDto readStudent(Long studentId) {
         Student student = studentRepository.findById(studentId).orElseThrow(
-                () -> new CustomRestfullException("학생을 조회할 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("학생을 조회할 수 없습니다.", HttpStatus.NOT_FOUND)
         );
 
         return StudentDto.fromEntity(student);
@@ -230,14 +230,14 @@ public class UserService {
     @Transactional
     public Staff readStaff(Long id) {
         return staffRepository.findById(id).orElseThrow(
-                () -> new CustomRestfullException("직원을 조회할 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList"));
+                () -> new CustomRestfullException("직원을 조회할 수 없습니다.", HttpStatus.NOT_FOUND));
     }
 
     // 교수 조회
     @Transactional
     public ProfessorInfoDto readProfessorInfo(Long id) {
         Professor professor = professorRepository.findById(id).orElseThrow(
-                () -> new CustomRestfullException("교수을 조회할 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList"));
+                () -> new CustomRestfullException("교수을 조회할 수 없습니다.", HttpStatus.NOT_FOUND));
         return new ProfessorInfoDto(professor); // dto 생성자 추가함
     }
 
@@ -245,7 +245,7 @@ public class UserService {
     @Transactional
     public StudentInfoDto readStudentInfo(Long id) {
         Student student = studentRepository.findById(id).orElseThrow(
-                () -> new CustomRestfullException("학생 정보를 찾을 수 없습니다", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("학생 정보를 찾을 수 없습니다", HttpStatus.NOT_FOUND)
         );
         return StudentInfoDto.fromEntity(student);
     }
@@ -260,7 +260,7 @@ public class UserService {
                     professorRepository.findByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail());
             case "staff" ->
                     staffRepository.findByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail());
-            default -> throw new CustomRestfullException("잘못된 userRole 입니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+            default -> throw new CustomRestfullException("잘못된 userRole 입니다.", HttpStatus.BAD_REQUEST);
         };
     }
 
@@ -276,19 +276,19 @@ public class UserService {
             case "student" -> {
                 findId = studentRepository.findByIdAndNameAndEmail(userId, userName, userEmail);
                 if (findId == null) {
-                    throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+                    throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST);
                 }
             }
             case "professor" -> {
                 findId = professorRepository.findByIdAndNameAndEmail(findPasswordFormDto.getId(), findPasswordFormDto.getName(), findPasswordFormDto.getEmail());
                 if (findId == null) {
-                    throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+                    throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST);
                 }
             }
             case "staff" -> {
                 findId = staffRepository.findByIdAndNameAndEmail(findPasswordFormDto.getId(), findPasswordFormDto.getName(), findPasswordFormDto.getEmail());
                 if (findId == null) {
-                    throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+                    throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST);
                 }
             }
         }
@@ -297,7 +297,7 @@ public class UserService {
         System.out.println(tempPassword);
 
         User user = userRepository.findById(findId).orElseThrow(
-                () -> new CustomRestfullException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );
         user.setPassword(passwordEncoder.encode(tempPassword));
         userRepository.save(user);

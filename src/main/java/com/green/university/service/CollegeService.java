@@ -30,14 +30,14 @@ public class CollegeService {
     //id로 해당 단과대 정보 가져옴
 	public College readCollById(Long id) {
         return collegeRepository.findById(id)
-                .orElseThrow(()-> new CustomRestfullException("해당 단과대를 찾을 수 없습니다.", HttpStatus.NOT_FOUND, "/break/appList"));
+                .orElseThrow(()-> new CustomRestfullException("해당 단과대를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 	}
 
 
     //id로 해당 학과 정보 가져옴 , deptId
 	public Department readDeptById(Long id) {
         return departmentRepository.findById(id)
-                .orElseThrow(() -> new CustomRestfullException("해당 학과를 찾을 수 없습니다.",HttpStatus.NOT_FOUND, "/break/appList"));
+                .orElseThrow(() -> new CustomRestfullException("해당 학과를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
 	}
 
 

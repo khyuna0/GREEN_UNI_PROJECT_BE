@@ -11,7 +11,6 @@ import com.green.university.config.security.CustomUserDetails;
 import com.green.university.service.*;
 import com.green.university.utils.Define;
 import com.green.university.utils.StuStatUtil;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -168,7 +167,7 @@ public class StuSubController {
 
         // 예비 수강 신청 기간이 아니라면
         if (SUGANG_PERIOD != 0) {
-            throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
         }
 
         // 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가
@@ -230,7 +229,7 @@ public class StuSubController {
 
         // 예비 수강 신청 기간이 아니라면
         if (SUGANG_PERIOD != 0) {
-            throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
         }
 
         Long studentId = principal.getId();
@@ -254,7 +253,7 @@ public class StuSubController {
 
         // 예비 수강 신청 기간이 아니라면
         if (SUGANG_PERIOD != 0) {
-            throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
         }
 
         Long studentId = principal.getId();
@@ -280,7 +279,7 @@ public class StuSubController {
 
         // 예비 수강 신청 기간이 아니라면
         if (SUGANG_PERIOD != 0) {
-            throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
         }
 
         Long studentId = principal.getId();
@@ -325,7 +324,7 @@ public class StuSubController {
 
         // 수강 신청 기간이 아니라면
         if (SUGANG_PERIOD != 1) {
-            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
         }
 
         // 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가
@@ -385,7 +384,7 @@ public class StuSubController {
 
         // 수강 신청 기간이 아니라면
         if (SUGANG_PERIOD != 1) {
-            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
         }
 
         Long studentId = principal.getId();
@@ -433,7 +432,7 @@ public class StuSubController {
 
         // 수강 신청 기간이 아니라면
         if (SUGANG_PERIOD != 1) {
-            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
         }
 
         Long studentId = principal.getId();
@@ -459,7 +458,7 @@ public class StuSubController {
 
         // 수강 신청 기간이 아니라면
         if (SUGANG_PERIOD != 1) {
-            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
         }
 
         Long studentId = principal.getId();
@@ -504,7 +503,7 @@ public class StuSubController {
 
         // 수강 신청 기간이 아니라면
         if (SUGANG_PERIOD != 1) {
-            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
         }
 
         // 수강 신청이 완료되지 않은 예비 수강 신청 내역
@@ -533,7 +532,7 @@ public class StuSubController {
 
         // 예비 수강 신청 기간이라면
         if (SUGANG_PERIOD == 0) {
-            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
         }
 
         // 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가

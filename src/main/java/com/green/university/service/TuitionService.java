@@ -92,7 +92,7 @@ public class TuitionService {
         // 기존 서비스에서 프론트 호출용으로 DTO로 변경 -> 리포 통해 id로 찾는 방식으로 변경함
 //        StudentDto studentEntity = userService.readStudent(studentId); // 예외처리 완료된 유저 조회
         Student student = studentRepository.findById(studentId).orElseThrow(
-                () -> new CustomRestfullException("학생 정보를 찾을 수 없습니다", HttpStatus.NOT_FOUND, "/break/appList")
+                () -> new CustomRestfullException("학생 정보를 찾을 수 없습니다", HttpStatus.NOT_FOUND)
         );
 		StuSch stuSch = new StuSch();
 		stuSch.setStudent(student);
@@ -117,15 +117,15 @@ public class TuitionService {
 				Double avgGrade = gradeDto.getAvgGrade();
 				// 평점에 따라 장학금 유형 결정
 				if (avgGrade >= 4.2) {
-					stuSch.setSchType(scholarshipRepository.findById(1L).orElseThrow(() -> new CustomRestfullException("해당 장학금 정보가 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")));
+					stuSch.setSchType(scholarshipRepository.findById(1L).orElseThrow(() -> new CustomRestfullException("해당 장학금 정보가 없습니다.", HttpStatus.NOT_FOUND)));
 				} else if (avgGrade >= 3.7) {
-					stuSch.setSchType(scholarshipRepository.findById(2L).orElseThrow(() -> new CustomRestfullException("해당 장학금 정보가 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")));
+					stuSch.setSchType(scholarshipRepository.findById(2L).orElseThrow(() -> new CustomRestfullException("해당 장학금 정보가 없습니다.", HttpStatus.NOT_FOUND)));
 				}
 			}
 
 			// 1학년 1학기 학생이라면
 		} else {
-			stuSch.setSchType(scholarshipRepository.findById(2L).orElseThrow(() -> new CustomRestfullException("해당 장학금 정보가 없습니다.", HttpStatus.NOT_FOUND, "/break/appList")));
+			stuSch.setSchType(scholarshipRepository.findById(2L).orElseThrow(() -> new CustomRestfullException("해당 장학금 정보가 없습니다.", HttpStatus.NOT_FOUND)));
 		}
 
         stuSchRepository.save(stuSch);
@@ -175,7 +175,7 @@ public class TuitionService {
 
         // 전체 등록 금액 구하기
         Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new CustomRestfullException("학생 정보 없음", HttpStatus.NOT_FOUND, "/break/appList"));
+                .orElseThrow(() -> new CustomRestfullException("학생 정보 없음", HttpStatus.NOT_FOUND));
 
         // 학생 정보에서 학과 정보 -> 단과대 정보 -> 단과대 별 등록금 정보 찾아 저장함
         Long tuiAmount = collTuitRepository.findById(student.getDepartment().getCollege().getId()).get().getAmount();
@@ -191,7 +191,7 @@ public class TuitionService {
         Scholarship scholarship = null;
         if (stuSch.getSchType() != null) { // 장학금 받을 수 있는 경우(장학금 타입이 null이 아님)
             scholarship = scholarshipRepository.findById(stuSch.getSchType().getType())
-                    .orElseThrow(() -> new CustomRestfullException("장학금 정보 없음", HttpStatus.NOT_FOUND, "/break/appList"));
+                    .orElseThrow(() -> new CustomRestfullException("장학금 정보 없음", HttpStatus.NOT_FOUND));
         }
 
         Long schAmount = 0L;

@@ -36,7 +36,7 @@ public class AuthController {
             bindingResult.getAllErrors().forEach(error -> {
                 sb.append(error.getDefaultMessage()).append("\\n");
             });
-            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
         }
 
         LoginResponseDto loginResponse = userService.login(loginDto); // JWT 발급
@@ -55,7 +55,7 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<?> me(@AuthenticationPrincipal CustomUserDetails principal) {
         if (principal == null) {
-            throw new CustomRestfullException("로그인 정보가 없습니다.", HttpStatus.UNAUTHORIZED, "/break/appList");
+            throw new CustomRestfullException("로그인 정보가 없습니다.", HttpStatus.UNAUTHORIZED);
         }
         User user = principal.getUser();
         System.out.println("user: " + user);

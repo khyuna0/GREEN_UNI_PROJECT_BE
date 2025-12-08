@@ -7,9 +7,7 @@ import com.green.university.entity.Professor;
 import com.green.university.service.ProfessorService;
 import com.green.university.service.StudentService;
 import com.green.university.service.UserService;
-import com.green.university.utils.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -48,7 +46,7 @@ public class UserController {
             bindingResult.getAllErrors().forEach(error -> {
                 sb.append(error.getDefaultMessage()).append("\\n");
             });
-            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
         }
         userService.createStaffToStaffAndUser(createStaffDto);
 
@@ -65,7 +63,7 @@ public class UserController {
             bindingResult.getAllErrors().forEach(error -> {
                 sb.append(error.getDefaultMessage()).append("\\n");
             });
-            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
         }
 
         userService.createProfessorToProfessorAndUser(createProfessorDto);

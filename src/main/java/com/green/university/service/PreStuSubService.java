@@ -65,12 +65,12 @@ public class PreStuSubService {
         PreStuSub existed = readPreStuSub(studentId, subjectId);
         if (existed != null) {
             throw new CustomRestfullException(
-                    "이미 해당 과목을 예비 수강신청했습니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+                    "이미 해당 과목을 예비 수강신청했습니다.", HttpStatus.BAD_REQUEST);
         }
 
         // 신청 대상 과목 정보
         Subject targetSubject = subjectRepository.findById(subjectId).orElseThrow(
-                () -> new CustomRestfullException("없는 과목입니다.", HttpStatus.NOT_FOUND, "/break/appList"));
+                () -> new CustomRestfullException("없는 과목입니다.", HttpStatus.NOT_FOUND));
 
         // 1. 현재 총 예비 학점 계산
         List<PreStuSub> preStuSubList = preStuSubRepository.findByStudent_Id(studentId);
@@ -98,7 +98,7 @@ public class PreStuSubService {
         // 예비 수강신청 내역 저장
         PreStuSub preStuSub = new PreStuSub();
         preStuSub.setStudent(studentRepository.findById(studentId).orElseThrow(
-                () -> new CustomRestfullException("없는 학생 정보입니다.", HttpStatus.NOT_FOUND, "/break/appList")));
+                () -> new CustomRestfullException("없는 학생 정보입니다.", HttpStatus.NOT_FOUND)));
         preStuSub.setSubject(targetSubject);
         preStuSubRepository.save(preStuSub);
 
@@ -114,12 +114,12 @@ public class PreStuSubService {
         PreStuSub preStuSub = preStuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId);
 
         if (preStuSub == null) { // 해당 예비 수강 신청 내역 없을 때 예외처리
-            throw new CustomRestfullException("신청 내역이 존재하지 않습니다.", HttpStatus.NOT_FOUND, "/break/appList");
+            throw new CustomRestfullException("신청 내역이 존재하지 않습니다.", HttpStatus.NOT_FOUND);
         }
         preStuSubRepository.deleteById(preStuSub.getId());
 
         // 해당 강의 현재인원 -1
-        Subject subject = subjectRepository.findById(subjectId).orElseThrow(() -> new CustomRestfullException("없는 과목입니다.", HttpStatus.NOT_FOUND, "/break/appList"));
+        Subject subject = subjectRepository.findById(subjectId).orElseThrow(() -> new CustomRestfullException("없는 과목입니다.", HttpStatus.NOT_FOUND));
         subject.setNumOfStudent(subject.getNumOfStudent() - 1); // 트랜젝션 종료 시 자동 업데이트 됨...?
 
     }

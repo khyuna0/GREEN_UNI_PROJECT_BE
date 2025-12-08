@@ -41,15 +41,15 @@ public class EvaluationService {
                 .isPresent();
 
         if(exist){
-            throw new CustomRestfullException("이미 해당 과목의 강의평가를 등록했습니다.", HttpStatus.BAD_REQUEST, "/break/appList");
+            throw new CustomRestfullException("이미 해당 과목의 강의평가를 등록했습니다.", HttpStatus.BAD_REQUEST);
         }
 
         // 학생 , 과목 엔티티 조회
         Student student = studentRepository.findById(studentId)
-                .orElseThrow(()-> new CustomRestfullException("학생 정보를 찾을 수 없습니다.",HttpStatus.NOT_FOUND, "/break/appList"));
+                .orElseThrow(()-> new CustomRestfullException("학생 정보를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
 
         Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(()-> new CustomRestfullException("과목 정보를 찾을 수 없습니다.",HttpStatus.NOT_FOUND, "/break/appList"));
+                .orElseThrow(()-> new CustomRestfullException("과목 정보를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
 
         // 엔티티 매핑
         Evaluation evaluation = new Evaluation();
@@ -71,7 +71,7 @@ public class EvaluationService {
     @Transactional
     public Evaluation readEvaluationByStudentIdAndSubjectId(Long studentId, Long subjectId) {
         return evaluationRepository.findByStudent_IdAndSubject_Id(studentId, subjectId)
-                .orElseThrow(() -> new CustomRestfullException("강의 평가를 찾을 수 없습니다.",HttpStatus.NOT_FOUND, "/break/appList"));
+                .orElseThrow(() -> new CustomRestfullException("강의 평가를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
         // .orElse(null);  위처럼 예외던지거나 null처리
 
     }
