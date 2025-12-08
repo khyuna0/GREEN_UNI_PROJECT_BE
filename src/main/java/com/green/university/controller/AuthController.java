@@ -56,7 +56,7 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<?> me(@AuthenticationPrincipal CustomUserDetails principal) {
         if (principal == null) {
-            throw new CustomRestfullException("로그인이 정보가 없습니다.", HttpStatus.UNAUTHORIZED);
+            throw new CustomRestfullException("로그인 정보가 없습니다.", HttpStatus.UNAUTHORIZED);
         }
         User user = principal.getUser();
         System.out.println("user: " + user);

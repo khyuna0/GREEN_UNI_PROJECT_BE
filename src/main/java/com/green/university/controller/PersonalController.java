@@ -182,7 +182,7 @@ public class PersonalController {
     }
 
     // 5) 비밀번호 변경 처리
-    @PutMapping("/password")
+    @PatchMapping("/password")
     public ResponseEntity<?> updatePasswordProc(
             @Valid @RequestBody ChangePasswordDto changePasswordDto,
             BindingResult bindingResult,
