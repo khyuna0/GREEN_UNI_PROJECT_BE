@@ -16,6 +16,6 @@ public interface ProfessorRepository extends JpaRepository<Professor, Long> {
     Long findByIdAndNameAndEmail(Long id, String name, String email);
 
     // 페이지, 과별 교수 조회 (검색 용)
-    Page<Professor> findByDepartmentId(Long departmentId, Pageable pageable);
+    Page<Professor> findByDepartmentName(String departmentName, Pageable pageable);
 
 }

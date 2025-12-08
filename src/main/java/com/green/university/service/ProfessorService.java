@@ -219,28 +219,23 @@ public class ProfessorService {
 	}
 
 	/**
-	 * @param professorListForm
 	 * @return 교수 리스트 조회( 가 아니라 검색 같다 )
 	 */
 
     @Transactional
-    public Page<Professor> readProfessorList(ProfessorListForm professorListForm, int page) {
-
-        if (page < 1) page = 1;
-        int realPage = page - 1; // 페이지 번호가 1부터 시작하게 보정함
-        Pageable pageable = PageRequest.of(realPage, PAGE_SIZE, Sort.by("id").descending());
+    public Page<Professor> readProfessorList(Long professorId, String deptName, Pageable pageable) {
 
         // 1) professorId로 단일 검색 (PK는 유니크라 단건 조회)
-        if (professorListForm.getProfessorId() != null) {
-            Professor p = professorRepository.findById(professorListForm.getProfessorId())
+        if (professorId != null) {
+            Professor p = professorRepository.findById(professorId)
                     .orElse(null);
             List<Professor> result = (p == null) ? List.of() : List.of(p);
             return new PageImpl<>(result, pageable, result.size()); // 고유키 검색 -> 단권 반환 -> 리스트 형식
         }
 
         // 2) deptId로 검색 (특정 학과 교수 목록 조회)
-        if (professorListForm.getDeptId() != null) {
-            return professorRepository.findByDepartmentId(professorListForm.getDeptId(), pageable);
+        if (deptName != null) {
+            return professorRepository.findByDepartmentName(deptName, pageable);
         }
 
         // 3) 조건 없음 → 전체 교수 목록 조회

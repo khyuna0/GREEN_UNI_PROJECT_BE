@@ -9,7 +9,11 @@ import com.green.university.service.StudentService;
 import com.green.university.service.UserService;
 import com.green.university.utils.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -33,6 +37,7 @@ public class UserController {
     @Autowired
     private ProfessorService professorService;
 
+    private static final int PAGE_SIZE = 20;
 
     // staff 입력
     @PostMapping("/staff")
@@ -90,32 +95,23 @@ public class UserController {
      *
      * @return 교수 조회 페이지 (아래 showProfessorListByPage와 합칠 수 있을 것 같다)
      */
-    @GetMapping({"/professorList", "/professorList/{page}"})
+    @GetMapping({"/professorList/{page}"})
     public ResponseEntity<?> showProfessorList(
-            @PathVariable(value = "page", required = false) Integer page,
+            @PathVariable int page,   // 0부터 시작함
             @RequestParam(required = false) Long professorId,
-            @RequestParam(required = false) Long deptId) {
+            @RequestParam(required = false) String deptName
+    ) {
+        if(page < 0) page = 0; // 페이지 유효성 검사
 
-        int currentPage = (page == null || page < 1) ? 1 : page;
+        Pageable pageable = PageRequest.of(page ,PAGE_SIZE, Sort.by("id").descending());
 
-        ProfessorListForm professorListForm = new ProfessorListForm();
-        professorListForm.setPage((currentPage - 1) * 20);
-
-        // 검색어가 있는 경우
-        if (professorId != null) professorListForm.setProfessorId(professorId);
-        if (deptId != null) professorListForm.setDeptId(deptId);
-
-        Page<Professor> list = professorService.readProfessorList(professorListForm, currentPage);
-        /**
-         * @author 서영 1페이지가 선택되어 있음을 보여주기 위함
-         */
-
-        PaginationUtil.PaginationResult paginationResult = PaginationUtil.build(list, currentPage, 10);
+        Page<Professor> list = professorService.readProfessorList(professorId, deptName, pageable);
 
         return ResponseEntity.ok(Map.of(
-                "professorList", list,
-                "paginationResult", paginationResult
-                // "deptId", deptId,
+                "professorList", list.getContent(),    // 실제 데이터
+                "page", list.getNumber(),               //  현재 페이지
+                "totalPages", list.getTotalPages(),     // 전체 페이지 수
+                "totalElements", list.getTotalElements()// 전체 개수
         ));
     }
 

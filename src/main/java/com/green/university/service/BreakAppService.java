@@ -2,7 +2,6 @@ package com.green.university.service;
 
 import com.green.university.dto.BreakAppFormDto;
 import com.green.university.entity.Student;
-import com.green.university.exception.CustomPathException;
 import com.green.university.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.BreakAppRepository;
 import com.green.university.entity.BreakApp;
@@ -44,8 +43,8 @@ public class BreakAppService {
         List<BreakApp> breakAppList = breakAppRepository.findByStudent_IdOrderByIdDesc(dto.getStudentId());
         for (BreakApp b : breakAppList) {
             if ("처리중".equals(b.getStatus())) {
-                throw new CustomPathException("이미 처리중인 신청 내역이 존재합니다.",
-                        HttpStatus.BAD_REQUEST, "/break/appList");
+                throw new CustomRestfullException("이미 처리중인 신청 내역이 존재합니다.", HttpStatus.CONFLICT
+                );
             }
         }
 
