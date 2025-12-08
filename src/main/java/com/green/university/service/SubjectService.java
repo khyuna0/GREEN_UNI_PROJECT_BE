@@ -142,7 +142,7 @@ public class SubjectService {
     @Transactional (readOnly = true)
     public Page<SubjectDto> readSubjectListByCurrentSemesterPage(CurrentSemesterSubjectSearchFormDto dto, Pageable pageable) {
         String type = dto.getType();
-        Long deptId = dto.getDeptId();
+        String deptName = dto.getDeptName();
         String name = dto.getName();
 
         // 조건 없이 전체 조회
@@ -155,8 +155,8 @@ public class SubjectService {
             spec = spec.and(SubjectSpecification.hasType(type));
         }
         // 학과명
-        if (deptId != null) {
-            spec = spec.and(SubjectSpecification.hasDepartment(deptId));
+        if (deptName != null) {
+            spec = spec.and(SubjectSpecification.hasDepartmentName(deptName));
         }
         // 강의명
         if (name != null && !name.isEmpty()) {
