@@ -161,13 +161,13 @@ public class ProfessorService {
 		Subject subject = subjectRepository.findById(subjectId).orElseThrow(
 				() -> new CustomRestfullException("과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
 		);
-		SyllaBus syllaBus = syllaBusRepository.findBySubject_Id(subjectId).orElseThrow(
+		Syllabus syllabus = syllaBusRepository.findBySubject_Id(subjectId).orElseThrow(
 				() -> new CustomRestfullException("강의 계획서를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 		Professor professor = subject.getProfessor();
 		if (professor == null) {
 			throw new CustomRestfullException("교수 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 		}
-		ReadSyllabusDto dto = new ReadSyllabusDto(subject, professor, syllaBus); // Dto에 생성자 추가함
+		ReadSyllabusDto dto = new ReadSyllabusDto(subject, professor, syllabus); // Dto에 생성자 추가함
 
 		// 교과목 정보
 //		dto.setSubjectId(subject.getId());
@@ -189,11 +189,11 @@ public class ProfessorService {
 //		dto.setTel(professor.getTel());
 //		dto.setEmail(professor.getEmail());
 //
-//		// SyllaBus 부분 (개요, 목표, 정보, 계획)
-//		dto.setOverview(syllaBus.getOverview());
-//		dto.setObjective(syllaBus.getObjective());
-//		dto.setTextbook(syllaBus.getTextbook());
-//		dto.setProgram(syllaBus.getProgram());
+//		// syllabus 부분 (개요, 목표, 정보, 계획)
+//		dto.setOverview(syllabus.getOverview());
+//		dto.setObjective(syllabus.getObjective());
+//		dto.setTextbook(syllabus.getTextbook());
+//		dto.setProgram(syllabus.getProgram());
 
 		System.out.println(dto);
 		return dto;
@@ -207,14 +207,14 @@ public class ProfessorService {
 	@Transactional
 	public void updateSyllabus(Long id , SyllaBusFormDto syllaBusFormDto) {
 
-        SyllaBus syllaBus = syllaBusRepository.findBySubject_Id(id).orElseThrow(
+        Syllabus syllabus = syllaBusRepository.findBySubject_Id(id).orElseThrow(
                 () -> new CustomRestfullException("강의 계획서를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
-        syllaBus.setOverview(syllaBusFormDto.getOverview());
-        syllaBus.setObjective(syllaBusFormDto.getObjective());
-        syllaBus.setTextbook(syllaBusFormDto.getTextbook());
-        syllaBus.setProgram(syllaBusFormDto.getProgram());
+        syllabus.setOverview(syllaBusFormDto.getOverview());
+        syllabus.setObjective(syllaBusFormDto.getObjective());
+        syllabus.setTextbook(syllaBusFormDto.getTextbook());
+        syllabus.setProgram(syllaBusFormDto.getProgram());
 
-        syllaBusRepository.save(syllaBus);
+        syllaBusRepository.save(syllabus);
 	}
 
 	/**

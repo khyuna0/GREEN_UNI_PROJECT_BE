@@ -10,9 +10,7 @@ import lombok.Data;
  */
 @Data
 public class SubjectDto {
-	
 
-	
 	// 과목 id
 	private Long id;
 	
@@ -66,6 +64,9 @@ public class SubjectDto {
 	
 	// 신청 여부
 	private Boolean status;
+
+	// 강의 계획서
+	private String syllabus;
 
 	// Subject 엔티티 -> SubjectDto로 변환
 	public static SubjectDto fromEntity(Subject subject) {

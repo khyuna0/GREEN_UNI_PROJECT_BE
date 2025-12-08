@@ -2,7 +2,7 @@ package com.green.university.dto.response;
 
 import com.green.university.entity.Professor;
 import com.green.university.entity.Subject;
-import com.green.university.entity.SyllaBus;
+import com.green.university.entity.Syllabus;
 import lombok.Data;
 
 /**
@@ -36,13 +36,13 @@ public class ReadSyllabusDto {
 	private String tel;
 	private String email;
 
-    // SyllaBus 부분
+    // syllabus 부분
 	private String overview;
 	private String objective;
 	private String textbook;
 	private String program;
 
-    public ReadSyllabusDto(Subject s, Professor p, SyllaBus sy) {
+    public ReadSyllabusDto(Subject s, Professor p, Syllabus sy) {
 
         // subject 부분
         this.subjectId = s.getId();
@@ -63,7 +63,7 @@ public class ReadSyllabusDto {
         this.tel = p.getTel();
         this.email = p.getEmail();
 
-        // SyllaBus
+        // syllabus
         this.overview = sy.getOverview();
         this.objective = sy.getObjective();
         this.textbook = sy.getTextbook();

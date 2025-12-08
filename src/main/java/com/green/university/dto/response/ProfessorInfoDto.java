@@ -1,12 +1,9 @@
 package com.green.university.dto.response;
 
 import com.green.university.entity.Professor;
-import com.green.university.entity.Subject;
-import com.green.university.entity.SyllaBus;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 //import java.sql.Date; 타입 오류 때문에 위로 변경
 

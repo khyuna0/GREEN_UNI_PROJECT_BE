@@ -8,6 +8,7 @@ public class CurrentSemesterSubjectSearchFormDto {
 
 	private String type;
 	private Long deptId;
+	private String deptName;
 	private String name;
 	
 	private Long subYear = Define.CURRENT_YEAR;
