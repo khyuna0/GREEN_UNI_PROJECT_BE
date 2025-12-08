@@ -18,6 +18,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,7 +43,7 @@ public class NoticeService {
 
         // createTime 비었으면 지금 시간으로
         notice.setCreatedTime(noticeFormDto.getCreatedTime() != null
-                ? noticeFormDto.getCreatedTime() : Timestamp.from(Instant.now()));
+                ? noticeFormDto.getCreatedTime(): LocalDateTime.now());
 
         Notice saved = noticeRepository.save(notice);
         noticeFormDto.setNoticeId(saved.getId());
