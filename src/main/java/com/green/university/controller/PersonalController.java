@@ -1,5 +1,6 @@
 package com.green.university.controller;
 
+import com.green.university.config.security.JwtUtil;
 import com.green.university.dto.*;
 import com.green.university.dto.response.*;
 import com.green.university.entity.BreakApp;
@@ -37,6 +38,8 @@ public class PersonalController {
     private NoticeService noticeService;
     @Autowired
     private ScheduleService scheuleService;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     // 메인 홈에 필요한 데이터 (공지, 일정, 사용자 정보)
     @GetMapping("")
@@ -121,6 +124,8 @@ public class PersonalController {
             @RequestParam String password,
             @AuthenticationPrincipal CustomUserDetails principal
     ) {
+
+
         if (bindingResult.hasErrors()) {
             StringBuilder sb = new StringBuilder();
             bindingResult.getAllErrors().forEach(error -> {
@@ -157,8 +162,10 @@ public class PersonalController {
             throw new CustomRestfullException("알 수 없는 사용자 권한입니다.", HttpStatus.BAD_REQUEST);
         }
 
+
         return ResponseEntity.ok(Map.of(
                 "message", "개인정보가 수정되었습니다."
+
         ));
     }
 
