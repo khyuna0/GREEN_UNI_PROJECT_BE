@@ -58,7 +58,7 @@ public class PreStuSubService {
                 .toList();
     }
 
-    // 학생의 예비 수강신청 내역 추가 / 단일 건으로 적용
+    // 🖋 학생의 예비 수강신청 내역 추가 / 단일 건으로 적용
     @Transactional
     public void createPreStuSub(Long studentId, Long subjectId) {
         // 이미 신청한 과목인지 확인
@@ -88,7 +88,7 @@ public class PreStuSubService {
         StuSubUtil.checkSumGrades(targetSubject, stuSubSumGradesDto);
 
         // 2. 해당 학생의 예비 수강 신청 내역 시간표
-		List<StuSubDayTimeDto> dayTimeList =  preStuSubList.stream()
+        List<StuSubDayTimeDto> dayTimeList = preStuSubList.stream()
                 .map(pre -> new StuSubDayTimeDto(pre.getSubject())) // 시간 정보만 DTO에 저장하고
                 .toList(); // StuSubDayTimeDto 리스트로 반환
 
