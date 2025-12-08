@@ -257,10 +257,10 @@ public class AdminService {
 
         Long subjectId = subject.getId();
 
-        SyllaBus syllaBus = new SyllaBus(); // 강의 아이디로 강의 찾아 엔티티에 강의만 저장함
-        syllaBus.setSubject(subjectRepository.findById(subjectId).orElseThrow(
+        Syllabus syllabus = new Syllabus(); // 강의 아이디로 강의 찾아 엔티티에 강의만 저장함
+        syllabus.setSubject(subjectRepository.findById(subjectId).orElseThrow(
                 () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)));
-		syllaBusRepository.save(syllaBus);
+		syllaBusRepository.save(syllabus);
     }
 
 	/**

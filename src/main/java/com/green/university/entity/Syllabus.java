@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Entity
-public class SyllaBus { // 강의 계획서
+public class Syllabus { // 강의 계획서
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
