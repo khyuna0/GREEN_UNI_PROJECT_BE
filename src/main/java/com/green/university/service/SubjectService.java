@@ -6,11 +6,13 @@ import com.green.university.dto.response.SubjectDto;
 import com.green.university.handler.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.SubjectRepository;
 import com.green.university.entity.Subject;
+import com.green.university.repository.specification.SubjectSpecification;
 import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -139,14 +141,31 @@ public class SubjectService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * @return 수강 신청에 사용할 강의 정보 (학생용) 현재 연도-학기에 해당하는 강의만 출력됨 + 페이징 처리
-     */
-    @Transactional
-    public Page<SubjectDto> readSubjectListByCurrentSemesterPage(Integer page) {
-        Pageable pageable = PageRequest.of(page, Define.SUBJECT_PAGE_SIZE);
-        Page<Subject> subjectPage = subjectRepository.findBySubYearAndSemester(Define.CURRENT_YEAR,
-                Define.CURRENT_SEMESTER, pageable);
+    // 수강 신청에 사용할 강의 정보 (학생용) 현재 연도-학기에 해당하는 강의만 출력 + 페이징 처리 + 검색
+    @Transactional (readOnly = true)
+    public Page<SubjectDto> readSubjectListByCurrentSemesterPage(CurrentSemesterSubjectSearchFormDto dto, Pageable pageable) {
+        String type = dto.getType();
+        Long deptId = dto.getDeptId();
+        String name = dto.getName();
+
+        // 조건 없이 전체 조회
+        Specification<Subject> spec = (root, query, cb) -> null;
+
+        // 현재 연도, 학기에 해당하는 과목
+        spec = spec.and(SubjectSpecification.currentSemester(Define.CURRENT_YEAR, Define.CURRENT_SEMESTER));
+        // 전공 또는 교양
+        if (type != null && !type.isEmpty()) {
+            spec = spec.and(SubjectSpecification.hasType(type));
+        }
+        // 학과명
+        if (deptId != null) {
+            spec = spec.and(SubjectSpecification.hasDepartment(deptId));
+        }
+        // 강의명
+        if (name != null && !name.isEmpty()) {
+            spec = spec.and(SubjectSpecification.nameContains(name));
+        }
+        Page<Subject> subjectPage = subjectRepository.findAll(spec, pageable);
         return subjectPage.map(SubjectDto::fromEntity);
     }
 
