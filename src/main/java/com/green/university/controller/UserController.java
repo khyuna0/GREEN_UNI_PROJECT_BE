@@ -1,6 +1,7 @@
 package com.green.university.controller;
 
 import com.green.university.dto.*;
+import com.green.university.dto.response.ProfessorDto;
 import com.green.university.dto.response.StudentDto;
 import com.green.university.exception.CustomRestfullException;
 import com.green.university.entity.Professor;
@@ -103,7 +104,7 @@ public class UserController {
 
         Pageable pageable = PageRequest.of(page ,PAGE_SIZE, Sort.by("id").descending());
 
-        Page<Professor> list = professorService.readProfessorList(professorId, deptName, pageable);
+        Page<ProfessorDto> list = professorService.readProfessorList(professorId, deptName, pageable);
 
         return ResponseEntity.ok(Map.of(
                 "professorList", list.getContent(),    // 실제 데이터
@@ -118,20 +119,18 @@ public class UserController {
     public ResponseEntity<?> showStudentList(
             @RequestParam(required = false) Long studentId,
             @RequestParam(required = false) Long deptId,
-            @RequestParam(defaultValue = "0") Integer page) {
+            @PathVariable int page) {
 
-        StudentListForm studentListForm = new StudentListForm();
-        studentListForm.setStudentId(studentId);
-        studentListForm.setDeptId(deptId);
-        studentListForm.setPage(page.longValue());
+        if(page < 0) page = 0; // 페이지 유효성 검사
+        Pageable pageable = PageRequest.of(page ,PAGE_SIZE, Sort.by("id").descending());
 
-        Page<StudentDto> list = studentService.readStudentList(studentListForm);
+        Page<StudentDto> list = studentService.readStudentList(studentId, deptId, pageable);
 
         Map<String, Object> pagingResponse = new HashMap<>();
         pagingResponse.put("listCount", list.getTotalElements()); // 전체 글 수
         pagingResponse.put("totalPages", list.getTotalPages()); // 전체 페이지 수
         pagingResponse.put("currentPage", list.getNumber()); // 현재 페이지 번호
-        pagingResponse.put("lists", list.getContent()); // 현재 페이지에 해당하는 데이터
+        pagingResponse.put("studentList", list.getContent()); // 현재 페이지에 해당하는 데이터
 
         return ResponseEntity.ok(pagingResponse);
     }

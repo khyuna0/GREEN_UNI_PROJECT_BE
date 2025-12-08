@@ -2,15 +2,15 @@ package com.green.university.service;
 
 import com.green.university.dto.SyllaBusFormDto;
 import com.green.university.dto.UpdateStudentGradeDto;
-import com.green.university.dto.response.ReadSyllabusDto;
-import com.green.university.dto.response.StudentInfoForProfessorDto;
-import com.green.university.dto.response.SubjectForProfessorDto;
-import com.green.university.dto.response.SubjectPeriodForProfessorDto;
+import com.green.university.dto.response.*;
 import com.green.university.entity.*;
 import com.green.university.exception.CustomRestfullException;
 import com.green.university.repository.interfaces.*;
+import com.green.university.repository.specification.ProfessorSpecification;
+import com.green.university.repository.specification.StudentSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -222,41 +222,39 @@ public class ProfessorService {
 	 */
 
     @Transactional
-    public Page<Professor> readProfessorList(Long professorId, String deptName, Pageable pageable) {
+    public Page<ProfessorDto> readProfessorList(Long professorId, String deptName, Pageable pageable) {
 
-        // 1) professorId로 단일 검색 (PK는 유니크라 단건 조회)
+        Specification<Professor> spec = (
+                root, query, cb) -> null; // 조건 없이 전체 조회
         if (professorId != null) {
-            Professor p = professorRepository.findById(professorId)
-                    .orElse(null);
-            List<Professor> result = (p == null) ? List.of() : List.of(p);
-            return new PageImpl<>(result, pageable, result.size()); // 고유키 검색 -> 단권 반환 -> 리스트 형식
+            spec = spec.and(ProfessorSpecification.hasProfessorId(professorId));
         }
-
-        // 2) deptId로 검색 (특정 학과 교수 목록 조회)
         if (deptName != null) {
-            return professorRepository.findByDepartmentName(deptName, pageable);
+            spec = spec.and(ProfessorSpecification.hasDepartmentName(deptName));
+        }
+        if(deptName != null && professorId != null) {
+            spec = spec.and(ProfessorSpecification.hasProfessorIdAndDepartmentName(professorId, deptName));
         }
 
-        // 3) 조건 없음 → 전체 교수 목록 조회
-        return professorRepository.findAll(pageable);
-    }
+        Page<Professor> Professor = professorRepository.findAll(spec, pageable);
+        return Professor.map(ProfessorDto::fromEntity); // dto로 반환해주기
 
-//	/**
-//	 *
-//	 * @param professorListForm
-//	 * @return 교수 수 (페이징?) 나중엔 필요없을듯, 컨트롤러에서 처리
-//	 */
-//	@Transactional
-//	public Long readProfessorAmount(ProfessorListForm professorListForm) {
+
+//        // 1) professorId로 단일 검색 (PK는 유니크라 단건 조회)
+//        if (professorId != null) {
+//            Professor p = professorRepository.findById(professorId)
+//                    .orElse(null);
+//            List<Professor> result = (p == null) ? List.of() : List.of(p);
+//            return new PageImpl<>(result, pageable, result.size()); // 고유키 검색 -> 단권 반환 -> 리스트 형식
+//        }
 //
-//		Long amount = null;
-//		if (professorListForm.getDeptId() != null) {
-//			amount = professorRepository.countByDepartment_id(professorListForm.getDeptId());
-//		} else {
-//			amount = professorRepository.count(); // .count() -> 테이블의 전체 row 개수를 long 타입으로 반환하는 메서드
-//		}
+//        // 2) deptId로 검색 (특정 학과 교수 목록 조회)
+//        if (deptName != null) {
+//            return professorRepository.findByDepartmentName(deptName, pageable);
+//        }
 //
-//		return amount;
-//	}
+//        // 3) 조건 없음 → 전체 교수 목록 조회
+//        return professorRepository.findAll(pageable);
+    }
 
 }

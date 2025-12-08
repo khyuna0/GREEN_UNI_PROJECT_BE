@@ -32,21 +32,11 @@ public class StudentService {
     private DepartmentRepository departmentRepository;
 
     /**
-     * @param studentListForm
      * @return 학생 리스트
      */
     @Transactional(readOnly = true)
-    public Page<StudentDto> readStudentList(StudentListForm studentListForm) {
-        // 1. 페이징 관련된 정보
-        int page = studentListForm.getPage() == null ? 0 : studentListForm.getPage().intValue();
-        if (page < 0) page = 0;
+    public Page<StudentDto> readStudentList(Long studentId, Long deptId, Pageable pageable) {
 
-        Pageable pageable = PageRequest.of(page, Define.STUDENT_PAGE_SIZE);
-
-        Long studentId = studentListForm.getStudentId();
-        Long deptId = studentListForm.getDeptId();
-
-        // 2. Specification 사용하기
         Specification<Student> spec = (
                 root, query, cb) -> null; // 조건 없이 전체 조회
         if (studentId != null) {
@@ -54,6 +44,9 @@ public class StudentService {
         }
         if (deptId != null) {
             spec = spec.and(StudentSpecification.hasDepartment(deptId));
+        }
+        if (studentId != null && deptId != null) {
+            spec = spec.and(StudentSpecification.hasStudentIdAndDepartment(studentId, deptId));
         }
 
         Page<Student> Student = studentRepository.findAll(spec, pageable);
