@@ -2,15 +2,12 @@ package com.green.university.dto.response;
 
 import com.green.university.entity.Notice;
 import com.green.university.entity.NoticeFile;
-import com.green.university.entity.Professor;
-import com.green.university.entity.Subject;
-import jakarta.persistence.*;
+import com.green.university.utils.LocalDateTimeUtil;
 import lombok.Data;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 public class NoticeDto {
@@ -20,7 +17,10 @@ public class NoticeDto {
     private String title;
     private String content;
     private Long views;
-    private Timestamp createdTime;
+    private LocalDateTime createdTime;
+
+    private String createdTimeFormatted; // 화면 출력용
+
     private List<NoticeFile> files = new ArrayList<>();
 
     public NoticeDto(Notice n) {
@@ -30,22 +30,12 @@ public class NoticeDto {
         this.content = n.getContent();
         this.views = n.getViews();
         this.createdTime = n.getCreatedTime();
+        this.createdTimeFormatted = LocalDateTimeUtil.dateTimeToString(n.getCreatedTime());
 
-//        // 파일 리스트가 null일 가능성 대비
-//        if (n.getFiles() != null) {
-//            this.files = n.getFiles().stream()
-//                    .map(f -> new NoticeFile())
-//                    .collect(Collectors.toList());
-//        }
-
-        // 엔티티 그대로 담는 경우
         if (n.getFiles() != null) {
             this.files = new ArrayList<>(n.getFiles());
         } else {
             this.files = null;
         }
     }
-
-
 }
-

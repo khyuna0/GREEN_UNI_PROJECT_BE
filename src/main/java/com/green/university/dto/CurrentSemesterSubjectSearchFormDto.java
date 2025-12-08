@@ -12,7 +12,6 @@ public class CurrentSemesterSubjectSearchFormDto {
 	
 	private Long subYear = Define.CURRENT_YEAR;
 	private Long semester = Define.CURRENT_SEMESTER;
-	
-	private Long page;
+
 	
 }

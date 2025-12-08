@@ -61,9 +61,9 @@ public class NoticeController {
     public ResponseEntity<?> insertNotice(@Validated NoticeFormDto noticeFormDto) {
 
         MultipartFile file = noticeFormDto.getFile();
-        if (!file.isEmpty()) {
+        if (file != null && !file.isEmpty()) {
             if (file.getSize() > Define.MAX_FILE_SIZE) {
-                throw new CustomRestfullException("파일 크기는 20MB 이상 클 수 없습니다.", HttpStatus.BAD_REQUEST);
+                throw new CustomRestfullException("파일 크기는 20MB 이상 클 수 없습니다.", HttpStatus.BAD_REQUEST, "/notice");
             }
             try {
                 String saveDirectory = Define.UPLOAD_DIRECTORY;
@@ -144,7 +144,7 @@ public class NoticeController {
     // 검색 + 페이지
     @GetMapping("/search/{page}")
     public ResponseEntity<?> showNoticeByKeywordAndPage( NoticePageFormDto noticePageFormDto,
-                                                         @PathVariable("page") int page, @RequestParam String keyword) {
+                                                         @PathVariable("page") int page) {
 
         noticePageFormDto.setPage(page);
 
@@ -158,7 +158,7 @@ public class NoticeController {
                 "listCount",noticePage.getTotalPages(),
                 "currentPage",page
         ));
-       
+
     }
 
 

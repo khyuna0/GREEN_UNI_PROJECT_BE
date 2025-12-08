@@ -18,6 +18,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,7 +43,7 @@ public class NoticeService {
 
         // createTime 비었으면 지금 시간으로
         notice.setCreatedTime(noticeFormDto.getCreatedTime() != null
-                ? noticeFormDto.getCreatedTime() : Timestamp.from(Instant.now()));
+                ? noticeFormDto.getCreatedTime(): LocalDateTime.now());
 
         Notice saved = noticeRepository.save(notice);
         noticeFormDto.setNoticeId(saved.getId());
@@ -98,7 +99,7 @@ public class NoticeService {
     @Transactional
     public NoticeDto readByIdNotice(Long id) {
         Notice notice = noticeRepository.findById(id)
-                .orElseThrow(() -> new CustomRestfullException("공지 없음", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomRestfullException("공지 없음", HttpStatus.NOT_FOUND, "/break/appList"));
 
         long currentViews = notice.getViews() == null ? 0: notice.getViews();
         notice.setViews(currentViews + 1);
@@ -111,7 +112,7 @@ public class NoticeService {
     @Transactional
     public void updateNotice(Long id, NoticeFormDto noticeFormDto) {
         Notice notice = noticeRepository.findById(id)
-                .orElseThrow(() -> new CustomRestfullException("공지 없음", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomRestfullException("공지 없음", HttpStatus.NOT_FOUND, "/break/appList"));
 
         notice.setCategory(noticeFormDto.getCategory());
         notice.setTitle(noticeFormDto.getTitle());

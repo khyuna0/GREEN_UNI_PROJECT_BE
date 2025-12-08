@@ -1,0 +1,41 @@
+package com.green.university.repository.specification;
+
+import com.green.university.entity.Subject;
+import org.springframework.data.jpa.domain.Specification;
+
+// 데이터베이스에서 데이터를 조회할 때 동적인 쿼리를 작성할 수 있는 jpa에서 제공하는 인터페이스
+public class SubjectSpecification {
+
+    // 현재 년도, 학기로 찾기
+    public static Specification<Subject> currentSemester(Long subYear, Long semester) {
+        return (root, query, cb) ->
+                cb.and(
+                        cb.equal(root.get("subYear"), subYear),
+                        cb.equal(root.get("semester"), semester)
+                );
+    }
+
+    // 전공 또는 교양인지 찾기
+    public static Specification<Subject> hasType(String type) {
+        return (root, query, cb) ->
+                type == null || type.isBlank()
+                        ? null
+                        : cb.equal(root.get("type"), type);
+    }
+
+    // 학과로 찾기
+    public static Specification<Subject> hasDepartment(Long deptId) {
+        return (root, query, cb) ->
+                deptId == null
+                        ? null
+                        : cb.equal(root.get("department").get("id"), deptId);
+    }
+
+    // 과목명으로 찾기
+    public static Specification<Subject> nameContains(String name) {
+        return (root, query, cb) ->
+                name == null || name.isBlank()
+                        ? null
+                        : cb.like(root.get("name"), "%" + name + "%");
+    }
+}

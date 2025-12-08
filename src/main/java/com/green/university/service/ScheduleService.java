@@ -31,7 +31,7 @@ public class ScheduleService {
 
 	// 학사일정 조회 (디테일)
 	public ScheduleDto readScheduleById(Long id) {
-		Schedule schedule = scheduleRepository.findById(id).orElseThrow(() -> new CustomRestfullException("없는 학사일정입니다", HttpStatus.NOT_FOUND));
+		Schedule schedule = scheduleRepository.findById(id).orElseThrow(() -> new CustomRestfullException("없는 학사일정입니다", HttpStatus.NOT_FOUND, "/break/appList"));
 
 		return new ScheduleDto(schedule);
 	}
@@ -54,7 +54,7 @@ public class ScheduleService {
 	public void updateSchedule(ScheduleFormDto dto, Long id) {
 
         //학사일정 아이디로 찾아 수정하기
-        Schedule schedule = scheduleRepository.findById(id).orElseThrow(() -> new CustomRestfullException("해당 학사일정 없음", HttpStatus.NOT_FOUND));
+        Schedule schedule = scheduleRepository.findById(id).orElseThrow(() -> new CustomRestfullException("해당 학사일정 없음", HttpStatus.NOT_FOUND, "/break/appList"));
         schedule.setStartDay(dto.getStartDay());
         schedule.setEndDay(dto.getEndDay());
         schedule.setInformation(dto.getInformation());

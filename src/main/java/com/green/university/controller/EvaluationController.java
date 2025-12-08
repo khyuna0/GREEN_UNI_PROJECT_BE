@@ -56,19 +56,19 @@ public class EvaluationController {
         evaluationFormDto.setSubjectId(subjectId);
 
         if (evaluationFormDto.getAnswer1() == null) {
-            throw new CustomRestfullException("1번 질문에 답 해주세요", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("1번 질문에 답 해주세요", HttpStatus.BAD_REQUEST, "/break/appList");
         } else if (evaluationFormDto.getAnswer2() == null) {
-            throw new CustomRestfullException("2번 질문에 답 해주세요", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("2번 질문에 답 해주세요", HttpStatus.BAD_REQUEST, "/break/appList");
         } else if (evaluationFormDto.getAnswer3() == null) {
-            throw new CustomRestfullException("3번 질문에 답 해주세요", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("3번 질문에 답 해주세요", HttpStatus.BAD_REQUEST, "/break/appList");
         } else if (evaluationFormDto.getAnswer4() == null) {
-            throw new CustomRestfullException("4번 질문에 답 해주세요", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("4번 질문에 답 해주세요", HttpStatus.BAD_REQUEST, "/break/appList");
         } else if (evaluationFormDto.getAnswer5() == null) {
-            throw new CustomRestfullException("5번 질문에 답 해주세요", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("5번 질문에 답 해주세요", HttpStatus.BAD_REQUEST, "/break/appList");
         } else if (evaluationFormDto.getAnswer6() == null) {
-            throw new CustomRestfullException("6번 질문에 답 해주세요", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("6번 질문에 답 해주세요", HttpStatus.BAD_REQUEST, "/break/appList");
         } else if (evaluationFormDto.getAnswer7() == null) {
-            throw new CustomRestfullException("7번 질문에 답 해주세요", HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("7번 질문에 답 해주세요", HttpStatus.BAD_REQUEST, "/break/appList");
         } else {
             evaluationService.createEvanluation(evaluationFormDto);
         }

@@ -26,7 +26,7 @@ public class StuSubUtil {
 			
 			// 현재 학점 + 신청 강의 학점이 최대 수강 가능 학점을 초과한다면
 			if ((sumGrades + subGrades) > Define.MAX_GRADES) {
-				throw new CustomRestfullException("신청 가능한 최대 학점을 초과했습니다.", HttpStatus.BAD_REQUEST);
+				throw new CustomRestfullException("신청 가능한 최대 학점을 초과했습니다.", HttpStatus.BAD_REQUEST, "/break/appList");
 			}
 		}
 	}
@@ -69,7 +69,7 @@ public class StuSubUtil {
 				
 				for (Long j : targetTimeList) {
 					if (dayTimeList.get(i).timeList().contains(j)) {
-						throw new CustomRestfullException("이전에 신청한 강의와 시간이 중복됩니다.", HttpStatus.BAD_REQUEST);
+						throw new CustomRestfullException("이전에 신청한 강의와 시간이 중복됩니다.", HttpStatus.BAD_REQUEST, "/break/appList");
 					}
 				}
 			}

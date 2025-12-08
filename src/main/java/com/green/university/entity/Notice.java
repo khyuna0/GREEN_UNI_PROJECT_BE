@@ -5,6 +5,7 @@ import lombok.Data;
 import org.w3c.dom.Text;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +24,7 @@ public class Notice {
     private Long views;
 
     // 타임스탬프 ..?
-    private Timestamp createdTime; // 공지 생성시간
+    private LocalDateTime createdTime; // 공지 생성시간
 
     // 파일목록
     @OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true)
