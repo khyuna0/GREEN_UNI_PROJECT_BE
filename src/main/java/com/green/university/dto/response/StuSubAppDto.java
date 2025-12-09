@@ -6,9 +6,6 @@ import com.green.university.entity.Student;
 import com.green.university.entity.Subject;
 import lombok.Data;
 
-/**
- * @author 서영
- */
 @Data
 public class StuSubAppDto {
 

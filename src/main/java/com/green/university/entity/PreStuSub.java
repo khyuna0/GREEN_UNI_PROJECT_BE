@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Entity
 @Data
-public class PreStuSub {
+public class PreStuSub { // 학생 예비 수강 신청
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
