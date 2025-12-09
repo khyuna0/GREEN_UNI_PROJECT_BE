@@ -71,7 +71,7 @@ public class ProfessorService {
 	@Transactional
 	public List<SubjectForProfessorDto> selectSubjectBySemester(
 			SubjectPeriodForProfessorDto subjectPeriodForProfessorDto) {
-		List<Subject> list = subjectRepository.findByProfessor_IdAndSubYearAndSemester(subjectPeriodForProfessorDto.getId(), subjectPeriodForProfessorDto.getSemester(), subjectPeriodForProfessorDto.getSubYear());
+		List<Subject> list = subjectRepository.findByProfessor_IdAndSubYearAndSemester(subjectPeriodForProfessorDto.getId(), subjectPeriodForProfessorDto.getSubYear(), subjectPeriodForProfessorDto.getSemester());
 		return list.stream()
 				.map(subject -> {
 					SubjectForProfessorDto subjectDto = new SubjectForProfessorDto();
@@ -168,34 +168,6 @@ public class ProfessorService {
 			throw new CustomRestfullException("교수 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 		}
 		ReadSyllabusDto dto = new ReadSyllabusDto(subject, professor, syllabus); // Dto에 생성자 추가함
-
-		// 교과목 정보
-//		dto.setSubjectId(subject.getId());
-//		dto.setName(subject.getName());
-//		dto.setSubYear(subject.getSubYear());
-//		dto.setSemester(subject.getSemester());
-//		dto.setGrades(subject.getGrades());
-//		dto.setType(subject.getType());
-//
-//		dto.setSubDay(subject.getSubDay());
-//		dto.setStartTime(subject.getStartTime());
-//		dto.setEndTime(subject.getEndTime());
-//		dto.setRoomId(subject.getRoom().getId());
-//		dto.setDeptName(subject.getDepartment().getName());
-//		dto.setCollegeName(subject.getDepartment().getCollege().getName()); // 확인 필요
-//
-//		// 교강사 정보
-//		dto.setProfessorName(professor.getName());
-//		dto.setTel(professor.getTel());
-//		dto.setEmail(professor.getEmail());
-//
-//		// syllabus 부분 (개요, 목표, 정보, 계획)
-//		dto.setOverview(syllabus.getOverview());
-//		dto.setObjective(syllabus.getObjective());
-//		dto.setTextbook(syllabus.getTextbook());
-//		dto.setProgram(syllabus.getProgram());
-
-		System.out.println(dto);
 		return dto;
 	}
 
@@ -205,7 +177,7 @@ public class ProfessorService {
 	 * @param syllaBusFormDto
 	 */
 	@Transactional
-	public void updateSyllabus(Long id , SyllaBusFormDto syllaBusFormDto) {
+	public void updateSyllabus(Long id, SyllaBusFormDto syllaBusFormDto) {
 
         Syllabus syllabus = syllaBusRepository.findBySubject_Id(id).orElseThrow(
                 () -> new CustomRestfullException("강의 계획서를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
@@ -218,7 +190,7 @@ public class ProfessorService {
 	}
 
 	/**
-	 * @return 교수 리스트 조회( 가 아니라 검색 같다 )
+	 * @return 교수 리스트 조회 + 검색
 	 */
 
     @Transactional
@@ -239,22 +211,6 @@ public class ProfessorService {
         Page<Professor> Professor = professorRepository.findAll(spec, pageable);
         return Professor.map(ProfessorDto::fromEntity); // dto로 반환해주기
 
-
-//        // 1) professorId로 단일 검색 (PK는 유니크라 단건 조회)
-//        if (professorId != null) {
-//            Professor p = professorRepository.findById(professorId)
-//                    .orElse(null);
-//            List<Professor> result = (p == null) ? List.of() : List.of(p);
-//            return new PageImpl<>(result, pageable, result.size()); // 고유키 검색 -> 단권 반환 -> 리스트 형식
-//        }
-//
-//        // 2) deptId로 검색 (특정 학과 교수 목록 조회)
-//        if (deptName != null) {
-//            return professorRepository.findByDepartmentName(deptName, pageable);
-//        }
-//
-//        // 3) 조건 없음 → 전체 교수 목록 조회
-//        return professorRepository.findAll(pageable);
     }
 
 }

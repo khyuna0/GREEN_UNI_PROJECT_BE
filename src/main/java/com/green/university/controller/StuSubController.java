@@ -119,19 +119,6 @@ public class StuSubController {
     @GetMapping("/subjectList/search")
     public ResponseEntity<?> readSubjectListSearch(@Validated CurrentSemesterSubjectSearchFormDto currentSemesterSubjectSearchFormDto) {
 
-        // 프론트에서 매개변수 DTO는
-        //    api.get("/sugang/subjectList/search", {
-//        params: {
-//            type: selectedType,
-//                    deptId: selectedDept,
-//                    name: searchName,
-//                    subYear: 2025,
-//                    semester: 1,
-//                    page: 1
-//        }
-//    }); -> 이 형식으로 채워줘야 한다.
-
-
         // 강의 리스트
         List<SubjectDto> subjectList = subjectService
                 .readSubjectListSearchByCurrentSemester(currentSemesterSubjectSearchFormDto);
