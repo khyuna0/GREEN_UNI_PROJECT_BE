@@ -30,7 +30,7 @@ public class GradeController {
      *
      * @return
      */
-    @GetMapping("/thisSemester")
+    @GetMapping("/current")
     public ResponseEntity<?> thisSemester(@AuthenticationPrincipal CustomUserDetails principal) {
 
         Long studentId = principal.getId();
