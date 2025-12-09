@@ -3,11 +3,8 @@ package com.green.university.dto.response;
 import com.green.university.entity.Subject;
 import lombok.Data;
 
-/**
- * @author 서영
- * 강의 시간표 조회 시 사용할 Dto
- * 단과대학, 학과 등을 id 대신 이름으로 쉽게 보여주기 위해 이름을 추가해서 만듦
- */
+// 강의 시간표 조회 시 사용할 Dto
+// 단과대학, 학과 등을 id 대신 이름으로 쉽게 보여주기 위해 이름을 추가해서 만듦
 @Data
 public class SubjectDto {
 
@@ -23,7 +20,7 @@ public class SubjectDto {
 	// 교수 이름
 	private String professorName;
 	
-	// 강의실 id (==이름)
+	// 강의실 id (= 강의실 이름)
 	private String roomId;
 
 	// 단과대 이름
@@ -65,7 +62,7 @@ public class SubjectDto {
 	// 신청 여부
 	private Boolean status;
 
-	// 강의 계획서
+	// 강의 계획서 (굳이 필요한 지)
 	private String syllabus;
 
 	// Subject 엔티티 -> SubjectDto로 변환

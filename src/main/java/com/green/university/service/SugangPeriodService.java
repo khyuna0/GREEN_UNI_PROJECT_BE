@@ -1,7 +1,7 @@
 package com.green.university.service;
 
 import com.green.university.entity.SugangPeriod;
-import com.green.university.repository.interfaces.SugangPeriodRepository;
+import com.green.university.repository.SugangPeriodRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

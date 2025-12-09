@@ -1,7 +1,6 @@
-package com.green.university.repository.interfaces;
+package com.green.university.repository;
 
 import com.green.university.entity.Professor;
-import com.green.university.entity.Staff;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,4 +1,4 @@
-package com.green.university.repository.specification;
+package com.green.university.specification;
 
 import com.green.university.entity.Student;
 import org.springframework.data.jpa.domain.Specification;

@@ -1,4 +1,4 @@
-package com.green.university.repository.interfaces;
+package com.green.university.repository;
 
 import com.green.university.entity.StuStat;
 

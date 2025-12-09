@@ -1,7 +1,7 @@
 package com.green.university.config.security;
 
 import com.green.university.entity.User;
-import com.green.university.repository.interfaces.UserRepository;
+import com.green.university.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
