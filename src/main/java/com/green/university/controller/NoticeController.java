@@ -32,20 +32,19 @@ public class NoticeController {
     @GetMapping("/search/{page}")
     public ResponseEntity<?> showNoticeByKeywordAndPage(
             @RequestParam(defaultValue = "select") String crud,
-            @PathVariable int page) {
+            @PathVariable int page,
+            NoticePageFormDto dto) {
 
-            NoticePageFormDto dto = new NoticePageFormDto();
-            dto.setKeyword(null);
-            dto.setType(null);
+        Page<Notice> noticePage = noticeService.readNoticePage(dto, page);
 
-            Page<Notice> noticePage =  noticeService.readNoticePage(dto,page);
-
-            return ResponseEntity.ok(Map.of(
-                    "crud", crud,  // 화면이 어떤모드인지 - select, read, update 등
-                    "noticeList",noticePage.getContent(), // 현재 페이지에 보일 데이터
-                    "listCount", noticePage.getTotalPages(), // 총페이지수 
-                    "currentPage",page // 현재 페이지
-            ));
+        return ResponseEntity.ok(Map.of(
+                "crud", crud,
+                "keyword", dto.getKeyword(),
+                "type", dto.getType(),
+                "noticeList", noticePage.getContent(),
+                "listCount", noticePage.getTotalPages(),
+                "currentPage", page
+        ));
     }
 
     // 공지사항 페이지 이동
