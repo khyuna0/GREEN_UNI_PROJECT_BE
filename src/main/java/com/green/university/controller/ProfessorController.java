@@ -54,8 +54,7 @@ public class ProfessorController {
 		subjectPeriodForProfessorDto.setSubYear(Define.CURRENT_YEAR);
 		subjectPeriodForProfessorDto.setSemester(Define.CURRENT_SEMESTER);
 		subjectPeriodForProfessorDto.setId(professorId);
-		List<SubjectForProfessorDto> subjectList = professorService
-				.selectSubjectBySemester(subjectPeriodForProfessorDto);
+		List<SubjectForProfessorDto> subjectList = professorService.selectSubjectBySemester(subjectPeriodForProfessorDto);
 
         return ResponseEntity.ok(Map.of(
                 "semesterList", semesterList,
@@ -65,6 +64,7 @@ public class ProfessorController {
 
 	/**
 	 * 조회한 년도 학기의 강의 리스트 출력
+     * subject를 semester와 year로 찾기
 	 *
 	 * @param period: 조회할 년도 학기
 	 * @return 조회 신청한 학기의 본인 강좌 조회 페이지
@@ -74,7 +74,7 @@ public class ProfessorController {
                                               @AuthenticationPrincipal CustomUserDetails principal) { // period는 "2023년도 1학기" 형식
 		Long professorId = principal.getId();
 		List<SubjectPeriodForProfessorDto> semesterList = professorService.selectSemester(professorId);
-		String[] str = period.split("year");
+		String[] str = period.split("_");
 		SubjectPeriodForProfessorDto subjectPeriodForProfessorDto = new SubjectPeriodForProfessorDto();
 		subjectPeriodForProfessorDto.setSubYear(Long.valueOf(str[0]));
 		subjectPeriodForProfessorDto.setSemester(Long.valueOf(str[1]));
@@ -145,7 +145,7 @@ public class ProfessorController {
 	 *
 	 * @return 강의계획서 조회 창
 	 */
-	@GetMapping("/syllabus/update/{subjectId}")
+	@GetMapping("/syllabus/{subjectId}")
 	public ResponseEntity<?> createSyllabus(@PathVariable("subjectId") Long subjectId) {
 		ReadSyllabusDto readSyllabusDto = professorService.readSyllabus(subjectId);
 
@@ -159,9 +159,8 @@ public class ProfessorController {
 	 * @param syllaBusFormDto
 	 * @return 강의계획서 업데이트 창
 	 */
-	@PatchMapping("/syllabus/update/{subjectId}")
+	@PatchMapping("/syllabus/{subjectId}")
 	public ResponseEntity<?> createSyllabusProc(@PathVariable("subjectId") Long subjectId, SyllaBusFormDto syllaBusFormDto) {
-//		System.out.println(syllaBusFormDto);
 		professorService.updateSyllabus(subjectId, syllaBusFormDto);
 
         return ResponseEntity.ok().body("강의 계획서 수정이 정상적으로 처리되었습니다.");
