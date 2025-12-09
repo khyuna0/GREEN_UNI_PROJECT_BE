@@ -14,129 +14,104 @@ import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 
- // 금학기,학기별 성적, 누계성적 조회
+// 금학기,학기별 성적, 누계성적 조회
 @RestController
 @RequestMapping("/api/grade")
 public class GradeController {
 
-	@Autowired
-	private HttpSession session;
+    @Autowired
+    private HttpSession session;
 
-	@Autowired
-	private GradeService gradeService;
+    @Autowired
+    private GradeService gradeService;
 
-	/**
-	 * 금학기 성적조회
-	 *
-	 * @return
-	 */
-	@GetMapping("/thisSemester")
-	public ResponseEntity<?> thisSemester(@AuthenticationPrincipal CustomUserDetails principal) {
-
-        Long studentId = principal.getId();
-
-		// 학생이 수강 신청한 연도 조회
-		List<GradeDto> yearList = gradeService.readGradeYearByStudentId(studentId);
-
-        List<GradeDto> thisSemester = null; // 값 보내주기 위해 선언부만 만듬
-        MyGradeDto mygrade = null;
-
-		// 수강한 연도가 없으면 금학기 성적조회 x
-		if (!yearList.isEmpty()) {
-
-			// 금학기 성적조회 기능
-			thisSemester = gradeService.readThisSemesterByStudentId(studentId);
-
-			// 누계 성적 조회
-			mygrade = gradeService.readMyGradeByStudentId(studentId);
-		}
-
-        return ResponseEntity.ok(Map.of(
-                "yearList", yearList,
-                "gradeList", thisSemester, // 상태에 따라 null 일수도 있음
-                "mygrade", mygrade
-        ));
-	}
-
-	/**
-	 * 학기별 성적조회
-	 *
-	 * @return
-	 */
-	@GetMapping("/semester")
-	public ResponseEntity<?> semester(@AuthenticationPrincipal CustomUserDetails principal) {
-
-		Long studentId = principal.getId();
-
-		// 학생이 수강 신청한 연도 조회
-		List<GradeDto> yearList = gradeService.readGradeYearByStudentId(studentId);
-		// 전체 성적 조회
-		List<GradeDto> gradeAllList = gradeService.readAllGradeByStudentId(studentId);
-		// 학생이 신청한 학기가 있는지 찾는 기능
-		List<GradeDto> semesterList = gradeService.readGradeSemesterByStudentId(studentId);
-
-        return ResponseEntity.ok(Map.of(
-                "yearList", yearList,
-                "gradeList", gradeAllList,
-                "semesterList", semesterList
-        ));
-	}
-
-	/**
-	 * 학기별 성적 조회
-	 *
-	 * @return
-	 */
-    @PostMapping("/read")
-    public ResponseEntity<?> readGradeProc(@RequestParam("type") String type,
-                                           @RequestParam("subyear") Long subYear,
-                                           @RequestParam("semester") Long semester,
-                                           @AuthenticationPrincipal CustomUserDetails principal) {
+    /**
+     * 금학기 성적조회
+     *
+     * @return
+     */
+    @GetMapping("/thisSemester")
+    public ResponseEntity<?> thisSemester(@AuthenticationPrincipal CustomUserDetails principal) {
 
         Long studentId = principal.getId();
 
         // 학생이 수강 신청한 연도 조회
         List<GradeDto> yearList = gradeService.readGradeYearByStudentId(studentId);
 
-        // 학생이 수강 신청한 학기 조회
-        List<GradeDto> semesterList = gradeService.readGradeSemesterByStudentId(studentId);
+        List<GradeDto> thisSemester = null; // 값 보내주기 위해 선언부만 만듬
+        MyGradeDto mygrade = null;
 
-        //실제 조회할 성적 리스트
-        List<GradeDto> gradeList;
+        // 수강한 연도가 없으면 금학기 성적조회 x
+        if (!yearList.isEmpty()) {
 
-        if ("전체".equals(type)) {
-            gradeList = gradeService.readGradeByStudentId(studentId, subYear, semester);
-        } else {
-            gradeList = gradeService.readGradeByType(studentId, subYear, semester, type);
+            // 금학기 성적조회 기능
+            thisSemester = gradeService.readThisSemesterByStudentId(studentId);
+
+            // 누계 성적 조회
+            mygrade = gradeService.readMyGradeByStudentId(studentId);
         }
 
-        // Model -> JSON 응답으로 한번에 내려주기
+        return ResponseEntity.ok(Map.of(
+                "yearList", yearList,
+                "gradeList", thisSemester, // 상태에 따라 null 일수도 있음
+                "mygrade", mygrade
+        ));
+    }
+
+    /**
+     * 학기별 성적조회 (초기 + 필터 통합)
+     */
+    @GetMapping("/semester")
+    public ResponseEntity<?> semester(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @RequestParam(value = "type", required = false, defaultValue = "전체") String type,
+            @RequestParam(value = "subyear", required = false) Long subYear,
+            @RequestParam(value = "semester", required = false) Long semester
+    ) {
+        Long studentId = principal.getId();
+
+        List<GradeDto> yearList = gradeService.readGradeYearByStudentId(studentId);
+        List<GradeDto> semesterList = gradeService.readGradeSemesterByStudentId(studentId);
+
+        List<GradeDto> gradeList;
+
+        // 초기(필터 미선택)
+        if (subYear == null || semester == null) {
+            gradeList = gradeService.readAllGradeByStudentId(studentId);
+        } else {
+            // 필터 조회
+            if ("전체".equals(type)) {
+                gradeList = gradeService.readGradeByStudentId(studentId, subYear, semester);
+            } else {
+                gradeList = gradeService.readGradeByType(studentId, subYear, semester, type);
+            }
+        }
+
         return ResponseEntity.ok(Map.of(
                 "yearList", yearList,
                 "semesterList", semesterList,
                 "gradeList", gradeList
         ));
+    }
 
-    };
+    /**
+     * 총 누계성적 조회
+     *
+     * @return
+     */
+    @GetMapping("total")
+    public ResponseEntity<?> totalGrade( @AuthenticationPrincipal CustomUserDetails principal) {
 
-	/**
-	 * 총 누계성적 조회
-	 *
-	 * @return
-	 */
-	@GetMapping("total")
-	public ResponseEntity<?> totalGrade( @AuthenticationPrincipal CustomUserDetails principal) {
+        Long studentId = principal.getId();
 
-		Long studentId = principal.getId();
-
-		// 학생이 수강 신청한 연도 조회
-		List<GradeDto> yearList = gradeService.readGradeYearByStudentId(studentId);
-		List<MyGradeDto> gradeList = gradeService.readgradeinquiryList(studentId);
+        // 학생이 수강 신청한 연도 조회
+        List<GradeDto> yearList = gradeService.readGradeYearByStudentId(studentId);
+        List<MyGradeDto> gradeList = gradeService.readgradeinquiryList(studentId);
 
         return ResponseEntity.ok(Map.of(
                 "yearList", yearList,
                 "gradeList", gradeList
         ));
-	}
+    }
 
 }
