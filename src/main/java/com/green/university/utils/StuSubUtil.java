@@ -31,9 +31,8 @@ public class StuSubUtil {
 		}
 	}
 	
-	// 신청하려는 강의와 현재 학생의 시간표가 겹치지 않는지 확인
+	// 🔥 신청하려는 강의와 현재 학생의 시간표가 겹치지 않는지 확인
 	public static void checkDayTime(Subject targetSubject, List<StuSubDayTimeDto> dayTimeList) {
-		
 		// 예비 수강 신청 내역은 연도/학기를 체크하지 않아도 됨 (연도/학기별로 초기화시키므로)
 		// start_time ~ end_time을 정수형 배열로 생성해서 contains로 확인하기 ?
 		
@@ -44,9 +43,7 @@ public class StuSubUtil {
 		}
 
 		// 신청 내역 시간표를 돌면서, 신청 대상 과목의 요일과 겹치는지 확인
-		
 		List<Long> checkDayList = new ArrayList<>();
-		
 		for (int i = 0; i < dayTimeList.size(); i++) {
 			if (dayTimeList.get(i).getSubDay().equals(targetSubject.getSubDay())) {
 				checkDayList.add(1L);
@@ -55,7 +52,7 @@ public class StuSubUtil {
 				checkDayList.add(0L);
 			}
 		}
-		
+
 		for (int i = 0; i < checkDayList.size(); i++) {
 			
 			// 요일이 겹쳐서 시간을 체크해야 함

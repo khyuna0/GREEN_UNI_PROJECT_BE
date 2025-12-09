@@ -138,7 +138,7 @@ public class SubjectService {
                 .collect(Collectors.toList());
     }
 
-    // 🖋 수강 신청에 사용할 강의 정보 (학생용) 현재 연도-학기에 해당하는 강의만 출력 + 페이징 처리 + 검색
+    // 🔥 수강 신청에 사용할 강의 정보 (학생용) 현재 연도-학기에 해당하는 강의만 출력 + 페이징 처리 + 검색
     @Transactional (readOnly = true)
     public Page<SubjectDto> readSubjectListByCurrentSemesterPage(CurrentSemesterSubjectSearchFormDto dto, Pageable pageable) {
         String type = dto.getType();

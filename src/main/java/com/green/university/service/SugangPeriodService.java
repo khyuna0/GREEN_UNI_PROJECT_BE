@@ -12,11 +12,11 @@ import java.time.LocalDateTime;
 @Transactional
 public class SugangPeriodService {
     @Autowired
-    private SugangPeriodRepository repository;
+    private SugangPeriodRepository sugangPeriodRepository;
 
     // 현재 상태 조회
     public int getCurrentStatus() {
-        return repository.findFirstByOrderByIdDesc()
+        return sugangPeriodRepository.findFirstByOrderByIdDesc()
                 .map(SugangPeriod::getStatus)
                 .orElse(2); // 기본값: 종료 상태
     }
@@ -27,11 +27,11 @@ public class SugangPeriodService {
             throw new IllegalArgumentException("상태는 0, 1, 2만 가능");
         }
 
-        SugangPeriod period = repository.findFirstByOrderByIdDesc()
+        SugangPeriod period = sugangPeriodRepository.findFirstByOrderByIdDesc()
                 .orElse(new SugangPeriod());
 
         period.setStatus(newStatus);
         period.setUpdatedAt(LocalDateTime.now());
-        repository.save(period);
+        sugangPeriodRepository.save(period);
     }
 }
