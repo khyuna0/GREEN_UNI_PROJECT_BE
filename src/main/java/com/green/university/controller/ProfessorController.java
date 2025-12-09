@@ -92,7 +92,7 @@ public class ProfessorController {
 	 * @return 해당 과목을 듣는 학생 리스트
 	 */
 	@GetMapping("/subject/{subjectId}")
-	public ResponseEntity<?> subjectStudentList( @PathVariable("subjectId") Long subjectId) {
+	public ResponseEntity<?> subjectStudentList(@PathVariable("subjectId") Long subjectId) {
 		List<StudentInfoForProfessorDto> studentList = professorService.selectBySubjectId(subjectId);
 		Subject subject = professorService.selectSubjectById(subjectId);
 
@@ -160,7 +160,7 @@ public class ProfessorController {
 	 * @return 강의계획서 업데이트 창
 	 */
 	@PatchMapping("/syllabus/{subjectId}")
-	public ResponseEntity<?> createSyllabusProc(@PathVariable("subjectId") Long subjectId, SyllaBusFormDto syllaBusFormDto) {
+	public ResponseEntity<?> createSyllabusProc(@PathVariable("subjectId") Long subjectId, @RequestBody SyllaBusFormDto syllaBusFormDto) {
 		professorService.updateSyllabus(subjectId, syllaBusFormDto);
 
         return ResponseEntity.ok().body("강의 계획서 수정이 정상적으로 처리되었습니다.");

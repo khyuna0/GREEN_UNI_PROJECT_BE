@@ -168,8 +168,6 @@ public class ProfessorService {
 			throw new CustomRestfullException("교수 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 		}
 		ReadSyllabusDto dto = new ReadSyllabusDto(subject, professor, syllabus); // Dto에 생성자 추가함
-
-		System.out.println(dto);
 		return dto;
 	}
 
@@ -179,7 +177,7 @@ public class ProfessorService {
 	 * @param syllaBusFormDto
 	 */
 	@Transactional
-	public void updateSyllabus(Long id , SyllaBusFormDto syllaBusFormDto) {
+	public void updateSyllabus(Long id, SyllaBusFormDto syllaBusFormDto) {
 
         Syllabus syllabus = syllaBusRepository.findBySubject_Id(id).orElseThrow(
                 () -> new CustomRestfullException("강의 계획서를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
