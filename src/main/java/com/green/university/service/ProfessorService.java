@@ -110,7 +110,7 @@ public class ProfessorService {
 	public Subject selectSubjectById(Long id) {
 		Subject subjectEntity = subjectRepository.findById(id).orElseThrow(
 				() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
-		);;
+		);
 
 		return subjectEntity;
 	}
@@ -120,34 +120,42 @@ public class ProfessorService {
 	 * 
 	 * @param updateStudentGradeDto
 	 */
-	@Transactional
-	public void updateGrade(UpdateStudentGradeDto updateStudentGradeDto) {
-		// 1. 학생+과목으로 StuSub 찾기 (여기서 completeGrade도 업데이트 가능)
-		StuSub stuSub = stuSubRepository.findByStudent_IdAndSubject_Id(
-						updateStudentGradeDto.getStudentId(), updateStudentGradeDto.getSubjectId())
-				.orElseThrow(() -> new RuntimeException("학생 과목 정보 없음"));
+    /**
+     * 출결 및 성적 기입
+     */
+    @Transactional
+    public void updateGrade(Long subjectId, Long studentId, UpdateStudentGradeDto dto) {
 
-		// 2. stuSub으로 연결된 StuSubDetail 찾기
-		StuSubDetail detail = stuSubDetailRepository.findByStuSub(stuSub)
-				.orElseThrow(() -> new RuntimeException("출결 정보 없음"));
+        // 1. StuSub 찾기
+        StuSub stuSub = stuSubRepository
+                .findByStudent_IdAndSubject_Id(studentId, subjectId)
+                .orElseThrow(() -> new RuntimeException("학생 과목 정보 없음"));
 
-		detail.setAbsent(updateStudentGradeDto.getAbsent());
-		detail.setLateness(updateStudentGradeDto.getLateness());
-		detail.setHomework(updateStudentGradeDto.getHomework());
-		detail.setMildExam(updateStudentGradeDto.getMidExam());  // mildExam → midExam 맞는지 확인!
-		detail.setFinalExam(updateStudentGradeDto.getFinalExam());
-		detail.setConvertedMark(updateStudentGradeDto.getConvertedMark());
+        // 2. StuSubDetail 찾기
+        StuSubDetail detail = stuSubDetailRepository.findByStuSub(stuSub)
+                .orElseThrow(() -> new RuntimeException("출결 정보 없음"));
 
-		// 3. StuSub의 최종학점도 업데이트 ?
-		stuSub.setCompleteGrade(updateStudentGradeDto.getConvertedMark());
+        // 3. 출결/점수 업데이트
+        detail.setAbsent(dto.getAbsent());
+        detail.setLateness(dto.getLateness());
+        detail.setHomework(dto.getHomework());
+        detail.setMildExam(dto.getMidExam());  // 컬럼명 mildExam 맞음
+        detail.setFinalExam(dto.getFinalExam());
+        detail.setConvertedMark(dto.getConvertedMark());
 
-		// 4. 등급 변환해서 저장 (Grade 엔티티 매핑 필요)
-		Grade grade = gradeRepository.findByGrade(updateStudentGradeDto.getGrade()); // gradeRepository 추가
-		stuSub.setGrade(grade);
+        // 4. 등급 엔티티 조회
+        Grade grade = gradeRepository.findByGrade(dto.getGrade())
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 학점 등급입니다: " + dto.getGrade()));
+        stuSub.setGrade(grade);
 
-		stuSubDetailRepository.save(detail);
-		stuSubRepository.save(stuSub);
-	}
+        // 5. 완성학점 업데이트 (점수 기준)
+        stuSub.setCompleteGrade(dto.getConvertedMark());
+
+        // 6. 저장
+        stuSubDetailRepository.save(detail);
+        stuSubRepository.save(stuSub);
+    }
+
 
 	/**
 	 * 교수 강의계획서 조회 (수정 시에도 필요)

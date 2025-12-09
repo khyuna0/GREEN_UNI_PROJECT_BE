@@ -20,8 +20,8 @@ public class StuSub { // 학생의 과목과 학점
     private Subject subject;
 
     @ManyToOne
-    @JoinColumn(name = "grade_grade")
-    private Grade grade;
+    @JoinColumn(name = "grade_id") // todo grade_id로 수정
+    private Grade grade; // A+,B, C...
 
-    private Long completeGrade; // 최종학점?
+    private Long completeGrade; // 환산점수
 }
