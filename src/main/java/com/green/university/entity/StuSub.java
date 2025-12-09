@@ -23,5 +23,5 @@ public class StuSub { // 학생의 수강 과목과 학점
     @JoinColumn(name = "grade_id")
     private Grade grade;
 
-    private Long completeGrade; // 최종학점?
+    private Long completeGrade; // 환산점수
 }

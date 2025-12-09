@@ -122,10 +122,10 @@ public class ProfessorController {
     // 업데이트
 	@PatchMapping("/subject/{subjectId}/{studentId}")
 	public ResponseEntity<?> updateStudentDetailProc(@PathVariable("subjectId") Long subjectId, @PathVariable ("studentId")Long studentId,
-			UpdateStudentGradeDto updateStudentGradeDto) {
+			@RequestBody UpdateStudentGradeDto updateStudentGradeDto) {
 
 		// 점수 입력
-		professorService.updateGrade(updateStudentGradeDto);
+		professorService.updateGrade(subjectId, studentId ,updateStudentGradeDto);
 		
 		// 취득학점 입력
 		if (updateStudentGradeDto.getGrade().equals("F")) {
