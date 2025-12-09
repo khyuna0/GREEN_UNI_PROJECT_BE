@@ -63,13 +63,13 @@ public class StuSubController {
     }
 
     // ========================= 학생 기능 =========================
-    // 🔥 수강 신청에 사용할 강의 시간표 조회 (학생용) 현재 연도-학기에 해당하는 강의만 출력 + 페이징 처리 + 검색
+    // 🔥 수강 신청 탭에서 보여지는 전체 강의 시간표 조회 (현재 연도, 학기에 해당하는 강의 + 페이징 + 검색)
     @GetMapping("/subjectList")
-    public ResponseEntity<?> readSubjectList(
+    public ResponseEntity<?> sugangSubjectList(
             @ModelAttribute CurrentSemesterSubjectSearchFormDto dto,
-            @PageableDefault(page = 0, size = Define.SUBJECT_PAGE_SIZE, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(page = 0, size = Define.SUBJECT_PAGE_SIZE, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
 
-        // 현재 학기에 맞는 강의 목록
+        // 현재 연도, 학기에 맞는 강의 목록
         Page<SubjectDto> subjectList = subjectService.readSubjectListByCurrentSemesterPage(dto, pageable);
 
         Map<String, Object> pagingResponse = new HashMap<>();
@@ -81,52 +81,36 @@ public class StuSubController {
         return ResponseEntity.ok(pagingResponse);
     }
 
-    // 예비 수강 신청
-    @GetMapping("/pre/{page}")
-    public ResponseEntity<?> preStuSubApplication(@PathVariable("page") int page,
-                                                  @AuthenticationPrincipal CustomUserDetails principal) { // page 값 int로 변경함
+    // 🔥 예비 수강 신청 탭에서 보여지는 강의 목록 (현재 연도, 학기 강의 + 검색 + 페이징 + 수강신청 버튼 존재)
+    @GetMapping("/presubjectlist")
+    public ResponseEntity<?> sugangPreSubjectList(
+            @ModelAttribute CurrentSemesterSubjectSearchFormDto dto,
+            @PageableDefault(page = 0, size = Define.SUBJECT_PAGE_SIZE, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
+            @AuthenticationPrincipal CustomUserDetails principal) {
 
         // 예비 수강 신청 기간이 아니라면
         int currentStatus = sugangPeriodService.getCurrentStatus();
         if (currentStatus != 0) {
             throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
         }
-
-        // 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가
         Long studentId = principal.getId();
 
-        StudentDto studentInfo = userService.readStudent(studentId);
+        // 현재 연도, 학기에 맞는 강의 목록
+        Page<SubjectDto> subjectList = subjectService.readSubjectListByCurrentSemesterPage(dto, pageable); // 현재 학기에 맞는 강의 목록
 
-        StuStatDto stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
-        List<BreakApp> breakAppList = breakAppService.readByStudentId(studentInfo.getId()); // 최근 순으로 정렬되어 있음
-
-        StuStatUtil.checkStuStat("수강신청", stuStatEntity, breakAppList);
-
-        // 강의 리스트
-        List<SubjectDto> subjectList = subjectService.readSubjectListByCurrentSemester();
-        Long subjectCount = (long) subjectList.size();
-
-        // 총 페이지 수
-        Long pageCount = (long) Math.ceil(subjectCount / 20.0);
-
-        // 필터에 사용할 전체 학과 정보
-        List<Department> deptList = collegeService.readDeptAll();
-
-        // 필터에 사용할 강의 이름 정보 (중복 값 제거)
-        List<String> subNameList = new ArrayList<>();
-        for (SubjectDto subject : subjectList) {
-            if (!subNameList.contains(subject.getName())) {
-                subNameList.add(subject.getName());
-            }
+        // 학생이 예비 수강 신청을 했는지 여부 (status = false, true)
+        for (SubjectDto sub : subjectList) {
+            PreStuSub preStuSub = preStuSubService.readPreStuSub(studentId, sub.getId());
+            sub.setStatus(preStuSub != null);
         }
-        return ResponseEntity.ok(Map.of(
-                "subjectCount", subjectCount,
-                "pageCount", pageCount,
-                "page", page,
-                //"subjectList", subjectListLimit,
-                "deptList", deptList,
-                "subNameList", subNameList
-        ));
+        //
+        Map<String, Object> pagingResponse = new HashMap<>();
+        pagingResponse.put("listCount", subjectList.getTotalElements());
+        pagingResponse.put("totalPages", subjectList.getTotalPages());
+        pagingResponse.put("currentPage", subjectList.getNumber());
+        pagingResponse.put("lists", subjectList.getContent());
+
+        return ResponseEntity.ok(pagingResponse);
     }
 
     // 🔥 예비 수강 신청 처리 (신청)
@@ -154,133 +138,6 @@ public class StuSubController {
         preStuSubService.deletePreStuSub(principal.getId(), subjectId);
         return ResponseEntity.ok().body("예비 수강 신청을 정상적으로 취소하였습니다.");
 
-    }
-
-    // 🔥 예비 수강 신청 탭에서 보여지는 강의 목록 (현재 연도, 학기 강의 + 검색 + 페이징 + 수강신청 버튼 존재)
-    @GetMapping("/presubjectlist")
-    public ResponseEntity<?> preStuSubApplicationSearch(
-            @ModelAttribute CurrentSemesterSubjectSearchFormDto dto,
-            @PageableDefault(page = 0, size = Define.SUBJECT_PAGE_SIZE, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-            @AuthenticationPrincipal CustomUserDetails principal) {
-        // 예비 수강 신청 기간이 아니라면
-        int currentStatus = sugangPeriodService.getCurrentStatus();
-        if (currentStatus != 0) {
-            throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
-        }
-        Long studentId = principal.getId();
-
-        // 강의 리스트
-        Page<SubjectDto> subjectList = subjectService.readSubjectListByCurrentSemesterPage(dto, pageable); // 현재 학기에 맞는 강의 목록
-
-        // 학생이 예비 수강 신청을 했는지 여부 (status = false, true)
-        for (SubjectDto sub : subjectList) {
-            PreStuSub preStuSub = preStuSubService.readPreStuSub(studentId, sub.getId());
-            sub.setStatus(preStuSub != null);
-        }
-        //
-        Map<String, Object> pagingResponse = new HashMap<>();
-        pagingResponse.put("listCount", subjectList.getTotalElements());
-        pagingResponse.put("totalPages", subjectList.getTotalPages());
-        pagingResponse.put("currentPage", subjectList.getNumber());
-        pagingResponse.put("lists", subjectList.getContent());
-
-        return ResponseEntity.ok(pagingResponse);
-    }
-
-    // 수강 신청
-    @GetMapping("/application/{page}")
-    public ResponseEntity<?> stuSubApplication(@PathVariable int page,
-                                               @AuthenticationPrincipal CustomUserDetails principal) {
-
-        // 수강 신청 기간이 아니라면
-        int currentStatus = sugangPeriodService.getCurrentStatus();
-        if (currentStatus != 1) {
-            throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
-        }
-
-        // 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가
-        Long studentId = principal.getId();
-
-        StudentDto studentInfo = userService.readStudent(studentId);
-
-        StuStatDto stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
-        List<BreakApp> breakAppList = breakAppService.readByStudentId(studentInfo.getId()); // 최근 순으로 정렬되어 있음
-        StuStatUtil.checkStuStat("수강신청", stuStatEntity, breakAppList);
-
-        // 강의 리스트
-        List<SubjectDto> subjectList = subjectService.readSubjectListByCurrentSemester();
-        Long subjectCount = (long) subjectList.size();
-
-        // 총 페이지 수
-        Long pageCount = (long) Math.ceil(subjectCount / 20.0);
-
-        // 필터에 사용할 전체 학과 정보
-        List<Department> deptList = collegeService.readDeptAll();
-
-        // 필터에 사용할 강의 이름 정보 (중복 값 제거)
-        List<String> subNameList = new ArrayList<>();
-        for (SubjectDto subject : subjectList) {
-            if (!subNameList.contains(subject.getName())) {
-                subNameList.add(subject.getName());
-            }
-        }
-
-        return ResponseEntity.ok(Map.of(
-                "subjectCount", subjectCount,
-                "page", page,
-                "pageCount", pageCount,
-                //"subjectList", subjectListLimit,
-                "deptList", deptList,
-                "subNameList", subNameList
-        ));
-    }
-
-    // 수강 신청 강의 목록에서 필터링
-    @GetMapping("/application/search")
-    public ResponseEntity<?> stuSubApplicationSearch(
-            @Validated CurrentSemesterSubjectSearchFormDto currentSemesterSubjectSearchFormDto,
-            @AuthenticationPrincipal CustomUserDetails principal) {
-
-        // 수강 신청 기간이 아니라면
-        int currentStatus = sugangPeriodService.getCurrentStatus();
-        if (currentStatus != 1) {
-            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
-        }
-
-        Long studentId = principal.getId();
-
-        // 강의 리스트
-        List<SubjectDto> subjectList = subjectService
-                .readSubjectListSearchByCurrentSemester(currentSemesterSubjectSearchFormDto);
-        for (SubjectDto sub : subjectList) {
-            // 현재 담겨 있는지 확인
-            StuSub stuSub = stuSubService.readStuSub(studentId, sub.getId());
-            if (stuSub != null) {
-                sub.setStatus(true);
-            } else {
-                sub.setStatus(false);
-            }
-        }
-
-        Long subjectCount = (long) subjectList.size();
-
-        // 필터에 사용할 전체 학과 정보
-        List<Department> deptList = collegeService.readDeptAll();
-
-        // 필터에 사용할 강의 이름 정보 (중복 값 제거)
-        List<String> subNameList = new ArrayList<>();
-        for (SubjectDto subject : subjectList) {
-            if (!subNameList.contains(subject.getName())) {
-                subNameList.add(subject.getName());
-            }
-        }
-
-        return ResponseEntity.ok(Map.of(
-                "subjectCount", subjectCount,
-                "subjectList", subjectList,
-                "deptList", deptList,
-                "subNameList", subNameList
-        ));
     }
 
     // 🔥 수강 신청

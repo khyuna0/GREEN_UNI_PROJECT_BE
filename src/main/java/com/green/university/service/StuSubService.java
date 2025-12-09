@@ -130,9 +130,10 @@ public class StuSubService {
         // 수강신청 내역 삭제
         stuSubRepository.delete(stuSub);
         // 해당 강의 현재인원 -1
-        Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new CustomRestfullException("과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
-        subject.setNumOfStudent(subject.getNumOfStudent() - 1);
+        subjectService.updateMinusNumOfStudent(subjectId);
+//        Subject subject = subjectRepository.findById(subjectId)
+//                .orElseThrow(() -> new CustomRestfullException("과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+//        subject.setNumOfStudent(subject.getNumOfStudent() - 1);
     }
 
     // 🔥🔥🔥 예비 수강 신청 기간 -> 수강 신청 기간 변경 시 로직 (ai 도움 받아서 아예 다 바꿈!!!!!!!!!!!!)
