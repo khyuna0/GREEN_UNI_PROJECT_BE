@@ -67,37 +67,13 @@ public class NoticeController {
         ));
     }
 
-
-    /**
-     *
-     * @return 공지사항 입력 기능
-     */
+    // 공지사항 등록 (multipart는 @ModelAttribute로 받는 게 안전)
+    // 파일관련은 service에서 -> 컨트롤러에 파일 관련 코드많아지면
+    // 테스트 어려움 , 수정시 버그위험 증가, 다른api에도 중복 코드 많이 생김
     @PostMapping("/write")
-    public ResponseEntity<?> insertNotice(@Validated NoticeFormDto noticeFormDto) {
+    public ResponseEntity<?> insertNotice(@ModelAttribute @Validated NoticeFormDto noticeFormDto) {
 
-        MultipartFile file = noticeFormDto.getFile();
-        if (file != null && !file.isEmpty()) {
-            if (file.getSize() > Define.MAX_FILE_SIZE) {
-                throw new CustomRestfullException("파일 크기는 20MB 이상 클 수 없습니다.", HttpStatus.BAD_REQUEST);
-            }
-            try {
-                String saveDirectory = Define.UPLOAD_DIRECTORY;
-                File dir = new File(saveDirectory);
-                if (!dir.exists()) {
-                    dir.mkdirs();
-                }
-                UUID uuid = UUID.randomUUID();
-                String fileName = uuid + "_" + file.getOriginalFilename();
-                String uploadPath = Define.UPLOAD_DIRECTORY + File.separator + fileName;
-                File destination = new File(uploadPath);
-                file.transferTo(destination);
-                noticeFormDto.setOriginFilename(file.getOriginalFilename());
-                noticeFormDto.setUuidFilename(fileName);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        noticeService.readNotice(noticeFormDto);
+        noticeService.createNotice(noticeFormDto);
         return ResponseEntity.ok().body("공지사항 입력이 완료되었습니다");
     }
 
