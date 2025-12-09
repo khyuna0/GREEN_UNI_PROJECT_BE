@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Entity
-public class StuSub { // 학생의 과목과 학점
+public class StuSub { // 학생의 수강 과목과 학점
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
