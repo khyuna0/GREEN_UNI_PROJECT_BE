@@ -1,6 +1,7 @@
 package com.green.university.dto.response;
 
 import com.green.university.entity.StuSub;
+import com.green.university.entity.StuSubDetail;
 import com.green.university.entity.Student;
 import lombok.Data;
 
@@ -30,14 +31,25 @@ public class StudentInfoForProfessorDto {
 	private Long convertedMark;
 
 	// StuSub 엔티티 -> StudentInfoForProfessorDto로 변환
-	public static StudentInfoForProfessorDto fromEntity (StuSub stuSub) {
-		StudentInfoForProfessorDto  dto = new StudentInfoForProfessorDto();
-		Student student = stuSub.getStudent();
-		dto.setId(stuSub.getId());
-		dto.setStudentId(stuSub.getStudent().getId());
-		dto.setStudentName(stuSub.getStudent().getName());
-		dto.setDeptName(student.getDepartment().getName());
-		return dto;
-	}
+    public static StudentInfoForProfessorDto fromEntity(StuSubDetail s) {
+        StudentInfoForProfessorDto dto = new StudentInfoForProfessorDto();
+
+        Student student = s.getStudent();
+
+        dto.setId(s.getId());
+        dto.setStudentId(student.getId());
+        dto.setStudentName(student.getName());
+        dto.setDeptName(student.getDepartment().getName());
+
+        dto.setAbsent(s.getAbsent());
+        dto.setLateness(s.getLateness());
+        dto.setHomework(s.getHomework());
+        dto.setMidExam(s.getMildExam());        // 엔티티 컬럼명 mildExam 주의
+        dto.setFinalExam(s.getFinalExam());
+        dto.setConvertedMark(s.getConvertedMark());
+
+        return dto;
+    }
+
 	
 }

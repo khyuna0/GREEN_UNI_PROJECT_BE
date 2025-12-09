@@ -94,7 +94,7 @@ public class ProfessorService {
 	 */
 	@Transactional
 	public List<StudentInfoForProfessorDto> selectBySubjectId(Long subjectId) {
-		return stuSubRepository.findBySubject_Id(subjectId)
+		return stuSubDetailRepository.findBySubject_Id(subjectId)
 				.stream()
 				.map(StudentInfoForProfessorDto::fromEntity)  // 각 StuSub → DTO 변환
 				.collect(Collectors.toList());
@@ -145,7 +145,7 @@ public class ProfessorService {
 
         // 4. 등급 엔티티 조회
         Grade grade = gradeRepository.findByGrade(dto.getGrade())
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 학점 등급입니다: " + dto.getGrade()));
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 학점 등급입니다"));
         stuSub.setGrade(grade);
 
         // 5. 완성학점 업데이트 (점수 기준)

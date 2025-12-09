@@ -169,20 +169,32 @@ public class StuSubService {
 
     // 점수 입력 시 F면 취득학점 0, F가 아니면 강의의 이수학점
     @Transactional
-    public void updateCompleteGrade(Long studentId, Long subjectId, Long completeGrade) {
-        StuSub stuSub = new StuSub();
-        Grade grade = new Grade();
-        Subject subject = subjectRepository.findById(subjectId).orElseThrow(
-                () -> new CustomRestfullException("과목을 찾을 수 없음", HttpStatus.NOT_FOUND)
-        );
+    public void updateCompleteGrade(Long studentId, Long subjectId) {
 
-        if (stuSub.getGrade().getGrade().equals("F")) {
-            grade.setGradeValue(0L);
-        } else {
-            grade.setGradeValue(subject.getGrades());
+        // 기존 StuSub 조회
+        StuSub stuSub = stuSubRepository
+                .findByStudent_IdAndSubject_Id(studentId, subjectId)
+                .orElseThrow(() -> new CustomRestfullException("수강 정보 없음", HttpStatus.NOT_FOUND));
+
+        // 연관된 Grade 조회
+        Grade grade = stuSub.getGrade();
+        if (grade == null) {
+            throw new CustomRestfullException("등급이 먼저 설정되어야 합니다.", HttpStatus.BAD_REQUEST);
         }
-        stuSub.setGrade(grade);
-        stuSub.setCompleteGrade(completeGrade);
+
+        // 3. 과목 조회 (학점 가져오기)
+        Subject subject = subjectRepository.findById(subjectId)
+                .orElseThrow(() -> new CustomRestfullException("과목을 찾을 수 없음", HttpStatus.NOT_FOUND));
+
+        // 4. F 학점이면 0점, 아니면 subject.grades 적용
+        if ("F".equals(grade.getGrade())) {
+            stuSub.setCompleteGrade(0L);
+        } else {
+            stuSub.setCompleteGrade(subject.getGrades());
+        }
+
+        // 5. 저장
         stuSubRepository.save(stuSub);
     }
+
 }
