@@ -99,7 +99,7 @@ public class GradeController {
      *
      * @return
      */
-    @GetMapping("total")
+    @GetMapping("/total")
     public ResponseEntity<?> totalGrade( @AuthenticationPrincipal CustomUserDetails principal) {
 
         Long studentId = principal.getId();
