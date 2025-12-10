@@ -3,30 +3,21 @@ package com.green.university.controller;
 import com.green.university.dto.NoticeFormDto;
 import com.green.university.dto.NoticePageFormDto;
 import com.green.university.dto.response.NoticeDto;
-import com.green.university.exception.CustomRestfullException;
 import com.green.university.entity.Notice;
-import com.green.university.config.security.CustomUserDetails;
 import com.green.university.service.NoticeService;
-import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/notice")
 public class NoticeController {
     @Autowired
     NoticeService noticeService;
-
 
     // 공지사항 리스트 + 페이지
     @GetMapping("/search/{page}")
@@ -92,23 +83,21 @@ public class NoticeController {
         ));
     }
 
-
-
     //  공지사항 수정 페이지
     @GetMapping("/update/{NoticeId}")
-    public ResponseEntity<?> update(@PathVariable("NoticeId") Long NoticeId) {
+    public ResponseEntity<?> update(@PathVariable("NoticeId") Long noticeId) {
 
-        NoticeDto notice = noticeService.readByIdNotice(NoticeId);
+        NoticeDto notice = noticeService.readByIdNotice(noticeId);
         return ResponseEntity.ok(Map.of(
                 "crud","update",
                 "notice", notice
         ));
     }
 
-
     // 공지사항 수정
     @PatchMapping("/update/{NoticeId}")
-    public ResponseEntity<?> update(@PathVariable("NoticeId") Long NoticeId, @Validated NoticeFormDto noticeFormDto) {
+    public ResponseEntity<?> update(@PathVariable("NoticeId") Long NoticeId,
+                                    @ModelAttribute @Validated NoticeFormDto noticeFormDto) {
         noticeService.updateNotice(NoticeId, noticeFormDto);
         return ResponseEntity.ok().body("공지사항 수정이 완료되었습니다.");
     }
@@ -119,4 +108,11 @@ public class NoticeController {
         noticeService.deleteNotice(NoticeId);
         return ResponseEntity.ok().body("공지사항 삭제가 완료되었습니다.");
     }
+
+    // 파일 다운로드(공지 ID 기준)
+    @GetMapping("/file/download/{noticeId}")
+    public ResponseEntity<?> downloadNoticeFile(@PathVariable Long noticeId) {
+        return noticeService.downloadFileByNoticeId(noticeId);
+    }
+
 }

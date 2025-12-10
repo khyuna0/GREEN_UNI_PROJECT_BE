@@ -10,18 +10,19 @@ import com.green.university.entity.Notice;
 import com.green.university.specification.NoticeSpecification;
 import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -162,8 +163,8 @@ public class NoticeService {
         }
     }
 
-
     // 공지 삭제  + 파일 삭제
+    @Transactional
     public void deleteNotice(Long id) {
 
         Notice notice = noticeRepository.findById(id)
@@ -189,11 +190,42 @@ public class NoticeService {
                     dto.setContent(n.getContent());
                     dto.setViews(n.getViews());
                     dto.setCreatedTime(n.getCreatedTime());
+
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
 
+    //  첨부파일 다운로드 (noticeId 기준)
+    public ResponseEntity<Resource> downloadFileByNoticeId(Long noticeId) {
+
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new CustomRestfullException("공지 없음", HttpStatus.NOT_FOUND));
+
+        if (notice.getFile() == null) {
+            throw new CustomRestfullException("첨부파일 없음", HttpStatus.NOT_FOUND);
+        }
+
+        String uuid = notice.getFile().getUuidFilename();
+        String origin = notice.getFile().getOriginFilename();
+
+        File file = new File(Define.UPLOAD_DIRECTORY + File.separator + uuid);
+        if (!file.exists()) {
+            throw new CustomRestfullException("파일이 존재하지 않습니다.", HttpStatus.NOT_FOUND);
+        }
+
+        Resource resource = new FileSystemResource(file);
+
+        String encoded = URLEncoder.encode(origin, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encoded)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
+    }
+
+    // ✅ 변경: 미리보기 메서드 제거
+    // public ResponseEntity<Resource> viewFileByNoticeId(Long noticeId) { ... }
 
     // 파일 처리 메서드들
     // 로직들이 공지에 종속되어있어서 일단 여기에 두는게 나음
