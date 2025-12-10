@@ -3,13 +3,17 @@ package com.green.university.service;
 import com.green.university.dto.response.GradeDto;
 import com.green.university.dto.response.GradeForScholarshipDto;
 import com.green.university.dto.response.MyGradeDto;
+import com.green.university.entity.Evaluation;
 import com.green.university.entity.Grade;
 import com.green.university.entity.StuSub;
 import com.green.university.entity.Subject;
+import com.green.university.exception.CustomRestfullException;
+import com.green.university.repository.interfaces.EvaluationRepository;
 import com.green.university.repository.interfaces.GradeRepository;
 import com.green.university.repository.interfaces.StuSubRepository;
 import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +30,8 @@ public class GradeService {
     @Autowired
     private GradeRepository gradeRepository;
 
+    @Autowired
+    private EvaluationRepository evaluationRepository;
 
     // 학생이 수강신청한 연도 조회
     public List<GradeDto> readGradeYearByStudentId(Long studentId) {
@@ -217,8 +223,16 @@ public class GradeService {
 
         Subject subject = ss.getSubject();
         Grade grade = ss.getGrade();
-
+        Evaluation evaluation = evaluationRepository
+                .findByStudent_IdAndSubject_Id(
+                        ss.getStudent().getId(),
+                        ss.getSubject().getId()
+                )
+                .orElse(null);
         if (subject != null) {
+            dto.setEvaluationId(
+                    evaluation != null ? evaluation.getId() : null
+            );
             dto.setSubYear(subject.getSubYear());
             dto.setSemester(subject.getSemester());
             dto.setSubjectId(subject.getId());
@@ -235,10 +249,6 @@ public class GradeService {
                 dto.setGradeValue(String.valueOf(grade.getGradeValue())); // "4", "3" 등
             }
         }
-
-        // evaluationId는 현재 엔티티에 없으니 일단 null
-        dto.setEvaluationId(null);
-
         return dto;
     }
     

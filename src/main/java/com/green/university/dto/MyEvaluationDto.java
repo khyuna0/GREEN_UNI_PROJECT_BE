@@ -16,11 +16,11 @@ public class MyEvaluationDto {
     private Long answer6;
     private Long answer7;
     private String improvements;
+    private String answerSum;
 
-    public String answerSum() {
-        double answerSum = (double)(answer1 + answer2 + answer3 + answer4 + answer5 + answer6 + answer7) / 7;
-        String result = String.format("%.2f", answerSum);
-        return result;
+    public void calculateAnswerSum() { // 총 평가 점수 계산
+        double sum = (double)(answer1 + answer2 + answer3 + answer4 + answer5 + answer6 + answer7) / 7;
+        this.answerSum = String.format("%.2f", sum);
     }
 
 }

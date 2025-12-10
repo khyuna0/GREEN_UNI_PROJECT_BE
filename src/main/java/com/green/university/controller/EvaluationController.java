@@ -47,13 +47,11 @@ public class EvaluationController {
      * 강의평가 post
      */
     @PostMapping("/write/{subjectId}")
-    public ResponseEntity<?> EvaluationProc(@PathVariable("subjectId") Long subjectId, EvaluationDto evaluationFormDto,
+    public ResponseEntity<?> EvaluationProc(@PathVariable("subjectId") Long subjectId,
+                                            @RequestBody EvaluationDto evaluationFormDto,
                                             @AuthenticationPrincipal CustomUserDetails principal) {
 
         Long studentId = principal.getId();
-
-        evaluationFormDto.setStudentId(studentId);
-        evaluationFormDto.setSubjectId(subjectId);
 
         if (evaluationFormDto.getAnswer1() == null) {
             throw new CustomRestfullException("1번 질문에 답 해주세요", HttpStatus.BAD_REQUEST);
@@ -70,7 +68,7 @@ public class EvaluationController {
         } else if (evaluationFormDto.getAnswer7() == null) {
             throw new CustomRestfullException("7번 질문에 답 해주세요", HttpStatus.BAD_REQUEST);
         } else {
-            evaluationService.createEvanluation(evaluationFormDto);
+            evaluationService.createEvanluation(studentId,subjectId,evaluationFormDto);
         }
 
 //		// 창을 닫을 때 post가 작동이 안하는거 방지
@@ -78,31 +76,31 @@ public class EvaluationController {
         return ResponseEntity.ok().body("강의평가가 완료되었습니다");
     }
 
-    // 강의 평가 처음화면 (교수)
-    @GetMapping("/read")
-    public ResponseEntity<?> readEvaluation(@AuthenticationPrincipal CustomUserDetails principal) {
-
-        Long professorId = principal.getId();
-
-        List<MyEvaluationDto> subjectName = evaluationService.readSubjectName(professorId);
-        List<MyEvaluationDto> eval = evaluationService.readEvaluationByProfessorId(professorId);
-
-        return ResponseEntity.ok(Map.of(
-                "subjectName", subjectName,
-                "eval", eval
-        ));
-    }
+//    // 강의 평가 처음화면 (교수)
+//    @GetMapping("/read")
+//    public ResponseEntity<?> readEvaluation(@AuthenticationPrincipal CustomUserDetails principal) {
+//
+//        Long professorId = principal.getId();
+//
+//        List<MyEvaluationDto> subjectName = evaluationService.readSubjectName(professorId);
+//        List<MyEvaluationDto> eval = evaluationService.readEvaluationByProfessorId(professorId);
+//
+//        return ResponseEntity.ok(Map.of(
+//                "subjectName", subjectName,
+//                "eval", eval
+//        ));
+//    }
 
     // 과목별 강의 평가 조회 (교수)
-    @PostMapping("/read/{subject_Name}")
-    public ResponseEntity<?> readEvaluation( @RequestParam("subject_Name") String subject_Name,   // 기존 request.getParameter("subjectId") 대체
+    @GetMapping("/read")
+    public ResponseEntity<?> readEvaluation( @RequestParam(required = false, value = "subject_Name") String subject_Name,   // 기존 request.getParameter("subjectId") 대체
                                              @AuthenticationPrincipal CustomUserDetails principal) {
 
         Long professorId = principal.getId();
         List<MyEvaluationDto> subjectName = evaluationService.readSubjectName(professorId);
         List<MyEvaluationDto> eval = evaluationService.readEvaluationByProfessorIdAndName(professorId, subject_Name);
         return ResponseEntity.ok(Map.of(
-                "subjectName", subjectName,
+                "subNames", subjectName,
                 "eval", eval
         ));
     }

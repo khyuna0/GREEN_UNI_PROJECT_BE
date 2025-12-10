@@ -9,7 +9,9 @@ import com.green.university.repository.interfaces.EvaluationRepository;
 import com.green.university.entity.Evaluation;
 import com.green.university.repository.interfaces.StudentRepository;
 import com.green.university.repository.interfaces.SubjectRepository;
+import com.green.university.repository.specification.EvaluationSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,10 +32,8 @@ public class EvaluationService {
 
     // 강의 평가 등록 (학생)
     @Transactional
-    public void createEvanluation(EvaluationDto evaluationFormDto) {
+    public void createEvanluation(Long studentId, Long subjectId, EvaluationDto evaluationFormDto) {
 
-        Long studentId = evaluationFormDto.getStudentId();
-        Long subjectId = evaluationFormDto.getSubjectId();
 
         // 이미 평가했는지 확인
         boolean exist = evaluationRepository
@@ -131,44 +131,18 @@ public class EvaluationService {
     @Transactional
     public List<MyEvaluationDto> readEvaluationByProfessorIdAndName(Long professorId, String name) {
 
-        List<Evaluation> evaluations = evaluationRepository.findBySubject_Professor_IdAndSubject_Name(professorId,name);
+        Specification<Evaluation> spec =
+                Specification.where(EvaluationSpecification.professorIdEq(professorId));
 
-        // 1. 밑에서 공통 메서드 쓰는경우
-        // stream: List를 흐름(Stream)으로 바꿔서 -> 각 요소에 작업을 적용하고 → 다시 List로 돌려주는 도구
+        if (name != null && !name.isBlank()) {
+            spec = spec.and(EvaluationSpecification.subjectNameEq(name));
+        }
+
+        List<Evaluation> evaluations = evaluationRepository.findAll(spec);
 
                 return evaluations.stream()  // List<Evaluation> → Stream<Evaluation> 으로 바꾸기
                         .map(this::toMyEvaluationDto) // this::to~ = e -> this.toMyEvaluationDto(e)
                         .toList();
-
-
-
-        // 2. 따로 쓰는경우
-//        List<MyEvaluationDto> result = new ArrayList<>();
-//        for(Evaluation e : evaluations){
-//            MyEvaluationDto dto = new MyEvaluationDto();
-//
-//            // 교수 id
-//            if (e.getSubject() != null && e.getSubject().getProfessor() != null) {
-//                dto.setProfessorId(e.getSubject().getProfessor().getId());
-//            }
-//
-//            // 과목 이름
-//            if (e.getSubject() != null) {
-//                dto.setName(e.getSubject().getName());
-//            }
-//
-//            // 점수들
-//            dto.setAnswer1(e.getAnswer1());
-//            dto.setAnswer2(e.getAnswer2());
-//            dto.setAnswer3(e.getAnswer3());
-//            dto.setAnswer4(e.getAnswer4());
-//            dto.setAnswer5(e.getAnswer5());
-//            dto.setAnswer6(e.getAnswer6());
-//            dto.setAnswer7(e.getAnswer7());
-//
-//            result.add(dto);
-//        }
-//        return  result;
     }
 
     // 평가가 존재하는 과목 목록 (교수)
@@ -218,6 +192,7 @@ public class EvaluationService {
         dto.setAnswer6(e.getAnswer6());
         dto.setAnswer7(e.getAnswer7());
         dto.setImprovements(e.getImprovements());
+        dto.calculateAnswerSum();
 
         return dto;
     }
