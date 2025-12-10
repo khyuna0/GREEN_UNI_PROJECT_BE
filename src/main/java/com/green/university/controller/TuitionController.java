@@ -125,15 +125,6 @@ public class TuitionController {
     }
 
 	/**
-	 * 장학금 유형 설정 + 등록금 납부 고지서 생성 페이지
-	 */
-	@GetMapping("/bill")
-	public ResponseEntity<?> createPayment() {
-
-        return ResponseEntity.ok().body("등록금 납부 고지서 생성 페이지.");
-	}
-
-	/**
 	 * 등록금 납부 고지서 생성 (학생 id를 가지고 와서 for문으로 돌려서 tuition을 생성하는 것 같은데)
 	 */
 	@GetMapping("/create")
