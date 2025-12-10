@@ -8,9 +8,10 @@ import com.green.university.entity.Grade;
 import com.green.university.entity.StuSub;
 import com.green.university.entity.Subject;
 import com.green.university.exception.CustomRestfullException;
-import com.green.university.repository.interfaces.EvaluationRepository;
-import com.green.university.repository.interfaces.GradeRepository;
-import com.green.university.repository.interfaces.StuSubRepository;
+import com.green.university.repository.EvaluationRepository;
+import com.green.university.repository.GradeRepository;
+import com.green.university.repository.StuSubRepository;
+import com.green.university.repository.SubjectRepository;
 import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,9 @@ public class GradeService {
 
     @Autowired
     private EvaluationRepository evaluationRepository;
+
+    @Autowired
+    private SubjectRepository subjectRepository;
 
     // 학생이 수강신청한 연도 조회
     public List<GradeDto> readGradeYearByStudentId(Long studentId) {
@@ -122,7 +126,7 @@ public class GradeService {
             return Collections.emptyList();
         }
 
-        //연도, 학기별 그룹
+        //연도, 학기별 그룹 TODO 그룹화 하는 이유?
         Map<String, List<StuSub>> grouped = stuSubs.stream()
                 .filter(ss -> ss.getSubject() != null)
                 .filter(ss -> ss.getSubject().getSubYear() != null && ss.getSubject().getSemester() != null)
@@ -131,12 +135,18 @@ public class GradeService {
                 ));
 
         List<MyGradeDto> result = new ArrayList<>();
-        for(List<StuSub> list : grouped.values()){
-            Subject subject = new Subject();
-            Long year = subject.getSubYear();
-            Long semester = subject.getSemester();
+        for (Map.Entry<String, List<StuSub>> entry : grouped.entrySet()) {
+
+            String key = entry.getKey(); // 예: "2023-1"
+            List<StuSub> list = entry.getValue();
+
+            String[] parts = key.split("-");
+            Long year = Long.valueOf(parts[0]);
+            Long semester = Long.valueOf(parts[1]);
+
             result.add(calculateMyGradeDto(studentId, year, semester, list));
         }
+
 
         return result;
 
