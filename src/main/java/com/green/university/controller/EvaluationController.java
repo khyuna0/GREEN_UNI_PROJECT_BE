@@ -93,9 +93,8 @@ public class EvaluationController {
 
     // 과목별 강의 평가 조회 (교수)
     @GetMapping("/read")
-    public ResponseEntity<?> readEvaluation( @RequestParam(required = false, value = "subject_Name") String subject_Name,   // 기존 request.getParameter("subjectId") 대체
+    public ResponseEntity<?> readEvaluation(@RequestParam(required = false, value = "subject_Name") String subject_Name,
                                              @AuthenticationPrincipal CustomUserDetails principal) {
-
         Long professorId = principal.getId();
         List<MyEvaluationDto> subjectName = evaluationService.readSubjectName(professorId);
         List<MyEvaluationDto> eval = evaluationService.readEvaluationByProfessorIdAndName(professorId, subject_Name);
