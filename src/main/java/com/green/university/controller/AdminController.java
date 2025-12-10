@@ -76,40 +76,28 @@ public class AdminController {
         ));
 	}
 
-	/**
-	 * 
-	 * @return 학과 입력 기능 crud=insert
-	 */
+	// 학과 입력 기능 crud=insert
 	@PostMapping("/department")
 	public ResponseEntity<?> departmentProc(DepartmentFormDto departmentFormDto) {
 		adminService.createDepartment(departmentFormDto);
         return ResponseEntity.ok().body("학과 입력이 완료되었습니다");
 	}
 
-	/**
-	 * 
-	 * @return 학과 삭제 기능
-	 */
+	// 학과 삭제 기능
 	@GetMapping("/departmentDelete/{deptId}")
 	public ResponseEntity<?> deleteDepartment(@PathVariable("deptId") Long deptId) {
 		adminService.deleteDepartment(deptId);
         return ResponseEntity.ok().body("학과 삭제가 완료되었습니다");
 	}
 
-	/**
-	 * 
-	 * @return 학과 수정 기능
-	 */
+	// 학과 수정 기능
 	@PatchMapping("/department/{deptId}")
 	public ResponseEntity<?> updateDepartment(@PathVariable("deptId") Long deptId, @Valid DepartmentFormDto departmentFormDto) {
 		adminService.updateDepartment(deptId, departmentFormDto);
         return ResponseEntity.ok().body("학과 수정이 완료되었습니다");
 	}
 
-	/**
-	 * 
-	 * @return 강의실 페이지 - 리스트 보기
-	 */
+	// 강의실 페이지 - 리스트 보기
 	@GetMapping("/room")
 	public ResponseEntity<?> room(@RequestParam(defaultValue = "select") String crud) {
 		List<Room> roomList = adminService.readRoom();
@@ -122,30 +110,21 @@ public class AdminController {
         ));
 	}
 
-	/**
-	 * 
-	 * @return 강의실 입력 기능
-	 */
+	// 강의실 입력 기능
 	@PostMapping("/room")
-	public ResponseEntity<?> roomProc(@Valid RoomFormDto roomFormDto) {
+	public ResponseEntity<?> roomProc(@Valid @RequestBody RoomFormDto roomFormDto) {
 		adminService.createRoom(roomFormDto);
         return ResponseEntity.ok().body("강의실 입력이 완료되었습니다");
 	}
 
-	/**
-	 * 
-	 * @return 강의실 삭제 기능
-	 */
+	// 강의실 삭제 기능
 	@DeleteMapping("/roomDelete/{roomId}")
 	public ResponseEntity<?> deleteRoom(@RequestParam String roomId) { // 강의실 기본키(id)는 E601 이런 형식임
 		adminService.deleteRoom(roomId);
         return ResponseEntity.ok().body("강의실 삭제가 완료되었습니다");
 	}
 
-	/**
-	 * 
-	 * @return 강의 페이지 - 리스트 조회
-	 */
+	// 강의 페이지 - 리스트 조회
 	@GetMapping("/subject")
     public ResponseEntity<?> subject(@RequestParam(defaultValue = "select") String crud) {
 		List<Subject> subjectList = adminService.readSubject();

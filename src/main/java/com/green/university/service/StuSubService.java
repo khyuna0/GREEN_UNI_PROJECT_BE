@@ -6,9 +6,11 @@ import com.green.university.dto.response.StuSubSumGradesDto;
 import com.green.university.entity.*;
 import com.green.university.exception.CustomRestfullException;
 import com.green.university.repository.*;
+import com.green.university.specification.SubjectSpecification;
 import com.green.university.utils.Define;
 import com.green.university.utils.StuSubUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,16 +28,12 @@ public class StuSubService {
 
     @Autowired
     private StuSubRepository stuSubRepository;
-
     @Autowired
     private SubjectRepository subjectRepository;
-
     @Autowired
     private SubjectService subjectService;
-
     @Autowired
     private PreStuSubRepository preStuSubRepository;
-
     @Autowired
     private StuSubDetailRepository stuSubDetailRepository;
     @Autowired
@@ -131,21 +129,25 @@ public class StuSubService {
         stuSubRepository.delete(stuSub);
         // 해당 강의 현재인원 -1
         subjectService.updateMinusNumOfStudent(subjectId);
-//        Subject subject = subjectRepository.findById(subjectId)
-//                .orElseThrow(() -> new CustomRestfullException("과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
-//        subject.setNumOfStudent(subject.getNumOfStudent() - 1);
     }
 
-    // 🔥🔥🔥 예비 수강 신청 기간 -> 수강 신청 기간 변경 시 로직 (ai 도움 받아서 아예 다 바꿈!!!!!!!!!!!!)
+    // 🔥🔥🔥 예비 수강 신청 기간 -> 수강 신청 기간 변경 시 로직 (ai 도움 받음)
     @Transactional
     public void movePreToStuSubBatch() {
         System.out.println("========== 배치 시작 ==========");
 
-        // 1. 모든 과목의 정원 초과 여부 먼저 확인
-        Map<Long, Boolean> subjectOverCapacity = new HashMap<>();
-        List<Subject> allSubjects = subjectRepository.findAll();
+        // 1. 특정 연도, 학기 강의 조회
+        //List<Subject> allSubjects = subjectRepository.findAll();
+        Specification<Subject> spec = SubjectSpecification.currentSemester(
+                Define.CURRENT_YEAR,
+                Define.CURRENT_SEMESTER
+        );
+        List<Subject> currentSubjects = subjectRepository.findAll(spec);
+        System.out.println("📚 현재 학기 과목 수: " + currentSubjects.size());
 
-        for (Subject subject : allSubjects) {
+        // 2. 정원 초과 여부 확인
+        Map<Long, Boolean> subjectOverCapacity = new HashMap<>();
+        for (Subject subject : currentSubjects) {
             boolean isOverCapacity = subject.getNumOfStudent() > subject.getCapacity();
             subjectOverCapacity.put(subject.getId(), isOverCapacity);
 
@@ -158,7 +160,7 @@ public class StuSubService {
             }
         }
 
-        // 2. 모든 예비 수강 신청 조회
+        // 3. 모든 예비 수강 신청 조회
         List<PreStuSub> allPre = preStuSubRepository.findAll();
         System.out.println("📋 전체 예비 수강 신청 건수: " + allPre.size());
 
@@ -169,10 +171,21 @@ public class StuSubService {
             Student student = pre.getStudent();
             Subject subject = pre.getSubject();
 
+            // 현재 학기 과목이 아니면 스킵 (안전장치)
+            if (!subject.getSubYear().equals(Define.CURRENT_YEAR) ||
+                    !subject.getSemester().equals(Define.CURRENT_SEMESTER)) {
+                System.out.println("⏭️ 현재 학기가 아님: " + subject.getName() +
+                        " (학생ID: " + student.getId() + ")");
+                continue;
+            }
+
             // 해당 과목이 정원 초과였다면 → 예비는 남겨둠 (재신청 가능)
             if (subjectOverCapacity.getOrDefault(subject.getId(), false)) {
                 System.out.println("❌ 과목 정원 초과로 자동 이동 실패: " + subject.getName() +
                         " (학생ID: " + student.getId() + ")");
+                /** TODO: 예비 수강 신청 목록과 성공한 목록이 보여지는데 이때 수강 신청 버튼을
+                 * 취소, 신청으로 보여주기 위해서는 status를 이용해야하는지 아니면 다른 방법이 있는지
+                */
                 failCount++;
                 continue;
             }
