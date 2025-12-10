@@ -10,7 +10,9 @@ public class CustomRestfullException extends RuntimeException {
 	
 	public CustomRestfullException(String message, HttpStatus status) {
 		super(message);
-		this.status = status;
+        if(status != null ) {
+            this.status = status;
+        }
 	}
 	
 }

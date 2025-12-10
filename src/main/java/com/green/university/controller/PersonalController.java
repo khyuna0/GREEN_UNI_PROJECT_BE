@@ -275,18 +275,8 @@ public class PersonalController {
     // 아이디 찾기
     @PostMapping("/find/id")
     public ResponseEntity<?> findIdProc(
-            @Valid @RequestBody FindIdFormDto findIdFormDto,
-            BindingResult bindingResult
+            @Valid @RequestBody FindIdFormDto findIdFormDto
     ) {
-
-        if (bindingResult.hasErrors()) {
-            StringBuilder sb = new StringBuilder();
-            bindingResult.getAllErrors().forEach(error -> {
-                sb.append(error.getDefaultMessage()).append("\\n");
-            });
-            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
-        }
-
         Long findId = userService.readIdByNameAndEmail(findIdFormDto);
 
         return ResponseEntity.ok(Map.of(
@@ -298,17 +288,8 @@ public class PersonalController {
     // 비밀번호 찾기
     @PostMapping("/find/password")
     public ResponseEntity<?> findPasswordProc(
-            @Valid @RequestBody FindPasswordFormDto findPasswordFormDto,
-            BindingResult bindingResult
+            @Valid @RequestBody FindPasswordFormDto findPasswordFormDto
     ) {
-        if (bindingResult.hasErrors()) {
-            StringBuilder sb = new StringBuilder();
-            bindingResult.getAllErrors().forEach(error -> {
-                sb.append(error.getDefaultMessage()).append("\\n");
-            });
-            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
-        }
-
         String password = userService.updateTempPassword(findPasswordFormDto);
 
         return ResponseEntity.ok(Map.of(

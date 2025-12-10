@@ -297,7 +297,7 @@ public class UserService {
         System.out.println(tempPassword);
 
         User user = userRepository.findById(findId).orElseThrow(
-                () -> new CustomRestfullException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+                () -> new CustomRestfullException("조건에 맞는 사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );
         user.setPassword(passwordEncoder.encode(tempPassword));
         userRepository.save(user);
