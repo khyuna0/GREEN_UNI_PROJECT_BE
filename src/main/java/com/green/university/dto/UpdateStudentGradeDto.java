@@ -1,5 +1,7 @@
 package com.green.university.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -9,23 +11,26 @@ import lombok.Data;
  */
 @Data
 public class UpdateStudentGradeDto {
-	
-	private Long studentId;
-	private Long subjectId;
 
-	// 결석 횟수
-	private Long absent;
-	// 지각 횟수
-	private Long lateness;
-	// 과제 점수
-	private Long homework;
-	// 중간고사 점수
-	private Long midExam;
-	// 기말고사 점수
-	private Long finalExam;
-	// 총합 환산 점수
-	private Long convertedMark;
-	// 등급
-	private String grade;
+    @NotNull(message = "결석 횟수를 입력해주세요.")
+    private Long absent;
+
+    @NotNull(message = "지각 횟수를 입력해주세요.")
+    private Long lateness;
+
+    @NotNull(message = "과제 점수를 입력해주세요.")
+    private Long homework;
+
+    @NotNull(message = "중간고사 점수를 입력해주세요.")
+    private Long midExam;
+
+    @NotNull(message = "기말고사 점수를 입력해주세요.")
+    private Long finalExam;
+
+    @NotNull(message = "환산 점수를 입력해주세요.")
+    private Long convertedMark;
+
+    @NotBlank(message = "등급을 선택해주세요.")
+    private String grade;
 
 }

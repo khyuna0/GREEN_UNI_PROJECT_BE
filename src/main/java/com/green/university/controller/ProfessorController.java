@@ -10,6 +10,7 @@ import com.green.university.service.StuSubService;
 import com.green.university.service.SubjectService;
 import com.green.university.service.UserService;
 import com.green.university.utils.Define;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -102,44 +103,42 @@ public class ProfessorController {
         ));
 	}
 
-	/**
-	 *
-	 * @param subjectId
-	 * @param studentId
-	 * @return 출결 및 성적 기입 페이지
-	 */
-	@GetMapping("/subject/{subjectId}/{studentId}")
-	public ResponseEntity<?> updateStudentDetail(@PathVariable("subjectId") Long subjectId, @PathVariable ("studentId")Long studentId) {
-
-        StudentDto student = userService.readStudent(studentId);
-
-        return ResponseEntity.ok(Map.of(
-                "student", student,
-                "subjectId", subjectId
-        ));
-	}
+//	/**
+//	 *
+//	 * @param subjectId
+//	 * @param studentId
+//	 * @return 출결 및 성적 기입 페이지
+//	 */
+//	@GetMapping("/subject/{subjectId}/{studentId}")
+//	public ResponseEntity<?> updateStudentDetail(@PathVariable("subjectId") Long subjectId, @PathVariable ("studentId")Long studentId) {
+//
+//        StudentDto student = userService.readStudent(studentId);
+//
+//        return ResponseEntity.ok(Map.of(
+//                "student", student,
+//                "subjectId", subjectId
+//        ));
+//	}
     
-    // 업데이트
-	@PatchMapping("/subject/{subjectId}/{studentId}")
-	public ResponseEntity<?> updateStudentDetailProc(@PathVariable("subjectId") Long subjectId, @PathVariable ("studentId")Long studentId,
-			@RequestBody UpdateStudentGradeDto updateStudentGradeDto) {
+    // 교수의 성적 입력
+    @PatchMapping("/subject/{subjectId}/{studentId}")
+    public ResponseEntity<?> updateStudentDetailProc(
+            @PathVariable Long subjectId,
+            @PathVariable Long studentId,
+            @Valid @RequestBody UpdateStudentGradeDto dto) {
 
-		// 점수 입력
-		professorService.updateGrade(subjectId, studentId ,updateStudentGradeDto);
-		
-		// 취득학점 입력
-		if (updateStudentGradeDto.getGrade().equals("F")) {
-			stuSubService.updateCompleteGrade(studentId, subjectId, 0L);
-		} else {
-			Long subjectGrade = subjectService.readBySubjectId(subjectId).getGrades();
-			stuSubService.updateCompleteGrade(studentId, subjectId, subjectGrade);
-		}
+        // 1) 점수 입력
+        professorService.updateGrade(subjectId, studentId, dto);
+
+        // 2) 이수학점 계산 (F 여부는 서비스 안에서 처리)
+        stuSubService.updateCompleteGrade(studentId, subjectId);
 
         return ResponseEntity.ok(Map.of(
                 "studentId", studentId,
                 "subjectId", subjectId
         ));
-	}
+    }
+
 
 	/**
 	 *
