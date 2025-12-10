@@ -17,9 +17,6 @@ public interface StuSubRepository extends JpaRepository<StuSub, Long> {
     // 학생의 특정 연도 + 학기 전체 수강 내역 조회
     List<StuSub> findByStudent_IdAndSubject_SubYearAndSubject_Semester(Long studentId, Long subYear, Long semester);
 
-    // 수강 신청 내역 삭제
-    void deleteByStudent_IdAndSubject_Id(Long studentId, Long subjectId);
-
     // 수강 신청 내역과 예비 수강 신청 내역 조인 후 조회
     // type == 1 : 수강 신청, 예비 수강 신청에 둘 다 존재
     // type == 0 : 예비 수강 신청에만 존재
