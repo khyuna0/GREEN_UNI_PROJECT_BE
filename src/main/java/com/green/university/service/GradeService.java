@@ -3,13 +3,18 @@ package com.green.university.service;
 import com.green.university.dto.response.GradeDto;
 import com.green.university.dto.response.GradeForScholarshipDto;
 import com.green.university.dto.response.MyGradeDto;
+import com.green.university.entity.Evaluation;
 import com.green.university.entity.Grade;
 import com.green.university.entity.StuSub;
 import com.green.university.entity.Subject;
+import com.green.university.exception.CustomRestfullException;
+import com.green.university.repository.EvaluationRepository;
 import com.green.university.repository.GradeRepository;
 import com.green.university.repository.StuSubRepository;
+import com.green.university.repository.SubjectRepository;
 import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +31,11 @@ public class GradeService {
     @Autowired
     private GradeRepository gradeRepository;
 
+    @Autowired
+    private EvaluationRepository evaluationRepository;
+
+    @Autowired
+    private SubjectRepository subjectRepository;
 
     // 학생이 수강신청한 연도 조회
     public List<GradeDto> readGradeYearByStudentId(Long studentId) {
@@ -116,7 +126,7 @@ public class GradeService {
             return Collections.emptyList();
         }
 
-        //연도, 학기별 그룹
+        //연도, 학기별 그룹 TODO 그룹화 하는 이유?
         Map<String, List<StuSub>> grouped = stuSubs.stream()
                 .filter(ss -> ss.getSubject() != null)
                 .filter(ss -> ss.getSubject().getSubYear() != null && ss.getSubject().getSemester() != null)
@@ -125,12 +135,18 @@ public class GradeService {
                 ));
 
         List<MyGradeDto> result = new ArrayList<>();
-        for(List<StuSub> list : grouped.values()){
-            Subject subject = new Subject();
-            Long year = subject.getSubYear();
-            Long semester = subject.getSemester();
+        for (Map.Entry<String, List<StuSub>> entry : grouped.entrySet()) {
+
+            String key = entry.getKey(); // 예: "2023-1"
+            List<StuSub> list = entry.getValue();
+
+            String[] parts = key.split("-");
+            Long year = Long.valueOf(parts[0]);
+            Long semester = Long.valueOf(parts[1]);
+
             result.add(calculateMyGradeDto(studentId, year, semester, list));
         }
+
 
         return result;
 
@@ -217,8 +233,16 @@ public class GradeService {
 
         Subject subject = ss.getSubject();
         Grade grade = ss.getGrade();
-
+        Evaluation evaluation = evaluationRepository
+                .findByStudent_IdAndSubject_Id(
+                        ss.getStudent().getId(),
+                        ss.getSubject().getId()
+                )
+                .orElse(null);
         if (subject != null) {
+            dto.setEvaluationId(
+                    evaluation != null ? evaluation.getId() : null
+            );
             dto.setSubYear(subject.getSubYear());
             dto.setSemester(subject.getSemester());
             dto.setSubjectId(subject.getId());
@@ -235,10 +259,6 @@ public class GradeService {
                 dto.setGradeValue(String.valueOf(grade.getGradeValue())); // "4", "3" 등
             }
         }
-
-        // evaluationId는 현재 엔티티에 없으니 일단 null
-        dto.setEvaluationId(null);
-
         return dto;
     }
     

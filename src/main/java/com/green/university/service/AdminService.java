@@ -178,23 +178,20 @@ public class AdminService {
         collTuit.setAmount(collTuitFormDto.getAmount());
     }
 
-	/**
-	 * 강의실 입력 서비스
-	 */
+	// 강의실 등록
 	@Transactional
-	public void createRoom(@Validated RoomFormDto roomFormDto) {
-		// 강의실 중복 입력 검사
+	public void createRoom(RoomFormDto roomFormDto) {
 		List<Room> roomList = roomRepository.findAll();
         for (Room value : roomList) {
             if (value.getId().equals((roomFormDto.getId()))) {
                 throw new CustomRestfullException("이미 존재하는 강의실입니다", HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
-
+        College college = collegeRepository.findById(roomFormDto.getCollegeId()).orElseThrow(
+                () -> new CustomRestfullException("존재하지 않는 단과대입니다.", HttpStatus.BAD_REQUEST));
         Room room = new Room();
         room.setId(roomFormDto.getId());
-        room.setCollege(roomFormDto.getCollege());
-
+        room.setCollege(college);
 		roomRepository.save(room);
 	}
 

@@ -13,10 +13,13 @@ import jakarta.validation.constraints.NotBlank;
 @Data
 public class FindIdFormDto {
 
-	@NotBlank
-	private String name;
-	@Email
-	private String email;
-	private String userRole;
-	
+    @NotBlank(message = "이름을 입력해주세요.")
+    private String name;
+
+    @Email(message = "올바른 이메일 형식을 입력해주세요.")
+    @NotBlank(message = "이메일을 입력해주세요.")
+    private String email;
+
+    @NotBlank(message = "회원 유형을 선택해주세요.")
+    private String userRole;
 }

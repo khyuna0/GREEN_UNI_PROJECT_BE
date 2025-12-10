@@ -4,10 +4,8 @@ import lombok.Data;
 
 @Data
 public class EvaluationDto {
-    // 입력용 dto
+    // 강평 입력용 dto
 
-    private Long studentId;
-    private Long subjectId;
     private Long answer1;
     private Long answer2;
     private Long answer3;
