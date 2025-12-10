@@ -24,6 +24,7 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    // TODO: 여러 에러 한번에 처리할건지 (String -> List로 변환)
     // Validation 실패 처리 (DTO @Valid, @NotNull 등)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationException(MethodArgumentNotValidException ex) {

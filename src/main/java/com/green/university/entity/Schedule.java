@@ -19,7 +19,7 @@ public class Schedule {
     @JoinColumn(name = "staff_id")
     private Staff staff;
 
-    private LocalDate startDay;
-    private LocalDate endDay;
-    private String information;
+    private LocalDate startDay; // 시작 날짜
+    private LocalDate endDay; // 종료 날짜
+    private String information; // 학사 일정 내용
 }
