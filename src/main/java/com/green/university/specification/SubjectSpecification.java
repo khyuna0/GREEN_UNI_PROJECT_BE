@@ -1,4 +1,4 @@
-package com.green.university.repository.specification;
+package com.green.university.specification;
 
 import com.green.university.entity.Department;
 import com.green.university.entity.Subject;
@@ -8,7 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 // 데이터베이스에서 데이터를 조회할 때 동적인 쿼리를 작성할 수 있는 jpa에서 제공하는 인터페이스
 public class SubjectSpecification {
 
-    // 현재 년도, 학기로 찾기
+    // 현재 연도, 학기로 찾기
     public static Specification<Subject> currentSemester(Long subYear, Long semester) {
         return (root, query, cb) ->
                 cb.and(
@@ -45,7 +45,7 @@ public class SubjectSpecification {
         };
     }
 
-    // 과목명으로 찾기
+    // 강의명으로 찾기
     public static Specification<Subject> nameContains(String name) {
         return (root, query, cb) ->
                 name == null || name.isBlank()

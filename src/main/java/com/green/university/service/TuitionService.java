@@ -2,7 +2,7 @@ package com.green.university.service;
 
 import com.green.university.dto.response.GradeForScholarshipDto;
 import com.green.university.exception.CustomRestfullException;
-import com.green.university.repository.interfaces.*;
+import com.green.university.repository.*;
 import com.green.university.entity.*;
 import com.green.university.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;

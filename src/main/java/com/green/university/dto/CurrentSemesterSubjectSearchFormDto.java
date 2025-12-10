@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class CurrentSemesterSubjectSearchFormDto {
 
-	private String type;
+	private String type; // 전공 또는 교양
 	private Long deptId;
 	private String deptName;
 	private String name;

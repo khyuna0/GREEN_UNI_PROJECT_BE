@@ -4,13 +4,15 @@ import com.green.university.dto.NoticeFormDto;
 import com.green.university.dto.NoticePageFormDto;
 import com.green.university.dto.response.NoticeDto;
 import com.green.university.exception.CustomRestfullException;
-import com.green.university.repository.interfaces.NoticeRepository;
+import com.green.university.repository.NoticeRepository;
 import com.green.university.entity.Notice;
+import com.green.university.specification.NoticeSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +29,39 @@ public class NoticeService {
     private NoticeRepository noticeRepository;
 
     private static final int PAGE_SIZE = 10;
+
+    // 검색 + 페이징 처리
+    @Transactional(readOnly = true)
+    public Page<Notice> readNoticePage(NoticePageFormDto dto, int page) {
+
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "id"));
+        String keyword = dto.getKeyword();
+        String type = dto.getType();
+
+        Specification<Notice> spec = (root, query, cb) -> null;
+
+        // keyword 있을 때만 type에 따라 spec 사용
+        if (keyword != null && !keyword.isBlank()) {
+
+            if ("title".equalsIgnoreCase(type)) {
+                spec = spec.and(NoticeSpecification.titleContains(keyword));
+
+            } else if ("content".equalsIgnoreCase(type)) {
+                spec = spec.and(NoticeSpecification.contentContains(keyword));
+
+            } else {
+                // 기본: 제목 + 내용
+                spec = spec.and(NoticeSpecification.titleOrContentContains(keyword));
+            }
+        }
+
+        return noticeRepository.findAll(spec, pageable);
+    }
+
+    // 공지 갯수 확인
+    public Long readNoticeAmount(NoticePageFormDto dto, int page) {
+        return readNoticePage(dto, page).getTotalElements();
+    }
 
     // 공지 입력
     public void readNotice(@Validated NoticeFormDto noticeFormDto) {
@@ -46,52 +81,6 @@ public class NoticeService {
         Notice saved = noticeRepository.save(notice);
         noticeFormDto.setNoticeId(saved.getId());
     }
-
-
-    // 검색 + 페이징 처리
-    public Page<Notice> readNoticePage(NoticePageFormDto noticePageFormDto){
-
-        int pageParam = noticePageFormDto.getPage();
-        int page = pageParam < 1 ? 1 : pageParam;
-
-        String keyword = noticePageFormDto.getKeyword();
-        String type = noticePageFormDto.getType();
-
-        Pageable pageable = PageRequest.of(
-                page - 1,          // 1페이지 -> 0, 2페이지 -> 1 ...
-                PAGE_SIZE,
-                Sort.by(Sort.Direction.DESC,"id") // 최신 글 순
-        );
-
-        // 검색어 없으면 전체 조회
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return noticeRepository.findAll(pageable);
-        }
-
-        // 검색어 있으면 타입에 따라 나눔
-        if ("title".equals(type)) {
-            // 제목으로만 검색
-            return noticeRepository.findByTitleContainingIgnoreCase(keyword, pageable);
-        } else {
-            // 제목 + 내용으로 검색
-            return noticeRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
-                    keyword, keyword, pageable
-            );
-        }
-    }
-
-
-    // 공지 갯수 확인
-    public Long readNoticeAmount(NoticePageFormDto noticePageFormDto) {
-        return readNoticePage(noticePageFormDto).getTotalElements();
-    }
-
-
-    // 공지 검색
-    public List<Notice> readNoticeByKeyword(NoticePageFormDto noticePageFormDto) {
-        return readNoticePage(noticePageFormDto).getContent();
-    }
-
 
     // 공지 상세 조회 + 조회수 증가
     @Transactional
