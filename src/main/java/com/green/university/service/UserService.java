@@ -255,11 +255,11 @@ public class UserService {
     public Long readIdByNameAndEmail(FindIdFormDto findIdFormDto) {
         return switch (findIdFormDto.getUserRole()) {
             case "student" ->
-                    studentRepository.findByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail());
+                    studentRepository.findIdByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail());
             case "professor" ->
-                    professorRepository.findByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail());
+                    professorRepository.findIdByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail());
             case "staff" ->
-                    staffRepository.findByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail());
+                    staffRepository.findIdByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail());
             default -> throw new CustomRestfullException("잘못된 userRole 입니다.", HttpStatus.BAD_REQUEST);
         };
     }
