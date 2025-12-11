@@ -1,10 +1,7 @@
 package com.green.university.controller;
 
 import com.green.university.dto.CurrentSemesterSubjectSearchFormDto;
-import com.green.university.dto.response.StuStatDto;
-import com.green.university.dto.response.StuSubAppDto;
-import com.green.university.dto.response.StudentDto;
-import com.green.university.dto.response.SubjectDto;
+import com.green.university.dto.response.*;
 import com.green.university.exception.CustomRestfullException;
 import com.green.university.entity.*;
 import com.green.university.config.security.CustomUserDetails;
@@ -252,5 +249,43 @@ public class StuSubController {
                 "totalGrades", totalGrades
         ));
     }
+
+    // 최종 수강 신청 timetable 조회
+    @GetMapping("/timetable")
+    public ResponseEntity<?> getMyTimetable(@AuthenticationPrincipal CustomUserDetails principal) {
+
+        // 예비 수강 신청 기간이면 최종 시간표 조회 불가
+        int currentStatus = sugangPeriodService.getCurrentStatus();
+        if (currentStatus == 0) {
+            throw new CustomRestfullException(
+                    "예비 수강 신청 기간에는 최종 시간표를 조회할 수 없습니다.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        // 학적/휴학 상태 체크 (기존 stusublist/list와 동일한 흐름)
+        Long studentId = principal.getId();
+
+        StudentDto studentInfo = userService.readStudent(studentId);
+        StuStatDto stuStatEntity = stuStatService.readCurrentStatus(studentInfo.getId());
+        List<BreakApp> breakAppList = breakAppService.readByStudentId(studentInfo.getId());
+        StuStatUtil.checkStuStat("수강신청", stuStatEntity, breakAppList);
+
+        // 시간표 DTO 변환 결과 받아오기
+        List<TimetableCourseDto> courses = stuSubService.readMyTimetable(studentId);
+
+        // 총 학점 계산
+        Long totalGrades = courses.stream()
+                .mapToLong(TimetableCourseDto::getGrades)
+                .sum();
+
+        // 응답
+        return ResponseEntity.ok(Map.of(
+                "period", currentStatus,  // 1학기 or 2학기
+                "courses", courses,
+                "totalGrades", totalGrades
+        ));
+    }
+
 
 }
