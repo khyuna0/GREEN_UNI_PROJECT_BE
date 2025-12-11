@@ -18,5 +18,5 @@ public class RoomFormDto {
 	private String id;
 
 	@NotNull
-	private College college;
+	private Long collegeId;
 }
