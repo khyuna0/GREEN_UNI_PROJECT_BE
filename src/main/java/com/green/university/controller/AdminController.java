@@ -56,10 +56,20 @@ public class AdminController {
      *
      * @return 단과대학 삭제 기능 crud=delete
      */
-    @DeleteMapping("/college/delete/{collegeId}")
+    @DeleteMapping("/college/{collegeId}")
     public ResponseEntity<?> deleteCollege(@PathVariable("collegeId") Long collegeId) {
         adminService.deleteCollege(collegeId);
         return ResponseEntity.ok().body("단과대학 삭제가 완료되었습니다.");
+    }
+
+    // 단과대 수정 기능
+    @PatchMapping("/college/{collegeId}")
+    public ResponseEntity<?> updateCollege(
+            @PathVariable("collegeId") Long collegeId,
+            @RequestBody @Valid CollegeFormDto collegeFormDto) {
+
+        adminService.updateCollege(collegeId, collegeFormDto);
+        return ResponseEntity.ok().body("단과대학 수정이 완료되었습니다.");
     }
 
 
@@ -86,7 +96,7 @@ public class AdminController {
     }
 
     // 학과 삭제 기능
-    @GetMapping("/department/delete/{deptId}")
+    @DeleteMapping("/department/delete/{deptId}")
     public ResponseEntity<?> deleteDepartment(@PathVariable("deptId") Long deptId) {
         adminService.deleteDepartment(deptId);
         return ResponseEntity.ok().body("학과 삭제가 완료되었습니다");
