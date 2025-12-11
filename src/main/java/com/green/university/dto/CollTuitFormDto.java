@@ -19,7 +19,7 @@ public class CollTuitFormDto {
 
     private Long collegeId;
 
-    private String 	name; // 단과대 이름
+    private String 	name; // 단과대 이름 -> 이름으로 검색
 
     @NotNull
     @Positive //정수형에 써주는것

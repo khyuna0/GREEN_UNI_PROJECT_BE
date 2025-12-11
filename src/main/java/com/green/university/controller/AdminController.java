@@ -169,10 +169,7 @@ public class AdminController {
         return ResponseEntity.ok().body("강의 수정이 완료되었습니다");
     }
 
-    /**
-     *
-     * @return 단과대별 등록금 페이지
-     */
+    // 단과대 등록금 페이지
     @GetMapping("/tuition")
     public ResponseEntity<?> collTuit(@RequestParam(defaultValue = "select") String crud) {
         List<CollTuitFormDto> collTuitList = adminService.readCollTuit();
@@ -185,30 +182,21 @@ public class AdminController {
         ));
     }
 
-    /**
-     *
-     * @return 단과대별 등록금 입력 기능
-     */
+    // 단과대 등록금 입력
     @PostMapping("/tuition")
     public ResponseEntity<?> insertcollTuit(@RequestBody @Valid CollTuitFormDto collTuitFormDto) {
         adminService.createCollTuit(collTuitFormDto);
         return ResponseEntity.ok().body("단과대별 등록금 입력이 완료되었습니다");
     }
 
-    /**
-     *
-     * @return 단과대 등록금 삭제 기능
-     */
-    @DeleteMapping("/tuition/delete/{collegeId}")
+    // 단과대 등록금 삭제
+    @DeleteMapping("/tuition/{collegeId}")
     public ResponseEntity<?> deleteCollTuit(@PathVariable("collegeId") Long collegeId) {
         adminService.deleteCollTuit(collegeId);
         return ResponseEntity.ok().body("단과대별 등록금 삭제가 완료되었습니다");
     }
 
-    /**
-     *
-     * @return 단과대 등록금 수정 기능
-     */
+    // 단과대 등록금 수정
     @PatchMapping("/tuition/{collegeId}")
     public ResponseEntity<?> updateCollTuit(@PathVariable("collegeId") Long collegeId ,  @RequestBody @Valid CollTuitFormDto collTuitFormDto) {
         adminService.updateCollTuit(collegeId, collTuitFormDto);

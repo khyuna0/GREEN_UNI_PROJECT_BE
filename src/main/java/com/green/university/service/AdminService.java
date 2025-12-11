@@ -152,28 +152,28 @@ public class AdminService {
     }
 
     // 단과대 등록금 삭제
+    @Transactional
     public void deleteCollTuit(Long collegeId) {
-        collTuitRepository.deleteById(collegeId);
 
-        // 없는 데이터 삭제 시 에러 처리
         if (!collTuitRepository.existsByCollege_Id(collegeId)) {
-            throw new CustomRestfullException("해당 단과대의 등록금 정보가 없습니다.",
-                    HttpStatus.NOT_FOUND);
+            throw new CustomRestfullException(
+                    "해당 단과대의 등록금 정보가 없습니다.",
+                    HttpStatus.NOT_FOUND
+            );
         }
+
 
         collTuitRepository.deleteByCollege_Id(collegeId);
     }
 
-    //단과대 등록금 수정
-    public void updateCollTuit(Long id, CollTuitFormDto collTuitFormDto) {
+    @Transactional
+    public void updateCollTuit(Long collegeId, CollTuitFormDto collTuitFormDto) {
 
-        // 기존 등록금 엔티티 조회
-        CollTuit collTuit = collTuitRepository.findByCollege_Id(id)
+        CollTuit collTuit = collTuitRepository.findByCollege_Id(collegeId)
                 .orElseThrow(() ->
                         new CustomRestfullException("해당 단과대의 등록금 정보가 없습니다.",
                                 HttpStatus.NOT_FOUND));
 
-        // 값 변경
         collTuit.setAmount(collTuitFormDto.getAmount());
     }
 
