@@ -99,37 +99,37 @@ public class TuitionService {
 		stuSch.setSchYear(Define.CURRENT_YEAR);
 		stuSch.setSemester(Define.CURRENT_SEMESTER);
 
-		// 1학년 2학기 이상의 학생이라면
+		// 1학년 2학기 이상의 학생인 경우에만 장학금 1유형(전액) 받을 수 있음
 		if (student.getGrade() > 1 || student.getSemester() == 2) {
 			// 직전 학기 성적 평균
 			// 상수로 선언해둬서 노란줄 뜨는 거니까 무시하기
 			GradeForScholarshipDto gradeDto = null;
-			if (Define.CURRENT_SEMESTER == 1) {
+			if (Define.CURRENT_SEMESTER == 1) { // 현재 1학기라면? 전 년도 2학기 성적으로 판단
 				gradeDto = gradeService.readAvgGrade(studentId, Define.CURRENT_YEAR - 1, 2L);
-			} else {
+			} else { // 현재 2학기 - 1학기 성적으로 판단
 				gradeDto = gradeService.readAvgGrade(studentId, Define.CURRENT_YEAR, 1L);
 			}
 
-			if (gradeDto == null) {
+			if (gradeDto == null) { // 성적을 아직 입력하지 않은 상황?
                 stuSchRepository.save(stuSch); // setSchType이 null 로 저장된다
 				return null; // 학점이 없어서 장학금 지급 안됨
 			} else {
-				Double avgGrade = gradeDto.getAvgGrade();
-				// 평점에 따라 장학금 유형 결정
-				if (avgGrade >= 4.2) {
-					stuSch.setSchType(scholarshipRepository.findById(1L).orElseThrow(() -> new CustomRestfullException("해당 장학금 정보가 없습니다.", HttpStatus.NOT_FOUND)));
-				} else if (avgGrade >= 3.7) {
-					stuSch.setSchType(scholarshipRepository.findById(2L).orElseThrow(() -> new CustomRestfullException("해당 장학금 정보가 없습니다.", HttpStatus.NOT_FOUND)));
-				}
-			}
+                Double avgGrade = gradeDto.getAvgGrade();
+                // 평점에 따라 장학금 유형 결정
+                if (avgGrade >= 4.2) {
+                    stuSch.setSchType(scholarshipRepository.findById(1L).orElseThrow(() -> new CustomRestfullException("해당 장학금 정보가 없습니다.", HttpStatus.NOT_FOUND)));
+                } else if (avgGrade >= 3.7) {
+                    stuSch.setSchType(scholarshipRepository.findById(2L).orElseThrow(() -> new CustomRestfullException("해당 장학금 정보가 없습니다.", HttpStatus.NOT_FOUND)));
+                }
+            }
 
-			// 1학년 1학기 학생이라면
+			// 1학년 1학기 학생이라면 기본 장학금만 지급함
 		} else {
 			stuSch.setSchType(scholarshipRepository.findById(2L).orElseThrow(() -> new CustomRestfullException("해당 장학금 정보가 없습니다.", HttpStatus.NOT_FOUND)));
 		}
 
         stuSchRepository.save(stuSch);
-		return stuSch.getSchType().getType(); // 장학금 타입이 결정남
+		return stuSch.getSchType().getType(); // 장학금 타입 결정되어 저장
 	}
 
 	/**
@@ -156,7 +156,7 @@ public class TuitionService {
 				if (b.getToYear() > Define.CURRENT_YEAR) {
 					return 0L;
 					// 휴학 종료 연도가 현재 연도와 같을 경우
-				} else if (b.getToYear() == Define.CURRENT_YEAR) {
+				} else if (b.getToYear().equals(Define.CURRENT_YEAR)) {
 					// 현재 학기 == 1 && 종료 학기 == 1이면 생성하지 않음
 					// 현재 학기 == 1 && 종료 학기 == 2이면 생성하지 않음
 					// 현재 학기 == 2 && 종료 학기 == 1이면 생성함
@@ -186,6 +186,7 @@ public class TuitionService {
 		Long schType = createCurrentSchType(studentId);
 
         Scholarship scholarship = null;
+
         if (schType != null) { // 장학금 받을 수 있는 경우(장학금 타입이 null이 아님)
             scholarship = scholarshipRepository.findById(schType)
                     .orElseThrow(() -> new CustomRestfullException("장학금 정보 없음", HttpStatus.NOT_FOUND));

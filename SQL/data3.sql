@@ -32,6 +32,8 @@ VALUES (230004, '$2a$10$FhWCqhZC.zTPpVbRO6WeweMcDx5J56Y0nEB0btTRbon2.g4aY5lPu', 
 -- 학생
 INSERT INTO student (id, name, birth_date, gender, address, tel, email, department_id, grade, semester, entrance_date)
 VALUES
+    (2022000001,'전민우', '2001-06-19', '남성', '부산시 남구', '010-5267-1815', 'jmw@green.com', 101, 2, 1, '2020-03-02'),
+    (2022000002,'민민서', '2001-06-19', '여성', '부산시 남구', '010-5267-1815', 'mms@green.com', 101, 2, 1, '2020-03-02'),
     (2023000001,'박시우', '2002-06-19', '남성', '부산시 남구', '010-5267-1815', 'psw@green.com', 101, 1, 1, '2021-03-02'),
     (2023000002,'김예준', '2002-04-25', '남성', '부산시 북구', '010-4152-9963', 'kyj@green.com', 101, 1, 1, '2021-03-02'),
     (2023000003,'김지우', '2002-11-15', '여성', '부산시 해운대구', '010-1526-8495', 'kjw@green.com', 101, 1, 1, '2021-03-02'),
@@ -256,6 +258,8 @@ VALUES
 
 INSERT INTO user (id, password, user_role)
 VALUES
+    (2022000001, '$2a$10$FhWCqhZC.zTPpVbRO6WeweMcDx5J56Y0nEB0btTRbon2.g4aY5lPu', 'student'),
+    (2022000002, '$2a$10$FhWCqhZC.zTPpVbRO6WeweMcDx5J56Y0nEB0btTRbon2.g4aY5lPu', 'student'),
     (2023000001, '$2a$10$FhWCqhZC.zTPpVbRO6WeweMcDx5J56Y0nEB0btTRbon2.g4aY5lPu', 'student'),
     (2023000002, '$2a$10$FhWCqhZC.zTPpVbRO6WeweMcDx5J56Y0nEB0btTRbon2.g4aY5lPu', 'student'),
     (2023000003, '$2a$10$FhWCqhZC.zTPpVbRO6WeweMcDx5J56Y0nEB0btTRbon2.g4aY5lPu', 'student'),
@@ -470,6 +474,8 @@ VALUES
 -- 재학
 INSERT INTO stu_stat (student_id, status, from_date, to_date)
 VALUES
+    (2022000001, '재학', '2022-03-02', '9999-01-01'),
+    (2022000002, '재학', '2022-03-02', '9999-01-01'),
     (2023000001, '재학', '2023-03-02', '9999-01-01'),
     (2023000002, '재학', '2023-03-02', '9999-01-01'),
     (2023000003, '재학', '2023-03-02', '9999-01-01'),

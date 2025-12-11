@@ -114,6 +114,8 @@ public class StuSubService {
         stuSub.setSubject(targetSubject);
         stuSub.setStudent(targetStudent);
         stuSubDetail.setStuSub(stuSub);
+        stuSubDetail.setStudent(studentRepository.findById(studentId).orElseThrow(() -> new CustomRestfullException("학생 정보 없음", HttpStatus.NOT_FOUND)));
+        stuSubDetail.setStudent(studentRepository.findById(subjectId).orElseThrow(() -> new CustomRestfullException("과목 정보 없음", HttpStatus.NOT_FOUND)));
         stuSubRepository.save(stuSub); // 수강신청 내역 추가
         stuSubDetailRepository.save(stuSubDetail); // 수강 상세 내역에도 데이터 추가
 

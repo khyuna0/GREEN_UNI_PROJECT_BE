@@ -28,6 +28,7 @@ public class StuSubDetail {
     private Long homework;
     private Long mildExam;
     private Long finalExam;
-    private Long convertedMark;
+    private Double convertedMark; // 환산점수
+    private String grade; // 등급 (단순 출력용)
 
 }

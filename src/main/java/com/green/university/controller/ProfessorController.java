@@ -5,10 +5,7 @@ import com.green.university.dto.UpdateStudentGradeDto;
 import com.green.university.dto.response.*;
 import com.green.university.entity.Subject;
 import com.green.university.config.security.CustomUserDetails;
-import com.green.university.service.ProfessorService;
-import com.green.university.service.StuSubService;
-import com.green.university.service.SubjectService;
-import com.green.university.service.UserService;
+import com.green.university.service.*;
 import com.green.university.utils.Define;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +36,8 @@ public class ProfessorController {
 	private StuSubService stuSubService;
 	@Autowired
 	private SubjectService subjectService;
+    @Autowired
+    private StuSubDetailService stuSubDetailService;
 	
 	/**
 	 * 교수 본인의 강의가 있는 년도 학기 조회하는 기능 조회한 년도 학기의 강의 리스트 출력(처음값은 현재학기)
@@ -89,49 +88,29 @@ public class ProfessorController {
 	}
 
 	/**
-	 *
 	 * @return 해당 과목을 듣는 학생 리스트
 	 */
 	@GetMapping("/subject/{subjectId}")
 	public ResponseEntity<?> subjectStudentList(@PathVariable("subjectId") Long subjectId) {
 		List<StudentInfoForProfessorDto> studentList = professorService.selectBySubjectId(subjectId);
 		Subject subject = professorService.selectSubjectById(subjectId);
-
+        int stuNum = studentList.size();
         return ResponseEntity.ok(Map.of(
                 "subject", subject,
-                "studentList", studentList
+                "studentList", studentList,
+                "stuNum", stuNum
         ));
 	}
 
-//	/**
-//	 *
-//	 * @param subjectId
-//	 * @param studentId
-//	 * @return 출결 및 성적 기입 페이지
-//	 */
-//	@GetMapping("/subject/{subjectId}/{studentId}")
-//	public ResponseEntity<?> updateStudentDetail(@PathVariable("subjectId") Long subjectId, @PathVariable ("studentId")Long studentId) {
-//
-//        StudentDto student = userService.readStudent(studentId);
-//
-//        return ResponseEntity.ok(Map.of(
-//                "student", student,
-//                "subjectId", subjectId
-//        ));
-//	}
-    
-    // 교수의 성적 입력
+    // 교수의 성적 입력 (절대평가 : 등급까지 산출 / 상대평가 : 환산점수까지만 산출, 과락, 결석 F 처리만)
     @PatchMapping("/subject/{subjectId}/{studentId}")
     public ResponseEntity<?> updateStudentDetailProc(
             @PathVariable Long subjectId,
             @PathVariable Long studentId,
             @Valid @RequestBody UpdateStudentGradeDto dto) {
 
-        // 1) 점수 입력
+        // 점수 입력 시 결석 횟수 따라 F, 환산점수 처리
         professorService.updateGrade(subjectId, studentId, dto);
-
-        // 2) 이수학점 계산 (F 여부는 서비스 안에서 처리)
-        stuSubService.updateCompleteGrade(studentId, subjectId);
 
         return ResponseEntity.ok(Map.of(
                 "studentId", studentId,
@@ -139,6 +118,15 @@ public class ProfessorController {
         ));
     }
 
+    // 상대평가 과목: 전체 학생 등급 산출
+    @PatchMapping("/relativeGrade/{subjectId}")
+    public ResponseEntity<?> relativeGrade (
+            @PathVariable Long subjectId
+    ) {
+        stuSubDetailService.getRelativeGrade(subjectId);
+
+        return ResponseEntity.ok().body("등급 산출 완료");
+    }
 
 	/**
 	 *

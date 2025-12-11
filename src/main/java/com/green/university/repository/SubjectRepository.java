@@ -47,5 +47,7 @@ public interface SubjectRepository extends JpaRepository<Subject,Long>,
     @Query("select s.id from Subject s where s.capacity < s.numOfStudent")
     List<Long> findIdByCapacityLessThanNumOfStudent();
 
-
+    // 강의의 총 수강 학생 수
+    @Query("SELECT s.numOfStudent FROM Subject s WHERE s.id = :subjectId")
+    int findNumOfStudentById(Long subjectId);
 }
