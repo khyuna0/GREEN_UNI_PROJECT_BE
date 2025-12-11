@@ -3,6 +3,8 @@ package com.green.university.repository;
 import com.green.university.entity.Department;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 
 public interface DepartmentRepository extends JpaRepository<Department, Long> {
     // public Long insert(DepartmentFormDto departmentFormDto);
@@ -12,6 +14,9 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
 
     // 학과 이름 중복 체크
     boolean existsByName(String name);
+    
+    // 이름으로 학과 찾기
+    Optional<Department> findByName(String name);
 
 
 }

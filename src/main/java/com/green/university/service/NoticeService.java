@@ -91,7 +91,6 @@ public class NoticeService {
         // 파일 있으면 저장 + notice 연결
         MultipartFile file = noticeFormDto.getFile();
         if( file != null && !file.isEmpty()) {
-
             validateFileSize(file);
 
             StoredFileInfo info = storeFileToDisk(file);
@@ -196,41 +195,13 @@ public class NoticeService {
                 .collect(Collectors.toList());
     }
 
-    //  첨부파일 다운로드 (noticeId 기준)
-    public ResponseEntity<Resource> downloadFileByNoticeId(Long noticeId) {
 
-        Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new CustomRestfullException("공지 없음", HttpStatus.NOT_FOUND));
-
-        if (notice.getFile() == null) {
-            throw new CustomRestfullException("첨부파일 없음", HttpStatus.NOT_FOUND);
-        }
-
-        String uuid = notice.getFile().getUuidFilename();
-        String origin = notice.getFile().getOriginFilename();
-
-        File file = new File(Define.UPLOAD_DIRECTORY + File.separator + uuid);
-        if (!file.exists()) {
-            throw new CustomRestfullException("파일이 존재하지 않습니다.", HttpStatus.NOT_FOUND);
-        }
-
-        Resource resource = new FileSystemResource(file);
-
-        String encoded = URLEncoder.encode(origin, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encoded)
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(resource);
-    }
-
-    // ✅ 변경: 미리보기 메서드 제거
-    // public ResponseEntity<Resource> viewFileByNoticeId(Long noticeId) { ... }
 
     // 파일 처리 메서드들
     // 로직들이 공지에 종속되어있어서 일단 여기에 두는게 나음
     // 빼려고 하면 FileStorageService로 분리
-
+    
+    // 파일 사이즈 제한
     private void validateFileSize(MultipartFile file){
         if(file.getSize() > Define.MAX_FILE_SIZE){
             throw new CustomRestfullException("파일 크기는 20MB 이상 클 수 없습니다.",HttpStatus.BAD_REQUEST);
@@ -270,6 +241,35 @@ public class NoticeService {
         }
     }
 
+    //  첨부파일 다운로드 (noticeId 기준)
+    public ResponseEntity<Resource> downloadFileByNoticeId(Long noticeId) {
+
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new CustomRestfullException("공지 사항이 존재하지 않습니다.", HttpStatus.NOT_FOUND));
+
+        if (notice.getFile() == null) {
+            throw new CustomRestfullException("첨부파일 없음", HttpStatus.NOT_FOUND);
+        }
+
+        String uuid = notice.getFile().getUuidFilename();
+        String origin = notice.getFile().getOriginFilename();
+
+        File file = new File(Define.UPLOAD_DIRECTORY + File.separator + uuid);
+        if (!file.exists()) {
+            throw new CustomRestfullException("파일이 존재하지 않습니다.", HttpStatus.NOT_FOUND);
+        }
+
+        Resource resource = new FileSystemResource(file);
+
+        String encoded = URLEncoder.encode(origin, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encoded)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
+    }
+
+    // 파일 삭제
     private void deleteFileFromDisk(String uuidFilename){
         if(uuidFilename == null) return;
 

@@ -47,8 +47,8 @@ public class SubjectFormDto { // 강의 입력과 수정 시 사용하는 DTO
 //	@Max(18)
 	private Long endTime;
 //	@NotEmpty
-	private Long grades;
+	private Long grades; // 이수 학점
 //	@NotEmpty
 	private Long capacity;
-	private Long numOfStudent;
+
 }

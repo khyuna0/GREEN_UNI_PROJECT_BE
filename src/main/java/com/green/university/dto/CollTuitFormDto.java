@@ -16,7 +16,7 @@ import jakarta.validation.constraints.NotEmpty;
 public class CollTuitFormDto {
     //@NotBlank, @NotEmpty는 문자열용 -> NotNull로 변경
 
-    @NotNull
+
     private Long collegeId;
 
     private String 	name; // 단과대 이름

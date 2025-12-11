@@ -62,9 +62,8 @@ public class AdminService {
         collegeRepository.deleteById(collegeId);
     }
 
-    /**
-     * 학과 입력 서비스
-     */
+
+    // 학과 입력
     @Transactional
     public void createDepartment(@Validated DepartmentFormDto departmentFormDto) {
 
@@ -119,8 +118,8 @@ public class AdminService {
     // 단과대별 등록금 입력
     @Transactional
     public void createCollTuit(@Validated CollTuitFormDto collTuitFormDto) {
-        // 단과대 엔티티 조회
-        College college = collegeRepository.findById(collTuitFormDto.getCollegeId())
+        // 단과대 이름으로 엔티티 조회
+        College college = collegeRepository.findByName(collTuitFormDto.getName())
                 .orElseThrow(() -> new CustomRestfullException("단과대를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
 
         //이미 해당 단과대에 등록금이 있는지 중복 체크
@@ -178,10 +177,10 @@ public class AdminService {
         collTuit.setAmount(collTuitFormDto.getAmount());
     }
 
-	// 강의실 등록
-	@Transactional
-	public void createRoom(RoomFormDto roomFormDto) {
-		List<Room> roomList = roomRepository.findAll();
+    // 강의실 등록
+    @Transactional
+    public void createRoom(RoomFormDto roomFormDto) {
+        List<Room> roomList = roomRepository.findAll();
         for (Room value : roomList) {
             if (value.getId().equals((roomFormDto.getId()))) {
                 throw new CustomRestfullException("이미 존재하는 강의실입니다", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -192,15 +191,15 @@ public class AdminService {
         Room room = new Room();
         room.setId(roomFormDto.getId());
         room.setCollege(college);
-		roomRepository.save(room);
-	}
+        roomRepository.save(room);
+    }
 
-	/**
-	 * 강의실 조회 서비스
-	 */
-	public List<Room> readRoom() {
+    /**
+     * 강의실 조회 서비스
+     */
+    public List<Room> readRoom() {
         return roomRepository.findAll();
-	}
+    }
 
     /**
      * 강의실 삭제 서비스
@@ -247,9 +246,7 @@ public class AdminService {
         subject.setSubDay(subjectFormDto.getSubDay());
         subject.setStartTime(subjectFormDto.getStartTime());
         subject.setEndTime(subjectFormDto.getEndTime());
-        subject.setGrades(subjectFormDto.getGrades());
         subject.setCapacity(subjectFormDto.getCapacity());
-        subject.setNumOfStudent(subjectFormDto.getNumOfStudent());
         subjectRepository.save(subject);
 
         Long subjectId = subject.getId();
@@ -257,50 +254,49 @@ public class AdminService {
         Syllabus syllabus = new Syllabus(); // 강의 아이디로 강의 찾아 엔티티에 강의만 저장함
         syllabus.setSubject(subjectRepository.findById(subjectId).orElseThrow(
                 () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)));
-		syllaBusRepository.save(syllabus);
+        syllaBusRepository.save(syllabus);
     }
 
-	/**
-	 * 강의 조회 서비스
-	 */
-	public List<Subject> readSubject() {
+    /**
+     * 강의 조회 서비스
+     */
+    public List<Subject> readSubject() {
         return subjectRepository.findAll();
-	}
+    }
 
-	/**
-	 * 강의 삭제 서비스
-	 */
-	public void deleteSubject(Long id) {
-		subjectRepository.deleteById(id);
-		syllaBusRepository.deleteById(id);
-	}
+    /**
+     * 강의 삭제 서비스
+     */
+    public void deleteSubject(Long id) {
+        subjectRepository.deleteById(id);
+        syllaBusRepository.deleteById(id);
+    }
 
-	/**
-	 * 강의 수정 서비스
-	 */
-	public void updateSubject(Long id, SubjectFormDto subjectFormDto) {
-		// ID로 연도 학기 조회
-		Subject subject = subjectRepository.findById(id).orElseThrow(
+    /**
+     * 강의 수정 서비스
+     */
+    public void updateSubject(Long id, SubjectFormDto subjectFormDto) {
+        // ID로 연도 학기 조회
+        Subject subject = subjectRepository.findById(id).orElseThrow(
                 () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );
-		// 강의실, 강의시간 중복 검사
-		List<Subject> subjectList = subjectRepository.findByRoom_IdAndSubDayAndSubYearAndSemester(
+        // 강의실, 강의시간 중복 검사
+        List<Subject> subjectList = subjectRepository.findByRoom_IdAndSubDayAndSubYearAndSemester(
                 subject.getRoom().getId(), subject.getSubDay(), subject.getSubYear(), subject.getSemester()
         );
-		if (subjectList != null) {
-			SubjectUtil subjectUtil = new SubjectUtil();
-			boolean result = subjectUtil.calculate(subjectFormDto, subjectList);
-			if (!result) {
-				throw new CustomRestfullException("해당 시간대는 강의실을 사용중입니다! 다시 선택해주세요", HttpStatus.BAD_REQUEST);
-			}
-		}
+        if (subjectList != null) {
+            SubjectUtil subjectUtil = new SubjectUtil();
+            boolean result = subjectUtil.calculate(subjectFormDto, subjectList);
+            if (!result) {
+                throw new CustomRestfullException("해당 시간대는 강의실을 사용중입니다! 다시 선택해주세요", HttpStatus.BAD_REQUEST);
+            }
+        }
         subject.setName(subjectFormDto.getName());
         subject.setRoom(subject.getRoom());
         subject.setSubDay(subjectFormDto.getSubDay());
         subject.setStartTime(subjectFormDto.getStartTime());
         subject.setEndTime(subjectFormDto.getEndTime());
-        subject.setNumOfStudent(subjectFormDto.getNumOfStudent());
         subjectRepository.save(subject);
-	}
+    }
 
 }

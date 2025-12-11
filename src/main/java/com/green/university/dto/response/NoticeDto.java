@@ -19,6 +19,7 @@ public class NoticeDto {  // 응답용
     private NoticeFileDto file;
     private boolean hasFile;
 
+
     public NoticeDto(Notice n) {
         this.id = n.getId();
         this.category = n.getCategory();

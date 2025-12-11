@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,200 +18,201 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 
- * @author 박성희 
+ *
+ * @author 박성희
  * Admin 수업 조회/입력 관련 Controller
  */
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
-	@Autowired
-	private AdminService adminService;
+    @Autowired
+    private AdminService adminService;
 
-	/**
-	 * 
-	 * @return 단과대 페이지 - 단과대학 리스트 조회
-	 */
-	@GetMapping("/college")
-	public ResponseEntity<?> college( @RequestParam(defaultValue = "select") String crud) {
-		// crud는 등록/삭제 시 ?crud=insert 처럼 파라미터로 붙어 무슨 작업하는지 상태를 나타낸다
-		List<College> collegeList = adminService.readCollege();
+    /**
+     *
+     * @return 단과대 페이지 - 단과대학 리스트 조회
+     */
+    @GetMapping("/college")
+    public ResponseEntity<?> college( @RequestParam(defaultValue = "select") String crud) {
+        // crud는 등록/삭제 시 ?crud=insert 처럼 파라미터로 붙어 무슨 작업하는지 상태를 나타낸다
+        List<College> collegeList = adminService.readCollege();
         return ResponseEntity.ok(Map.of(
                 "collegeList", collegeList,
                 "crud", crud
         ));
-	}
+    }
 
-	/**
-	 * 
-	 * @return 단과대학 입력 기능 / 등록 버튼 누르면 실행, crud=insert
-	 */
-	@PostMapping("/college")
-	public ResponseEntity<?> collegeProc(CollegeFormDto collegeFormDto) {
-		adminService.createCollege(collegeFormDto);
-        return ResponseEntity.ok().body("단과대학 입력이 완료되었습니다");
-	}
+    /**
+     *
+     * @return 단과대학 입력 기능 / 등록 버튼 누르면 실행, crud=insert
+     */
+    @PostMapping("/college")
+    public ResponseEntity<?> collegeProc(@RequestBody@Valid  CollegeFormDto collegeFormDto) {
+        adminService.createCollege(collegeFormDto);
+        return ResponseEntity.ok().body("단과대학 입력이 완료되었습니다.");
+    }
 
-	/**
-	 * 
-	 * @return 단과대학 삭제 기능 crud=delete
-	 */
-	@DeleteMapping("/collegeDelete/{collegeId}")
-	public ResponseEntity<?> deleteCollege(@PathVariable("collegeId") Long collegeId) {
-		adminService.deleteCollege(collegeId);
-        return ResponseEntity.ok().body("단과대학 삭제가 완료되었습니다");
-	}
+    /**
+     *
+     * @return 단과대학 삭제 기능 crud=delete
+     */
+    @DeleteMapping("/college/delete/{collegeId}")
+    public ResponseEntity<?> deleteCollege(@PathVariable("collegeId") Long collegeId) {
+        adminService.deleteCollege(collegeId);
+        return ResponseEntity.ok().body("단과대학 삭제가 완료되었습니다.");
+    }
 
-	/**
-	 * 
-	 * @return 학과 페이지 페이지 이동 시, 단과대학 조회 후 이동
-	 */
-	@GetMapping("/department")
-	public ResponseEntity<?> department(@RequestParam(defaultValue = "select") String crud) {
-		List<Department> departmentList = adminService.readDepartment(); // 프론트에서 합쳐 찍는 형태일까?
-		List<College> collegeList = adminService.readCollege();
+
+    /**
+     *
+     * @return 학과 페이지 페이지 이동 시, 단과대학 조회 후 이동
+     */
+    @GetMapping("/department")
+    public ResponseEntity<?> department(@RequestParam(defaultValue = "select") String crud) {
+        List<Department> departmentList = adminService.readDepartment(); // 프론트에서 합쳐 찍는 형태일까?
+        List<College> collegeList = adminService.readCollege();
         return ResponseEntity.ok(Map.of(
                 "collegeList", collegeList,
                 "departmentList", departmentList,
                 "crud", crud
         ));
-	}
+    }
 
-	// 학과 입력 기능 crud=insert
-	@PostMapping("/department")
-	public ResponseEntity<?> departmentProc(DepartmentFormDto departmentFormDto) {
-		adminService.createDepartment(departmentFormDto);
+    // 학과 입력 기능 crud=insert
+    @PostMapping("/department")
+    public ResponseEntity<?> departmentProc(@RequestBody @Valid DepartmentFormDto departmentFormDto) {
+        adminService.createDepartment(departmentFormDto);
         return ResponseEntity.ok().body("학과 입력이 완료되었습니다");
-	}
+    }
 
-	// 학과 삭제 기능
-	@GetMapping("/departmentDelete/{deptId}")
-	public ResponseEntity<?> deleteDepartment(@PathVariable("deptId") Long deptId) {
-		adminService.deleteDepartment(deptId);
+    // 학과 삭제 기능
+    @GetMapping("/department/delete/{deptId}")
+    public ResponseEntity<?> deleteDepartment(@PathVariable("deptId") Long deptId) {
+        adminService.deleteDepartment(deptId);
         return ResponseEntity.ok().body("학과 삭제가 완료되었습니다");
-	}
+    }
 
-	// 학과 수정 기능
-	@PatchMapping("/department/{deptId}")
-	public ResponseEntity<?> updateDepartment(@PathVariable("deptId") Long deptId, @Valid DepartmentFormDto departmentFormDto) {
-		adminService.updateDepartment(deptId, departmentFormDto);
+    // 학과 수정 기능
+    @PatchMapping("/department/{deptId}")
+    public ResponseEntity<?> updateDepartment(@PathVariable("deptId") Long deptId,@RequestBody @Valid DepartmentFormDto departmentFormDto) {
+        adminService.updateDepartment(deptId, departmentFormDto);
         return ResponseEntity.ok().body("학과 수정이 완료되었습니다");
-	}
+    }
 
-	// 강의실 페이지 - 리스트 보기
-	@GetMapping("/room")
-	public ResponseEntity<?> room(@RequestParam(defaultValue = "select") String crud) {
-		List<Room> roomList = adminService.readRoom();
-		List<College> collegeList = adminService.readCollege();
+    // 강의실 페이지 - 리스트 보기
+    @GetMapping("/room")
+    public ResponseEntity<?> room(@RequestParam(defaultValue = "select") String crud) {
+        List<Room> roomList = adminService.readRoom();
+        List<College> collegeList = adminService.readCollege();
 
         return ResponseEntity.ok(Map.of(
                 "collegeList", collegeList,
                 "roomList", roomList,
                 "crud", crud
         ));
-	}
+    }
 
-	// 강의실 입력 기능
-	@PostMapping("/room")
-	public ResponseEntity<?> roomProc(@Valid @RequestBody RoomFormDto roomFormDto) {
-		adminService.createRoom(roomFormDto);
+    // 강의실 입력 기능
+    @PostMapping("/room")
+    public ResponseEntity<?> roomProc(@Valid @RequestBody RoomFormDto roomFormDto) {
+        adminService.createRoom(roomFormDto);
         return ResponseEntity.ok().body("강의실 입력이 완료되었습니다");
-	}
+    }
 
-	// 강의실 삭제 기능
-	@DeleteMapping("/roomDelete/{roomId}")
-	public ResponseEntity<?> deleteRoom(@RequestParam String roomId) { // 강의실 기본키(id)는 E601 이런 형식임
-		adminService.deleteRoom(roomId);
+    // 강의실 삭제 기능
+    @DeleteMapping("/room/delete/{roomId}")
+    public ResponseEntity<?> deleteRoom(@RequestParam String roomId) { // 강의실 기본키(id)는 E601 이런 형식임
+        adminService.deleteRoom(roomId);
         return ResponseEntity.ok().body("강의실 삭제가 완료되었습니다");
-	}
+    }
 
-	// 강의 페이지 - 리스트 조회
-	@GetMapping("/subject")
+    // 강의 페이지 - 리스트 조회
+    @GetMapping("/subject")
     public ResponseEntity<?> subject(@RequestParam(defaultValue = "select") String crud) {
-		List<Subject> subjectList = adminService.readSubject();
-		List<College> collegeList = adminService.readCollege();
+        List<Subject> subjectList = adminService.readSubject();
+        List<College> collegeList = adminService.readCollege();
 
         return ResponseEntity.ok(Map.of(
                 "collegeList", collegeList,
                 "subjectList", subjectList,
                 "crud", crud
         ));
-	}
+    }
 
-	/**
-	 * 
-	 * @return 강의 입력 기능
-	 */
-	@PostMapping("/subject")
+    /**
+     *
+     * @return 강의 입력 기능
+     */
+    @PostMapping("/subject")
     public ResponseEntity<?> insertSubject(@Valid @RequestBody SubjectFormDto subjectFormDto) {
-		adminService.createSubjectAndSyllabus(subjectFormDto);
+        adminService.createSubjectAndSyllabus(subjectFormDto);
         return ResponseEntity.ok().body("강의 입력이 완료되었습니다");
-	}
+    }
 
-	/**
-	 * 
-	 * @return 강의 삭제 기능
-	 */
-	@DeleteMapping("/subjectDelete/{subjectId}")
+    /**
+     *
+     * @return 강의 삭제 기능
+     */
+    @DeleteMapping("/subject/delete/{subjectId}")
     public ResponseEntity<?> deleteSubject(@PathVariable("subjectId") Long subjectId) {
-		adminService.deleteSubject(subjectId);
+        adminService.deleteSubject(subjectId);
         return ResponseEntity.ok().body("강의 삭제가 완료되었습니다");
-	}
+    }
 
-	/**
-	 * 
-	 * @return 강의 수정 기능
-	 */
-	@PatchMapping("/subject/{subjectId}")
-    public ResponseEntity<?> updateSubject(@PathVariable("subjectId") Long subjectId, @Valid SubjectFormDto subjectFormDto) {
-		adminService.updateSubject(subjectId, subjectFormDto);
+    /**
+     *
+     * @return 강의 수정 기능
+     */
+    @PatchMapping("/subject/{subjectId}")
+    public ResponseEntity<?> updateSubject(@PathVariable("subjectId") Long subjectId, @RequestBody @Valid SubjectFormDto subjectFormDto) {
+        adminService.updateSubject(subjectId, subjectFormDto);
         return ResponseEntity.ok().body("강의 수정이 완료되었습니다");
-	}
+    }
 
-	/**
-	 * 
-	 * @return 단과대별 등록금 페이지
-	 */
-	@GetMapping("/tuition")
-	public ResponseEntity<?> collTuit(@RequestParam(defaultValue = "select") String crud) {
-		List<CollTuitFormDto> collTuitList = adminService.readCollTuit();
-		List<College> collegeList = adminService.readCollege();
+    /**
+     *
+     * @return 단과대별 등록금 페이지
+     */
+    @GetMapping("/tuition")
+    public ResponseEntity<?> collTuit(@RequestParam(defaultValue = "select") String crud) {
+        List<CollTuitFormDto> collTuitList = adminService.readCollTuit();
+        List<College> collegeList = adminService.readCollege();
 
         return ResponseEntity.ok(Map.of(
                 "collegeList", collegeList,
                 "collTuitList", collTuitList,
                 "crud", crud
         ));
-	}
+    }
 
-	/**
-	 * 
-	 * @return 단과대별 등록금 입력 기능
-	 */
-	@PostMapping("/tuition")
-	public ResponseEntity<?> insertcollTuit(@Valid CollTuitFormDto collTuitFormDto) {
-		adminService.createCollTuit(collTuitFormDto);
+    /**
+     *
+     * @return 단과대별 등록금 입력 기능
+     */
+    @PostMapping("/tuition")
+    public ResponseEntity<?> insertcollTuit(@RequestBody @Valid CollTuitFormDto collTuitFormDto) {
+        adminService.createCollTuit(collTuitFormDto);
         return ResponseEntity.ok().body("단과대별 등록금 입력이 완료되었습니다");
-	}
+    }
 
-	/**
-	 * 
-	 * @return 단과대 등록금 삭제 기능
-	 */
-	@DeleteMapping("/tuitionDelete/{collegeId}")
-	public ResponseEntity<?> deleteCollTuit(@PathVariable("collegeId") Long collegeId) {
-		adminService.deleteCollTuit(collegeId);
+    /**
+     *
+     * @return 단과대 등록금 삭제 기능
+     */
+    @DeleteMapping("/tuition/delete/{collegeId}")
+    public ResponseEntity<?> deleteCollTuit(@PathVariable("collegeId") Long collegeId) {
+        adminService.deleteCollTuit(collegeId);
         return ResponseEntity.ok().body("단과대별 등록금 삭제가 완료되었습니다");
-	}
+    }
 
-	/**
-	 * 
-	 * @return 단과대 등록금 수정 기능
-	 */
-	@PatchMapping("/tuitionUpdate/{collegeId}")
-	public ResponseEntity<?> updateCollTuit(@PathVariable("collegeId") Long collegeId ,@Valid CollTuitFormDto collTuitFormDto) {
-		adminService.updateCollTuit(collegeId, collTuitFormDto);
+    /**
+     *
+     * @return 단과대 등록금 수정 기능
+     */
+    @PatchMapping("/tuition/{collegeId}")
+    public ResponseEntity<?> updateCollTuit(@PathVariable("collegeId") Long collegeId ,  @RequestBody @Valid CollTuitFormDto collTuitFormDto) {
+        adminService.updateCollTuit(collegeId, collTuitFormDto);
         return ResponseEntity.ok().body("단과대별 등록금 수정이 완료되었습니다");
-	}
+    }
 
 }
