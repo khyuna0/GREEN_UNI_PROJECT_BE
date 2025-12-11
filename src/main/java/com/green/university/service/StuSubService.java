@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -41,10 +42,18 @@ public class StuSubService {
     private StudentRepository studentRepository;
 
     // 학생의 수강신청 내역에 해당 강의가 존재하는지 확인
-    public StuSub readStuSub(Long studentId, Long subjectId) {
-        return stuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId).orElseThrow(
-                () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND)
-        );
+    public Optional<StuSub> readStuSub(Long studentId, Long subjectId) {
+        return stuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId);
+    }
+    /**
+     * 특정 학생이 특정 과목을 수강신청 했는지 확인
+     * @param studentId 학생 ID
+     * @param subjectId 과목 ID
+     * @return 신청했으면 true, 아니면 false
+     */
+    public boolean isEnrolled(Long studentId, Long subjectId) {
+        // 수강신청 테이블(StuSub)에서 해당 학생의 해당 과목 신청 내역 확인
+        return stuSubRepository.existsByStudentIdAndSubjectId(studentId, subjectId);
     }
 
     // 🔥🔥 학생의 해당 학기 수강 신청 내역 조회
@@ -69,7 +78,8 @@ public class StuSubService {
         );
 
         // 중복 체크
-        if (stuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId).isPresent()) {
+        Optional<StuSub> stuSubOptional = stuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId);
+        if (stuSubOptional.isPresent()) {
             throw new CustomRestfullException("이미 수강 신청한 과목입니다.", HttpStatus.BAD_REQUEST);
         }
 
@@ -105,17 +115,11 @@ public class StuSubService {
         StuSubUtil.checkSumGrades(targetSubject, stuSubSumGradesDto);
         StuSubUtil.checkDayTime(targetSubject, dayTimeList);
 
-        StuSub stuSub = stuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId).orElseThrow(
-                () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND)
-        );
-        StuSubDetail stuSubDetail = stuSubDetailRepository.findByStuSub(stuSub).orElseThrow(
-                () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND)
-        );
+
+        StuSub stuSub = new StuSub();
         stuSub.setSubject(targetSubject);
         stuSub.setStudent(targetStudent);
-        stuSubDetail.setStuSub(stuSub);
         stuSubRepository.save(stuSub); // 수강신청 내역 추가
-        stuSubDetailRepository.save(stuSubDetail); // 수강 상세 내역에도 데이터 추가
 
         // 해당 강의 현재인원 +1
         subjectService.updatePlusNumOfStudent(subjectId);
@@ -127,7 +131,7 @@ public class StuSubService {
         StuSub stuSub = stuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId)
                 .orElseThrow(() -> new CustomRestfullException("수강 신청 내역이 없습니다.", HttpStatus.NOT_FOUND));
         // 수강신청 내역 삭제
-        stuSubRepository.delete(stuSub);
+        stuSubRepository.deleteById(stuSub.getId());
         // 해당 강의 현재인원 -1
         subjectService.updateMinusNumOfStudent(subjectId);
     }
@@ -214,10 +218,11 @@ public class StuSubService {
                 stuSub.setSubject(subject);
                 stuSubRepository.save(stuSub);
 
-                // StuSubDetail 생성
-                StuSubDetail detail = new StuSubDetail();
-                detail.setStuSub(stuSub);
-                stuSubDetailRepository.save(detail);
+                // 삭제한 이유 : 최종 수강 신청 완료가 될 때 넘어가게 만들 예정
+//                // StuSubDetail 생성
+//                StuSubDetail detail = new StuSubDetail();
+//                detail.setStuSub(stuSub);
+//                stuSubDetailRepository.save(detail);
 
                 // 과목 현재 인원 +1
                 subject.setNumOfStudent(subject.getNumOfStudent() + 1);
@@ -332,11 +337,15 @@ public class StuSubService {
     public List<StuSubAppDto> readPreStuSubByStuSub(Long studentId) {
         // 예비 수강 신청 테이블에 남아있는 것들만 조회
         List<PreStuSub> preStuSubList = preStuSubRepository.findByStudent_Id(studentId);
+        for (PreStuSub pre : preStuSubList) {
+            pre.setStatus(false);
+        }
         return preStuSubList.stream()
                 .map(pre -> new StuSubAppDto(
                         studentId,
                         pre.getSubject(),
-                        pre.getSubject().getProfessor()
+                        pre.getSubject().getProfessor(),
+                        false
                 ))
                 .collect(Collectors.toList());
     }
@@ -379,5 +388,4 @@ public class StuSubService {
                 .map(TimetableCourseDto::from)
                 .collect(Collectors.toList());
     }
-
 }

@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 // 수강 신청 관련 (preStuSub 포함) 강의 시간표는 SubjectController 대신 일부러 여기에 넣음
 @RestController
@@ -45,6 +47,7 @@ public class StuSubController {
 
     // ========================= 관리자 기능 =========================
     // 🔥 배치 실행용 엔드포인트 (관리자 전용)
+    // 수강신청 변경에 따라 학생의 예비 수강신청 내역이 둘(미완성, 완성)으로 나눠지게 만들어줌
     @PostMapping("/batch/move-pre-to-regular")
     public ResponseEntity<?> executeBatch() {
         stuSubService.movePreToStuSubBatch();
@@ -129,6 +132,52 @@ public class StuSubController {
 
     }
 
+    // 🔥 수강 신청 탭에서 보여지는 강의 목록 (현재 연도, 학기 강의 + 검색 + 페이징 + 수강신청 버튼 존재)
+    @GetMapping("/regularsubjectlist")
+    public ResponseEntity<?> sugangSubjectList(
+            @ModelAttribute CurrentSemesterSubjectSearchFormDto dto,
+            @PageableDefault(page = 0, size = Define.SUBJECT_PAGE_SIZE, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
+            @AuthenticationPrincipal CustomUserDetails principal) {
+
+        // 수강 신청 기간이 아니라면
+        int currentStatus = sugangPeriodService.getCurrentStatus();
+        if (currentStatus != 1) {
+            throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
+        }
+        Long studentId = principal.getId();
+
+        // 현재 연도, 학기에 맞는 강의 목록
+        Page<SubjectDto> subjectPage = subjectService.readSubjectListByCurrentSemesterPage(dto, pageable);
+
+        // 방법1. 학생의 수강 신청 여부(status)를 SubjectDto에 추가하는 것
+        for (SubjectDto sub : subjectPage) {
+            // 과목 id 가져오기
+            Long subjectId = sub.getId();
+            // 그 과목 id를 통해서 stusub에 신청 내역 확인하기
+            Optional<StuSub> stuSub = stuSubService.readStuSub(studentId, subjectId);
+            // 여기서 stusub가 true면 신청한거, false면 신청 안한 거 -> dto에 값 넣어주기
+            sub.setStatus(stuSub.isPresent());
+        }
+        // 방법2. 각 강의마다 학생의 신청 상태(status) 업데이트 (깔끔 버전)
+//        List<SubjectDto> subjectList = subjectPage.getContent().stream()
+//                .map(subjectDto -> {
+//                    // Optional을 사용해서 null-safe하게 처리
+//                    Optional<StuSub> stuSubOpt = stuSubService.readStuSub(studentId, subjectDto.getId());
+//                    // 존재하면 true, 없으면 false
+//                    subjectDto.setStatus(stuSubOpt.isPresent());
+//                    return subjectDto;
+//                })
+//                .toList();
+
+        Map<String, Object> pagingResponse = new HashMap<>();
+        pagingResponse.put("listCount", subjectPage.getTotalElements());
+        pagingResponse.put("totalPages", subjectPage.getTotalPages());
+        pagingResponse.put("currentPage", subjectPage.getNumber());
+        pagingResponse.put("lists", subjectPage.getContent());
+
+        return ResponseEntity.ok(pagingResponse);
+    }
+
     // 🔥 수강 신청
     @PostMapping("/regular/{subjectId}")
     public ResponseEntity<?> addStuSub(@PathVariable("subjectId") Long subjectId,
@@ -138,7 +187,10 @@ public class StuSubController {
         if (currentStatus != 1) {
             throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
         }
+        System.out.println("subjectId = " + subjectId);
+        System.out.println("principal = " + principal.getId());
         stuSubService.createStuSub(principal.getId(), subjectId);
+        preStuSubService.deleteBySubject_Id(subjectId);
         return ResponseEntity.ok().body("수강 신청이 정상적으로 처리되었습니다.");
     }
 
@@ -146,7 +198,6 @@ public class StuSubController {
     @DeleteMapping("/regular/{subjectId}")
     public ResponseEntity<?> deleteStuSub(@PathVariable("subjectId") Long subjectId,
                                           @AuthenticationPrincipal CustomUserDetails principal) {
-
         // 수강 신청 기간이 아니라면
         int currentStatus = sugangPeriodService.getCurrentStatus();
         if (currentStatus != 1) {
