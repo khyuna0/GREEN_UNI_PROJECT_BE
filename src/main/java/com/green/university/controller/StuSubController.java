@@ -207,7 +207,7 @@ public class StuSubController {
         return ResponseEntity.ok().body("수강 신청 취소가 정상적으로 처리되었습니다.");
     }
 
-    // 🔥 학생의 예비/수강 목록 조회 (기간에 따라 다르게)
+    // 🔥 학생의 예비 / 수강 목록 조회 (기간에 따라 다르게)
     @GetMapping("/stusublist")
     public ResponseEntity<?> getStudentSubList(@AuthenticationPrincipal CustomUserDetails principal) {
         // 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가
@@ -267,7 +267,7 @@ public class StuSubController {
     }
 
 
-    // 아마도 학생의 최종 수강 신청 내역!
+    // 아마도 학생의 최종 수강 신청 내역 (아래 timetable 쓰면 될 듯..)
     @GetMapping("/list")
     public ResponseEntity<?> stuSubAppList(@AuthenticationPrincipal CustomUserDetails principal) {
 
