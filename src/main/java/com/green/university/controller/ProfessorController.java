@@ -97,6 +97,7 @@ public class ProfessorController {
 		List<StudentInfoForProfessorDto> studentList = professorService.selectBySubjectId(subjectId);
 		Subject subject = professorService.selectSubjectById(subjectId);
 
+
         return ResponseEntity.ok(Map.of(
                 "subject", subject,
                 "studentList", studentList

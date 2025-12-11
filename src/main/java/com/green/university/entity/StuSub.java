@@ -22,6 +22,6 @@ public class StuSub { // 학생의 수강 과목과 학점
     @ManyToOne
     @JoinColumn(name = "grade_id")
     private Grade grade;
-
-    private double completeGrade; // 환산점수
+    
+    private Long completeGrade; // 이수학점
 }

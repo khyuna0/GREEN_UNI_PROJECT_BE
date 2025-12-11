@@ -131,7 +131,7 @@ public class ProfessorService {
         StuSubDetail detail = stuSubDetailRepository.findByStuSub(stuSub)
                 .orElseThrow(() -> new RuntimeException("출결 정보 없음"));
 
-        // 3. 해당 강의 듣는 학생 수 계산 (상대평가 계산 용 / 수강 인원이 10명 이하면 절대평가) todo 기준 픽스하기
+        // 3. 해당 강의 듣는 학생 수 계산 (상대평가 계산 용 / 수강 인원이 10명 이하면 절대평가)
         Long numOfStudent = subjectRepository.findNumOfStudentById(subjectId);
 
         // 4. 기본 성적 입력
@@ -140,28 +140,13 @@ public class ProfessorService {
         detail.setHomework(dto.getHomework()); // 과제점수
         detail.setMildExam(dto.getMidExam()); // 중간
         detail.setFinalExam(dto.getFinalExam()); // 기말
-
-
+        
         // 5. 환산점수 계산
-
-//        환산점수 계산 기준
-//        - 감점 요소
-//        지각 3회 = 결석 1회
-//        결석 1회 = -2 점 (결석 4회 F)
-//
-//        - 환산점수 계산
-//        과제 점수 20%
-//        중간 시험 30%
-//        기말 시험 50%
-//
-//        최종 환산점수 = 환산점수 - 감점 요소
-//        전체 수강인원 20명 이상일 때 - 상대평가 등급 자동 산출
-//        등급은 처음 자동 산출, 이후 교수 수정 가능
 
         // 출석 감점 계산
         long latenessToAbsent = dto.getLateness() / 3; // 지각 3회 - 결석 1번
         long totalAbsent = dto.getAbsent() + latenessToAbsent;
-        double penalty = totalAbsent * 2;
+        double penalty = totalAbsent * 2; // 결석 당 패널티 점수 -2점
 
         // 환산점수 계산
         double convertedmark =
@@ -174,43 +159,45 @@ public class ProfessorService {
 
         // 5. 계산된 환산점수
         detail.setConvertedMark(finalConvertedMark);
-        stuSub.setCompleteGrade(finalConvertedMark);
-
-        stuSubDetailRepository.save(detail);
-        stuSubRepository.save(stuSub);
 
         // 6. 등급 계산
-        // 수강 인원이 20명 이상이면 상대평가, 미만이면 절대평가
-        String  gradeValue = "F"; // 기본 값
-        if(totalAbsent < 5 && numOfStudent < 20) { // 절대평가 기준
-            if (finalConvertedMark >= 95) gradeValue = "A+";
-            else if (finalConvertedMark >= 90) gradeValue = "A0";
-            else if (finalConvertedMark >= 85) gradeValue = "B+";
-            else if (finalConvertedMark >= 80) gradeValue = "B0";
-            else if (finalConvertedMark >= 75) gradeValue = "C+";
-            else if (finalConvertedMark >= 70) gradeValue = "C0";
-            else if (finalConvertedMark >= 65) gradeValue = "D+";
-            else if (finalConvertedMark >= 60) gradeValue = "D0";
-        } else if (totalAbsent < 5) {
+        String gradeValue =null;
 
+        if(numOfStudent < 20) { // 수강생이 20명 미만이면 절대평가
+            gradeValue = getAbsoluteGrade(finalConvertedMark);
         }
 
+        if(totalAbsent > 5) { // 결석 5번 이상이면 F
+            gradeValue = "F";
+        }
 
-        // 6. 등급 엔티티 조회
+        // 7. 등급 엔티티 조회
         Grade grade = gradeRepository.findByGrade(gradeValue)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 학점 등급입니다"));
         stuSub.setGrade(grade);
         detail.setGrade(grade.getGrade()); // 단순 출력용으로 저장함
-        // 5. 완성학점 업데이트 (점수 기준)
 
-
-        // 6. 저장
+        // 8. 저장
         stuSubDetailRepository.save(detail);
         stuSubRepository.save(stuSub);
     }
 
+    // 절대평가 기준 등급 산출
+    private static String getAbsoluteGrade(double score) {
+        if (score >= 95) return "A+";
+        if (score >= 90) return "A0";
+        if (score >= 85) return "B+";
+        if (score >= 80) return "B0";
+        if (score >= 75) return "C+";
+        if (score >= 70) return "C0";
+        if (score >= 65) return "D+";
+        if (score >= 60) return "D0";
 
-	/**
+        return "F";
+    }
+
+
+    /**
 	 * 교수 강의계획서 조회 (수정 시에도 필요)
 	 * 
 	 * @param subjectId
@@ -273,5 +260,6 @@ public class ProfessorService {
         return Professor.map(ProfessorDto::fromEntity); // dto로 반환해주기
 
     }
+    
 
 }

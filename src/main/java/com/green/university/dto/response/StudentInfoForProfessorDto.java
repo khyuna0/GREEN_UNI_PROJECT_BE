@@ -28,7 +28,7 @@ public class StudentInfoForProfessorDto {
 	// 기말고사 점수
 	private Long finalExam;
 	// 총합 환산 점수
-	private Long convertedMark;
+	private Double convertedMark;
     // 등급 (단순확인용)
     private String grade;
 
