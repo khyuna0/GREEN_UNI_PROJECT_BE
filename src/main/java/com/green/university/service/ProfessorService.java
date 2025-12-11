@@ -34,6 +34,8 @@ public class ProfessorService {
 	private SyllaBusRepository syllaBusRepository;
 	@Autowired
 	private ProfessorRepository professorRepository;
+    @Autowired
+    private StuSubService stuSubService;
 
     private static final int PAGE_SIZE = 20; // 교수 리스트 / 검색 페이징 용
     @Autowired
@@ -132,7 +134,7 @@ public class ProfessorService {
                 .orElseThrow(() -> new RuntimeException("출결 정보 없음"));
 
         // 3. 해당 강의 듣는 학생 수 계산 (상대평가 계산 용 / 수강 인원이 10명 이하면 절대평가)
-        Long numOfStudent = subjectRepository.findNumOfStudentById(subjectId);
+        int numOfStudent = subjectRepository.findNumOfStudentById(subjectId);
 
         // 4. 기본 성적 입력
         detail.setAbsent(dto.getAbsent()); // 결석
@@ -143,43 +145,49 @@ public class ProfessorService {
         
         // 5. 환산점수 계산
 
-        // 출석 감점 계산
-        long latenessToAbsent = dto.getLateness() / 3; // 지각 3회 - 결석 1번
-        long totalAbsent = dto.getAbsent() + latenessToAbsent;
-        double penalty = totalAbsent * 2; // 결석 당 패널티 점수 -2점
+
 
         // 환산점수 계산
         double convertedmark =
                 ( dto.getHomework() * 0.2 ) + // 과제 점수 20%
-                ( dto.getMidExam() * 0.3 ) + // 중간 점수 30%
-                ( dto.getFinalExam() * 0.5 ); // 기말 점수 50%
+                ( dto.getMidExam() * 0.4 ) + // 중간 점수 40%
+                ( dto.getFinalExam() * 0.4 ); // 기말 점수 40%
 
         // 최종 환산점수 계산 첫째 자리까지 반올림 (환산점수 - 감점)
         double finalConvertedMark = Math.round((convertedmark - penalty) * 10) / 10.0;
 
         // 5. 계산된 환산점수
+        if(finalConvertedMark < 0) finalConvertedMark = 0;
         detail.setConvertedMark(finalConvertedMark);
 
         // 6. 등급 계산
-        String gradeValue =null;
+        String gradeValue = null;
 
         if(numOfStudent < 20) { // 수강생이 20명 미만이면 절대평가
             gradeValue = getAbsoluteGrade(finalConvertedMark);
         }
-
-        if(totalAbsent > 5) { // 결석 5번 이상이면 F
+        /*
+        *   결석 5회 이상
+        *   중간고사, 기말고사 40점 미만
+        *   환산점수 60점 미만이면 - F
+        */
+        if(totalAbsent >= 5 || dto.getMidExam() < 40 || dto.getFinalExam() < 40 || finalConvertedMark < 60) { // 결석 5번 이상이면 F
             gradeValue = "F";
         }
 
         // 7. 등급 엔티티 조회
-        Grade grade = gradeRepository.findByGrade(gradeValue)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 학점 등급입니다"));
-        stuSub.setGrade(grade);
-        detail.setGrade(grade.getGrade()); // 단순 출력용으로 저장함
+        if(gradeValue != null) {
+            Grade grade = gradeRepository.findByGrade(gradeValue)
+                    .orElseThrow(() -> new RuntimeException("존재하지 않는 학점 등급입니다"));
+            stuSub.setGrade(grade);
+            detail.setGrade(grade.getGrade()); // 단순 출력용으로 저장함
+        }
 
         // 8. 저장
         stuSubDetailRepository.save(detail);
         stuSubRepository.save(stuSub);
+        // 9. 최종 성적 가지고 이수학점 계산
+        stuSubService.updateCompleteGrade(studentId, subjectId);
     }
 
     // 절대평가 기준 등급 산출
@@ -192,7 +200,6 @@ public class ProfessorService {
         if (score >= 70) return "C0";
         if (score >= 65) return "D+";
         if (score >= 60) return "D0";
-
         return "F";
     }
 
@@ -260,6 +267,14 @@ public class ProfessorService {
         return Professor.map(ProfessorDto::fromEntity); // dto로 반환해주기
 
     }
-    
+
+    public int getPenaltyNum(UpdateStudentGradeDto dto) {
+        // 출석 감점 계산
+        long latenessToAbsent = dto.getLateness() / 3; // 지각 3회 - 결석 1번
+        long totalAbsent = dto.getAbsent() + latenessToAbsent;
+        double penalty = totalAbsent * 2; // 결석 당 패널티 점수 -2점
+
+        return penalty;
+    }
 
 }
