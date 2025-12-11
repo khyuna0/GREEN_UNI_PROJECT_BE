@@ -42,27 +42,21 @@ public class AdminController {
         ));
     }
 
-    /**
-     *
-     * @return 단과대학 입력 기능 / 등록 버튼 누르면 실행, crud=insert
-     */
+    // 단과대 등록
     @PostMapping("/college")
     public ResponseEntity<?> collegeProc(@RequestBody@Valid  CollegeFormDto collegeFormDto) {
         adminService.createCollege(collegeFormDto);
         return ResponseEntity.ok().body("단과대학 입력이 완료되었습니다.");
     }
 
-    /**
-     *
-     * @return 단과대학 삭제 기능 crud=delete
-     */
+    // 단과대 삭제
     @DeleteMapping("/college/{collegeId}")
     public ResponseEntity<?> deleteCollege(@PathVariable("collegeId") Long collegeId) {
         adminService.deleteCollege(collegeId);
         return ResponseEntity.ok().body("단과대학 삭제가 완료되었습니다.");
     }
 
-    // 단과대 수정 기능
+    // 단과대 수정
     @PatchMapping("/college/{collegeId}")
     public ResponseEntity<?> updateCollege(
             @PathVariable("collegeId") Long collegeId,

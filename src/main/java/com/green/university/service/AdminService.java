@@ -58,13 +58,20 @@ public class AdminService {
     }
 
     // 단과대 삭제
+    @Transactional
     public void deleteCollege(Long collegeId) {
+
+        if (!collegeRepository.existsById(collegeId)) {
+            throw new CustomRestfullException("해당 단과대를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+        }
         collegeRepository.deleteById(collegeId);
     }
+
 
     //단과대 수정
     @Transactional
     public void updateCollege(Long collegeId, CollegeFormDto collegeFormDto) {
+
         // 기존 단과대 엔티티 조회
         College college = collegeRepository.findById(collegeId)
                 .orElseThrow(() ->
@@ -73,12 +80,11 @@ public class AdminService {
         String beforeName = college.getName();
         String afterName  = collegeFormDto.getName();
 
-        // 2. 이름이 실제로 변경될 때만 중복 체크
+        // 이름이 실제로 변경될 때 중복 체크
         if (!beforeName.equals(afterName) && collegeRepository.existsByName(afterName)) {
             throw new CustomRestfullException("이미 존재하는 단과대입니다.", HttpStatus.BAD_REQUEST);
         }
 
-        // 3. 이름 변경
         college.setName(afterName);
     }
 

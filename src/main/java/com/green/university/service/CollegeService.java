@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * 
+ *
  * @author 서영
  *
  */
@@ -20,31 +20,31 @@ import java.util.List;
 @Service
 public class CollegeService {
 
-	@Autowired
-	private CollegeRepository collegeRepository;
+    @Autowired
+    private CollegeRepository collegeRepository;
 
-	@Autowired
-	private DepartmentRepository departmentRepository;
+    @Autowired
+    private DepartmentRepository departmentRepository;
 
-    
+
     //id로 해당 단과대 정보 가져옴
-	public College readCollById(Long id) {
+    public College readCollById(Long id) {
         return collegeRepository.findById(id)
                 .orElseThrow(()-> new CustomRestfullException("해당 단과대를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
-	}
+    }
 
 
     //id로 해당 학과 정보 가져옴 , deptId
-	public Department readDeptById(Long id) {
+    public Department readDeptById(Long id) {
         return departmentRepository.findById(id)
                 .orElseThrow(() -> new CustomRestfullException("해당 학과를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
-	}
+    }
 
 
     //전체 학과 정보 조회
-	public List<Department> readDeptAll() {
-		List<Department> deptEntityList = departmentRepository.findAll();
-		return deptEntityList;
-	}
+    public List<Department> readDeptAll() {
+        List<Department> deptEntityList = departmentRepository.findAll();
+        return deptEntityList;
+    }
 
 }
