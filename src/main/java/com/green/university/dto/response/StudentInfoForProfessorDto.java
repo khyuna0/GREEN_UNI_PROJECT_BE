@@ -29,8 +29,10 @@ public class StudentInfoForProfessorDto {
 	private Long finalExam;
 	// 총합 환산 점수
 	private Long convertedMark;
+    // 등급 (단순확인용)
+    private String grade;
 
-	// StuSub 엔티티 -> StudentInfoForProfessorDto로 변환
+	// StuSubDetail 엔티티 -> StudentInfoForProfessorDto로 변환
     public static StudentInfoForProfessorDto fromEntity(StuSubDetail s) {
         StudentInfoForProfessorDto dto = new StudentInfoForProfessorDto();
 
@@ -47,6 +49,7 @@ public class StudentInfoForProfessorDto {
         dto.setMidExam(s.getMildExam());        // 엔티티 컬럼명 mildExam 주의
         dto.setFinalExam(s.getFinalExam());
         dto.setConvertedMark(s.getConvertedMark());
+        dto.setGrade(s.getGrade());
 
         return dto;
     }

@@ -27,10 +27,10 @@ public class UpdateStudentGradeDto {
     @NotNull(message = "기말고사 점수를 입력해주세요.")
     private Long finalExam;
 
-    @NotNull(message = "환산 점수를 입력해주세요.")
+    @NotNull(message = "환산 점수를 입력해주세요.") // 지우기
     private Long convertedMark;
 
-    @NotBlank(message = "등급을 선택해주세요.")
+    @NotBlank(message = "등급을 선택해주세요.") // 처음은 자동, 이후에 수정가능하게 변경 예정
     private String grade;
 
 }

@@ -103,23 +103,6 @@ public class ProfessorController {
         ));
 	}
 
-//	/**
-//	 *
-//	 * @param subjectId
-//	 * @param studentId
-//	 * @return 출결 및 성적 기입 페이지
-//	 */
-//	@GetMapping("/subject/{subjectId}/{studentId}")
-//	public ResponseEntity<?> updateStudentDetail(@PathVariable("subjectId") Long subjectId, @PathVariable ("studentId")Long studentId) {
-//
-//        StudentDto student = userService.readStudent(studentId);
-//
-//        return ResponseEntity.ok(Map.of(
-//                "student", student,
-//                "subjectId", subjectId
-//        ));
-//	}
-    
     // 교수의 성적 입력
     @PatchMapping("/subject/{subjectId}/{studentId}")
     public ResponseEntity<?> updateStudentDetailProc(
@@ -127,7 +110,7 @@ public class ProfessorController {
             @PathVariable Long studentId,
             @Valid @RequestBody UpdateStudentGradeDto dto) {
 
-        // 1) 점수 입력
+        // 1) 점수 입력 (여기서 결석 횟수 따라 F, 환산점수 처리, 상대평가 등급 등 해줘야 함...)
         professorService.updateGrade(subjectId, studentId, dto);
 
         // 2) 이수학점 계산 (F 여부는 서비스 안에서 처리)
