@@ -11,5 +11,5 @@ public class Grade {
     @Id
     private String grade; // 등급 (A, B, C)
 
-    private Long gradeValue; // 학점 (4.5, 3.0)
+    private Double gradeValue; // 학점 (4.5, 3.0)
 }

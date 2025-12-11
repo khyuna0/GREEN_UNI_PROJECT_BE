@@ -189,6 +189,7 @@ public class GradeService {
     // 장학금용 평균 성적 조회
     public GradeForScholarshipDto readAvgGrade(Long studentId, Long subYear, Long semester) {
 
+        // 특정 년도/학기에 수강한 모든 과목 가져오기
         List<StuSub> stuSubs = stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(studentId, subYear, semester);
 
         if(stuSubs.isEmpty()) {
@@ -202,12 +203,14 @@ public class GradeService {
             Subject subject = ss.getSubject();
             Grade grade = ss.getGrade();
 
-            if(subject != null || grade != null) continue;
+            // subject 또는 grade가 null 이면 계산 스킵
+            if(subject == null || grade == null) continue;
 
             Long subjectGrades = subject.getGrades();
-            Long gradeValue = grade.getGradeValue();
+            Double gradeValue = grade.getGradeValue();
 
-            if(subjectGrades != null || gradeValue != null) continue;
+            // 학점 또는 등급값이 null이면 스킵
+            if(subjectGrades == null || gradeValue == null) continue;
 
             totalWeighted += subjectGrades * gradeValue;
             totalGrades += subjectGrades;
