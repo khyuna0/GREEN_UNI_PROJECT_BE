@@ -1,5 +1,6 @@
 package com.green.university.service;
 
+import com.green.university.dto.PenaltyResultDto;
 import com.green.university.dto.SyllaBusFormDto;
 import com.green.university.dto.UpdateStudentGradeDto;
 import com.green.university.dto.response.*;
@@ -7,6 +8,7 @@ import com.green.university.entity.*;
 import com.green.university.exception.CustomRestfullException;
 import com.green.university.repository.*;
 import com.green.university.specification.ProfessorSpecification;
+import com.green.university.utils.PenaltyCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -142,12 +144,13 @@ public class ProfessorService {
         detail.setHomework(dto.getHomework()); // 과제점수
         detail.setMildExam(dto.getMidExam()); // 중간
         detail.setFinalExam(dto.getFinalExam()); // 기말
-        
+
+
+        PenaltyResultDto penaltyResult = PenaltyCalculator.calculate(dto.getAbsent(), dto.getLateness());
+        long totalAbsent = penaltyResult.getTotalAbsent();
+        double penalty = penaltyResult.getPenalty();
+
         // 5. 환산점수 계산
-
-
-
-        // 환산점수 계산
         double convertedmark =
                 ( dto.getHomework() * 0.2 ) + // 과제 점수 20%
                 ( dto.getMidExam() * 0.4 ) + // 중간 점수 40%
@@ -160,20 +163,31 @@ public class ProfessorService {
         if(finalConvertedMark < 0) finalConvertedMark = 0;
         detail.setConvertedMark(finalConvertedMark);
 
-        // 6. 등급 계산
+        // 6. 등급 계산 (선택된 등급이 있으면 환산점수 까지만 계산하고, 등급은 수정됨)
         String gradeValue = null;
 
-        if(numOfStudent < 20) { // 수강생이 20명 미만이면 절대평가
-            gradeValue = getAbsoluteGrade(finalConvertedMark);
+        boolean gradeChanged =
+                dto.getGrade() != null &&
+                !dto.getGrade().equals(detail.getGrade());
+
+        if(gradeChanged) { // 선택된 등급이 있고, 변경되었을 때
+            gradeValue = dto.getGrade();
+
+        } else { // 최초 성적 입력 시
+            if(numOfStudent < 20) { // 수강생이 20명 미만이면 절대평가
+                gradeValue = getAbsoluteGrade(finalConvertedMark);
+            }
+
+            /*
+             *   결석 5회 이상
+             *   중간고사, 기말고사 40점 미만
+             *   환산점수 60점 미만이면 - F
+             */
+            if(totalAbsent >= 5 || dto.getMidExam() < 40 || dto.getFinalExam() < 40 || finalConvertedMark < 60) { // 결석 5번 이상이면 F
+                gradeValue = "F";
+            }
         }
-        /*
-        *   결석 5회 이상
-        *   중간고사, 기말고사 40점 미만
-        *   환산점수 60점 미만이면 - F
-        */
-        if(totalAbsent >= 5 || dto.getMidExam() < 40 || dto.getFinalExam() < 40 || finalConvertedMark < 60) { // 결석 5번 이상이면 F
-            gradeValue = "F";
-        }
+
 
         // 7. 등급 엔티티 조회
         if(gradeValue != null) {
@@ -266,15 +280,6 @@ public class ProfessorService {
         Page<Professor> Professor = professorRepository.findAll(spec, pageable);
         return Professor.map(ProfessorDto::fromEntity); // dto로 반환해주기
 
-    }
-
-    public int getPenaltyNum(UpdateStudentGradeDto dto) {
-        // 출석 감점 계산
-        long latenessToAbsent = dto.getLateness() / 3; // 지각 3회 - 결석 1번
-        long totalAbsent = dto.getAbsent() + latenessToAbsent;
-        double penalty = totalAbsent * 2; // 결석 당 패널티 점수 -2점
-
-        return penalty;
     }
 
 }

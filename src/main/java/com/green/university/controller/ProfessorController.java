@@ -109,7 +109,7 @@ public class ProfessorController {
             @PathVariable Long studentId,
             @Valid @RequestBody UpdateStudentGradeDto dto) {
 
-        // 점수 입력 시 결석 횟수 따라 F, 환산점수 처리, 인원 수 대비 절대평가/상대평가 성적 산출
+        // 점수 입력 시 결석 횟수 따라 F, 환산점수 처리
         professorService.updateGrade(subjectId, studentId, dto);
 
         return ResponseEntity.ok(Map.of(

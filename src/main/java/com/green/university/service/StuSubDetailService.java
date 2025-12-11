@@ -1,5 +1,6 @@
 package com.green.university.service;
 
+import com.green.university.dto.PenaltyResultDto;
 import com.green.university.entity.Grade;
 import com.green.university.entity.StuSub;
 import com.green.university.entity.StuSubDetail;
@@ -8,6 +9,7 @@ import com.green.university.repository.GradeRepository;
 import com.green.university.repository.StuSubDetailRepository;
 import com.green.university.repository.StuSubRepository;
 import com.green.university.repository.SubjectRepository;
+import com.green.university.utils.PenaltyCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -64,10 +66,16 @@ public class StuSubDetailService {
         int cPlus = (int)Math.round(cCount * 0.4);
         int dPlus = (int)Math.round(dCount * 0.4);
 
+
+
         for (int i = 0; i< numOfStudent; i++) {
             StuSubDetail d = stuSubList.get(i);
-            if(d.getGrade().equals("F") ) continue; // 이미 F 등급이면 건너뜀
+            if (d.getGrade() != null && d.getGrade().equals("F")) continue; // 이미 F면 건너뜀
+
             String getGrade;
+            // 결석 수 계산
+            PenaltyResultDto penaltyResult = PenaltyCalculator.calculate(d.getAbsent(), d.getLateness());
+            long totalAbsent = penaltyResult.getTotalAbsent();
 
             if (i < aCount) {
                 // A 구간
@@ -92,6 +100,10 @@ public class StuSubDetailService {
                 if (idxInD < dPlus) getGrade = "D+";
                 else getGrade = "D0";
             }
+
+            if(totalAbsent > 5 || d.getMildExam() < 40 || d.getFinalExam() < 40 || d.getConvertedMark() < 60) {
+                getGrade = "F";
+                }
 
             Grade grade = gradeRepository.findByGrade(getGrade)
                     .orElseThrow(() -> new RuntimeException("존재하지 않는 학점 등급입니다"));

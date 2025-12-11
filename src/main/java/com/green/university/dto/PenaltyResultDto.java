@@ -7,5 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class PenaltyResultDto {
     private long totalAbsent;
-    private int penalty;
+    private double penalty;
 }
