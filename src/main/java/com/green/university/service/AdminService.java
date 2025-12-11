@@ -101,19 +101,17 @@ public class AdminService {
         Department department = new Department();
         department.setName(departmentFormDto.getName());
 
-        //collegeId 까지 매핑?
-        College college = collegeRepository.findById(departmentFormDto.getCollegeId())
+        // 단과대 이름으로 조회
+        College college = collegeRepository.findByName(departmentFormDto.getCollegeName())
                 .orElseThrow(() -> new CustomRestfullException("단과대를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
         department.setCollege(college);
 
         departmentRepository.save(department);
-
     }
 
     // 학과 조회
     public List<Department> readDepartment() {
-        List<Department> departmentList = departmentRepository.findAll();
-        return departmentList;
+        return departmentRepository.findAllByOrderByCollege_IdAsc();
     }
 
     // 학과 삭제
@@ -133,7 +131,7 @@ public class AdminService {
         department.setName(departmentFormDto.getName());
 
         // 단과대 수정
-        College college = collegeRepository.findById(departmentFormDto.getCollegeId())
+        College college = collegeRepository.findByName(departmentFormDto.getCollegeName())
                 .orElseThrow(()-> new CustomRestfullException("단과대를 찾을 수 없습니다.",HttpStatus.NOT_FOUND));
         department.setCollege(college);
 

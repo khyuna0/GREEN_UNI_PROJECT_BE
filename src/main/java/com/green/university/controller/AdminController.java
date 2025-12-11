@@ -90,7 +90,7 @@ public class AdminController {
     }
 
     // 학과 삭제 기능
-    @DeleteMapping("/department/delete/{deptId}")
+    @DeleteMapping("/department/{deptId}")
     public ResponseEntity<?> deleteDepartment(@PathVariable("deptId") Long deptId) {
         adminService.deleteDepartment(deptId);
         return ResponseEntity.ok().body("학과 삭제가 완료되었습니다");
@@ -98,7 +98,7 @@ public class AdminController {
 
     // 학과 수정 기능
     @PatchMapping("/department/{deptId}")
-    public ResponseEntity<?> updateDepartment(@PathVariable("deptId") Long deptId,@RequestBody @Valid DepartmentFormDto departmentFormDto) {
+    public ResponseEntity<?> updateDepartment(@PathVariable("deptId") Long deptId, @RequestBody @Valid DepartmentFormDto departmentFormDto) {
         adminService.updateDepartment(deptId, departmentFormDto);
         return ResponseEntity.ok().body("학과 수정이 완료되었습니다");
     }
