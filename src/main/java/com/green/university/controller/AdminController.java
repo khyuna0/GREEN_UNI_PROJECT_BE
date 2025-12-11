@@ -124,10 +124,17 @@ public class AdminController {
     }
 
     // 강의실 삭제 기능
-    @DeleteMapping("/room/delete/{roomId}")
-    public ResponseEntity<?> deleteRoom(@RequestParam String roomId) { // 강의실 기본키(id)는 E601 이런 형식임
+    @DeleteMapping("/room/{roomId}")
+    public ResponseEntity<?> deleteRoom(@PathVariable("roomId") String roomId) { // 강의실 기본키(id)는 E601 이런 형식임
         adminService.deleteRoom(roomId);
         return ResponseEntity.ok().body("강의실 삭제가 완료되었습니다");
+    }
+
+    // 강의실 수정 기능
+    @PatchMapping("/room/{roomId}")
+    public ResponseEntity<?> updateRoom(@PathVariable("roomId") String roomId,@RequestBody@Valid RoomFormDto roomFormDto){
+        adminService.updateRoom(roomId, roomFormDto);
+        return ResponseEntity.ok().body("강의실이 수정 되었습니다.");
     }
 
     // 강의 페이지 - 리스트 조회

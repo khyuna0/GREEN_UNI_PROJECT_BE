@@ -38,6 +38,7 @@ public class AdminService {
     @Autowired
     private ProfessorRepository professorRepository;
 
+    /* ====================== 단 과 대 ============================== */
     // 단과대 입력
     @Transactional
     public void createCollege(@Validated CollegeFormDto collegeFormDto) {
@@ -67,7 +68,6 @@ public class AdminService {
         collegeRepository.deleteById(collegeId);
     }
 
-
     //단과대 수정
     @Transactional
     public void updateCollege(Long collegeId, CollegeFormDto collegeFormDto) {
@@ -84,11 +84,10 @@ public class AdminService {
         if (!beforeName.equals(afterName) && collegeRepository.existsByName(afterName)) {
             throw new CustomRestfullException("이미 존재하는 단과대입니다.", HttpStatus.BAD_REQUEST);
         }
-
         college.setName(afterName);
     }
 
-
+    // ====================== 학 과 ==============================
     // 학과 입력
     @Transactional
     public void createDepartment(@Validated DepartmentFormDto departmentFormDto) {
@@ -139,6 +138,7 @@ public class AdminService {
 
     }
 
+    // ====================== 단 과 대 등 록 금 ==============================
     // 단과대별 등록금 입력
     @Transactional
     public void createCollTuit(@Validated CollTuitFormDto collTuitFormDto) {
@@ -150,13 +150,11 @@ public class AdminService {
         if(collTuitRepository.existsByCollege_Id(collTuitFormDto.getCollegeId())){
             throw new CustomRestfullException("이미 등록금이 입력된 단과대 입니다.",HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         //collTuit 엔티티 값 입력
         CollTuit collTuit = new CollTuit();
         collTuit.setCollege(college);
         collTuit.setAmount(collTuitFormDto.getAmount());
         collTuitRepository.save(collTuit);
-
     }
 
     //단과대 등록금 조회
@@ -193,13 +191,19 @@ public class AdminService {
     // 단과대 등록금 수정
     @Transactional
     public void updateCollTuit(Long collegeId, CollTuitFormDto collTuitFormDto) {
-
         CollTuit collTuit = collTuitRepository.findByCollege_Id(collegeId)
                 .orElseThrow(() ->
                         new CustomRestfullException("해당 단과대의 등록금 정보가 없습니다.",
                                 HttpStatus.NOT_FOUND));
 
         collTuit.setAmount(collTuitFormDto.getAmount());
+    }
+
+    // ====================== 강 의 실 ==============================
+
+    // 강의실 조회
+    public List<Room> readRoom() {
+        return roomRepository.findAll();
     }
 
     // 강의실 등록
@@ -219,23 +223,43 @@ public class AdminService {
         roomRepository.save(room);
     }
 
-    /**
-     * 강의실 조회 서비스
-     */
-    public List<Room> readRoom() {
-        return roomRepository.findAll();
-    }
-
-    /**
-     * 강의실 삭제 서비스
-     */
+    // 강의실 삭제
     public void deleteRoom(String id) {
+
+        if (subjectRepository.existsByRoom_Id(id)) {
+            throw new CustomRestfullException(
+                    "해당 강의실을 사용하는 강의가 있어 삭제할 수 없습니다.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
         roomRepository.deleteById(id);
     }
 
-    /**
-     * 강의 입력 서비스
-     */
+
+    // 강의실 수정
+    @Transactional
+    public void updateRoom(String id, RoomFormDto roomFormDto){
+        // 기존 강의실 조회
+        Room room = roomRepository.findById(id)
+                .orElseThrow(() -> new CustomRestfullException("해당 강의실이 없습니다.", HttpStatus.NOT_FOUND));
+
+        // 단과대 재매핑
+        College college = collegeRepository.findById(roomFormDto.getCollegeId())
+                .orElseThrow(() -> new CustomRestfullException("존재하지 않는 단과대입니다.", HttpStatus.BAD_REQUEST));
+
+        room.setCollege(college);
+    }
+
+
+    // ====================== 강 의 ==============================
+    // 강의 조회
+    public List<Subject> readSubject() {
+        return subjectRepository.findAll();
+    }
+
+
+    // 강의 입력
     @Transactional
     public void createSubjectAndSyllabus(@Valid @RequestBody SubjectFormDto subjectFormDto) {
         // 강의실, 강의시간 중복 검사
@@ -282,24 +306,14 @@ public class AdminService {
         syllaBusRepository.save(syllabus);
     }
 
-    /**
-     * 강의 조회 서비스
-     */
-    public List<Subject> readSubject() {
-        return subjectRepository.findAll();
-    }
-
-    /**
-     * 강의 삭제 서비스
-     */
+    // 강의 삭제
     public void deleteSubject(Long id) {
         subjectRepository.deleteById(id);
         syllaBusRepository.deleteById(id);
     }
 
-    /**
-     * 강의 수정 서비스
-     */
+    // 강의 수정
+    @Transactional
     public void updateSubject(Long id, SubjectFormDto subjectFormDto) {
         // ID로 연도 학기 조회
         Subject subject = subjectRepository.findById(id).orElseThrow(
