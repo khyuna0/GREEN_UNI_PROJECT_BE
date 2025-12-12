@@ -24,4 +24,6 @@ public interface PreStuSubRepository extends JpaRepository<PreStuSub, Long> {
     // status가 true인 것만 조회 (배치에서 사용)
     List<PreStuSub> findByStatusTrue();
 
+    void deleteBySubject_Id(Long subjectid);
+
 }

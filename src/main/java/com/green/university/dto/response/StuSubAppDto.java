@@ -38,6 +38,21 @@ public class StuSubAppDto {
         this.status = true;
     }
 
+    public StuSubAppDto(Long studentId, Subject s, Professor p, boolean status) {
+        this.studentId = studentId;
+        this.subjectId = s.getId();
+        this.subjectName = s.getName();
+        this.professorName = p.getName();
+        this.grades = s.getGrades();
+        this.subDay = s.getSubDay();
+        this.startTime = s.getStartTime();
+        this.endTime = s.getEndTime();
+        this.numOfStudent = s.getNumOfStudent();
+        this.capacity = s.getCapacity();
+        this.roomId = s.getRoom().getId();
+        this.status = status;
+    }
+
     public StuSubAppDto() {
 
     }

@@ -34,4 +34,6 @@ public interface StuSubRepository extends JpaRepository<StuSub, Long> {
             String type
     );
 
+    // 학생 ID와 과목 ID로 수강신청 내역 존재 여부 확인
+    boolean existsByStudentIdAndSubjectId(Long studentId, Long subjectId);
 }

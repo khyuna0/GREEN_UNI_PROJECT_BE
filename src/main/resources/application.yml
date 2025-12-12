@@ -2,6 +2,9 @@ server:
   port: 8888
 
 spring:
+  # 1. env
+  config:
+    import: file:.env[.properties]
   jackson:
     time-zone: Asia/Seoul
 
@@ -17,9 +20,9 @@ spring:
   # 3. DB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/green_uni?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: ${MYSQL_URL}
     username: root
-    password: 12345
+    password: ${MYSQL_PASSWORD}
 
   # 4. JPA
   jpa:
@@ -39,15 +42,15 @@ spring:
 
 # 5. JWT
 jwt:
-  secret: "zxcasdqwezxcasdsdkfjeifjklsdjfklsfjlkdsjflkdsjfldsfdsqwezxcasdqwe"
+  secret: ${JWT_SECRET}
 
 # 6. AI API
 app:
   ai:
     mistral:
-      api-key: pKbMQn1v6YnlXIstF1iEjl6kvFchQfwt
-      url: https://api.mistral.ai/v1/chat/completions
+      api-key: ${MISTRAL_API_KEY}
+      url: ${MISTRAL_URL}
       model: mistral-small-latest
     gemini:
-      api-key: AIzaSyCVI8L1DO7xueSnvuOBF1K5plZIetiPQwQ
-      url: https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent
+      api-key: ${GEMINI_API_KEY}
+      url: ${GEMINI_URL}

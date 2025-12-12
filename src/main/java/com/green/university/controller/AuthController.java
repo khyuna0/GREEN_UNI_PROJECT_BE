@@ -57,16 +57,12 @@ public class AuthController {
         if (principal == null) {
             throw new CustomRestfullException("로그인 정보가 없습니다.", HttpStatus.UNAUTHORIZED);
         }
-        User user = principal.getUser();
-        System.out.println("user: " + user);
         Long id = principal.getId();
-        System.out.println("id: " + id); // 이것도 학번 나오고
         String userRole = principal.getUserRole();
-        System.out.println("userRole: " + userRole); // 롤은 잘 나옴
         String username = principal.getUsername();
-        System.out.println("username: " + username); // 이것도 학번 나옴
+        String name = (principal.getName() != null ? principal.getName() : "사용자" ); // 더미에 username없어서 만듬
 
-        return ResponseEntity.ok(Map.of("id", id, "username", username, "role", userRole));
+        return ResponseEntity.ok(Map.of("id", id, "username", username, "role", userRole, "name", name));
     }
 
 }
