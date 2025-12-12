@@ -54,6 +54,12 @@ public class StuSubController {
         return ResponseEntity.ok("배치 실행 완료");
     }
 
+    @PostMapping("/batch/move-regular-to-detail")
+    public ResponseEntity<?> executeBatch2() {
+        stuSubService.moveStuSubToDetailBatch();
+        return ResponseEntity.ok("배치 실행 완료2");
+    }
+
     // ========================= 학생 기능 =========================
     // 🔥 수강 신청 탭에서 보여지는 전체 강의 시간표 조회 (현재 연도, 학기에 해당하는 강의 + 페이징 + 검색)
     @GetMapping("/subjectList")

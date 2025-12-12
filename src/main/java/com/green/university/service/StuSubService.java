@@ -380,7 +380,29 @@ public class StuSubService {
         stuSubRepository.save(stuSub);
     }
 
+    // 🔥🔥 수강 신청 기간 -> 수강 신청 기간 종료 변경 시 로직
+    @Transactional
+    public void moveStuSubToDetailBatch() {
+        // pre에 있는 모든 데이터 지우기
+        preStuSubRepository.deleteAll();
+        // stusub에서 데이터를 가져와서
+        List<StuSub> all = stuSubRepository.findAll();
+        for (StuSub stuSub : all) {
+            Optional<StuSubDetail> detail = stuSubDetailRepository.findByStuSub(stuSub);
+            if (detail.isPresent()) {
+                continue;
+            }
+            // detail에 3가지를 넣어주고 save 하기
+            StuSubDetail stuSubDetail = new StuSubDetail();
+            stuSubDetail.setStuSub(stuSub);
+            stuSubDetail.setStudent(stuSub.getStudent());
+            stuSubDetail.setSubject(stuSub.getSubject());
+            stuSubDetailRepository.save(stuSubDetail);
+        }
+    }
+
     // 최종 시간표 테이블용 dto 변환
+    @Transactional
     public List<TimetableCourseDto> readMyTimetable(Long studentId) {
         List<StuSubAppDto> list = readStuSubList(studentId);
 
