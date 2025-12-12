@@ -53,7 +53,9 @@ public class StudentInfoForProfessorDto {
         dto.setFinalExam(s.getFinalExam());
         dto.setConvertedMark(s.getConvertedMark());
         dto.setGrade(s.getGrade());
-        dto.setStatus(s.getGrade());
+        if(s.getGrade() != null) {
+            dto.setStatus(s.getGrade());
+        }
 
         return dto;
     }

@@ -32,6 +32,7 @@ public class ReadSyllabusDto {
     private String deptName;
 
     // professor
+    private Long professorId;
 	private String professorName;
 	private String tel;
 	private String email;
@@ -59,6 +60,7 @@ public class ReadSyllabusDto {
         this.deptName = s.getDepartment().getName();
 
         // professor
+        this.professorId = p.getId();
         this.professorName = p.getName();
         this.tel = p.getTel();
         this.email = p.getEmail();
