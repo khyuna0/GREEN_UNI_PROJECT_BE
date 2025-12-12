@@ -28,5 +28,6 @@ public class CreateStaffDto {
 	private String tel;
 	@Email
 	private String email;
+	private LocalDate hireDate;
 	
 }

@@ -45,24 +45,20 @@ public class UserService {
 
     // staff 생성 서비스로 먼저 staff_tb에 insert한 후 staff_tb에 생긴 id를 끌고와 user_tb에 생성함
     @Transactional
-    public void createStaffToStaffAndUser(CreateStaffDto createStaffDto) {
-        System.out.println(createStaffDto.getName());
+    public void createStaffToStaffAndUser(CreateStaffDto dto) {
+        System.out.println(dto.getName());
         Staff staff = new Staff();
-        staff.setName(createStaffDto.getName());
-        staff.setGender(createStaffDto.getGender());
-        staff.setAddress(createStaffDto.getAddress());
-        staff.setTel(createStaffDto.getTel());
-        staff.setEmail(createStaffDto.getEmail());
-        staff.setBirthDate(createStaffDto.getBirthDate());
-        staff.setHireDate(null);
-        System.out.println("staff: " + staff);
+        staff.setName(dto.getName());
+        staff.setGender(dto.getGender());
+        staff.setAddress(dto.getAddress());
+        staff.setTel(dto.getTel());
+        staff.setEmail(dto.getEmail());
+        staff.setBirthDate(dto.getBirthDate());
+        staff.setHireDate(dto.getHireDate());
         Staff savedStaff = staffRepository.save(staff);
-        System.out.println("savedStaff: " + savedStaff);
         Long staffId = savedStaff.getId();
-        System.out.println("staffId: " + staffId);
-
         // User 엔티티 생성 및 저장 (공통 메서드 이용)
-        createUser(staffId, "staff", createStaffDto.getName() );
+        createUser(staffId, "staff", dto.getName() );
     }
 
     // professor 생성 서비스로 먼저 professor_tb에 insert한 후 professor_tb에 생긴 id를 끌고와 user_tb에
@@ -78,7 +74,7 @@ public class UserService {
         professor.setDepartment(departmentRepository.findById(dto.getDeptId())
                 .orElseThrow(() -> new CustomRestfullException("없는 학과 정보입니다.", HttpStatus.NOT_FOUND)));
         // 필요한 필드 모두 dto에서 옮기기
-
+        professor.setHireDate(dto.getHireDate());
         Professor savedProfessor = professorRepository.save(professor);
         Long professorId = savedProfessor.getId();
 
@@ -88,25 +84,24 @@ public class UserService {
 
     // student 생성 서비스로 먼저 student_tb에 insert한 후 student_tb에 생긴 id를 끌고와 user_tb에
     @Transactional
-    public void createStudentToStudentAndUser(CreateStudentDto createStudentDto) {
+    public void createStudentToStudentAndUser(CreateStudentDto dto) {
         Student student = new Student();
-        student.setName(createStudentDto.getName());
-        student.setBirthDate(createStudentDto.getBirthDate());
-        student.setGender(createStudentDto.getGender());
-        student.setAddress(createStudentDto.getAddress());
-        student.setTel(createStudentDto.getTel());
-        student.setEntranceDate(createStudentDto.getEntranceDate());
-        student.setEmail(createStudentDto.getEmail());
-        student.setDepartment(departmentRepository.findById(createStudentDto.getDeptId())
+        student.setName(dto.getName());
+        student.setBirthDate(dto.getBirthDate());
+        student.setGender(dto.getGender());
+        student.setAddress(dto.getAddress());
+        student.setTel(dto.getTel());
+        student.setEntranceDate(dto.getEntranceDate());
+        student.setEmail(dto.getEmail());
+        student.setDepartment(departmentRepository.findById(dto.getDeptId())
                 .orElseThrow(() -> new CustomRestfullException("없는 학과 정보입니다.", HttpStatus.NOT_FOUND)));
         Student savedStudent = studentRepository.save(student);
         Long studentId = savedStudent.getId();
-        System.out.println(studentId);
 
         stuStatService.createFirstStatus(studentId); // 학적 상태 생성 (재학)
 
         // User 엔티티 생성 및 저장 (공통 메서드 이용)
-        createUser(studentId, "student", createStudentDto.getName());
+        createUser(studentId, "student", dto.getName());
     }
 
     // 로그인 -> JWT기반 변경

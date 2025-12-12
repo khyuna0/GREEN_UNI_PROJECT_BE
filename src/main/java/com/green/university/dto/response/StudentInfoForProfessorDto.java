@@ -31,6 +31,9 @@ public class StudentInfoForProfessorDto {
 	private Double convertedMark;
     // 등급 (단순확인용)
     private String grade;
+    //위험학생 여부
+    private String status;
+
 
 	// StuSubDetail 엔티티 -> StudentInfoForProfessorDto로 변환
     public static StudentInfoForProfessorDto fromEntity(StuSubDetail s) {
@@ -50,9 +53,17 @@ public class StudentInfoForProfessorDto {
         dto.setFinalExam(s.getFinalExam());
         dto.setConvertedMark(s.getConvertedMark());
         dto.setGrade(s.getGrade());
+        dto.setStatus(s.getGrade());
 
         return dto;
     }
-
+    private void setStatus (String grade) {
+       if (grade.contains("C")) {
+            this.status =  "경고";
+       }
+        if (grade.contains("D") || grade.contains("F")) {
+            this.status =  "위험";
+        }
+    }
 	
 }
