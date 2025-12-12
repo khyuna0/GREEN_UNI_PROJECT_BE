@@ -58,7 +58,7 @@ public class UserService {
         Staff savedStaff = staffRepository.save(staff);
         Long staffId = savedStaff.getId();
         // User 엔티티 생성 및 저장 (공통 메서드 이용)
-        createUser(staffId, "staff", createStaffDto.getName() );
+        createUser(staffId, "staff", dto.getName() );
     }
 
     // professor 생성 서비스로 먼저 professor_tb에 insert한 후 professor_tb에 생긴 id를 끌고와 user_tb에
@@ -101,7 +101,7 @@ public class UserService {
         stuStatService.createFirstStatus(studentId); // 학적 상태 생성 (재학)
 
         // User 엔티티 생성 및 저장 (공통 메서드 이용)
-        createUser(studentId, "student", createStudentDto.getName());
+        createUser(studentId, "student", dto.getName());
     }
 
     // 로그인 -> JWT기반 변경
