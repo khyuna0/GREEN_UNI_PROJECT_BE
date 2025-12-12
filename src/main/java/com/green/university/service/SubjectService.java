@@ -34,6 +34,7 @@ public class SubjectService {
         Long semester = dto.getSemester();
         String deptName = dto.getDeptName();
         String name = dto.getName();
+        String type = dto.getType();
 
         Specification<Subject> spec = (root, query, cb) -> null;
         // 연도, 학기
@@ -47,7 +48,11 @@ public class SubjectService {
         // 강의명
         if (name != null && !name.isEmpty()) {
             spec = spec.and(SubjectSpecification.nameContains(name));
+        } // 강의구분
+        if (type != null && !type.isEmpty()) {
+            spec = spec.and(SubjectSpecification.hasType(type));
         }
+
         Page<Subject> subjectList = subjectRepository.findAll(spec, pageable);
 
         return subjectList.map(SubjectDto::fromEntity);

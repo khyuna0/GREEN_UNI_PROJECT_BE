@@ -186,7 +186,7 @@ public class GradeService {
                 .collect(Collectors.toList());
     }
 
-    // 장학금용 평균 성적 조회
+    // 평균 성적 조회
     public GradeForScholarshipDto readAvgGrade(Long studentId, Long subYear, Long semester) {
 
         // 특정 년도/학기에 수강한 모든 과목 가져오기

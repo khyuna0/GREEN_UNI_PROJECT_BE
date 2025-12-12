@@ -15,13 +15,15 @@ public class BreakAppFormDto {
 
     private Long studentId;
     private Long studentGrade;
+//    @NotNull    (message = "시작 년도를 입력해주세요")
     private Long fromYear;
+//    @NotNull    (message = "시작 학기를 입력해주세요")
     private Long fromSemester;
-    @NotNull
+    @NotNull (message = "종료 년도를 입력해주세요")
     private Long toYear;
-    @NotNull
+    @NotNull    (message = "종료 학기를 입력해주세요")
     private Long toSemester;
-    @NotNull
+    @NotNull(message = "휴학 사유를 입력해주세요")
     private String type;
 
 }
