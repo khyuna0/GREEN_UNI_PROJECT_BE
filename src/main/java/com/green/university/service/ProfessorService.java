@@ -166,19 +166,10 @@ public class ProfessorService {
         // 6. 등급 계산 (선택된 등급이 있으면 환산점수 까지만 계산하고, 등급은 수정됨)
         String gradeValue = null;
 
-        boolean gradeChanged =
-                dto.getGrade() != null &&
-                !dto.getGrade().equals(detail.getGrade());
-
-        if(gradeChanged) { // 선택된 등급이 있고, 변경되었을 때
-            gradeValue = dto.getGrade();
-
-        } else { // 최초 성적 입력 시
             if(numOfStudent < 20) { // 수강생이 20명 미만이면 절대평가
                 gradeValue = getAbsoluteGrade(finalConvertedMark);
             }
-
-            /*
+             /*
              *   결석 5회 이상
              *   중간고사, 기말고사 40점 미만
              *   환산점수 60점 미만이면 - F
@@ -186,8 +177,11 @@ public class ProfessorService {
             if(totalAbsent >= 5 || dto.getMidExam() < 40 || dto.getFinalExam() < 40 || finalConvertedMark < 60) { // 결석 5번 이상이면 F
                 gradeValue = "F";
             }
-        }
 
+        if(dto.getGrade() != null && !dto.getGrade().equals(detail.getGrade())) { // 선택된 등급이 있고, 변경되었을 때
+            gradeValue = dto.getGrade();
+            System.out.println("gradeValue = " + gradeValue);
+        }
 
         // 7. 등급 엔티티 조회
         if(gradeValue != null) {

@@ -112,6 +112,8 @@ public class ProfessorController {
         // 점수 입력 시 결석 횟수 따라 F, 환산점수 처리
         professorService.updateGrade(subjectId, studentId, dto);
 
+
+
         return ResponseEntity.ok(Map.of(
                 "studentId", studentId,
                 "subjectId", subjectId
