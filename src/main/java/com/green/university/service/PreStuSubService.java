@@ -115,4 +115,11 @@ public class PreStuSubService {
         subject.setNumOfStudent(subject.getNumOfStudent() - 1);
     }
 
+    @Transactional
+    public void deleteBySubject_Id(Long subjectId) {
+        Subject subject = subjectRepository.findById(subjectId).orElseThrow(
+                () -> new CustomRestfullException("과목을 찾을 수 없습니다", HttpStatus.NOT_FOUND)
+        );
+        preStuSubRepository.deleteBySubject_Id(subjectId);
+    }
 }
