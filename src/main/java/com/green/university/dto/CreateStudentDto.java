@@ -29,5 +29,9 @@ public class CreateStudentDto {
 	private LocalDate entranceDate;
 	@Email
 	private String email;
+	@NotBlank
+	private String grade;
+	@NotBlank
+	private String semester;
 	
 }

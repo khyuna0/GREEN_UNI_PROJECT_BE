@@ -28,5 +28,6 @@ public class CreateProfessorDto {
 	private Long deptId;
 	@Email
 	private String email;
+	private LocalDate hireDate;
 	
 }
