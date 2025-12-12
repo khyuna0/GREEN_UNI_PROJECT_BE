@@ -45,16 +45,6 @@ public class StuSubService {
     public Optional<StuSub> readStuSub(Long studentId, Long subjectId) {
         return stuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId);
     }
-    /**
-     * 특정 학생이 특정 과목을 수강신청 했는지 확인
-     * @param studentId 학생 ID
-     * @param subjectId 과목 ID
-     * @return 신청했으면 true, 아니면 false
-     */
-    public boolean isEnrolled(Long studentId, Long subjectId) {
-        // 수강신청 테이블(StuSub)에서 해당 학생의 해당 과목 신청 내역 확인
-        return stuSubRepository.existsByStudentIdAndSubjectId(studentId, subjectId);
-    }
 
     // 🔥🔥 학생의 해당 학기 수강 신청 내역 조회
     public List<StuSubAppDto> readStuSubList(Long studentId) {
@@ -188,9 +178,6 @@ public class StuSubService {
             if (subjectOverCapacity.getOrDefault(subject.getId(), false)) {
                 System.out.println("❌ 과목 정원 초과로 자동 이동 실패: " + subject.getName() +
                         " (학생ID: " + student.getId() + ")");
-                /** TODO: 예비 수강 신청 목록과 성공한 목록이 보여지는데 이때 수강 신청 버튼을
-                 * 취소, 신청으로 보여주기 위해서는 status를 이용해야하는지 아니면 다른 방법이 있는지
-                 */
                 failCount++;
                 continue;
             }
@@ -247,7 +234,6 @@ public class StuSubService {
     }
 
     /**
-     @Transactional
      public void movePreToStuSubBatch() {
      System.out.println("========== 배치 시작 ==========");
 
@@ -292,7 +278,6 @@ public class StuSubService {
      */
 
     /**
-     @Transactional
      public void createStuSubByPreStuSub() {
      // 1. 정원 >= 신청인원인 강의
      List<Long> idList1 = subjectRepository.findIdByCapacityGreaterThanOrEqualNumOfStudent();
@@ -404,8 +389,6 @@ public class StuSubService {
     // 최종 시간표 테이블용 dto 변환
     @Transactional
     public List<TimetableCourseDto> readMyTimetable(Long studentId) {
-        List<StuSubAppDto> list = readStuSubList(studentId);
-
         return readStuSubList(studentId).stream()
                 .map(TimetableCourseDto::from)
                 .collect(Collectors.toList());
