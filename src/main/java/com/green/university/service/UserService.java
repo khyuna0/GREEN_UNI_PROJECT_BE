@@ -62,7 +62,7 @@ public class UserService {
         System.out.println("staffId: " + staffId);
 
         // User 엔티티 생성 및 저장 (공통 메서드 이용)
-        createUser(staffId, "staff");
+        createUser(staffId, "staff", createStaffDto.getName() );
     }
 
     // professor 생성 서비스로 먼저 professor_tb에 insert한 후 professor_tb에 생긴 id를 끌고와 user_tb에
@@ -83,7 +83,7 @@ public class UserService {
         Long professorId = savedProfessor.getId();
 
         // User 엔티티 생성 및 저장 (공통 메서드 이용)
-        createUser(professorId, "professor");
+        createUser(professorId, "professor", dto.getName());
     }
 
     // student 생성 서비스로 먼저 student_tb에 insert한 후 student_tb에 생긴 id를 끌고와 user_tb에
@@ -106,7 +106,7 @@ public class UserService {
         stuStatService.createFirstStatus(studentId); // 학적 상태 생성 (재학)
 
         // User 엔티티 생성 및 저장 (공통 메서드 이용)
-        createUser(studentId, "student");
+        createUser(studentId, "student", createStudentDto.getName());
     }
 
     // 로그인 -> JWT기반 변경
@@ -318,11 +318,12 @@ public class UserService {
     // 공통 메서드
     // =================================
     // id와 userRole 이용해서 User에 저장
-    private void createUser(Long id, String userRole) {
+    private void createUser(Long id, String userRole,String name) {
         User user = new User();
         user.setId(id);
         user.setPassword(passwordEncoder.encode(id + ""));
         user.setUserRole(userRole);
+        user.setName(name);
         userRepository.save(user);
     }
 
