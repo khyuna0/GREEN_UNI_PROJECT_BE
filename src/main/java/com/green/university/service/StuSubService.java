@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -41,10 +42,8 @@ public class StuSubService {
     private StudentRepository studentRepository;
 
     // 학생의 수강신청 내역에 해당 강의가 존재하는지 확인
-    public StuSub readStuSub(Long studentId, Long subjectId) {
-        return stuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId).orElseThrow(
-                () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND)
-        );
+    public Optional<StuSub> readStuSub(Long studentId, Long subjectId) {
+        return stuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId);
     }
 
     // 🔥🔥 학생의 해당 학기 수강 신청 내역 조회
@@ -69,7 +68,8 @@ public class StuSubService {
         );
 
         // 중복 체크
-        if (stuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId).isPresent()) {
+        Optional<StuSub> stuSubOptional = stuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId);
+        if (stuSubOptional.isPresent()) {
             throw new CustomRestfullException("이미 수강 신청한 과목입니다.", HttpStatus.BAD_REQUEST);
         }
 
@@ -105,19 +105,11 @@ public class StuSubService {
         StuSubUtil.checkSumGrades(targetSubject, stuSubSumGradesDto);
         StuSubUtil.checkDayTime(targetSubject, dayTimeList);
 
-        StuSub stuSub = stuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId).orElseThrow(
-                () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND)
-        );
-        StuSubDetail stuSubDetail = stuSubDetailRepository.findByStuSub(stuSub).orElseThrow(
-                () -> new CustomRestfullException("학생 과목 정보 없음", HttpStatus.NOT_FOUND)
-        );
+
+        StuSub stuSub = new StuSub();
         stuSub.setSubject(targetSubject);
         stuSub.setStudent(targetStudent);
-        stuSubDetail.setStuSub(stuSub);
-        stuSubDetail.setStudent(studentRepository.findById(studentId).orElseThrow(() -> new CustomRestfullException("학생 정보 없음", HttpStatus.NOT_FOUND)));
-        stuSubDetail.setStudent(studentRepository.findById(subjectId).orElseThrow(() -> new CustomRestfullException("과목 정보 없음", HttpStatus.NOT_FOUND)));
         stuSubRepository.save(stuSub); // 수강신청 내역 추가
-        stuSubDetailRepository.save(stuSubDetail); // 수강 상세 내역에도 데이터 추가
 
         // 해당 강의 현재인원 +1
         subjectService.updatePlusNumOfStudent(subjectId);
@@ -129,7 +121,7 @@ public class StuSubService {
         StuSub stuSub = stuSubRepository.findByStudent_IdAndSubject_Id(studentId, subjectId)
                 .orElseThrow(() -> new CustomRestfullException("수강 신청 내역이 없습니다.", HttpStatus.NOT_FOUND));
         // 수강신청 내역 삭제
-        stuSubRepository.delete(stuSub);
+        stuSubRepository.deleteById(stuSub.getId());
         // 해당 강의 현재인원 -1
         subjectService.updateMinusNumOfStudent(subjectId);
     }
@@ -186,9 +178,6 @@ public class StuSubService {
             if (subjectOverCapacity.getOrDefault(subject.getId(), false)) {
                 System.out.println("❌ 과목 정원 초과로 자동 이동 실패: " + subject.getName() +
                         " (학생ID: " + student.getId() + ")");
-                /** TODO: 예비 수강 신청 목록과 성공한 목록이 보여지는데 이때 수강 신청 버튼을
-                 * 취소, 신청으로 보여주기 위해서는 status를 이용해야하는지 아니면 다른 방법이 있는지
-                 */
                 failCount++;
                 continue;
             }
@@ -216,10 +205,11 @@ public class StuSubService {
                 stuSub.setSubject(subject);
                 stuSubRepository.save(stuSub);
 
-                // StuSubDetail 생성
-                StuSubDetail detail = new StuSubDetail();
-                detail.setStuSub(stuSub);
-                stuSubDetailRepository.save(detail);
+                // 삭제한 이유 : 최종 수강 신청 완료가 될 때 넘어가게 만들 예정
+//                // StuSubDetail 생성
+//                StuSubDetail detail = new StuSubDetail();
+//                detail.setStuSub(stuSub);
+//                stuSubDetailRepository.save(detail);
 
                 // 과목 현재 인원 +1
                 subject.setNumOfStudent(subject.getNumOfStudent() + 1);
@@ -244,7 +234,6 @@ public class StuSubService {
     }
 
     /**
-     @Transactional
      public void movePreToStuSubBatch() {
      System.out.println("========== 배치 시작 ==========");
 
@@ -289,7 +278,6 @@ public class StuSubService {
      */
 
     /**
-     @Transactional
      public void createStuSubByPreStuSub() {
      // 1. 정원 >= 신청인원인 강의
      List<Long> idList1 = subjectRepository.findIdByCapacityGreaterThanOrEqualNumOfStudent();
@@ -334,11 +322,15 @@ public class StuSubService {
     public List<StuSubAppDto> readPreStuSubByStuSub(Long studentId) {
         // 예비 수강 신청 테이블에 남아있는 것들만 조회
         List<PreStuSub> preStuSubList = preStuSubRepository.findByStudent_Id(studentId);
+        for (PreStuSub pre : preStuSubList) {
+            pre.setStatus(false);
+        }
         return preStuSubList.stream()
                 .map(pre -> new StuSubAppDto(
                         studentId,
                         pre.getSubject(),
-                        pre.getSubject().getProfessor()
+                        pre.getSubject().getProfessor(),
+                        false
                 ))
                 .collect(Collectors.toList());
     }
@@ -373,13 +365,32 @@ public class StuSubService {
         stuSubRepository.save(stuSub);
     }
 
-    // 최종 시간표 테이블용 dto 변환
-    public List<TimetableCourseDto> readMyTimetable(Long studentId) {
-        List<StuSubAppDto> list = readStuSubList(studentId);
+    // 🔥🔥 수강 신청 기간 -> 수강 신청 기간 종료 변경 시 로직
+    @Transactional
+    public void moveStuSubToDetailBatch() {
+        // pre에 있는 모든 데이터 지우기
+        preStuSubRepository.deleteAll();
+        // stusub에서 데이터를 가져와서
+        List<StuSub> all = stuSubRepository.findAll();
+        for (StuSub stuSub : all) {
+            Optional<StuSubDetail> detail = stuSubDetailRepository.findByStuSub(stuSub);
+            if (detail.isPresent()) {
+                continue;
+            }
+            // detail에 3가지를 넣어주고 save 하기
+            StuSubDetail stuSubDetail = new StuSubDetail();
+            stuSubDetail.setStuSub(stuSub);
+            stuSubDetail.setStudent(stuSub.getStudent());
+            stuSubDetail.setSubject(stuSub.getSubject());
+            stuSubDetailRepository.save(stuSubDetail);
+        }
+    }
 
+    // 최종 시간표 테이블용 dto 변환
+    @Transactional
+    public List<TimetableCourseDto> readMyTimetable(Long studentId) {
         return readStuSubList(studentId).stream()
                 .map(TimetableCourseDto::from)
                 .collect(Collectors.toList());
     }
-
 }
