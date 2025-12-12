@@ -1,11 +1,14 @@
 package com.green.university.repository;
 
+import com.green.university.entity.College;
 import com.green.university.entity.Professor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.Optional;
 
 
 public interface ProfessorRepository extends JpaRepository<Professor, Long>, JpaSpecificationExecutor<Professor> {
@@ -20,5 +23,8 @@ public interface ProfessorRepository extends JpaRepository<Professor, Long>, Jpa
 
     // 페이지, 과별 교수 조회 (검색 용)
     Page<Professor> findByDepartmentName(String departmentName, Pageable pageable);
+
+    // 이름으로 교수 찾기
+    Optional<Professor> findByName(String name);
 
 }

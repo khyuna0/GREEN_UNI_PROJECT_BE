@@ -28,10 +28,12 @@ public class AdminController {
     @Autowired
     private AdminService adminService;
 
+
     /**
      *
-     * @return 단과대 페이지 - 단과대학 리스트 조회
+     * 단과대
      */
+
     @GetMapping("/college")
     public ResponseEntity<?> college( @RequestParam(defaultValue = "select") String crud) {
         // crud는 등록/삭제 시 ?crud=insert 처럼 파라미터로 붙어 무슨 작업하는지 상태를 나타낸다
@@ -69,8 +71,9 @@ public class AdminController {
 
     /**
      *
-     * @return 학과 페이지 페이지 이동 시, 단과대학 조회 후 이동
+     *  학과
      */
+
     @GetMapping("/department")
     public ResponseEntity<?> department(@RequestParam(defaultValue = "select") String crud) {
         List<Department> departmentList = adminService.readDepartment(); // 프론트에서 합쳐 찍는 형태일까?
@@ -103,7 +106,12 @@ public class AdminController {
         return ResponseEntity.ok().body("학과 수정이 완료되었습니다");
     }
 
-    // 강의실 페이지 - 리스트 보기
+
+    /**
+     *
+     *   강의실
+     */
+    
     @GetMapping("/room")
     public ResponseEntity<?> room(@RequestParam(defaultValue = "select") String crud) {
         List<Room> roomList = adminService.readRoom();
@@ -137,6 +145,12 @@ public class AdminController {
         return ResponseEntity.ok().body("강의실이 수정 되었습니다.");
     }
 
+
+    /**
+     *
+     *   강의
+     */
+
     // 강의 페이지 - 리스트 조회
     @GetMapping("/subject")
     public ResponseEntity<?> subject(@RequestParam(defaultValue = "select") String crud) {
@@ -150,35 +164,31 @@ public class AdminController {
         ));
     }
 
-    /**
-     *
-     * @return 강의 입력 기능
-     */
+    // 강의 등록
     @PostMapping("/subject")
     public ResponseEntity<?> insertSubject(@Valid @RequestBody SubjectFormDto subjectFormDto) {
         adminService.createSubjectAndSyllabus(subjectFormDto);
         return ResponseEntity.ok().body("강의 입력이 완료되었습니다");
     }
 
-    /**
-     *
-     * @return 강의 삭제 기능
-     */
-    @DeleteMapping("/subject/delete/{subjectId}")
+    // 강의 삭제
+    @DeleteMapping("/subject/{subjectId}")
     public ResponseEntity<?> deleteSubject(@PathVariable("subjectId") Long subjectId) {
         adminService.deleteSubject(subjectId);
         return ResponseEntity.ok().body("강의 삭제가 완료되었습니다");
     }
 
-    /**
-     *
-     * @return 강의 수정 기능
-     */
+    // 강의 수정
     @PatchMapping("/subject/{subjectId}")
     public ResponseEntity<?> updateSubject(@PathVariable("subjectId") Long subjectId, @RequestBody @Valid SubjectFormDto subjectFormDto) {
         adminService.updateSubject(subjectId, subjectFormDto);
         return ResponseEntity.ok().body("강의 수정이 완료되었습니다");
     }
+
+    /**
+     *
+     * 단과대 등록금
+     */
 
     // 단과대 등록금 페이지
     @GetMapping("/tuition")

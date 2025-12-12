@@ -38,7 +38,11 @@ public class AdminService {
     @Autowired
     private ProfessorRepository professorRepository;
 
-    /* ====================== 단 과 대 ============================== */
+    /**
+     *
+     * 단과대
+     */
+
     // 단과대 입력
     @Transactional
     public void createCollege(@Validated CollegeFormDto collegeFormDto) {
@@ -87,7 +91,11 @@ public class AdminService {
         college.setName(afterName);
     }
 
-    // ====================== 학 과 ==============================
+    /**
+     *
+     * 학과
+     */
+
     // 학과 입력
     @Transactional
     public void createDepartment(@Validated DepartmentFormDto departmentFormDto) {
@@ -138,7 +146,11 @@ public class AdminService {
 
     }
 
-    // ====================== 단 과 대 등 록 금 ==============================
+    /**
+     *
+     * 단과대 등록금
+     */
+
     // 단과대별 등록금 입력
     @Transactional
     public void createCollTuit(@Validated CollTuitFormDto collTuitFormDto) {
@@ -199,7 +211,11 @@ public class AdminService {
         collTuit.setAmount(collTuitFormDto.getAmount());
     }
 
-    // ====================== 강 의 실 ==============================
+
+    /**
+     *
+     * 강의실
+     */
 
     // 강의실 조회
     public List<Room> readRoom() {
@@ -252,7 +268,11 @@ public class AdminService {
     }
 
 
-    // ====================== 강 의 ==============================
+    /**
+     *
+     *  강의
+     */
+
     // 강의 조회
     public List<Subject> readSubject() {
         return subjectRepository.findAll();
@@ -262,6 +282,7 @@ public class AdminService {
     // 강의 입력
     @Transactional
     public void createSubjectAndSyllabus(@Valid @RequestBody SubjectFormDto subjectFormDto) {
+
         // 강의실, 강의시간 중복 검사
         System.out.println("subjectFormDto = " + subjectFormDto);
         List<Subject> subjectList = subjectRepository.findByRoom_IdAndSubDayAndSubYearAndSemester(
@@ -274,15 +295,15 @@ public class AdminService {
                 throw new CustomRestfullException("해당 시간대는 강의실을 사용중입니다! 다시 선택해주세요", HttpStatus.BAD_REQUEST);
             }
         }
-        Professor professor = professorRepository.findById(subjectFormDto.getProfessorId()).orElseThrow(
-                () -> new CustomRestfullException("해당 교수 ID가 존재하지 않습니다", HttpStatus.NOT_FOUND)
-        );
+        Professor  professor = professorRepository.findByName(subjectFormDto.getProfessorName())
+                .orElseThrow(() -> new CustomRestfullException("해당 교수 이름이 존재하지 않습니다", HttpStatus.NOT_FOUND));
+
+        Department  department = departmentRepository.findByName(subjectFormDto.getDeptName())
+                .orElseThrow(() -> new CustomRestfullException("해당 학과 이름이 존재하지 않습니다.", HttpStatus.NOT_FOUND));
         Room room = roomRepository.findById(subjectFormDto.getRoomId()).orElseThrow(
                 () -> new CustomRestfullException("해당 강의실이 존재하지 않습니다.", HttpStatus.NOT_FOUND)
         );
-        Department department = departmentRepository.findById(subjectFormDto.getDeptId()).orElseThrow(
-                () -> new CustomRestfullException("해당 학과가 존재하지 않습니다.", HttpStatus.NOT_FOUND)
-        );
+
         // 과목 추가 하고, 그 과목 키로 강의 계획서 생성(내용은 없음, 회원가입과 비슷한 느낌?)
         Subject subject = new Subject();
         subject.setName(subjectFormDto.getName());
