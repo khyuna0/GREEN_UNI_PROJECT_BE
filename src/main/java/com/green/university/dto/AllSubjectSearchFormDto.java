@@ -8,7 +8,7 @@ public class AllSubjectSearchFormDto {
 
 	private Long subYear;
 	private Long semester;
-	//private Long deptId;
+	private String type;
 	private String deptName;
 	private String name;
 	

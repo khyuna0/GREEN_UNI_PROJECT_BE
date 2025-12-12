@@ -89,7 +89,7 @@ public class BreakAppController {
      * @return 휴복학 신청 내역 페이지
      */
     @PostMapping("/application")
-    public ResponseEntity<?> breakApplicationProc(@Validated BreakAppFormDto breakAppFormDto,
+    public ResponseEntity<?> breakApplicationProc(@Validated @RequestBody BreakAppFormDto breakAppFormDto,
                                                   @AuthenticationPrincipal CustomUserDetails principal) {
 
         Long studentId = principal.getId();
