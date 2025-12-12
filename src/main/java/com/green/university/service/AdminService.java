@@ -313,6 +313,7 @@ public class AdminService {
         subject.setType(subjectFormDto.getType());
         subject.setSubYear(subjectFormDto.getSubYear());
         subject.setSemester(subjectFormDto.getSemester());
+        subject.setGrades(subjectFormDto.getGrades());
         subject.setSubDay(subjectFormDto.getSubDay());
         subject.setStartTime(subjectFormDto.getStartTime());
         subject.setEndTime(subjectFormDto.getEndTime());
@@ -329,33 +330,65 @@ public class AdminService {
 
     // 강의 삭제
     public void deleteSubject(Long id) {
+        // 강의계획서 있으면 삭제
+        syllaBusRepository.findBySubject_Id(id)
+                .ifPresent(syllaBusRepository::delete);
+
         subjectRepository.deleteById(id);
-        syllaBusRepository.deleteById(id);
+
     }
 
     // 강의 수정
     @Transactional
     public void updateSubject(Long id, SubjectFormDto subjectFormDto) {
-        // ID로 연도 학기 조회
+        // 기존 과목 조회
         Subject subject = subjectRepository.findById(id).orElseThrow(
                 () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );
+
         // 강의실, 강의시간 중복 검사
         List<Subject> subjectList = subjectRepository.findByRoom_IdAndSubDayAndSubYearAndSemester(
-                subject.getRoom().getId(), subject.getSubDay(), subject.getSubYear(), subject.getSemester()
-        );
-        if (subjectList != null) {
+                        subjectFormDto.getRoomId(),
+                        subjectFormDto.getSubDay(),
+                        subjectFormDto.getSubYear(),
+                        subjectFormDto.getSemester()
+                )
+                .stream()
+                .filter(s -> !s.getId().equals(id))   // 현재 수정 중인 과목은 제외
+                .toList();
+
+        if (!subjectList.isEmpty()) { // 중복 후보가 있을때
             SubjectUtil subjectUtil = new SubjectUtil();
             boolean result = subjectUtil.calculate(subjectFormDto, subjectList);
             if (!result) {
                 throw new CustomRestfullException("해당 시간대는 강의실을 사용중입니다! 다시 선택해주세요", HttpStatus.BAD_REQUEST);
             }
         }
-        subject.setName(subjectFormDto.getName());
-        subject.setRoom(subject.getRoom());
-        subject.setSubDay(subjectFormDto.getSubDay());
-        subject.setStartTime(subjectFormDto.getStartTime());
-        subject.setEndTime(subjectFormDto.getEndTime());
+
+        // 담당 교수, 학과, 강의실 엔티티 조회
+        Professor professor = professorRepository.findByName(subjectFormDto.getProfessorName())
+                .orElseThrow(() -> new CustomRestfullException("해당 교수 이름이 존재하지 않습니다", HttpStatus.NOT_FOUND));
+
+        Department department = departmentRepository.findByName(subjectFormDto.getDeptName())
+                .orElseThrow(() -> new CustomRestfullException("해당 학과 이름이 존재하지 않습니다.", HttpStatus.NOT_FOUND));
+
+        Room room = roomRepository.findById(subjectFormDto.getRoomId())
+                .orElseThrow(() -> new CustomRestfullException("해당 강의실이 존재하지 않습니다.", HttpStatus.NOT_FOUND));
+
+        //실제 수정 반영
+        subject.setName(subjectFormDto.getName()); // 강의명
+        subject.setProfessor(professor); // 담당 교수
+        subject.setRoom(room); // 강의실
+        subject.setDepartment(department); // 학과
+        subject.setType(subjectFormDto.getType()); // 이수 구분
+        subject.setSubYear(subjectFormDto.getSubYear()); // 연도
+        subject.setSemester(subjectFormDto.getSemester()); // 학기
+        subject.setSubDay(subjectFormDto.getSubDay()); // 요일
+        subject.setStartTime(subjectFormDto.getStartTime()); // 시작시간
+        subject.setEndTime(subjectFormDto.getEndTime()); // 종료시간
+        subject.setGrades(subjectFormDto.getGrades());//이수학점
+        subject.setCapacity(subjectFormDto.getCapacity()); // 정원
+
         subjectRepository.save(subject);
     }
 

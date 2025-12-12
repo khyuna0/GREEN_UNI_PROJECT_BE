@@ -111,7 +111,7 @@ public class AdminController {
      *
      *   강의실
      */
-    
+
     @GetMapping("/room")
     public ResponseEntity<?> room(@RequestParam(defaultValue = "select") String crud) {
         List<Room> roomList = adminService.readRoom();
