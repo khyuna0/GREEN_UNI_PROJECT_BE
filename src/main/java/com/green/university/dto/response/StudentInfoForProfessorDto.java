@@ -60,7 +60,7 @@ public class StudentInfoForProfessorDto {
         return dto;
     }
     private void setStatus (String grade) {
-       if (grade.contains("C")) {
+       if (grade.contains("C0")) {
             this.status =  "경고";
        }
         if (grade.contains("D") || grade.contains("F")) {
