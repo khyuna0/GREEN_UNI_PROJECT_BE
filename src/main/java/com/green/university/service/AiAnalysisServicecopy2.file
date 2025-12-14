@@ -1,0 +1,303 @@
+package com.green.university.service;
+
+import com.green.university.dto.RiskNotificationDto;
+import com.green.university.dto.response.AiRiskAnalysisResult;
+import com.green.university.entity.*;
+import com.green.university.repository.DropoutRiskRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+// F. AiAnalysisService (과목이면 “출석+성적 합쳐서” 분석)
+public class AiAnalysisService {
+
+    private final WebClient geminiWebClient;
+    private final WebClient mistralWebClient;
+    private final ObjectMapper objectMapper;
+    private final DropoutRiskRepository dropoutRiskRepository;
+
+    @Value("${app.ai.mistral.model}")
+    private String mistralModel;
+
+    // ========== 공통 상담 프롬프트 ==========
+    private static final String COUNSELING_PROMPT = """
+            당신은 대학교의 20년 이상 경력의 상담 심리학자입니다.
+            학생의 중도 이탈을 막기 위해 교수가 학생에게 건넬 따뜻하고 효과적인 상담 멘트와 분석을 제공하세요.
+            
+            분석 대상 학생 정보:
+            - 이름: %s
+            - 학과: %s
+            - 위험 유형: %s
+            - 위험 수준: %s
+            - 과목명: %s
+            - 상세 정보: %s
+            
+            위 정보를 바탕으로 학생에 대한 중도 이탈 위험 분석을 진행해주세요.
+            JSON 형태로 응답 결과를 반환해주세요.
+            1. reason: 학생이 겪고 있을 것으로 추정되는 어려움 (한 줄 요약)
+            2. counseling_script: 교수가 학생에게 보낼 상담 메시지 (권위적이지 않고 걱정하는 투로, 200자 이내)
+            3. student_action: 학생에게 권장할 구체적인 행동 (예: "학습 상담센터 방문", 150자 이내)
+            
+            반드시 순수 JSON만 반환하세요. 마크다운 코드블록(```
+            {"reason":"...", "counseling_script":"...", "student_action":"..."}
+            """;
+
+
+    // Mono<String>이 뭐야? WebFlux는 비동기로 작동해서 결과를 바로 안 줘.
+    // Mono는 "나중에 하나의 데이터가 올 거야"라는 약속 같은 거야.
+
+    // ========== Gemini로 분석 + DB 저장 + 알림 DTO 반환 ==========
+    @Transactional
+    public Mono<RiskNotificationDto> analyzeAndSaveWithGemini(Long riskId) {
+        // [1단계] DB에서 DropoutRisk 조회
+        DropoutRisk risk = dropoutRiskRepository.findById(riskId)
+                .orElseThrow(() -> new RuntimeException("위험 학생 정보를 찾을 수 없습니다."));
+
+        // [2단계] 프롬프트 생성
+        String prompt = buildPrompt(risk);
+        String requestBody = buildGeminiRequest(prompt);
+
+        // [3단계] Gemini API 호출 시작
+        return geminiWebClient.post()
+                .uri("/v1/models/gemini-1.5-flash:generateContent")
+                .bodyValue(requestBody)
+                .retrieve()
+                // [4단계] 응답을 String으로 받음 → Mono<String> 반환
+                .bodyToMono(String.class)
+                // [5단계] String을 AiCounselingDto로 파싱 (비동기)
+                // parseGeminiResponse가 Mono<AiCounselingDto> 리턴하니까 flatMap 사용!
+                .flatMap(this::parseGeminiResponse)
+                // [6단계] AiCounselingDto로 DB 저장 + DTO 변환 (동기)
+                // buildNotification이 일반 RiskNotificationDto 리턴하니까 map 사용!
+                .map(aiResponse -> {
+                    // DB에 AI 분석 결과 저장
+                    risk.setAiAnalysis(formatAnalysis(aiResponse));
+                    dropoutRiskRepository.save(risk);
+
+                    // 알림 DTO 생성
+                    return buildNotification(risk, aiResponse);
+                })
+                // [7단계] 에러 발생 시 기본값 반환
+                // onErrorResume: WebFlux에서 try-catch 대신 씀. AI 실패해도 앱 안 터지고 기본 응답 제공.
+                .onErrorResume(e -> handleError("Gemini", risk, e));
+    }
+
+    // ========== Mistral로 분석 + DB 저장 + 알림 DTO 반환 ==========
+    @Transactional
+    public Mono<RiskNotificationDto> analyzeAndSaveWithMistral(Long riskId) {
+        log.info("🚀 Mistral AI 분석 시작 - riskId: {}", riskId);
+
+        DropoutRisk risk = dropoutRiskRepository.findById(riskId)
+                .orElseThrow(() -> new RuntimeException("위험 학생 정보를 찾을 수 없습니다."));
+
+
+        // 🔥 강제 초기화 (중요!)
+        risk.getStudent().getName();  // Student 초기화
+        if (risk.getSubject() != null) {
+            risk.getSubject().getName();  // Subject 초기화
+        }
+        risk.getStudent().getDepartment().getName();  // Department 초기화
+
+        log.info("📝 학생 정보: {}, 과목: {}",
+                risk.getStudent().getName(),
+                risk.getSubject() != null ? risk.getSubject().getName() : "전체");
+
+        String prompt = buildPrompt(risk);
+        String requestBody = buildMistralRequest(prompt);
+        log.info("📤 Mistral API 호출 시작");
+
+        return mistralWebClient.post()
+                .uri("/v1/chat/completions")
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(String.class)
+                .doOnNext(response -> log.info("📥 Mistral 응답 수신: {}", response.substring(0, Math.min(200, response.length()))))
+
+                .flatMap(this::parseMistralResponse)
+                .doOnNext(aiDto -> log.info("🔄 DTO 파싱 완료: {}", aiDto))
+
+                .map(aiResponse -> {
+                    log.info("💾 DB 저장 시작");
+
+                    risk.setAiAnalysis(formatAnalysis(aiResponse));
+                    dropoutRiskRepository.save(risk);
+                    return buildNotification(risk, aiResponse);
+                })
+                .onErrorResume(e -> handleError("Mistral", risk, e));
+    }
+
+    // 프롬프트 생성 (DropoutRisk 엔티티 기반)
+    private String buildPrompt(DropoutRisk risk) {
+        String studentName = risk.getStudent().getName();
+        String department = risk.getStudent().getDepartment().getName();
+        String riskTypeStr = risk.getRiskType() == RiskType.ATTENDANCE ? "출석 부족" : "성적 저조";
+        String riskLevelStr = risk.getRiskLevel() == RiskLevel.WARNING ? "경고" : "위험";
+        String subjectName = risk.getSubject() != null ? risk.getSubject().getName() : "전체 과목";
+
+        // 상세 정보 구성
+        String detail = "";
+        if (risk.getRiskType() == RiskType.ATTENDANCE && risk.getSubject() != null) {
+            detail = String.format("'%s' 과목에서 결석이 발생했습니다.", subjectName);
+        } else if (risk.getRiskType() == RiskType.GRADE) {
+            detail = "전체 학점이 기준 미달입니다.";
+        }
+
+        return String.format(COUNSELING_PROMPT,
+                studentName, department, riskTypeStr, riskLevelStr, subjectName, detail);
+    }
+
+    // Gemini 요청 바디 생성
+    private String buildGeminiRequest(String prompt) {
+        return String.format("""
+                {
+                    "contents": [{
+                        "parts": [{
+                            "text": "%s"
+                        }]
+                    }],
+                    "generationConfig": {
+                        "response_mime_type": "application/json"
+                    }
+                }
+                """, escapeJson(prompt));
+    }
+
+    // Mistral 요청 바디 생성
+    private String buildMistralRequest(String prompt) {
+        return String.format("""
+                {
+                    "model": "%s",
+                    "messages": [{
+                        "role": "user",
+                        "content": "%s"
+                    }],
+                    "response_format": {
+                        "type": "json_object"
+                    }
+                }
+                """, mistralModel, escapeJson(prompt));
+    }
+
+
+    // Gemini 응답 파싱
+    private Mono<AiCounselingDto> parseGeminiResponse(String rawResponse) {
+        try {
+            JsonNode root = objectMapper.readTree(rawResponse);
+            String aiText = root.path("candidates")
+                    .get(0)
+                    .path("content")
+                    .path("parts")
+                    .get(0)
+                    .path("text")
+                    .asText();
+
+            // 마크다운 코드블록 제거 (```json ... ```)
+            System.out.println("aiText: " + aiText);
+            String cleanJson = aiText.replaceAll("```json\\s*", "").trim();
+
+            AiCounselingDto response = objectMapper.readValue(cleanJson, AiCounselingDto.class);
+            return Mono.just(response);
+
+        } catch (Exception e) {
+            log.error("Gemini JSON 파싱 실패: {}", rawResponse, e);
+            return Mono.error(new RuntimeException("AI 응답 파싱 실패"));
+        }
+    }
+
+    // Mistral 응답 파싱
+    private Mono<AiCounselingDto> parseMistralResponse(String rawResponse) {
+        try {
+            log.info("🔍 Mistral 응답 파싱 시작");
+            JsonNode root = objectMapper.readTree(rawResponse);
+            // choices 배열 확인
+            JsonNode choices = root.path("choices");
+            if (choices.isMissingNode() || choices.isEmpty()) {
+                log.error("choices 필드 없음. 전체 응답: {}", rawResponse);
+                return Mono.error(new RuntimeException("Mistral 응답 형식 오류: choices 없음"));
+            }
+
+            String aiText = root.path("choices")
+                    .get(0)
+                    .path("message")
+                    .path("content")
+                    .asText();
+
+            if (aiText == null || aiText.isBlank()) {
+                log.error("content 비어있음. 전체 응답: {}", rawResponse);
+                return Mono.error(new RuntimeException("Mistral 응답 내용 없음"));
+            }
+
+            log.info("📄 파싱된 AI 텍스트: {}", aiText);
+
+            AiCounselingDto response = objectMapper.readValue(aiText, AiCounselingDto.class);
+            log.info("DTO 변환 완료: {}", response);  // ← 추가!
+            return Mono.just(response);
+
+        } catch (Exception e) {
+            log.error("Mistral JSON 파싱 실패: {}", rawResponse, e);
+            return Mono.error(new RuntimeException("AI 응답 파싱 실패"));
+        }
+    }
+
+
+    // DB 저장용 포맷 (구분자로 파싱 쉽게)
+    private String formatAnalysis(AiCounselingDto ai) {
+        return String.format("[원인] %s\n[상담 멘트] %s\n[학생 액션] %s",
+                ai.getReason(),
+                ai.getCounselingScript(),
+                ai.getStudentAction());
+    }
+
+
+    // RiskNotificationDto 생성
+    private RiskNotificationDto buildNotification(DropoutRisk risk, AiCounselingDto ai) {
+        return RiskNotificationDto.builder()
+                .riskId(risk.getId())
+                .studentName(risk.getStudent().getName())
+                .subjectName(risk.getSubject() != null ? risk.getSubject().getName() : "전체 과목")
+                .message(ai.getCounselingScript()) // 교수용은 counseling_script
+                .severity(risk.getRiskLevel() == RiskLevel.WARNING ? "WARNING" : "DANGER")
+                .targetRole("PROFESSOR")
+                .build();
+    }
+
+    // 에러 처리 (실무 패턴)
+    private Mono<RiskNotificationDto> handleError(String aiProvider, DropoutRisk risk, Throwable e) {
+        log.error("{} API 호출 실패 - riskId: {}", aiProvider, risk.getId(), e);
+
+        // 기본 분석 결과 저장
+        String fallbackAnalysis = "[원인] AI 분석 중 오류 발생\n[상담 멘트] 학생과의 직접 면담이 필요합니다.\n[학생 액션] 학과 사무실 방문";
+        risk.setAiAnalysis(fallbackAnalysis);
+        dropoutRiskRepository.save(risk);
+
+        // 기본 알림 반환
+        return Mono.just(RiskNotificationDto.builder()
+                .riskId(risk.getId())
+                .studentName(risk.getStudent().getName())
+                .subjectName(risk.getSubject() != null ? risk.getSubject().getName() : "전체 과목")
+                .message("AI 분석에 실패했습니다. 직접 상담을 권장합니다.")
+                .severity(risk.getRiskLevel() == RiskLevel.WARNING ? "WARNING" : "DANGER")
+                .targetRole("PROFESSOR")
+                .build());
+    }
+
+    // JSON 이스케이프
+    private String escapeJson(String text) {
+        return text.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "")
+                .replace("\t", "\\t");
+    }
+
+}
