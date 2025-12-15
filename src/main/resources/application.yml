@@ -31,7 +31,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        show_sql: true
+        # show_sql: true 인데 false로 바꿨음
+        show_sql: false
         dialect: org.hibernate.dialect.MySQLDialect
 
   web:
@@ -49,8 +50,8 @@ app:
   ai:
     mistral:
       api-key: ${MISTRAL_API_KEY}
-      url: ${MISTRAL_URL}
+      url: https://api.mistral.ai/v1
       model: mistral-small-latest
     gemini:
       api-key: ${GEMINI_API_KEY}
-      url: ${GEMINI_URL}
+      url: https://generativelanguage.googleapis.com/v1
