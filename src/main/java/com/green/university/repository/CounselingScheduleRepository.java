@@ -4,10 +4,17 @@ import com.green.university.entity.CounselingSchedule;
 import com.green.university.entity.Professor;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface CounselingScheduleRepository extends JpaRepository<CounselingSchedule, Long> {
 
     List<CounselingSchedule> findByProfessor(Professor professor); // 내가 열어 둔 상담 일정 보기
+
+    boolean existsByProfessorIdAndCounselingDateAndStartTime( // 상담 등록 중복 방지
+            Long professorId,
+            LocalDate counselingDate,
+            Long startTime
+    );
 
 }

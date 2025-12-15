@@ -22,6 +22,8 @@ public class CounselingController {
     @Autowired
     private CounselingScheduleService counselingScheduleService;
 
+    //
+
     @GetMapping("/professor") // 교수 - 내 상담 일정 불러오기
     public ResponseEntity<?> getSchedule (@AuthenticationPrincipal CustomUserDetails principal) {
         if (principal == null || !Objects.equals(principal.getUserRole(), "professor")) {
@@ -45,4 +47,6 @@ public class CounselingController {
 
         return ResponseEntity.ok().body("일정 등록이 완료되었습니다");
     }
+
+
 }

@@ -41,6 +41,17 @@ public class CounselingScheduleService {
 
             for (Long startTime : entry.getValue()) {
 
+                boolean exists =
+                        scheduleRepository
+                                .existsByProfessorIdAndCounselingDateAndStartTime(
+                                        professorId, date, startTime
+                                );
+
+                if (exists) {
+                    // 이미 열린 슬롯 → 스킵 or 예외
+                    continue; // 권장: 중복은 무시
+                }
+
                 CounselingSchedule cs = new CounselingSchedule();
                 cs.setProfessor(professor);
                 cs.setSubYear(request.getSubYear());
