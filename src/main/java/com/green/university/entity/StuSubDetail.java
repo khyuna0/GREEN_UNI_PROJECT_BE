@@ -31,4 +31,7 @@ public class StuSubDetail {
     private Double convertedMark; // 환산점수
     private String grade; // 등급 (단순 출력용)
 
+    @Column(nullable = false)
+    private boolean finalized = false; // 성적 최종 확정 여부
+
 }

@@ -1,5 +1,6 @@
 package com.green.university.service;
 
+import com.green.university.dto.AiRiskAnalysisRequest;
 import com.green.university.dto.PenaltyResultDto;
 import com.green.university.dto.SyllaBusFormDto;
 import com.green.university.dto.UpdateStudentGradeDto;
@@ -10,19 +11,19 @@ import com.green.university.repository.*;
 import com.green.university.specification.ProfessorSpecification;
 import com.green.university.utils.Define;
 import com.green.university.utils.PenaltyCalculator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * @author 김지현
- */
+@Slf4j
 @Service
 public class ProfessorService {
 
@@ -46,6 +47,12 @@ public class ProfessorService {
     private GradeService gradeService;
     @Autowired
     private RiskEvaluatorService riskEvaluatorService;
+    @Autowired
+    private DropoutRiskService dropoutRiskService;
+    @Autowired
+    private AiBatchService aiBatchService;
+    @Autowired
+    private SubjectAiJobRepository subjectAiJobRepository;
 
     /**
      * 교수가 맡은 과목들의 학기 검색
@@ -207,25 +214,28 @@ public class ProfessorService {
         // 9. 최종 성적 가지고 이수학점 계산
         stuSubService.updateCompleteGrade(studentId, subjectId);
 
+        // ★ [NEW] 10. AI 중도 이탈 위험 분석 트리거
+        // DB에 저장된 최신 상태의 엔티티를 넘겨줌
+//        dropoutRiskService.evaluateAndAnalyzeRisk(stuSub, detail);
+
         // =========================
         // 리스크 평가
         // =========================
         // 출석 위험
-        riskEvaluatorService.evaluateAttendance(stuSub.getStudent(), stuSub.getSubject(), totalAbsent);
-
-        // 과목 성적 위험(등급으로 판단)
-        riskEvaluatorService.evaluateSubjectGrade(stuSub.getStudent(), stuSub.getSubject(), detail.getGrade());
-
-        // 학기 누계 위험(금학기 평균)
-        MyGradeDto myGrade = gradeService.readMyGradeByStudentId(studentId);
-        if (myGrade != null) {
-            riskEvaluatorService.evaluateSemesterGpa(
-                    stuSub.getStudent(),
-                    myGrade.getAverage(),
-                    Long.valueOf(Define.CURRENT_YEAR),
-                    Long.valueOf(Define.CURRENT_SEMESTER)
-            );
-        }
+//        riskEvaluatorService.evaluateAttendance(stuSub.getStudent(), stuSub.getSubject(), totalAbsent);
+//
+//        // 과목 성적 위험(등급으로 판단)
+//        riskEvaluatorService.evaluateSubjectGrade(stuSub.getStudent(), stuSub.getSubject(), detail.getGrade());
+//
+//        // 학기 누계 위험(금학기 평균)
+//        MyGradeDto myGrade = gradeService.readMyGradeByStudentId(studentId);
+//        if (myGrade != null) {
+//            riskEvaluatorService.evaluateSemesterGpa(
+//                    stuSub.getStudent(),
+//                    myGrade.getAverage(),
+//                    Long.valueOf(Define.CURRENT_YEAR),
+//                    Long.valueOf(Define.CURRENT_SEMESTER)
+//            );
 
 
         // ========================================================
@@ -252,6 +262,80 @@ public class ProfessorService {
         if (score >= 60) return "D0";
         return "F";
     }
+
+    /**
+     * 과목 성적 최종 확정 + AI 분석 비동기 트리거
+     */
+    @Transactional
+    public void finalizeGrades(Long subjectId) {
+        List<StuSubDetail> details = stuSubDetailRepository.findBySubject_Id(subjectId);
+        if (details.isEmpty()) {
+            throw new CustomRestfullException("해당 과목에 성적 정보가 없습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        // 2. 모두 finalized=true로 변경 (성적 확정)
+        details.forEach(d -> d.setFinalized(true));
+        stuSubDetailRepository.saveAll(details);
+        // 여기까지가 “빠르게 끝나는” 트랜잭션
+
+        // 2) Job 저장/갱신 (과목당 1개 유지)
+        Subject subject = subjectRepository.findById(subjectId)
+                .orElseThrow(() -> new CustomRestfullException("과목이 없습니다.", HttpStatus.NOT_FOUND));
+
+        SubjectAiJob job = subjectAiJobRepository.findBySubject_Id(subjectId)
+                .orElseGet(SubjectAiJob::new);
+
+        job.setSubject(subject);
+        job.setStatus(JobStatus.RUNNING);
+        job.setTotalCount(details.size());
+        job.setDoneCount(0);
+        job.setMessage("AI 분석 준비중...");
+        subjectAiJobRepository.save(job);
+
+        // 여기서 비동기 호출 (다른 서비스 빈)
+        aiBatchService.runSubjectAiAsync(subjectId);
+    }
+
+    // 한 과목 전체 학생에 대해 AI 분석을 비동기로 실행
+//    @Async  // @EnableAsync 설정 필요
+//    public void runAiAnalysisInBackground(Long subjectId) {
+//        List<StuSubDetail> details = stuSubDetailRepository.findBySubject_IdAndFinalizedTrue(subjectId);
+//
+//        for (StuSubDetail detail : details) {
+//            try {
+//                StuSub stuSub = detail.getStuSub();
+//
+//                // 1) 위험도 평가 + request 생성 (기존 dropoutRiskService 로직 재사용 가정)
+//                AiRiskAnalysisRequest req = dropoutRiskService.buildRequest(stuSub, detail);
+//
+//                // 2) AI 호출 (mistral/gemini fallback)
+//                AiRiskAnalysisResult aiResult = aiAnalysisService.analyzeRisk(req);
+//
+//                // 3) 위험 타입 계산 (출결/성적/둘다)
+//                RiskType riskType = dropoutRiskService.decideRiskType(stuSub, detail);
+//
+//                // 4) DropoutRisk upsert (최신 1개만 유지)
+//                dropoutRiskService.upsertDropoutRisk(
+//                        stuSub.getStudent(),
+//                        stuSub.getSubject(),
+//                        riskType,
+//                        aiResult
+//                );
+//
+//                // 로그
+//                log.info("학생({}) 과목({}) 위험 분석 완료: {}",
+//                        stuSub.getStudent().getName(),
+//                        stuSub.getSubject().getName(),
+//                        riskType);
+//
+//            } catch (Exception e) {
+//                log.warn("학생({}) AI 분석 실패: {}",
+//                        detail.getStuSub().getStudent().getName(),
+//                        e.getMessage());
+//                // 실패해도 나머지 학생들은 계속 진행
+//            }
+//        }
+//    }
 
 
     /**

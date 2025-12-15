@@ -1,11 +1,13 @@
 package com.green.university.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
+@AllArgsConstructor
 public class AiRiskAnalysisResult { // AI 응답 DTO
 
     private String summary;          // 한 줄 요약
