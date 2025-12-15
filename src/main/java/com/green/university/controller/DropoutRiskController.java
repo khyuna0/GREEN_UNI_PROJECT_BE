@@ -2,17 +2,21 @@ package com.green.university.controller;
 
 import com.green.university.config.security.CustomUserDetails;
 import com.green.university.dto.response.DropoutRiskResponseDto;
+import com.green.university.dto.response.DropoutRiskRowDto;
 import com.green.university.entity.DropoutRisk;
 import com.green.university.entity.RiskStatus;
+import com.green.university.exception.CustomRestfullException;
 import com.green.university.repository.DropoutRiskRepository;
 import com.green.university.service.AiAnalysisService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
@@ -38,6 +42,25 @@ public class DropoutRiskController {
 
         return ResponseEntity.ok(dtos);
     }
+
+    // 학생 내 위험 과목 리스트 조회
+    @GetMapping("/me")
+    public ResponseEntity<List<DropoutRiskRowDto>> getMyRisks(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @RequestParam(required = false, defaultValue = "DETECTED") RiskStatus status
+    ) {
+        if (principal == null || !Objects.equals(principal.getUserRole(), "student")) {
+            throw new CustomRestfullException("권한이 없는 페이지입니다.", HttpStatus.UNAUTHORIZED);
+        }
+
+        Long studentId = principal.getId();
+
+        List<DropoutRisk> risks =
+                dropoutRiskRepository.findByStuSub_Student_IdAndStatus(studentId, status);
+
+        return ResponseEntity.ok(risks.stream().map(DropoutRiskRowDto::from).toList());
+    }
+
 
 //    // Gemini로 위험 학생 분석
 //    @PostMapping("/{riskId}/analyze/gemini")
