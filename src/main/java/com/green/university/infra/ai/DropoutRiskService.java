@@ -9,6 +9,7 @@ import com.green.university.infra.ai.entity.DropoutRisk;
 import com.green.university.infra.ai.entity.RiskLevel;
 import com.green.university.infra.ai.entity.RiskStatus;
 import com.green.university.infra.ai.entity.RiskType;
+import com.green.university.infra.ai.service.AiAnalysisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -101,10 +102,10 @@ public class DropoutRiskService {
         long totalAbsent = absent + (lateness / 3);
         // 지각 3회 = 결석 1회로 치환한 총 결석 수
         String grade = detail.getGrade();
-        boolean attendanceDanger = totalAbsent >= 5;
+        boolean attendanceDanger = totalAbsent >= 4;
         boolean gradeDanger = "F".equalsIgnoreCase(grade);
 
-        // 1. 위험 레벨: DANGER (결석 5회 이상 OR F학점)
+        // 1. 위험 레벨: DANGER (결석 4회 이상 OR F학점)
         // DANGER
         if (attendanceDanger && gradeDanger) {
             return new RiskAnalysis(RiskType.BOTH, RiskLevel.DANGER);

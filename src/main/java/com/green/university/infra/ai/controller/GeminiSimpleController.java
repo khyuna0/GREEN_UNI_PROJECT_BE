@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-public class GeminiSimpleController {
+public class GeminiSimpleController { // 제미나이 간단 테스트용 컨트롤러 (필요없음)
 
     private final WebClient webClient = WebClient.create("https://generativelanguage.googleapis.com");
 
