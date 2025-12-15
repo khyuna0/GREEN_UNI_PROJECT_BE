@@ -22,7 +22,7 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/counseling")
-public class CounselingController {
+public class CounselingScheduleController {
 
     @Autowired
     private CounselingScheduleService counselingScheduleService;
@@ -81,6 +81,11 @@ public class CounselingController {
 
         return ResponseEntity.ok().body(Map.of("riskStuList",riskStuList));
     }
+
+
+    /*
+        학생
+     */
 
 
 }

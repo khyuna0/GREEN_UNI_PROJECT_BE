@@ -3,7 +3,9 @@ package com.green.university.service;
 import com.green.university.dto.AllSubjectSearchFormDto;
 import com.green.university.dto.CurrentSemesterSubjectSearchFormDto;
 import com.green.university.dto.response.SubjectDto;
+import com.green.university.entity.StuSub;
 import com.green.university.exception.CustomRestfullException;
+import com.green.university.repository.StuSubRepository;
 import com.green.university.repository.SubjectRepository;
 import com.green.university.entity.Subject;
 import com.green.university.specification.SubjectSpecification;
@@ -17,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +29,8 @@ public class SubjectService {
 
     @Autowired
     private SubjectRepository subjectRepository;
+    @Autowired
+    private StuSubRepository stuSubRepository;
 
     // 모든 강의 조회 (전체 연도, 학기) + 페이징 + 검색
     @Transactional(readOnly = true)
@@ -118,6 +123,37 @@ public class SubjectService {
         return subjectRepository.findById(id).orElseThrow(
                 () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );
+    }
+    // 교수 - 이번 학기 강의 과목 뽑기
+    public List<Subject> getMySubjectNames(Long professorId) {
+        return  subjectRepository.findByProfessor_IdAndSubYearAndSemester(
+                professorId,
+                Define.CURRENT_YEAR,
+                Define.CURRENT_SEMESTER
+        );
+    }
+    // 학생 - 이번 학기 수강 과목 뽑기 (subjectId로 선택)
+    public List<Subject> getBySubjectNamesByStuSub(Long studentId, Long subjectId) {
+
+        List<StuSub> stuSubs =
+                stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(
+                        studentId,
+                        Define.CURRENT_YEAR,
+                        Define.CURRENT_SEMESTER
+                );
+
+        List<Subject> subjects = new ArrayList<>();
+
+        for (StuSub ss : stuSubs) {
+            Subject subject = ss.getSubject();
+
+            // 과목 선택 조건
+            if (subjectId == null || subject.getId().equals(subjectId)) {
+                subjects.add(subject);
+            }
+        }
+
+        return subjects;
     }
 
 }

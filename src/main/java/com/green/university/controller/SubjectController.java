@@ -1,9 +1,11 @@
 package com.green.university.controller;
 
+import com.green.university.config.security.CustomUserDetails;
 import com.green.university.dto.AllSubjectSearchFormDto;
 import com.green.university.dto.response.ReadSyllabusDto;
 import com.green.university.dto.response.SubjectDto;
 import com.green.university.entity.Department;
+import com.green.university.entity.Subject;
 import com.green.university.service.CollegeService;
 import com.green.university.service.ProfessorService;
 import com.green.university.service.SubjectService;
@@ -14,15 +16,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author 서영
@@ -72,5 +72,22 @@ public class SubjectController {
                 "syllabus", readSyllabusDto
         ));
     }
+
+    // 학생 - 이번 학기 수강/강의 과목 조회
+    @GetMapping("/semester")
+    public ResponseEntity<?> getSubjectThisSemester(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @RequestParam(required = false) Long subjectId
+    ) {
+        Long id = principal.getId(); // 사용자 아이디 조회
+
+        List<Subject> subjectList = subjectService.getBySubjectNamesByStuSub(id, subjectId);
+
+        return ResponseEntity.ok(Map.of(
+                "subjectList", subjectList
+        ));
+    }
+
+
 
 }

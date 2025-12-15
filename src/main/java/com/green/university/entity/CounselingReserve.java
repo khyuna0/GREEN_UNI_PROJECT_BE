@@ -1,6 +1,7 @@
 package com.green.university.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -32,7 +33,14 @@ public class CounselingReserve { // 확정된 상담
     @Column(unique = true)
     private String roomCode;
 
-    // 상담 사유 (예비에서 복사)
+    // 학생 위험 상태
+    @Enumerated(EnumType.STRING)
+    private RiskLevel risklevel; // danger, warning
+
+    @Enumerated(EnumType.STRING)
+    private RiskStatus status = RiskStatus.DETECTED; // DETECTED 포착됨, CONSULT_REQ 상담예약, RESOLVED 해결완료
+
+    // 상담 사유
     @Column(length = 200)
     private String reason;
 

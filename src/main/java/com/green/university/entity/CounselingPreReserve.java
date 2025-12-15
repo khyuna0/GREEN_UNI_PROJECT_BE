@@ -33,9 +33,13 @@ public class CounselingPreReserve { // 상담 신청(예비) 1주 마다 초기�
     @Enumerated(EnumType.STRING)
     private RiskLevel risklevel; // danger, warning
 
+    @Enumerated(EnumType.STRING)
+    private RiskStatus status = RiskStatus.DETECTED; // DETECTED 포착됨, CONSULT_REQ 상담예약, RESOLVED 해결완료
+
     // 승인 여부
     @Enumerated(EnumType.STRING)
-    private  ReserveStatus status; // 학생 신청, 교수 승인(승인 시 예약 생성), 반려
+    private  ReserveStatus approvalState = ReserveStatus.REQUESTED;
+    // 학생 신청, 교수 승인(승인 시 예약 생성), 반려
 }
 
 
