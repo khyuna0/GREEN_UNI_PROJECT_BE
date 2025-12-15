@@ -1,0 +1,27 @@
+package com.green.university.domain.student.dto;
+
+import com.green.university.domain.breakapp.entity.BreakApp;
+import com.green.university.domain.student.entity.Student;
+import lombok.Data;
+
+import java.time.LocalDate;
+@Data
+public class StuStatDto {
+
+    private Long id;
+    private Student student;
+    private String status;
+    private LocalDate fromDate;
+    private LocalDate toDate;
+    private BreakApp breakApp;
+
+    public StuStatDto(StuStat s) {
+        this.id = s.getId();
+        this.student = s.getStudent();
+        this.status = s.getStatus();
+        this.fromDate = s.getFromDate();
+        this.toDate = s.getToDate();
+        this.breakApp = s.getBreakApp();
+    }
+
+}

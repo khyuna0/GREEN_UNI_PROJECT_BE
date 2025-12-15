@@ -1,0 +1,16 @@
+package com.green.university.domain.scholarship.repository;
+
+import com.green.university.domain.scholarship.entity.StuSch;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface StuSchRepository extends JpaRepository <StuSch, Long> {
+
+    // 학생 아이디로 해당 학생이 어떤 년도, 학기에 장학금 유형인지 찾기
+    Optional<StuSch> findByStudent_IdAndSchYearAndSemester(
+            Long studentId,
+            Long schYear,
+            Long semester
+    );
+}

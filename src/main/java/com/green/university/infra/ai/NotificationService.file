@@ -1,0 +1,84 @@
+package com.green.university.service;
+
+import com.green.university.infra.ai.dto.RiskNotificationFormDto;
+import com.green.university.infra.ai.entity.DropoutRisk;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class NotificationService {
+
+    private final SimpMessagingTemplate messagingTemplate;
+
+    /**
+     * 학생에게 위험 알림 전송
+     */
+    public void sendRiskAlertToStudent(DropoutRisk risk) {
+
+        RiskNotificationDto notification = RiskNotificationDto.builder()
+                .riskId(risk.getId())
+                .studentName(risk.getStudent().getName())
+                .subjectName(risk.getSubject() != null ? risk.getSubject().getName() : "전체")
+                .message(buildStudentMessage(risk))
+                .severity(risk.getRiskLevel().name())
+                .targetRole("STUDENT")
+                .build();
+
+        // /topic/student/{studentId} 로 발송
+        messagingTemplate.convertAndSend(
+                "/topic/student/" + risk.getStudent().getId(),
+                notification
+        );
+
+        log.info("학생 {}에게 위험 알림 전송 완료", risk.getStudent().getName());
+    }
+
+    /**
+     * 교수에게 위험 학생 알림 전송
+     */
+    public void sendRiskAlertToProfessor(DropoutRisk risk) {
+
+        if (risk.getSubject() == null || risk.getSubject().getProfessor() == null) {
+            log.warn("교수 정보가 없어 알림을 전송할 수 없습니다.");
+            return;
+        }
+
+        RiskNotificationDto notification = RiskNotificationDto.builder()
+                .riskId(risk.getId())
+                .studentName(risk.getStudent().getName())
+                .subjectName(risk.getSubject().getName())
+                .message(buildProfessorMessage(risk))
+                .severity(risk.getRiskLevel().name())
+                .targetRole("PROFESSOR")
+                .build();
+
+        // /topic/professor/{professorId} 로 발송
+        messagingTemplate.convertAndSend(
+                "/topic/professor/" + risk.getSubject().getProfessor().getId(),
+                notification
+        );
+
+        log.info("교수 {}에게 위험 학생 알림 전송 완료", risk.getSubject().getProfessor().getName());
+    }
+
+    private String buildStudentMessage(DropoutRisk risk) {
+        if (risk.getRiskLevel().name().equals("WARNING")) {
+            return String.format("⚠️ [경고] '%s' 과목 결석이 2회입니다. 출석 관리에 유의하세요.",
+                    risk.getSubject().getName());
+        } else {
+            return String.format("🚨 [위험] '%s' 과목 결석이 3회 이상입니다. 상담이 필요합니다.",
+                    risk.getSubject() != null ? risk.getSubject().getName() : "전반적인 학업");
+        }
+    }
+
+    private String buildProfessorMessage(DropoutRisk risk) {
+        return String.format("📢 학생 '%s'이(가) '%s' 과목에서 중도 이탈 위험 상태입니다. 상담을 권장합니다.",
+                risk.getStudent().getName(),
+                risk.getSubject().getName());
+    }
+}
