@@ -63,7 +63,7 @@ public class AiAnalysisService {
                 너는 20년 이상의 대학교 상담 컨설턴트다.
                 아래 학생의 출결, 과제, 성적 정보를 보고 중도 이탈 위험을 분석해라.
                 - 출력 형식: JSON (summary, professorGuide, studentMessage, reasonTags 배열)
-                
+
                 학생 정보:
                 - 이름: %s
                 - 과목: %s

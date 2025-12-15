@@ -17,7 +17,10 @@ public class CounselingSchedule { // 교수가 열어주는 상담 일정
 
     private Long subYear; // 년도
     private Long semester; // 학기
+
     private String dayOfWeek; // 요일
+
     private Long startTime; // 시작 시간
+
     private Long endTime; // 종료 시간
 }
