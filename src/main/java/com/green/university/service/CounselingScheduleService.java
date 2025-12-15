@@ -5,6 +5,7 @@ import com.green.university.entity.CounselingSchedule;
 import com.green.university.entity.Professor;
 import com.green.university.repository.CounselingScheduleRepository;
 import com.green.university.repository.ProfessorRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,9 +22,10 @@ public class CounselingScheduleService {
     @Autowired
     private ProfessorRepository professorRepository;
 
-    public List<CounselingSchedule> getSchedules (Long professorId) { // 내 상담 목록 불러오기
-        Professor professor = professorRepository.findById(professorId).orElseThrow();
-        List<CounselingSchedule> lists = scheduleRepository.findByProfessor(professor);
+    public List<CounselingSchedule> getSchedulesByWeek ( Long professorId,
+                                                         LocalDate start,
+                                                         LocalDate end) { // 내 상담 목록 불러오기
+        List<CounselingSchedule> lists = scheduleRepository.findByProfessor_IdAndCounselingDateBetween(professorId, start, end);
         return lists;
     }
 
@@ -65,5 +67,17 @@ public class CounselingScheduleService {
             }
         }
     }
+
+    @Transactional
+    public void deleteSchedules(Long professorId, LocalDate date, Long startTime) {
+        CounselingSchedule schedule =
+                scheduleRepository
+                        .findByProfessor_IdAndCounselingDateAndStartTime(
+                                professorId, date, startTime
+                        );
+
+        scheduleRepository.delete(schedule);
+    }
+
 
 }

@@ -1,10 +1,13 @@
 package com.green.university.controller;
 
 import com.green.university.config.security.CustomUserDetails;
+import com.green.university.dto.DeleteScheduleRequestDto;
 import com.green.university.dto.WeeklyCounselingScheduleRequest;
 import com.green.university.entity.CounselingSchedule;
+import com.green.university.entity.DropoutRisk;
 import com.green.university.exception.CustomRestfullException;
 import com.green.university.service.CounselingScheduleService;
+import com.green.university.service.RiskStudentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,7 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -22,22 +27,26 @@ public class CounselingController {
     @Autowired
     private CounselingScheduleService counselingScheduleService;
 
-    //
+    @Autowired
+    private RiskStudentService riskStudentService;
 
-    @GetMapping("/professor") // 교수 - 내 상담 일정 불러오기
-    public ResponseEntity<?> getSchedule (@AuthenticationPrincipal CustomUserDetails principal) {
+    @GetMapping("/professor") // 교수 - 이번 주 내 상담 일정 불러오기
+    public ResponseEntity<?> getSchedule (
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @RequestParam LocalDate weekStartDate
+    ) {
         if (principal == null || !Objects.equals(principal.getUserRole(), "professor")) {
             throw new CustomRestfullException("권한이 없는 페이지입니다.", HttpStatus.UNAUTHORIZED);
         }
-
         Long id = principal.getId();
-        List<CounselingSchedule> list = counselingScheduleService.getSchedules(id);
+        LocalDate weekEndDate = weekStartDate.plusDays(4); // 월~금
+        List<CounselingSchedule> list = counselingScheduleService.getSchedulesByWeek(id, weekStartDate, weekEndDate);
 
-        return  ResponseEntity.ok().body(list);
+        return ResponseEntity.ok(Map.of("list", list));
     }
 
     @PostMapping("/professor") // 교수 - 내 상담 일정 등록
-    public ResponseEntity<?> WeeklyCounselingSchedule (@AuthenticationPrincipal CustomUserDetails principal, @Valid @RequestBody WeeklyCounselingScheduleRequest weeklyDto) {
+    public ResponseEntity<?> weeklyCounselingSchedule (@AuthenticationPrincipal CustomUserDetails principal, @Valid @RequestBody WeeklyCounselingScheduleRequest weeklyDto) {
         if (principal == null || !Objects.equals(principal.getUserRole(), "professor")) {
             throw new CustomRestfullException("권한이 없는 페이지입니다.", HttpStatus.UNAUTHORIZED);
         }
@@ -46,6 +55,31 @@ public class CounselingController {
         counselingScheduleService.createWeeklySchedule(professorId, weeklyDto);
 
         return ResponseEntity.ok().body("일정 등록이 완료되었습니다");
+    }
+
+    @DeleteMapping("/professor") // 교수 - 내 상담 일정 삭제
+    public ResponseEntity<?> deleteSchedule(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @RequestBody DeleteScheduleRequestDto req
+    ) {
+        counselingScheduleService.deleteSchedules(
+                principal.getId(),
+                req.getCounselingDate(),
+                req.getStartTime()
+        );
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/riskStu") // 교수 - 이번 학기 내 담당 위험 학생 조회 (과목 별)
+    public  ResponseEntity<?> getMyRiskStu (@AuthenticationPrincipal CustomUserDetails principal) {
+        if (principal == null || !Objects.equals(principal.getUserRole(), "professor")) {
+            throw new CustomRestfullException("권한이 없는 페이지입니다.", HttpStatus.UNAUTHORIZED);
+        }
+
+        Long professorId = principal.getId(); // 로그인 교수
+        List<DropoutRisk> riskStuList = riskStudentService.getRiskStudents(professorId);
+
+        return ResponseEntity.ok().body(Map.of("riskStuList",riskStuList));
     }
 
 
