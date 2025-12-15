@@ -8,6 +8,7 @@ import com.green.university.entity.*;
 import com.green.university.exception.CustomRestfullException;
 import com.green.university.repository.*;
 import com.green.university.specification.ProfessorSpecification;
+import com.green.university.utils.Define;
 import com.green.university.utils.PenaltyCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -20,89 +21,92 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 
  * @author 김지현
  */
 @Service
 public class ProfessorService {
 
-	@Autowired
-	private SubjectRepository subjectRepository;
-	@Autowired
-	private StuSubRepository stuSubRepository;
-	@Autowired
-	private StuSubDetailRepository stuSubDetailRepository;
-	@Autowired
-	private SyllaBusRepository syllaBusRepository;
-	@Autowired
-	private ProfessorRepository professorRepository;
+    @Autowired
+    private SubjectRepository subjectRepository;
+    @Autowired
+    private StuSubRepository stuSubRepository;
+    @Autowired
+    private StuSubDetailRepository stuSubDetailRepository;
+    @Autowired
+    private SyllaBusRepository syllaBusRepository;
+    @Autowired
+    private ProfessorRepository professorRepository;
     @Autowired
     private StuSubService stuSubService;
 
     private static final int PAGE_SIZE = 20; // 교수 리스트 / 검색 페이징 용
     @Autowired
     private GradeRepository gradeRepository;
+    @Autowired
+    private GradeService gradeService;
+    @Autowired
+    private RiskEvaluatorService riskEvaluatorService;
 
-	/**
-	 * 교수가 맡은 과목들의 학기 검색
-	 * 
-	 * @param professorId
-	 * @return SubjectPeriodForProfessorDto list
-	 */
-	@Transactional
-	public List<SubjectPeriodForProfessorDto> selectSemester(Long professorId) {
-		List<Subject> subjectList = subjectRepository.findByProfessor_Id(professorId);
-		// 중복 subYear, semester 있을 수 있으니 distinct 처리하려면 Set 같은 별도 로직 필요할 수 있음
-		// 여기선 리스트 전체를 dto로 변환해 반환하는 예제임
-		return subjectList.stream()
-				.map(subject -> {
-					SubjectPeriodForProfessorDto dto = new SubjectPeriodForProfessorDto();
-					dto.setId(professorId);
-					dto.setSubYear(subject.getSubYear());
-					dto.setSemester(subject.getSemester());
-					return dto;
-				})
-				.collect(Collectors.toList());
-	}
+    /**
+     * 교수가 맡은 과목들의 학기 검색
+     *
+     * @param professorId
+     * @return SubjectPeriodForProfessorDto list
+     */
+    @Transactional
+    public List<SubjectPeriodForProfessorDto> selectSemester(Long professorId) {
+        List<Subject> subjectList = subjectRepository.findByProfessor_Id(professorId);
+        // 중복 subYear, semester 있을 수 있으니 distinct 처리하려면 Set 같은 별도 로직 필요할 수 있음
+        // 여기선 리스트 전체를 dto로 변환해 반환하는 예제임
+        return subjectList.stream()
+                .map(subject -> {
+                    SubjectPeriodForProfessorDto dto = new SubjectPeriodForProfessorDto();
+                    dto.setId(professorId);
+                    dto.setSubYear(subject.getSubYear());
+                    dto.setSemester(subject.getSemester());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
 
-	/**
-	 * 년도와 학기, 교수 id를 이용하여 해당 과목의 정보 불러오기
-	 * 
-	 * @param subjectPeriodForProfessorDto
-	 * @return SubjectForProfessorDto list
-	 */
-	@Transactional
-	public List<SubjectForProfessorDto> selectSubjectBySemester(
-			SubjectPeriodForProfessorDto subjectPeriodForProfessorDto) {
-		List<Subject> list = subjectRepository.findByProfessor_IdAndSubYearAndSemester(subjectPeriodForProfessorDto.getId(), subjectPeriodForProfessorDto.getSubYear(), subjectPeriodForProfessorDto.getSemester());
-		return list.stream()
-				.map(subject -> {
-					SubjectForProfessorDto subjectDto = new SubjectForProfessorDto();
-					subjectDto.setId(subject.getId());
-					subjectDto.setName(subject.getName());
-					subjectDto.setSubDay(subject.getSubDay());
-					subjectDto.setStartTime(subject.getStartTime());
-					subjectDto.setEndTime(subject.getEndTime());
-					subjectDto.setRoomId(subject.getRoom().getId());
-					return subjectDto;
-				})
-				.collect(Collectors.toList());
-	}
+    /**
+     * 년도와 학기, 교수 id를 이용하여 해당 과목의 정보 불러오기
+     *
+     * @param subjectPeriodForProfessorDto
+     * @return SubjectForProfessorDto list
+     */
+    @Transactional
+    public List<SubjectForProfessorDto> selectSubjectBySemester(
+            SubjectPeriodForProfessorDto subjectPeriodForProfessorDto) {
+        List<Subject> list = subjectRepository.findByProfessor_IdAndSubYearAndSemester(subjectPeriodForProfessorDto.getId(), subjectPeriodForProfessorDto.getSubYear(), subjectPeriodForProfessorDto.getSemester());
+        return list.stream()
+                .map(subject -> {
+                    SubjectForProfessorDto subjectDto = new SubjectForProfessorDto();
+                    subjectDto.setId(subject.getId());
+                    subjectDto.setName(subject.getName());
+                    subjectDto.setSubDay(subject.getSubDay());
+                    subjectDto.setStartTime(subject.getStartTime());
+                    subjectDto.setEndTime(subject.getEndTime());
+                    subjectDto.setRoomId(subject.getRoom().getId());
+                    return subjectDto;
+                })
+                .collect(Collectors.toList());
+    }
 
-	/**
-	 * 해당 과목을 듣는 학생의 세부정보 리스트로 불러오기 (교수 확인용)
-	 * 
-	 * @param subjectId
-	 * @return StudentInfoForProfessorDto list
-	 */
-	@Transactional
-	public List<StudentInfoForProfessorDto> selectBySubjectId(Long subjectId) {
+    /**
+     * 해당 과목을 듣는 학생의 세부정보 리스트로 불러오기 (교수 확인용)
+     *
+     * @param subjectId
+     * @return StudentInfoForProfessorDto list
+     */
+    @Transactional
+    public List<StudentInfoForProfessorDto> selectBySubjectId(Long subjectId) {
 
-		return stuSubDetailRepository.findBySubject_Id(subjectId)
-				.stream()
-				.map(StudentInfoForProfessorDto::fromEntity)  // 각 StuSub → DTO 변환
-				.collect(Collectors.toList());
-	}
+        return stuSubDetailRepository.findBySubject_Id(subjectId)
+                .stream()
+                .map(StudentInfoForProfessorDto::fromEntity)  // 각 StuSub → DTO 변환
+                .collect(Collectors.toList());
+    }
 
 	/**
 	 * 과목 id로 과목 Entity 불러오기
@@ -116,13 +120,12 @@ public class ProfessorService {
 				() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
 		);
 
-		return subjectEntity;
-	}
+        return subjectEntity;
+    }
 
-	/**
-	 * 출결 및 성적 기입
-	 *
-	 */
+    /**
+     * 출결 및 성적 기입
+     */
     @Transactional
     public void updateGrade(Long subjectId, Long studentId, UpdateStudentGradeDto dto) {
 
@@ -150,17 +153,24 @@ public class ProfessorService {
         long totalAbsent = penaltyResult.getTotalAbsent();
         double penalty = penaltyResult.getPenalty();
 
+        // ========================================================
+        // [NEW] 중도 이탈 모니터링 트리거 (출석 체크)
+        // ========================================================
+        // 학생 엔티티와 과목 엔티티를 꺼내서 넘겨줌
+        //dropoutRiskService.checkAttendanceRisk(stuSub.getStudent(), stuSub.getSubject(), totalAbsent);
+        // ========================================================
+
         // 5. 환산점수 계산
         double convertedmark =
-                ( dto.getHomework() * 0.2 ) + // 과제 점수 20%
-                ( dto.getMidExam() * 0.4 ) + // 중간 점수 40%
-                ( dto.getFinalExam() * 0.4 ); // 기말 점수 40%
+                (dto.getHomework() * 0.2) + // 과제 점수 20%
+                        (dto.getMidExam() * 0.4) + // 중간 점수 40%
+                        (dto.getFinalExam() * 0.4); // 기말 점수 40%
 
         // 최종 환산점수 계산 첫째 자리까지 반올림 (환산점수 - 감점)
         double finalConvertedMark = Math.round((convertedmark - penalty) * 10) / 10.0;
 
         // 5. 계산된 환산점수
-        if(finalConvertedMark < 0) finalConvertedMark = 0;
+        if (finalConvertedMark < 0) finalConvertedMark = 0;
         detail.setConvertedMark(finalConvertedMark);
 
         // 6. 등급 계산 (선택된 등급이 있으면 환산점수 까지만 계산하고, 등급은 수정됨)
@@ -196,7 +206,39 @@ public class ProfessorService {
         stuSubRepository.save(stuSub);
         // 9. 최종 성적 가지고 이수학점 계산
         stuSubService.updateCompleteGrade(studentId, subjectId);
+
+        // =========================
+        // 리스크 평가
+        // =========================
+        // 출석 위험
+        riskEvaluatorService.evaluateAttendance(stuSub.getStudent(), stuSub.getSubject(), totalAbsent);
+
+        // 과목 성적 위험(등급으로 판단)
+        riskEvaluatorService.evaluateSubjectGrade(stuSub.getStudent(), stuSub.getSubject(), detail.getGrade());
+
+        // 학기 누계 위험(금학기 평균)
+        MyGradeDto myGrade = gradeService.readMyGradeByStudentId(studentId);
+        if (myGrade != null) {
+            riskEvaluatorService.evaluateSemesterGpa(
+                    stuSub.getStudent(),
+                    myGrade.getAverage(),
+                    Long.valueOf(Define.CURRENT_YEAR),
+                    Long.valueOf(Define.CURRENT_SEMESTER)
+            );
+        }
+
+
+        // ========================================================
+        // [NEW] 중도 이탈 모니터링 트리거 (성적)
+        // ========================================================
+//		MyGradeDto myGrade = gradeService.readMyGradeByStudentId(studentId);
+//		if (myGrade != null) {
+//			double currentGpa = myGrade.getAverage();  // 평균 평점
+//			dropoutRiskService.checkGradeRisk(stuSub.getStudent(), currentGpa);
+//		}
+        // ========================================================
     }
+
 
     // 절대평가 기준 등급 산출
     private static String getAbsoluteGrade(double score) {
@@ -213,34 +255,34 @@ public class ProfessorService {
 
 
     /**
-	 * 교수 강의계획서 조회 (수정 시에도 필요)
-	 * 
-	 * @param subjectId
-	 * @return 강의계획서
-	 */
-	@Transactional
-	public ReadSyllabusDto readSyllabus(Long subjectId) {
-		// Subject로 찾은 후 이걸로 SyllaBus도 찾고, Professor도 찾기
-		Subject subject = subjectRepository.findById(subjectId).orElseThrow(
-				() -> new CustomRestfullException("과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
-		);
-		Syllabus syllabus = syllaBusRepository.findBySubject_Id(subjectId).orElseThrow(
-				() -> new CustomRestfullException("강의 계획서를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
-		Professor professor = subject.getProfessor();
-		if (professor == null) {
-			throw new CustomRestfullException("교수 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
-		}
-		ReadSyllabusDto dto = new ReadSyllabusDto(subject, professor, syllabus); // Dto에 생성자 추가함
-		return dto;
-	}
+     * 교수 강의계획서 조회 (수정 시에도 필요)
+     *
+     * @param subjectId
+     * @return 강의계획서
+     */
+    @Transactional
+    public ReadSyllabusDto readSyllabus(Long subjectId) {
+        // Subject로 찾은 후 이걸로 SyllaBus도 찾고, Professor도 찾기
+        Subject subject = subjectRepository.findById(subjectId).orElseThrow(
+                () -> new CustomRestfullException("과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+        );
+        Syllabus syllabus = syllaBusRepository.findBySubject_Id(subjectId).orElseThrow(
+                () -> new CustomRestfullException("강의 계획서를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+        Professor professor = subject.getProfessor();
+        if (professor == null) {
+            throw new CustomRestfullException("교수 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+        }
+        ReadSyllabusDto dto = new ReadSyllabusDto(subject, professor, syllabus); // Dto에 생성자 추가함
+        return dto;
+    }
 
-	/**
-	 * 강의 계획서 업데이트
-	 * 
-	 * @param syllaBusFormDto
-	 */
-	@Transactional
-	public void updateSyllabus(Long id, SyllaBusFormDto syllaBusFormDto) {
+    /**
+     * 강의 계획서 업데이트
+     *
+     * @param syllaBusFormDto
+     */
+    @Transactional
+    public void updateSyllabus(Long id, SyllaBusFormDto syllaBusFormDto) {
 
         Syllabus syllabus = syllaBusRepository.findBySubject_Id(id).orElseThrow(
                 () -> new CustomRestfullException("강의 계획서를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
@@ -250,11 +292,11 @@ public class ProfessorService {
         syllabus.setProgram(syllaBusFormDto.getProgram());
 
         syllaBusRepository.save(syllabus);
-	}
+    }
 
-	/**
-	 * @return 교수 리스트 조회 + 검색
-	 */
+    /**
+     * @return 교수 리스트 조회 + 검색
+     */
 
     @Transactional
     public Page<ProfessorDto> readProfessorList(Long professorId, String deptName, Pageable pageable) {
@@ -267,7 +309,7 @@ public class ProfessorService {
         if (deptName != null) {
             spec = spec.and(ProfessorSpecification.hasDepartmentName(deptName));
         }
-        if(deptName != null && professorId != null) {
+        if (deptName != null && professorId != null) {
             spec = spec.and(ProfessorSpecification.hasProfessorIdAndDepartmentName(professorId, deptName));
         }
 
