@@ -50,8 +50,8 @@ app:
   ai:
     mistral:
       api-key: ${MISTRAL_API_KEY}
-      url: https://api.mistral.ai
+      url: https://api.mistral.ai/v1
       model: mistral-small-latest
     gemini:
       api-key: ${GEMINI_API_KEY}
-      url: https://generativelanguage.googleapis.com
+      url: https://generativelanguage.googleapis.com/v1
