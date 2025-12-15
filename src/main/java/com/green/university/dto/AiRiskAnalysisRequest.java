@@ -2,9 +2,11 @@ package com.green.university.dto;
 
 import com.green.university.entity.RiskLevel;
 import com.green.university.entity.RiskType;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class AiRiskAnalysisRequest { // AI에게 넘기는 핵심 DTO
 
     private Long studentId;

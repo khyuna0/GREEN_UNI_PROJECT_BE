@@ -5,6 +5,8 @@ import com.green.university.dto.UpdateStudentGradeDto;
 import com.green.university.dto.response.*;
 import com.green.university.entity.Subject;
 import com.green.university.config.security.CustomUserDetails;
+import com.green.university.entity.SubjectAiJob;
+import com.green.university.repository.SubjectAiJobRepository;
 import com.green.university.service.*;
 import com.green.university.utils.Define;
 import jakarta.validation.Valid;
@@ -38,7 +40,45 @@ public class ProfessorController {
 	private SubjectService subjectService;
     @Autowired
     private StuSubDetailService stuSubDetailService;
-	
+	@Autowired
+	private SubjectAiJobRepository subjectAiJobRepository;
+	@Autowired
+	private DropoutRiskQueryService dropoutRiskQueryService;
+
+
+	// 교수가 성적을 최종으로 확정 지으면 ai가 돌아감
+	@PostMapping("/subjects/{subjectId}/finalize")
+	public ResponseEntity<Void> finalizeSubjectGrades(@PathVariable Long subjectId) {
+		professorService.finalizeGrades(subjectId);
+		return ResponseEntity.ok().build(); // 바로 200 리턴 (AI는 백그라운드)
+	}
+
+	@GetMapping("/subjects/{subjectId}/ai-status")
+	public ResponseEntity<SubjectAiStatusResponse> aiStatus(@PathVariable Long subjectId) {
+		SubjectAiJob job = subjectAiJobRepository.findBySubject_Id(subjectId)
+				.orElse(null);
+
+		if (job == null) {
+			return ResponseEntity.ok(new SubjectAiStatusResponse("IDLE", "아직 AI 분석을 시작하지 않았습니다.", 0, 0));
+		}
+
+		return ResponseEntity.ok(new SubjectAiStatusResponse(
+				job.getStatus().name(),
+				job.getMessage(),
+				job.getDoneCount(),
+				job.getTotalCount()
+		));
+	}
+
+	// 최종 성적 확정 후 결과를 테이블로 보여주기
+	@GetMapping("/subjects/{subjectId}/dropout-risks")
+	public ResponseEntity<List<DropoutRiskRowDto>> getDropoutRisks(@PathVariable Long subjectId) {
+		return ResponseEntity.ok(dropoutRiskQueryService.getRisksBySubject(subjectId));
+	}
+
+
+
+
 	/**
 	 * 교수 본인의 강의가 있는 년도 학기 조회하는 기능 조회한 년도 학기의 강의 리스트 출력(처음값은 현재학기)
 	 *
