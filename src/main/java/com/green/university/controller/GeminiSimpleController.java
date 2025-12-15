@@ -29,7 +29,7 @@ public class GeminiSimpleController {
 
         return webClient.post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/v1beta/models/gemini-1.5-flash-latest:generateContent")
+                        .path("/models/gemini-2.0-flash:generateContent")
                         .queryParam("key", apiKey)
                         .build())
                 .contentType(MediaType.APPLICATION_JSON)

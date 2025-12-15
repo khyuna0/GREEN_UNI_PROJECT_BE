@@ -26,26 +26,26 @@ public class RiskEvaluatorService {
 
         String aiInput = "ATTENDANCE totalAbsent=" + totalAbsent + ", level=" + level;
 
-        DropoutRisk risk = dropoutRiskRepository
-                .findByStudent_IdAndSubject_IdAndRiskType(student.getId(), subject.getId(), RiskType.ATTENDANCE)
-                .orElseGet(() -> DropoutRisk.builder()
-                        .student(student)
-                        .subject(subject)
-                        .riskType(RiskType.ATTENDANCE)
-                        .status(RiskStatus.DETECTED)
-                        .build());
-
-        boolean changed = changed(risk, level, aiInput);
-
-        risk.setRiskLevel(level);
-        risk.setLastAiInput(aiInput);
-
-        DropoutRisk saved = dropoutRiskRepository.save(risk);
-
-        // WARNING도 미리 상담 원하면 WARNING도 AI 돌리자
-        if (changed) {
-            publisher.publishEvent(new RiskChangedEvent(saved.getId()));
-        }
+//        DropoutRisk risk = dropoutRiskRepository
+//                .findByStudent_IdAndSubject_IdAndRiskType(student.getId(), subject.getId(), RiskType.ATTENDANCE)
+//                .orElseGet(() -> DropoutRisk.builder()
+//                        .student(student)
+//                        .subject(subject)
+//                        .riskType(RiskType.ATTENDANCE)
+//                        .status(RiskStatus.DETECTED)
+//                        .build());
+//
+//        boolean changed = changed(risk, level, aiInput);
+//
+//        risk.setRiskLevel(level);
+//        risk.setLastAiInput(aiInput);
+//
+//        DropoutRisk saved = dropoutRiskRepository.save(risk);
+//
+//        // WARNING도 미리 상담 원하면 WARNING도 AI 돌리자
+//        if (changed) {
+//            publisher.publishEvent(new RiskChangedEvent(saved.getId()));
+//        }
     }
 
     @Transactional
@@ -55,25 +55,25 @@ public class RiskEvaluatorService {
 
         String aiInput = "SUBJECT_GRADE grade=" + gradeLetter + ", level=" + level;
 
-        DropoutRisk risk = dropoutRiskRepository
-                .findByStudent_IdAndSubject_IdAndRiskType(student.getId(), subject.getId(), RiskType.SUBJECT_GRADE)
-                .orElseGet(() -> DropoutRisk.builder()
-                        .student(student)
-                        .subject(subject)
-                        .riskType(RiskType.SUBJECT_GRADE)
-                        .status(RiskStatus.DETECTED)
-                        .build());
-
-        boolean changed = changed(risk, level, aiInput);
-
-        risk.setRiskLevel(level);
-        risk.setLastAiInput(aiInput);
-
-        DropoutRisk saved = dropoutRiskRepository.save(risk);
-
-        if (changed) {
-            publisher.publishEvent(new RiskChangedEvent(saved.getId()));
-        }
+//        DropoutRisk risk = dropoutRiskRepository
+//                .findByStudent_IdAndSubject_IdAndRiskType(student.getId(), subject.getId(), RiskType.SUBJECT_GRADE)
+//                .orElseGet(() -> DropoutRisk.builder()
+//                        .student(student)
+//                        .subject(subject)
+//                        .riskType(RiskType.SUBJECT_GRADE)
+//                        .status(RiskStatus.DETECTED)
+//                        .build());
+//
+//        boolean changed = changed(risk, level, aiInput);
+//
+//        risk.setRiskLevel(level);
+//        risk.setLastAiInput(aiInput);
+//
+//        DropoutRisk saved = dropoutRiskRepository.save(risk);
+//
+//        if (changed) {
+//            publisher.publishEvent(new RiskChangedEvent(saved.getId()));
+//        }
     }
 
     @Transactional
@@ -85,25 +85,25 @@ public class RiskEvaluatorService {
 
         String aiInput = "SEMESTER_GPA y=" + year + ", s=" + semester + ", gpa=" + semesterGpa + ", level=" + level;
 
-        DropoutRisk risk = dropoutRiskRepository
-                .findByStudent_IdAndSubjectIsNullAndRiskType(student.getId(), RiskType.SEMESTER_GPA)
-                .orElseGet(() -> DropoutRisk.builder()
-                        .student(student)
-                        .subject(null)
-                        .riskType(RiskType.SEMESTER_GPA)
-                        .status(RiskStatus.DETECTED)
-                        .build());
-
-        boolean changed = changed(risk, level, aiInput);
-
-        risk.setRiskLevel(level);
-        risk.setLastAiInput(aiInput);
-
-        DropoutRisk saved = dropoutRiskRepository.save(risk);
-
-        if (changed) {
-            publisher.publishEvent(new RiskChangedEvent(saved.getId()));
-        }
+//        DropoutRisk risk = dropoutRiskRepository
+//                .findByStudent_IdAndSubjectIsNullAndRiskType(student.getId(), RiskType.SEMESTER_GPA)
+//                .orElseGet(() -> DropoutRisk.builder()
+//                        .student(student)
+//                        .subject(null)
+//                        .riskType(RiskType.SEMESTER_GPA)
+//                        .status(RiskStatus.DETECTED)
+//                        .build());
+//
+//        boolean changed = changed(risk, level, aiInput);
+//
+//        risk.setRiskLevel(level);
+//        risk.setLastAiInput(aiInput);
+//
+//        DropoutRisk saved = dropoutRiskRepository.save(risk);
+//
+//        if (changed) {
+//            publisher.publishEvent(new RiskChangedEvent(saved.getId()));
+//        }
     }
 
     private boolean changed(DropoutRisk risk, RiskLevel level, String aiInput) {
