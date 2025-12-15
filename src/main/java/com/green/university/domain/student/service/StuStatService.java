@@ -1,13 +1,13 @@
 package com.green.university.domain.student.service;
 
-import com.green.university.domain.student.dto.StuStatDto;
 import com.green.university.domain.breakapp.entity.BreakApp;
-import com.green.university.domain.student.entity.Student;
-import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.domain.breakapp.repository.BreakAppRepository;
+import com.green.university.domain.student.dto.StuStat;
+import com.green.university.domain.student.dto.StuStatDto;
+import com.green.university.domain.student.entity.Student;
 import com.green.university.domain.student.repository.StuStatRepository;
 import com.green.university.domain.student.repository.StudentRepository;
-import com.green.university.domain.student.dto.StuStat;
+import com.green.university.global.exception.CustomRestfullException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

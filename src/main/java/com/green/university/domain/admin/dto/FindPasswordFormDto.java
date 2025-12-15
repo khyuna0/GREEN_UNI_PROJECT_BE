@@ -1,10 +1,9 @@
 package com.green.university.domain.admin.dto;
 
-import lombok.Data;
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 
 /**
  * 비밀번호 찾기 폼

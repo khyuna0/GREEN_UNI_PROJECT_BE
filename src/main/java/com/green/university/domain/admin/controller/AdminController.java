@@ -1,6 +1,8 @@
 package com.green.university.domain.admin.controller;
 
+import com.green.university.domain.admin.service.AdminService;
 import com.green.university.domain.subject.dto.SubjectFormDto;
+import com.green.university.domain.subject.entity.Subject;
 import com.green.university.domain.tuition.dto.CollTuitFormDto;
 import com.green.university.domain.university.dto.CollegeFormDto;
 import com.green.university.domain.university.dto.DepartmentFormDto;
@@ -8,8 +10,6 @@ import com.green.university.domain.university.dto.RoomFormDto;
 import com.green.university.domain.university.entity.College;
 import com.green.university.domain.university.entity.Department;
 import com.green.university.domain.university.entity.Room;
-import com.green.university.domain.subject.entity.Subject;
-import com.green.university.domain.admin.service.AdminService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

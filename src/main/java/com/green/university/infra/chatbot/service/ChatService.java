@@ -1,8 +1,8 @@
 package com.green.university.infra.chatbot.service;
 
-import com.green.university.infra.chatbot.dto.ChatResponseDto;
-import com.green.university.global.websocket.dto.ChatContext;
 import com.green.university.global.websocket.ChatRouter;
+import com.green.university.global.websocket.dto.ChatContext;
+import com.green.university.infra.chatbot.dto.ChatResponseDto;
 import com.green.university.infra.chatbot.handler.HandlerRegistry;
 import com.green.university.infra.chatbot.intent.ChatRouteResult;
 import org.springframework.stereotype.Service;

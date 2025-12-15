@@ -1,9 +1,9 @@
 package com.green.university.infra.ai.controller;
 
+import com.green.university.infra.ai.AiAnalysisService;
+import com.green.university.infra.ai.DropoutRiskRepository;
 import com.green.university.infra.ai.dto.response.DropoutRiskResponseDto;
 import com.green.university.infra.ai.entity.RiskStatus;
-import com.green.university.infra.ai.DropoutRiskRepository;
-import com.green.university.infra.ai.AiAnalysisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

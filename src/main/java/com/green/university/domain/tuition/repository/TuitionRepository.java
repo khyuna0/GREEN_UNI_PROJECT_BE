@@ -1,7 +1,6 @@
 package com.green.university.domain.tuition.repository;
 
 import com.green.university.domain.tuition.entity.Tuition;
-
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;

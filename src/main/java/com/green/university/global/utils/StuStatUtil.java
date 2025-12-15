@@ -1,8 +1,8 @@
 package com.green.university.global.utils;
 
+import com.green.university.domain.breakapp.entity.BreakApp;
 import com.green.university.domain.student.dto.StuStatDto;
 import com.green.university.global.exception.CustomRestfullException;
-import com.green.university.domain.breakapp.entity.BreakApp;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;

@@ -3,7 +3,10 @@ package com.green.university.infra.ai.entity;
 import com.green.university.domain.subject.entity.StuSub;
 import com.green.university.infra.ai.dto.response.AiRiskAnalysisResult;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 

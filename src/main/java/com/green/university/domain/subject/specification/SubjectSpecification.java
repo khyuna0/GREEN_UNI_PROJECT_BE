@@ -1,7 +1,7 @@
 package com.green.university.domain.subject.specification;
 
-import com.green.university.domain.university.entity.Department;
 import com.green.university.domain.subject.entity.Subject;
+import com.green.university.domain.university.entity.Department;
 import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
 

@@ -2,7 +2,7 @@ package com.green.university.domain.admin.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import lombok.*;
+import lombok.Data;
 
 @Data
 @Entity

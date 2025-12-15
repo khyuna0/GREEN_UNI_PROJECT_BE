@@ -1,14 +1,14 @@
 package com.green.university.domain.grade.service;
 
+import com.green.university.domain.evaluation.entity.Evaluation;
+import com.green.university.domain.evaluation.repository.EvaluationRepository;
 import com.green.university.domain.grade.dto.GradeDto;
 import com.green.university.domain.grade.dto.GradeForScholarshipDto;
 import com.green.university.domain.grade.dto.MyGradeDto;
-import com.green.university.domain.evaluation.entity.Evaluation;
 import com.green.university.domain.grade.entity.Grade;
+import com.green.university.domain.grade.repository.GradeRepository;
 import com.green.university.domain.subject.entity.StuSub;
 import com.green.university.domain.subject.entity.Subject;
-import com.green.university.domain.evaluation.repository.EvaluationRepository;
-import com.green.university.domain.grade.repository.GradeRepository;
 import com.green.university.domain.subject.repository.StuSubRepository;
 import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.global.utils.Define;

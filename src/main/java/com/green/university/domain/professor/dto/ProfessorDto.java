@@ -1,7 +1,7 @@
 package com.green.university.domain.professor.dto;
 
-import com.green.university.domain.university.entity.Department;
 import com.green.university.domain.professor.entity.Professor;
+import com.green.university.domain.university.entity.Department;
 import lombok.Data;
 
 import java.time.LocalDate;

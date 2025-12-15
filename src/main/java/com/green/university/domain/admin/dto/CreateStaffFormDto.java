@@ -1,10 +1,9 @@
 package com.green.university.domain.admin.dto;
 
 import jakarta.validation.constraints.Email;
-import lombok.Data;
-
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 
 import java.time.LocalDate;
 

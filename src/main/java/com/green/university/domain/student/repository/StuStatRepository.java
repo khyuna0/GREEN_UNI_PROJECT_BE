@@ -1,7 +1,6 @@
 package com.green.university.domain.student.repository;
 
 import com.green.university.domain.student.dto.StuStat;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

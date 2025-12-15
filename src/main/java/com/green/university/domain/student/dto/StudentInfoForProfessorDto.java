@@ -1,7 +1,7 @@
 package com.green.university.domain.student.dto;
 
-import com.green.university.domain.subject.entity.StuSubDetail;
 import com.green.university.domain.student.entity.Student;
+import com.green.university.domain.subject.entity.StuSubDetail;
 import lombok.Data;
 
 /**

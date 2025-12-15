@@ -3,7 +3,9 @@ package com.green.university.domain.tuition.entity;
 import com.green.university.domain.scholarship.entity.Scholarship;
 import com.green.university.domain.student.entity.Student;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor

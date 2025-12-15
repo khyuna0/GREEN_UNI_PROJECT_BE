@@ -1,11 +1,10 @@
 package com.green.university.domain.notice.dto;
 
 import com.green.university.global.utils.LocalDateTimeUtil;
-import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
-
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 

@@ -1,10 +1,10 @@
 package com.green.university.domain.student.service;
 
 import com.green.university.domain.student.dto.StudentDto;
-import com.green.university.domain.university.repository.DepartmentRepository;
-import com.green.university.domain.student.repository.StudentRepository;
 import com.green.university.domain.student.entity.Student;
+import com.green.university.domain.student.repository.StudentRepository;
 import com.green.university.domain.student.specification.StudentSpecification;
+import com.green.university.domain.university.repository.DepartmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

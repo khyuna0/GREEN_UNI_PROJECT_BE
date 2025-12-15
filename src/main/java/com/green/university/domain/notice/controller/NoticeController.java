@@ -1,8 +1,8 @@
 package com.green.university.domain.notice.controller;
 
+import com.green.university.domain.notice.dto.NoticeDto;
 import com.green.university.domain.notice.dto.NoticeFormDto;
 import com.green.university.domain.notice.dto.NoticePageFormDto;
-import com.green.university.domain.notice.dto.NoticeDto;
 import com.green.university.domain.notice.entity.Notice;
 import com.green.university.domain.notice.service.NoticeService;
 import org.springframework.beans.factory.annotation.Autowired;

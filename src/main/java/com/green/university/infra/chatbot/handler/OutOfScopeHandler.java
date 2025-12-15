@@ -1,8 +1,8 @@
 package com.green.university.infra.chatbot.handler;
 
-import com.green.university.infra.chatbot.dto.ChatResponseDto;
 import com.green.university.global.websocket.ChatHandler;
 import com.green.university.global.websocket.dto.ChatContext;
+import com.green.university.infra.chatbot.dto.ChatResponseDto;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

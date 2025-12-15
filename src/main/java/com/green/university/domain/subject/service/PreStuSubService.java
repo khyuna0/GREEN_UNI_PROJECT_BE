@@ -1,14 +1,14 @@
 package com.green.university.domain.subject.service;
 
+import com.green.university.domain.student.repository.StudentRepository;
 import com.green.university.domain.subject.dto.StuSubAppDto;
 import com.green.university.domain.subject.dto.StuSubDayTimeDto;
 import com.green.university.domain.subject.dto.StuSubSumGradesDto;
-import com.green.university.global.exception.CustomRestfullException;
-import com.green.university.domain.subject.repository.PreStuSubRepository;
-import com.green.university.domain.student.repository.StudentRepository;
-import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.domain.subject.entity.PreStuSub;
 import com.green.university.domain.subject.entity.Subject;
+import com.green.university.domain.subject.repository.PreStuSubRepository;
+import com.green.university.domain.subject.repository.SubjectRepository;
+import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.utils.StuSubUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

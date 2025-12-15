@@ -1,7 +1,9 @@
 package com.green.university.domain.tuition.service;
 
+import com.green.university.domain.admin.service.UserService;
 import com.green.university.domain.breakapp.entity.BreakApp;
 import com.green.university.domain.breakapp.service.BreakAppService;
+import com.green.university.domain.grade.dto.GradeForScholarshipDto;
 import com.green.university.domain.grade.service.GradeService;
 import com.green.university.domain.scholarship.entity.Scholarship;
 import com.green.university.domain.scholarship.entity.StuSch;
@@ -11,14 +13,12 @@ import com.green.university.domain.student.dto.StuStat;
 import com.green.university.domain.student.entity.Student;
 import com.green.university.domain.student.repository.StuStatRepository;
 import com.green.university.domain.student.repository.StudentRepository;
+import com.green.university.domain.student.service.StuStatService;
 import com.green.university.domain.tuition.entity.Tuition;
 import com.green.university.domain.tuition.repository.CollTuitRepository;
 import com.green.university.domain.tuition.repository.TuitionRepository;
-import com.green.university.domain.grade.dto.GradeForScholarshipDto;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.utils.Define;
-import com.green.university.domain.student.service.StuStatService;
-import com.green.university.domain.admin.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

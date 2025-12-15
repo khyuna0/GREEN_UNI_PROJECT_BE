@@ -1,7 +1,6 @@
 package com.green.university.domain.breakapp.repository;
 
 import com.green.university.domain.breakapp.entity.BreakApp;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

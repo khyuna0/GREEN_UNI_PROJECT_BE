@@ -1,14 +1,14 @@
 package com.green.university.domain.subject.service;
 
-import com.green.university.domain.subject.dto.PenaltyResultFormDto;
 import com.green.university.domain.grade.entity.Grade;
+import com.green.university.domain.grade.repository.GradeRepository;
+import com.green.university.domain.subject.dto.PenaltyResultFormDto;
 import com.green.university.domain.subject.entity.StuSub;
 import com.green.university.domain.subject.entity.StuSubDetail;
-import com.green.university.global.exception.CustomRestfullException;
-import com.green.university.domain.grade.repository.GradeRepository;
 import com.green.university.domain.subject.repository.StuSubDetailRepository;
 import com.green.university.domain.subject.repository.StuSubRepository;
 import com.green.university.domain.subject.repository.SubjectRepository;
+import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.utils.PenaltyCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

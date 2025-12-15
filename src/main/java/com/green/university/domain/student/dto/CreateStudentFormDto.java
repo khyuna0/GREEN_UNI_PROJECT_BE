@@ -1,8 +1,7 @@
 package com.green.university.domain.student.dto;
 
-import lombok.Data;
-
 import jakarta.validation.constraints.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 

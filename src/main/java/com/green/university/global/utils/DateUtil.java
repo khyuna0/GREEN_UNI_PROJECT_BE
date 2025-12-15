@@ -1,6 +1,5 @@
 package com.green.university.global.utils;
 
-import java.sql.Date;
 import java.time.LocalDate;
 
 // 날짜형 타입 관련 유틸

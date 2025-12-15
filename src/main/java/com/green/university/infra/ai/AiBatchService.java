@@ -1,11 +1,11 @@
 package com.green.university.infra.ai;
 
-import com.green.university.infra.ai.entity.JobStatus;
 import com.green.university.domain.subject.entity.StuSub;
 import com.green.university.domain.subject.entity.StuSubDetail;
-import com.green.university.infra.ai.entity.SubjectAiJob;
 import com.green.university.domain.subject.repository.StuSubDetailRepository;
 import com.green.university.domain.subject.repository.SubjectAiJobRepository;
+import com.green.university.infra.ai.entity.JobStatus;
+import com.green.university.infra.ai.entity.SubjectAiJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;

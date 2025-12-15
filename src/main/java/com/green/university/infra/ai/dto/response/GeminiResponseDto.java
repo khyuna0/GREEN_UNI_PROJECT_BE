@@ -1,6 +1,7 @@
 package com.green.university.infra.ai.dto.response;
 
 import lombok.Data;
+
 import java.util.List;
 
 // 구글 Gemini API 응답용 DTO

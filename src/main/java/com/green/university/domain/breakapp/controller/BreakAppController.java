@@ -1,14 +1,14 @@
 package com.green.university.domain.breakapp.controller;
 
-import com.green.university.domain.breakapp.dto.BreakAppFormDto;
-import com.green.university.domain.student.dto.StudentDto;
-import com.green.university.global.exception.CustomRestfullException;
-import com.green.university.domain.breakapp.entity.BreakApp;
-import com.green.university.global.security.CustomUserDetails;
-import com.green.university.domain.breakapp.service.BreakAppService;
-import com.green.university.domain.university.service.CollegeService;
-import com.green.university.domain.student.service.StuStatService;
 import com.green.university.domain.admin.service.UserService;
+import com.green.university.domain.breakapp.dto.BreakAppFormDto;
+import com.green.university.domain.breakapp.entity.BreakApp;
+import com.green.university.domain.breakapp.service.BreakAppService;
+import com.green.university.domain.student.dto.StudentDto;
+import com.green.university.domain.student.service.StuStatService;
+import com.green.university.domain.university.service.CollegeService;
+import com.green.university.global.exception.CustomRestfullException;
+import com.green.university.global.security.CustomUserDetails;
 import com.green.university.global.utils.Define;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;

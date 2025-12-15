@@ -2,7 +2,7 @@ package com.green.university.domain.student.entity;
 
 import com.green.university.domain.university.entity.Department;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 

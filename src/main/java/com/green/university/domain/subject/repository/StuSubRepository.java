@@ -1,7 +1,6 @@
 package com.green.university.domain.subject.repository;
 
 import com.green.university.domain.subject.entity.StuSub;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

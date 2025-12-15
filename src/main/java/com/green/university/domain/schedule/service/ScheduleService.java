@@ -1,11 +1,11 @@
 package com.green.university.domain.schedule.service;
 
+import com.green.university.domain.admin.repository.StaffRepository;
 import com.green.university.domain.schedule.dto.ScheduleDto;
 import com.green.university.domain.schedule.dto.ScheduleFormDto;
-import com.green.university.global.exception.CustomRestfullException;
-import com.green.university.domain.schedule.repository.ScheduleRepository;
 import com.green.university.domain.schedule.entity.Schedule;
-import com.green.university.domain.admin.repository.StaffRepository;
+import com.green.university.domain.schedule.repository.ScheduleRepository;
+import com.green.university.global.exception.CustomRestfullException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

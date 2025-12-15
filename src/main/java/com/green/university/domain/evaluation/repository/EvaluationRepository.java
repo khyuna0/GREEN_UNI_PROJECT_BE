@@ -1,7 +1,6 @@
 package com.green.university.domain.evaluation.repository;
 
 import com.green.university.domain.evaluation.entity.Evaluation;
-
 import com.green.university.domain.subject.entity.Subject;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

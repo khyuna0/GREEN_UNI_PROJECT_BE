@@ -1,18 +1,19 @@
 package com.green.university.domain.tuition.controller;
 
 import com.green.university.domain.admin.service.UserService;
+import com.green.university.domain.breakapp.entity.BreakApp;
 import com.green.university.domain.breakapp.service.BreakAppService;
-import com.green.university.domain.student.service.StuStatService;
-import com.green.university.domain.tuition.service.TuitionService;
-import com.green.university.domain.university.service.CollegeService;
 import com.green.university.domain.student.dto.StuStatDto;
 import com.green.university.domain.student.dto.StudentDto;
-import com.green.university.global.exception.CustomRestfullException;
-import com.green.university.domain.breakapp.entity.BreakApp;
+import com.green.university.domain.student.service.StuStatService;
 import com.green.university.domain.tuition.entity.Tuition;
+import com.green.university.domain.tuition.service.TuitionService;
+import com.green.university.domain.university.service.CollegeService;
+import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.security.CustomUserDetails;
 import com.green.university.global.utils.Define;
 import com.green.university.global.utils.StuStatUtil;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +21,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;

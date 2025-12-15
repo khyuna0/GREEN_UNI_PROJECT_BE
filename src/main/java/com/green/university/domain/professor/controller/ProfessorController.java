@@ -2,30 +2,30 @@ package com.green.university.domain.professor.controller;
 
 import com.green.university.domain.admin.service.UserService;
 import com.green.university.domain.professor.dto.ReadSyllabusDto;
+import com.green.university.domain.professor.dto.SyllaBusFormDto;
 import com.green.university.domain.professor.service.ProfessorService;
 import com.green.university.domain.student.dto.StudentInfoForProfessorDto;
 import com.green.university.domain.subject.dto.SubjectForProfessorDto;
 import com.green.university.domain.subject.dto.SubjectPeriodForProfessorDto;
+import com.green.university.domain.subject.dto.UpdateStudentGradeFormDto;
+import com.green.university.domain.subject.entity.Subject;
+import com.green.university.domain.subject.repository.SubjectAiJobRepository;
 import com.green.university.domain.subject.service.StuSubDetailService;
 import com.green.university.domain.subject.service.StuSubService;
 import com.green.university.domain.subject.service.SubjectService;
-import com.green.university.domain.professor.dto.SyllaBusFormDto;
-import com.green.university.domain.subject.dto.UpdateStudentGradeFormDto;
-import com.green.university.domain.subject.entity.Subject;
 import com.green.university.global.security.CustomUserDetails;
+import com.green.university.global.utils.Define;
+import com.green.university.infra.ai.DropoutRiskQueryService;
 import com.green.university.infra.ai.dto.response.DropoutRiskRowDto;
 import com.green.university.infra.ai.dto.response.SubjectAiStatusResponse;
 import com.green.university.infra.ai.entity.SubjectAiJob;
-import com.green.university.domain.subject.repository.SubjectAiJobRepository;
-import com.green.university.infra.ai.DropoutRiskQueryService;
-import com.green.university.global.utils.Define;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 

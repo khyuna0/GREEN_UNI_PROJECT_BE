@@ -1,7 +1,6 @@
 package com.green.university.domain.subject.repository;
 
 import com.green.university.domain.subject.entity.Subject;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

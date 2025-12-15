@@ -1,9 +1,9 @@
 package com.green.university.domain.subject.controller;
 
-import com.green.university.domain.subject.dto.AllSubjectSearchFormDto;
 import com.green.university.domain.professor.dto.ReadSyllabusDto;
-import com.green.university.domain.subject.dto.SubjectDto;
 import com.green.university.domain.professor.service.ProfessorService;
+import com.green.university.domain.subject.dto.AllSubjectSearchFormDto;
+import com.green.university.domain.subject.dto.SubjectDto;
 import com.green.university.domain.subject.service.SubjectService;
 import com.green.university.global.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;

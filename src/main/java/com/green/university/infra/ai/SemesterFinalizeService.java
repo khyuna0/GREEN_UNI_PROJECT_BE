@@ -1,7 +1,7 @@
 package com.green.university.infra.ai;
 
-import com.green.university.domain.grade.service.GradeService;
 import com.green.university.domain.grade.dto.MyGradeDto;
+import com.green.university.domain.grade.service.GradeService;
 import com.green.university.domain.student.entity.Student;
 import com.green.university.domain.student.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;

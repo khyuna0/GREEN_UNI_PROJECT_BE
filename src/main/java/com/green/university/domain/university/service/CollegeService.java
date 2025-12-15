@@ -1,10 +1,10 @@
 package com.green.university.domain.university.service;
 
-import com.green.university.global.exception.CustomRestfullException;
-import com.green.university.domain.university.repository.CollegeRepository;
-import com.green.university.domain.university.repository.DepartmentRepository;
 import com.green.university.domain.university.entity.College;
 import com.green.university.domain.university.entity.Department;
+import com.green.university.domain.university.repository.CollegeRepository;
+import com.green.university.domain.university.repository.DepartmentRepository;
+import com.green.university.global.exception.CustomRestfullException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

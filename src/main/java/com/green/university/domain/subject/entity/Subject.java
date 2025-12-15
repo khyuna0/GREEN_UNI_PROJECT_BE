@@ -1,7 +1,7 @@
 package com.green.university.domain.subject.entity;
 
-import com.green.university.domain.university.entity.Department;
 import com.green.university.domain.professor.entity.Professor;
+import com.green.university.domain.university.entity.Department;
 import com.green.university.domain.university.entity.Room;
 import jakarta.persistence.*;
 import lombok.Data;
