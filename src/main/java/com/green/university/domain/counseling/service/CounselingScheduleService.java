@@ -8,8 +8,10 @@ import com.green.university.domain.professor.entity.Professor;
 import com.green.university.domain.professor.repository.ProfessorRepository;
 import com.green.university.domain.subject.entity.Subject;
 import com.green.university.domain.subject.repository.SubjectRepository;
+import com.green.university.global.exception.CustomRestfullException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -20,7 +22,7 @@ import java.util.Map;
 public class CounselingScheduleService {
 
     @Autowired
-    private CounselingScheduleRepository scheduleRepository;
+    private CounselingScheduleRepository counselingScheduleRepository;
     @Autowired
     private ProfessorRepository professorRepository;
     @Autowired
@@ -30,7 +32,7 @@ public class CounselingScheduleService {
     public List<CounselingSchedule> getSchedulesByWeek(Long professorId,
                                                        LocalDate start,
                                                        LocalDate end) { // 내 상담 목록 불러오기
-        List<CounselingSchedule> lists = scheduleRepository.findByProfessor_IdAndCounselingDateBetween(professorId, start, end);
+        List<CounselingSchedule> lists = counselingScheduleRepository.findByProfessor_IdAndCounselingDateBetween(professorId, start, end);
         return lists;
     }
 
@@ -40,7 +42,7 @@ public class CounselingScheduleService {
                                                               LocalDate end) {
         Subject subject = subjectRepository.findById(subId).orElseThrow();
         Long professorId = subject.getProfessor().getId();
-        List<CounselingSchedule> schedulList = scheduleRepository.findByProfessor_IdAndCounselingDateBetween(professorId, start, end);
+        List<CounselingSchedule> schedulList = counselingScheduleRepository.findByProfessor_IdAndCounselingDateBetween(professorId, start, end);
         return schedulList.stream()
                 .map(CounselingInfoDto::new)
                 .toList();
@@ -61,7 +63,7 @@ public class CounselingScheduleService {
             for (Long startTime : entry.getValue()) {
 
                 boolean exists =
-                        scheduleRepository
+                        counselingScheduleRepository
                                 .existsByProfessorIdAndCounselingDateAndStartTime(
                                         professorId, date, startTime
                                 );
@@ -80,7 +82,7 @@ public class CounselingScheduleService {
                 cs.setStartTime(startTime);
                 cs.setEndTime(startTime + 1);
 
-                scheduleRepository.save(cs);
+                counselingScheduleRepository.save(cs);
             }
         }
     }
@@ -88,13 +90,36 @@ public class CounselingScheduleService {
     @Transactional
     public void deleteSchedules(Long professorId, LocalDate date, Long startTime) {
         CounselingSchedule schedule =
-                scheduleRepository
+                counselingScheduleRepository
                         .findByProfessor_IdAndCounselingDateAndStartTime(
                                 professorId, date, startTime
                         );
 
-        scheduleRepository.delete(schedule);
+        counselingScheduleRepository.delete(schedule);
     }
+
+    public Map<String, Object> getSchedulesBySubject(Long subjectId) {
+
+        // 1. 과목 조회
+        Subject subject = subjectRepository.findById(subjectId)
+                .orElseThrow(() ->
+                        new CustomRestfullException("과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+                );
+
+        // 2. 과목 담당 교수 ID
+        Long professorId = subject.getProfessor().getId();
+
+        // 3. 교수의 상담 일정 중 예약 안 된 것만 조회
+        List<CounselingSchedule> schedules =
+                counselingScheduleRepository
+                        .findByProfessor_IdAndReservedFalse(professorId);
+
+        return Map.of(
+                "subjectName", subject.getName(),
+                "scheduleList", schedules
+        );
+    }
+
 
 
 }

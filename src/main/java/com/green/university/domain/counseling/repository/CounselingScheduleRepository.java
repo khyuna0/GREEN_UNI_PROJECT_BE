@@ -26,4 +26,8 @@ public interface CounselingScheduleRepository extends JpaRepository<CounselingSc
 
     // 교수 기준 예약 완료된 상담 일정 조회
     List<CounselingSchedule> findByProfessor_IdAndReserved(Long professorId, boolean reserved);
+
+    List<CounselingSchedule> findByProfessor_IdAndReservedFalse(Long professorId);
+
+
 }

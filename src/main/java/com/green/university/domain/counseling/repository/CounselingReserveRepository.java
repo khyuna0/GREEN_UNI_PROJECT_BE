@@ -22,4 +22,7 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
     // 상태 기준 조회
     // 필요 시 REQUESTED / APPROVED / REJECTED 필터링 용도
     List<CounselingReserve> findByApprovalState(ApprovalState approvalState);
+
+    // 같은 학생 + 같은 상담 일정 예약 존재 여부
+    boolean existsByStudent_IdAndCounselingSchedule_Id(Long studentId, Long counselingScheduleId);
 }

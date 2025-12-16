@@ -7,7 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/reserve")
+@RequestMapping("/api/reserve")
 public class CounselingReserveController {
 
     private final CounselingReserveService counselingReserveService;

@@ -81,4 +81,21 @@ public class CounselingScheduleController {
 
         return ResponseEntity.ok().body(Map.of("riskStuList", riskStuList));
     }
+
+    @GetMapping("/schedule") // 학생 - 과목별 상담 일정 조회
+    public ResponseEntity<?> getScheduleBySubject(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @RequestParam Long subjectId
+    ) {
+        if (principal == null || !Objects.equals(principal.getUserRole(), "student")) {
+            throw new CustomRestfullException("권한이 없는 페이지입니다.", HttpStatus.UNAUTHORIZED);
+        }
+
+        Long studentId = principal.getId();
+
+        return ResponseEntity.ok(
+                counselingScheduleService.getSchedulesBySubject(subjectId)
+        );
+    }
+
 }

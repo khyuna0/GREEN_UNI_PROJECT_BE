@@ -1,6 +1,7 @@
 package com.green.university.domain.counseling.dto;
 
 
+import com.green.university.domain.counseling.entity.ApprovalState;
 import com.green.university.domain.counseling.entity.CounselingReserve;
 import com.green.university.domain.counseling.entity.CounselingSchedule;
 import com.green.university.domain.student.entity.Student;
@@ -31,6 +32,9 @@ public class CounselingReserveDto {
     // 상담 사유
     private String reason;
 
+    // 승인 여부
+    private ApprovalState approvalState;
+
     public CounselingReserveDto(CounselingReserve entity) {
         this.id = entity.getId();
         this.student = entity.getStudent();
@@ -39,6 +43,7 @@ public class CounselingReserveDto {
         this.roomCode = entity.getRoomCode();
         this.dropoutRisk = entity.getDropoutRisk();
         this.reason = entity.getReason();
+        this.approvalState = entity.getApprovalState();
     }
 
 }

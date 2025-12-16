@@ -47,6 +47,20 @@ public class CounselingReserveService {
     // 최초 상태는 REQUESTED
     public void requestReserve(CounselingReserveRequestDto dto, Long studentId) {
 
+        // 이미 신청한 상담인지 체크
+        boolean alreadyReserved =
+                counselingReserveRepository.existsByStudent_IdAndCounselingSchedule_Id(
+                        studentId,
+                        dto.getCounselingScheduleId()
+                );
+
+        if (alreadyReserved) {
+            throw new CustomRestfullException(
+                    "이미 해당 상담 일정에 신청한 내역이 있습니다.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
         // 학생 조회
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() ->
