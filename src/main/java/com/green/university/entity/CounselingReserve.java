@@ -24,6 +24,11 @@ public class CounselingReserve { // 확정된 상담
     @JoinColumn(name = "counselingSchedule_id", nullable = false)
     private CounselingSchedule counselingSchedule;
 
+    // 상담 요청한 과목
+    @ManyToOne
+    @JoinColumn(name = "subject_id")
+    private Subject subject;
+
     // 화상 상담 방 코드
     @Column(unique = true)
     private String roomCode;

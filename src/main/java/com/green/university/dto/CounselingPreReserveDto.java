@@ -3,7 +3,7 @@ package com.green.university.dto;
 import lombok.Data;
 
 @Data
-public class CounselingReserveDto {
+public class CounselingPreReserveDto {
 
     private Long preReserveId; // 예비 예약 아이디
 
