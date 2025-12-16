@@ -42,4 +42,6 @@ public interface DropoutRiskRepository extends JpaRepository<DropoutRisk, Long> 
     // 상태 필터 없이 전부 가져오고 싶으면 이것도 추가 추천
     List<DropoutRisk> findByStuSub_Subject_Id(Long subjectId);
 
+    Optional<DropoutRisk> findByStuSubId(Long stuSubId);
+
 }
