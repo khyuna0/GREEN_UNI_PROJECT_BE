@@ -2,8 +2,8 @@ package com.green.university.infra.ai;
 
 import com.green.university.domain.student.entity.Student;
 import com.green.university.domain.subject.entity.Subject;
-import com.green.university.infra.ai.entity.DropoutRisk;
-import com.green.university.infra.ai.entity.RiskLevel;
+import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
+import com.green.university.domain.dropoutrisk.entity.RiskLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;

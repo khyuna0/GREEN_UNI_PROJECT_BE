@@ -1,9 +1,9 @@
 package com.green.university.infra.ai.dto.response;
 
-import com.green.university.infra.ai.entity.DropoutRisk;
-import com.green.university.infra.ai.entity.RiskLevel;
-import com.green.university.infra.ai.entity.RiskStatus;
-import com.green.university.infra.ai.entity.RiskType;
+import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
+import com.green.university.domain.dropoutrisk.entity.RiskLevel;
+import com.green.university.domain.dropoutrisk.entity.RiskStatus;
+import com.green.university.domain.dropoutrisk.entity.RiskType;
 import lombok.Data;
 
 import java.time.LocalDateTime;

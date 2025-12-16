@@ -13,7 +13,7 @@ import com.green.university.domain.subject.repository.StuSubRepository;
 import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.infra.ai.DropoutRiskRepository;
-import com.green.university.infra.ai.entity.DropoutRisk;
+import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package com.green.university.infra.ai.entity;
+package com.green.university.domain.dropoutrisk.entity;
 
 // 처리 상태
 public enum RiskStatus {

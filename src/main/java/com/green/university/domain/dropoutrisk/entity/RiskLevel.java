@@ -1,4 +1,4 @@
-package com.green.university.infra.ai.entity;
+package com.green.university.domain.dropoutrisk.entity;
 
 // 위험 단계
 public enum RiskLevel {

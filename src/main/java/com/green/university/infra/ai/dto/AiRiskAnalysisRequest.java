@@ -1,7 +1,7 @@
 package com.green.university.infra.ai.dto;
 
-import com.green.university.infra.ai.entity.RiskLevel;
-import com.green.university.infra.ai.entity.RiskType;
+import com.green.university.domain.dropoutrisk.entity.RiskLevel;
+import com.green.university.domain.dropoutrisk.entity.RiskType;
 import lombok.Builder;
 import lombok.Data;
 
