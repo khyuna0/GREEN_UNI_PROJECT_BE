@@ -48,13 +48,21 @@ public class CounselingScheduleService {
                 .toList();
     }
 
+    @Transactional
     public void createWeeklySchedule(
             Long professorId,
             WeeklyCounselingScheduleRequest request
     ) {
+        // 교수 조회
         Professor professor = professorRepository.findById(professorId)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new CustomRestfullException(
+                                "교수를 찾을 수 없습니다.",
+                                HttpStatus.NOT_FOUND
+                        )
+                );
 
+        // 프론트에서 넘어온 슬롯 기준
         for (Map.Entry<LocalDate, List<Long>> entry : request.getSlots().entrySet()) {
 
             LocalDate date = entry.getKey();
@@ -62,17 +70,21 @@ public class CounselingScheduleService {
 
             for (Long startTime : entry.getValue()) {
 
+                // 이미 존재하는 슬롯인지 확인
                 boolean exists =
                         counselingScheduleRepository
-                                .existsByProfessorIdAndCounselingDateAndStartTime(
-                                        professorId, date, startTime
+                                .existsByProfessor_IdAndCounselingDateAndStartTime(
+                                        professorId,
+                                        date,
+                                        startTime
                                 );
 
+                // 이미 있으면 아무 것도 안 함 (중복 INSERT 방지)
                 if (exists) {
-                    // 이미 열린 슬롯 → 스킵 or 예외
-                    continue; // 권장: 중복은 무시
+                    continue;
                 }
 
+                // 새 슬롯만 INSERT
                 CounselingSchedule cs = new CounselingSchedule();
                 cs.setProfessor(professor);
                 cs.setSubYear(request.getSubYear());
@@ -81,22 +93,38 @@ public class CounselingScheduleService {
                 cs.setDayOfWeek(dayOfWeek);
                 cs.setStartTime(startTime);
                 cs.setEndTime(startTime + 1);
+                cs.setReserved(false);
 
                 counselingScheduleRepository.save(cs);
             }
         }
     }
 
+
     @Transactional
     public void deleteSchedules(Long professorId, LocalDate date, Long startTime) {
+
         CounselingSchedule schedule =
                 counselingScheduleRepository
                         .findByProfessor_IdAndCounselingDateAndStartTime(
-                                professorId, date, startTime
+                                professorId,
+                                date,
+                                startTime
                         );
+
+        // 이미 없으면 그냥 종료
+        if (schedule == null) {
+            return;
+        }
+
+        //예약된 일정이면 삭제 막기
+         if (schedule.isReserved()) {
+             throw new CustomRestfullException("예약된 일정은 삭제할 수 없습니다.", HttpStatus.BAD_REQUEST);
+         }
 
         counselingScheduleRepository.delete(schedule);
     }
+
 
     public Map<String, Object> getSchedulesBySubject(Long subjectId) {
 

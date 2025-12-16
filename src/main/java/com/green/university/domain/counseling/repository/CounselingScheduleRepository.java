@@ -16,10 +16,10 @@ public interface CounselingScheduleRepository extends JpaRepository<CounselingSc
     );
 
     // 내가 열어 둔 상담 일정 보기
-    boolean existsByProfessorIdAndCounselingDateAndStartTime( // 상담 등록 중복 방지
-                                                              Long professorId,
-                                                              LocalDate counselingDate,
-                                                              Long startTime
+    boolean existsByProfessor_IdAndCounselingDateAndStartTime(
+            Long professorId,
+            LocalDate counselingDate,
+            Long startTime
     );
 
     CounselingSchedule findByProfessor_IdAndCounselingDateAndStartTime(Long professorId, LocalDate date, Long startTime);
