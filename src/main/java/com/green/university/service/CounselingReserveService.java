@@ -29,7 +29,7 @@ public class CounselingReserveService {
     private StuSubRepository stuSubRepository;
     @Autowired
     private DropoutRiskRepository dropoutRiskRepository;
-    
+
     // 예약 반려 처리 - 가예약의 status 만 바꿔서 업데이트
     public void reject (CounselingPreReserveDto dto) {
         CounselingPreReserve preReserve = counselingPreReserveRepository.findById(dto.getPreReserveId()).orElseThrow(
@@ -60,7 +60,9 @@ public class CounselingReserveService {
         counselingReserve.setSubject(subject);
         counselingReserve.setCounselingSchedule(preReserve.getCounselingSchedule());
         counselingReserve.setReason(preReserve.getReason());
-        counselingReserve.setRoomCode(generateRoomCode());
+
+        String roomCode = generateRoomCode();
+        counselingReserve.setRoomCode(roomCode);
 
         // ===== 3. 위험 학생 처리 =====
         if(preReserve.getDropoutRisk() != null) {
