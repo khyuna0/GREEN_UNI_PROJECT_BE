@@ -2,7 +2,11 @@ package com.green.university.controller;
 
 import com.green.university.config.security.CustomUserDetails;
 import com.green.university.dto.CounselingInfoDto;
+import com.green.university.dto.response.CounselingPreReserveDto;
 import com.green.university.dto.response.PreReserveDto;
+import com.green.university.entity.CounselingPreReserve;
+import com.green.university.entity.Subject;
+import com.green.university.service.CounselingPreReserveService;
 import com.green.university.service.CounselingScheduleService;
 import com.green.university.service.SubjectService;
 import jakarta.validation.Valid;
@@ -21,6 +25,9 @@ public class CounselingPreReserveController {
 
     @Autowired
     private CounselingScheduleService counselingScheduleService;
+
+    @Autowired
+    private CounselingPreReserveService counselingPreReserveService;
 
     @Autowired
     private SubjectService subjectService;
@@ -43,17 +50,32 @@ public class CounselingPreReserveController {
                 "subName", subName
         ));
     }
-    
+
+    // 예비 상담 신청 내역 조회 (학생)
+    @GetMapping
+    public ResponseEntity<?> getPreReserveList (
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        Long id = principal.getId(); // 사용자 아이디 조회
+        List<CounselingPreReserveDto> preList = counselingPreReserveService.loadReservations(id);
+
+        return ResponseEntity.ok(Map.of(
+                "preList", preList
+        ));
+    }
+
     // 예비 상담 신청
-    @PostMapping("/byProfessorId")
+    @PostMapping
     public ResponseEntity<?> preReserve (
             @AuthenticationPrincipal CustomUserDetails principal,
             @Valid @RequestBody PreReserveDto preReserveDto
             ) {
         Long id = principal.getId(); // 사용자 아이디 조회
+        counselingPreReserveService.preReserve(id, preReserveDto);
 
-
+        return  ResponseEntity.ok().body("예비 상담 신청이 완료되었습니다!");
     }
+
 
 
 }

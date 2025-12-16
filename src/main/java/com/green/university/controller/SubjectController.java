@@ -73,7 +73,7 @@ public class SubjectController {
         ));
     }
 
-    // 학생 - 이번 학기 수강/강의 과목 조회
+    // 학생 - 이번 학기 강의 과목 조회
     @GetMapping("/semester")
     public ResponseEntity<?> getSubjectThisSemester(
             @AuthenticationPrincipal CustomUserDetails principal,
@@ -82,12 +82,23 @@ public class SubjectController {
         Long id = principal.getId(); // 사용자 아이디 조회
 
         List<Subject> subjectList = subjectService.getBySubjectNamesByStuSub(id, subjectId);
-
         return ResponseEntity.ok(Map.of(
                 "subjectList", subjectList
         ));
     }
 
+    // 교수 - 이번 학기 강의 과목 조회
+    @GetMapping("/semester/professor")
+    public ResponseEntity<?> getSubjectList(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @RequestParam(required = false) Long subjectId
+    ) {
+        Long id = principal.getId(); // 사용자 아이디 조회
+        List<Subject> subjectList = subjectService.getSubjectNames(id, subjectId);
 
+        return ResponseEntity.ok(Map.of(
+                "subjectList", subjectList
+        ));
+    }
 
 }

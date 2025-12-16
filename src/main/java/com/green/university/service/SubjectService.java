@@ -152,8 +152,31 @@ public class SubjectService {
                 subjects.add(subject);
             }
         }
-
         return subjects;
     }
+
+    // 교수 - 이번 학기 수강 과목
+    public List<Subject> getSubjectNames(Long professorId, Long subjectId) {
+
+        List<Subject> origin =
+                subjectRepository.findByProfessor_IdAndSubYearAndSemester(
+                        professorId,
+                        Define.CURRENT_YEAR,
+                        Define.CURRENT_SEMESTER
+                );
+
+        if (subjectId == null) { // 검색 조건이 없을 때
+            return origin; // 
+        }
+
+        List<Subject> result = new ArrayList<>();
+        for (Subject s : origin) {
+            if (s.getId().equals(subjectId)) {
+                result.add(s);
+            }
+        }
+        return result;
+    }
+
 
 }

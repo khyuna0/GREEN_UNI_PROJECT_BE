@@ -10,13 +10,13 @@ import lombok.Data;
 @Data
 public class PreReserveDto { // 상담 예비 신청
 
-    // 대상 교수
-    @NotNull(message = "상담할 교수님을 선택해 주세요")
-    private Long professorId;
+    // 상담할 과목
+    @NotNull(message = "상담할 과목을 선택해 주세요")
+    private Long subjectId;
 
     // 교수 오픈 일정
     @NotNull(message = "상담할 날짜를 선택해 주세요")
-    private CounselingSchedule counselingSchedule;
+    private Long counselingScheduleId;
 
     // 상담 사유
     @NotNull(message = "상담 사유를 입력해 주세요")

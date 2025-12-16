@@ -19,11 +19,6 @@ public class CounselingReserve { // 확정된 상담
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
-    // 교수
-    @ManyToOne
-    @JoinColumn(name = "professor_id", nullable = false)
-    private Professor professor;
-
     // 교수 오픈 일정
     @ManyToOne
     @JoinColumn(name = "counselingSchedule_id", nullable = false)
@@ -33,12 +28,10 @@ public class CounselingReserve { // 확정된 상담
     @Column(unique = true)
     private String roomCode;
 
-    // 학생 위험 상태
-    @Enumerated(EnumType.STRING)
-    private RiskLevel risklevel; // danger, warning
-
-    @Enumerated(EnumType.STRING)
-    private RiskStatus status = RiskStatus.DETECTED; // DETECTED 포착됨, CONSULT_REQ 상담예약, RESOLVED 해결완료
+    // 학생 위험 상태 - 위험학생 아니면 null
+    @ManyToOne
+    @JoinColumn(name = "dropoutRisk_id", nullable = true)
+    private DropoutRisk dropoutRisk;
 
     // 상담 사유
     @Column(length = 200)

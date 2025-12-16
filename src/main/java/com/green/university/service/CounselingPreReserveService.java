@@ -1,17 +1,15 @@
 package com.green.university.service;
 
+import com.green.university.dto.response.CounselingPreReserveDto;
 import com.green.university.dto.response.PreReserveDto;
-import com.green.university.entity.CounselingPreReserve;
-import com.green.university.entity.Professor;
-import com.green.university.entity.Student;
+import com.green.university.entity.*;
 import com.green.university.exception.CustomRestfullException;
-import com.green.university.repository.CounselingPreReserveRepository;
-import com.green.university.repository.ProfessorRepository;
-import com.green.university.repository.StuSubRepository;
-import com.green.university.repository.StudentRepository;
+import com.green.university.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class CounselingPreReserveService {
@@ -28,22 +26,51 @@ public class CounselingPreReserveService {
     @Autowired
     private StuSubRepository stuSubRepository;
 
-    // 자발적 예비 상담 예약 (위험 타입 저장 안 함)
-    private void preReserve (Long StudentId, PreReserveDto preReserveDto) {
+    @Autowired
+    private CounselingScheduleRepository counselingScheduleRepository;
+
+    @Autowired
+    private DropoutRiskRepository dropoutRiskRepository;
+
+    @Autowired
+    private SubjectRepository subjectRepository;
+
+    // 자발적 예비 상담 예약
+    public void preReserve (Long StudentId, PreReserveDto preReserveDto) {
 
         CounselingPreReserve counselingPreReserve = new CounselingPreReserve();
         Student student = studentRepository.findById(StudentId).orElseThrow(
                 () -> new CustomRestfullException("학생을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );
-        Professor professor = professorRepository.findById(preReserveDto.getProfessorId()).orElseThrow(
-                () -> new CustomRestfullException("교수를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+        Subject subject = subjectRepository.findById(preReserveDto.getSubjectId()).orElseThrow(
+                () -> new CustomRestfullException("학생을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );
 
         counselingPreReserve.setStudent(student);
-        counselingPreReserve.setProfessor(professor);
-        counselingPreReserve.setCounselingSchedule(preReserveDto.getCounselingSchedule());
+        // 교수가 정한 예약 일정 저장
+        counselingPreReserve.setCounselingSchedule(counselingScheduleRepository.findById(preReserveDto.getCounselingScheduleId()).orElseThrow());
+        counselingPreReserve.setSubject(subject);
         counselingPreReserve.setReason(preReserveDto.getReason());
 
+        // 해당 과목의 위험 학생인지 아닌지 조회
+        StuSub stuSub = stuSubRepository.findByStudent_IdAndSubject_Id(StudentId, preReserveDto.getSubjectId()).orElseThrow(
+                () -> new CustomRestfullException("성적을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+        );
+
+        if(dropoutRiskRepository.findByStuSubId(stuSub.getId()).isPresent()) {
+            DropoutRisk dropoutRisk = dropoutRiskRepository.findByStuSubId(stuSub.getId()).orElseThrow(
+                    () -> new CustomRestfullException("위험 학생을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+            );
+            counselingPreReserve.setDropoutRisk(dropoutRisk);
+        }
         counselingPreReserveRepository.save(counselingPreReserve);
+    }
+    // 학생 - 상담 신청 내역 조회
+    public List<CounselingPreReserveDto> loadReservations(Long studentId) {
+
+        return counselingPreReserveRepository.findByStudentId(studentId)
+                .stream()
+                .map(CounselingPreReserveDto::new)
+                .toList();
     }
 }
