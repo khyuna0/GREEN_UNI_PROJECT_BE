@@ -17,7 +17,7 @@ public class AiRiskAnalysisRequest { // AI에게 넘기는 핵심 DTO
     private long absent;
     private long lateness;
     private double convertedMark;
-    private String grade;       // "A0", "F" 등
+    private String letterGrade;       // "A0", "F" 등
     private Double semesterGpa; // null 가능
 
     private RiskType riskType;

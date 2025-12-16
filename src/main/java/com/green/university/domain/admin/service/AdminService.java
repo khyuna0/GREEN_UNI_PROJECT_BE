@@ -31,11 +31,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-/**
- *
- * @author 박성희
- *
- */
 
 @Service
 public class AdminService {
@@ -329,7 +324,7 @@ public class AdminService {
         subject.setType(subjectFormDto.getType());
         subject.setSubYear(subjectFormDto.getSubYear());
         subject.setSemester(subjectFormDto.getSemester());
-        subject.setGrades(subjectFormDto.getGrades());
+        subject.setCredits(subjectFormDto.getCredits());
         subject.setSubDay(subjectFormDto.getSubDay());
         subject.setStartTime(subjectFormDto.getStartTime());
         subject.setEndTime(subjectFormDto.getEndTime());
@@ -402,7 +397,7 @@ public class AdminService {
         subject.setSubDay(subjectFormDto.getSubDay()); // 요일
         subject.setStartTime(subjectFormDto.getStartTime()); // 시작시간
         subject.setEndTime(subjectFormDto.getEndTime()); // 종료시간
-        subject.setGrades(subjectFormDto.getGrades());//이수학점
+        subject.setCredits(subjectFormDto.getCredits());//이수학점
         subject.setCapacity(subjectFormDto.getCapacity()); // 정원
 
         subjectRepository.save(subject);

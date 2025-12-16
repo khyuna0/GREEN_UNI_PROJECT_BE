@@ -239,7 +239,7 @@ public class StuSubController {
         if (currentStatus == 0) {
             List<StuSubAppDto> preStuSubList = preStuSubService.readPreStuSubList(studentId);
             Long totalGrades = preStuSubList.stream()
-                    .mapToLong(StuSubAppDto::getGrades)
+                    .mapToLong(StuSubAppDto::getCredits)
                     .sum();
 
             System.out.println("[예비] 강의:" + preStuSubList);
@@ -258,7 +258,7 @@ public class StuSubController {
             List<StuSubAppDto> preStuSubList = stuSubService.readPreStuSubByStuSub(studentId); // 미완료
             List<StuSubAppDto> stuSubList = stuSubService.readStuSubList(studentId); // 완료
             Long totalGrades = stuSubList.stream()
-                    .mapToLong(StuSubAppDto::getGrades)
+                    .mapToLong(StuSubAppDto::getCredits)
                     .sum();
             System.out.println("[수강] 미완료" + stuSubList);
             System.out.println("[수강] 강의:" + preStuSubList);
@@ -274,7 +274,7 @@ public class StuSubController {
 
         // 종료 (최종 수강 신청 목록만)
         List<StuSubAppDto> stuList = stuSubService.readStuSubList(studentId);
-        Long totalGrades = stuList.stream().mapToLong(StuSubAppDto::getGrades).sum();
+        Long totalGrades = stuList.stream().mapToLong(StuSubAppDto::getCredits).sum();
 
         return ResponseEntity.ok(Map.of(
                 "period", 2,
@@ -309,7 +309,7 @@ public class StuSubController {
 
         Long totalGrades = 0L;
         for (StuSubAppDto s : stuSubList) {
-            totalGrades += s.getGrades();
+            totalGrades += s.getCredits();
         }
 
         return ResponseEntity.ok(Map.of(
@@ -344,7 +344,7 @@ public class StuSubController {
 
         // 총 학점 계산
         Long totalGrades = courses.stream()
-                .mapToLong(TimetableCourseDto::getGrades)
+                .mapToLong(TimetableCourseDto::getCredits)
                 .sum();
 
         // 응답

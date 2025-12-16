@@ -150,9 +150,7 @@ public class ProfessorService {
         return subjectEntity;
     }
 
-    /**
-     * 출결 및 성적 기입
-     */
+    // 해당 과목에 학생의 출결 및 성적 기입
     @Transactional
     public void updateGrade(Long subjectId, Long studentId, UpdateStudentGradeFormDto dto) {
 
@@ -180,13 +178,6 @@ public class ProfessorService {
         long totalAbsent = penaltyResult.getTotalAbsent();
         double penalty = penaltyResult.getPenalty();
 
-        // ========================================================
-        // [NEW] 중도 이탈 모니터링 트리거 (출석 체크)
-        // ========================================================
-        // 학생 엔티티와 과목 엔티티를 꺼내서 넘겨줌
-        //dropoutRiskService.checkAttendanceRisk(stuSub.getStudent(), stuSub.getSubject(), totalAbsent);
-        // ========================================================
-
         // 5. 환산점수 계산
         double convertedmark =
                 (dto.getHomework() * 0.2) + // 과제 점수 20%
@@ -201,10 +192,10 @@ public class ProfessorService {
         detail.setConvertedMark(finalConvertedMark);
 
         // 6. 등급 계산 (선택된 등급이 있으면 환산점수 까지만 계산하고, 등급은 수정됨)
-        String gradeString = null;
+        String letterGrade = null;
 
             if(numOfStudent < 20) { // 수강생이 20명 미만이면 절대평가
-                gradeString = getAbsoluteGrade(finalConvertedMark);
+                letterGrade = getAbsoluteGrade(finalConvertedMark);
             }
              /*
              *   결석 5회 이상
@@ -212,61 +203,27 @@ public class ProfessorService {
              *   환산점수 60점 미만이면 - F
              */
             if(totalAbsent >= 5 || dto.getMidExam() < 40 || dto.getFinalExam() < 40 || finalConvertedMark < 60) { // 결석 5번 이상이면 F
-                gradeString = "F";
+                letterGrade = "F";
             }
 
-        if(dto.getGrade() != null && !dto.getGrade().equals(detail.getGrade())) { // 선택된 등급이 있고, 변경되었을 때
-            gradeString = dto.getGrade();
-            System.out.println("gradeValue = " + gradeString);
+        if(dto.getGrade() != null && !dto.getGrade().equals(detail.getLetterGrade())) { // 선택된 등급이 있고, 변경되었을 때
+            letterGrade = dto.getGrade();
+            System.out.println("letterGrade = " + letterGrade);
         }
 
         // 7. 등급 엔티티 조회
-        if(gradeString != null) {
-            Grade grade = gradeRepository.findByGrade(gradeString)
+        if(letterGrade != null) {
+            Grade grade = gradeRepository.findByLetterGrade(letterGrade)
                     .orElseThrow(() -> new RuntimeException("존재하지 않는 학점 등급입니다"));
-            stuSub.setGrade(grade);
-            detail.setGrade(grade.getGrade()); // 단순 출력용으로 저장함
+            stuSub.setLetterGrade(grade);
+            detail.setLetterGrade(grade.getLetterGrade()); // 단순 출력용으로 저장함
         }
 
         // 8. 저장
         stuSubDetailRepository.save(detail);
         stuSubRepository.save(stuSub);
         // 9. 최종 성적 가지고 이수학점 계산
-        stuSubService.updateCompleteGrade(studentId, subjectId);
-
-        // ★ [NEW] 10. AI 중도 이탈 위험 분석 트리거
-        // DB에 저장된 최신 상태의 엔티티를 넘겨줌
-//        dropoutRiskService.evaluateAndAnalyzeRisk(stuSub, detail);
-
-        // =========================
-        // 리스크 평가
-        // =========================
-        // 출석 위험
-//        riskEvaluatorService.evaluateAttendance(stuSub.getStudent(), stuSub.getSubject(), totalAbsent);
-//
-//        // 과목 성적 위험(등급으로 판단)
-//        riskEvaluatorService.evaluateSubjectGrade(stuSub.getStudent(), stuSub.getSubject(), detail.getGrade());
-//
-//        // 학기 누계 위험(금학기 평균)
-//        MyGradeDto myGrade = gradeService.readMyGradeByStudentId(studentId);
-//        if (myGrade != null) {
-//            riskEvaluatorService.evaluateSemesterGpa(
-//                    stuSub.getStudent(),
-//                    myGrade.getAverage(),
-//                    Long.valueOf(Define.CURRENT_YEAR),
-//                    Long.valueOf(Define.CURRENT_SEMESTER)
-//            );
-
-
-        // ========================================================
-        // [NEW] 중도 이탈 모니터링 트리거 (성적)
-        // ========================================================
-//		MyGradeDto myGrade = gradeService.readMyGradeByStudentId(studentId);
-//		if (myGrade != null) {
-//			double currentGpa = myGrade.getAverage();  // 평균 평점
-//			dropoutRiskService.checkGradeRisk(stuSub.getStudent(), currentGpa);
-//		}
-        // ========================================================
+        stuSubService.updateCreditsFromLetterGrade(studentId, subjectId);
     }
 
 

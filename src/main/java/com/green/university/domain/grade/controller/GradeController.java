@@ -22,9 +22,6 @@ import java.util.Map;
 public class GradeController {
 
     @Autowired
-    private HttpSession session;
-
-    @Autowired
     private GradeService gradeService;
 
     /**

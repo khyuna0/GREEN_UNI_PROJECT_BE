@@ -12,16 +12,13 @@ import lombok.Data;
 @Data
 public class ReadSyllabusDto {
 
-//	sy.subject_id, s.name, s.sub_year, s.semester, s.grades, s.type, s.sub_day, s.start_time, s.end_time, s.room_id, 
-//	c.name college_name, p.name as professer_name, d.name as dept_name, p.tel, p.email, sy.overview, sy.objective, sy.textbook, sy.program
-
     // subject
 	private Long subjectId;
 	private String name;
 	private Long subYear;
 	private Long semester;
 	// 학점
-	private Long grades;
+	private Long credits;
 	private String type;
 	// 요일
 	private String subDay;
@@ -50,7 +47,7 @@ public class ReadSyllabusDto {
         this.name = s.getName();
         this.subYear = s.getSubYear();
         this.semester = s.getSemester();
-        this.grades = s.getGrades();
+        this.credits = s.getCredits();
         this.type = s.getType();
         this.subDay = s.getSubDay();
         this.startTime = s.getStartTime();

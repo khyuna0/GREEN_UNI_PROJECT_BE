@@ -51,7 +51,7 @@ public class SubjectDto {
     private Long endTime;
 
     // 이수 가능 학점
-    private Long grades;
+    private Long credits;
 
     // 정원
     private Long capacity;
@@ -89,7 +89,7 @@ public class SubjectDto {
         dto.setSubDay(subject.getSubDay());
         dto.setStartTime(subject.getStartTime());
         dto.setEndTime(subject.getEndTime());
-        dto.setGrades(subject.getGrades());
+        dto.setCredits(subject.getCredits());
         dto.setCapacity(subject.getCapacity());
         dto.setNumOfStudent(subject.getNumOfStudent());
         dto.setStatus(false);

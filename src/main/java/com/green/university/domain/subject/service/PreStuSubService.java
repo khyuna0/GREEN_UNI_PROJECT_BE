@@ -70,8 +70,8 @@ public class PreStuSubService {
         List<PreStuSub> preStuSubList = preStuSubRepository.findByStudent_Id(studentId);
         Long totalGrades = preStuSubRepository.findByStudent_Id(studentId)
                 .stream() //리스트를 스트림(Stream)으로 바꿔서 반복 처리
-                // PreStuSub에서 Subject를 꺼내고, 그 Subject의 학점(grades, 타입 Long)을 long 형태로 변환해 추출
-                .mapToLong(pre -> pre.getSubject().getGrades())
+                // PreStuSub에서 Subject를 꺼내고, 그 Subject의 학점(credits, 타입 Long)을 long 형태로 변환해 추출
+                .mapToLong(pre -> pre.getSubject().getCredits())
                 .sum();
 
         // 현재 총 신청 학점 검증용 DTO

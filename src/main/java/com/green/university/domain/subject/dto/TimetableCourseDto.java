@@ -13,7 +13,7 @@ public class TimetableCourseDto {
     private Long endTime;
     private String roomId;
     private String professorName;
-    private Long grades;
+    private Long credits;
 
     // 변환용
     public static TimetableCourseDto from(StuSubAppDto s) {
@@ -25,7 +25,7 @@ public class TimetableCourseDto {
                 s.getEndTime(),
                 s.getRoomId(),
                 s.getProfessorName(),
-                s.getGrades()
+                s.getCredits()
         );
     }
 }

@@ -70,50 +70,50 @@ public class StuSubDetailService {
 
         for (int i = 0; i< numOfStudent; i++) {
             StuSubDetail d = stuSubList.get(i);
-            if (d.getGrade() != null && d.getGrade().equals("F")) continue; // 이미 F면 건너뜀
+            if (d.getLetterGrade() != null && d.getLetterGrade().equals("F")) continue; // 이미 F면 건너뜀
 
-            String getGrade;
+            String letterGrade;
             // 결석 수 계산
             PenaltyResultFormDto penaltyResult = PenaltyCalculator.calculate(d.getAbsent(), d.getLateness());
             long totalAbsent = penaltyResult.getTotalAbsent();
 
             if (i < aCount) {
                 // A 구간
-                if (i < aPlus) getGrade = "A+";
-                else getGrade = "A0";
+                if (i < aPlus) letterGrade = "A+";
+                else letterGrade = "A0";
 
             } else if (i < aCount + bCount) {
                 // B 구간
                 int idxInB = i - aCount;
-                if (idxInB < bPlus) getGrade = "B+";
-                else getGrade = "B0";
+                if (idxInB < bPlus) letterGrade = "B+";
+                else letterGrade = "B0";
 
             } else if (i < aCount + bCount + cCount) {
                 // C 구간
                 int idxInC = i - (aCount + bCount);
-                if (idxInC < cPlus) getGrade = "C+";
-                else getGrade = "C0";
+                if (idxInC < cPlus) letterGrade = "C+";
+                else letterGrade = "C0";
 
             } else {
                 // D 구간
                 int idxInD = i - (aCount + bCount + cCount);
-                if (idxInD < dPlus) getGrade = "D+";
-                else getGrade = "D0";
+                if (idxInD < dPlus) letterGrade = "D+";
+                else letterGrade = "D0";
             }
 
             if(totalAbsent > 5 || d.getMildExam() < 40 || d.getFinalExam() < 40 || d.getConvertedMark() < 60) {
-                getGrade = "F";
+                letterGrade = "F";
                 }
 
-            Grade grade = gradeRepository.findByGrade(getGrade)
+            Grade grade = gradeRepository.findByLetterGrade(letterGrade)
                     .orElseThrow(() -> new RuntimeException("존재하지 않는 학점 등급입니다"));
             StuSub stuSub = stuSubRepository
                     .findByStudent_IdAndSubject_Id(d.getStudent().getId(), subjectId)
                     .orElseThrow(() -> new RuntimeException("학생 과목 정보 없음"));
-            stuSub.setGrade(grade);
-            d.setGrade(grade.getGrade()); // 단순 출력용으로 저장함
+            stuSub.setLetterGrade(grade);
+            d.setLetterGrade(grade.getLetterGrade()); // 단순 출력용으로 저장함
 
-            stuSubService.updateCompleteGrade(d.getStudent().getId(), subjectId);
+            stuSubService.updateCreditsFromLetterGrade(d.getStudent().getId(), subjectId);
 
         }
 

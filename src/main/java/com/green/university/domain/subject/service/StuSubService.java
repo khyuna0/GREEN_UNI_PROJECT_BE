@@ -98,7 +98,7 @@ public class StuSubService {
         // 1. 현재 총 신청 학점 계산
         // StuSub 리스트 → Subject 학점 숫자들 → grade 총합
         Long currentTotalGrade = stuSubList.stream()
-                .mapToLong(stuSub -> stuSub.getSubject().getGrades())
+                .mapToLong(stuSub -> stuSub.getSubject().getCredits())
                 .sum();
 
         StuSubSumGradesDto stuSubSumGradesDto = new StuSubSumGradesDto();
@@ -214,12 +214,6 @@ public class StuSubService {
                 stuSub.setSubject(subject);
                 stuSubRepository.save(stuSub);
 
-                // 삭제한 이유 : 최종 수강 신청 완료가 될 때 넘어가게 만들 예정
-//                // StuSubDetail 생성
-//                StuSubDetail detail = new StuSubDetail();
-//                detail.setStuSub(stuSub);
-//                stuSubDetailRepository.save(detail);
-
                 // 과목 현재 인원 +1
                 subject.setNumOfStudent(subject.getNumOfStudent() + 1);
                 subjectRepository.save(subject);
@@ -321,12 +315,6 @@ public class StuSubService {
      }
      */
 
-    // 수강 신청 내역과 예비 수강 신청 내역 조인 후 조회 -> 예비 수강 신청에만 존재
-    @Transactional
-//    public List<StuSubAppDto> readPreStuSubByStuSub(Long studentId) {
-//        List<StuSub> stuSubList = stuSubRepository.findByStudent_Id(studentId);
-//        return stuSubList.stream().map(StuSubAppDto::fromEntity).collect(Collectors.toList());
-//    }
     // 학생의 예비 수강 신청 중 아직 본 수강으로 안 넘어간 목록
     public List<StuSubAppDto> readPreStuSubByStuSub(Long studentId) {
         // 예비 수강 신청 테이블에 남아있는 것들만 조회
@@ -346,7 +334,7 @@ public class StuSubService {
 
     // 점수 입력 시 F면 취득학점 0, F가 아니면 강의의 이수학점
     @Transactional
-    public void updateCompleteGrade(Long studentId, Long subjectId) {
+    public void updateCreditsFromLetterGrade(Long studentId, Long subjectId) {
 
         // 기존 StuSub 조회
         StuSub stuSub = stuSubRepository
@@ -354,7 +342,7 @@ public class StuSubService {
                 .orElseThrow(() -> new CustomRestfullException("수강 정보 없음", HttpStatus.NOT_FOUND));
 
         // 연관된 Grade 조회
-        Grade grade = stuSub.getGrade();
+        Grade grade = stuSub.getLetterGrade();
         if (grade == null) {
             throw new CustomRestfullException("등급이 먼저 설정되어야 합니다.", HttpStatus.BAD_REQUEST);
         }
@@ -363,11 +351,11 @@ public class StuSubService {
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new CustomRestfullException("과목을 찾을 수 없음", HttpStatus.NOT_FOUND));
 
-        // 4. F 학점이면 0점, 아니면 subject.grades 적용
-        if ("F".equals(grade.getGrade())) {
-            stuSub.setCompleteGrade(0L);
+        // 4. F 학점이면 0점, 아니면 subject.credits 적용
+        if ("F".equals(grade.getLetterGrade())) {
+            stuSub.setCredits(0L);
         } else {
-            stuSub.setCompleteGrade(subject.getGrades());
+            stuSub.setCredits(subject.getCredits());
         }
 
         // 5. 저장

@@ -22,7 +22,7 @@ public class StuSubUtil {
 			Long sumGrades = stuSubSumGradesDto.getSumGrades();
 			
 			// 신청하려는 강의의 학점
-			Long subGrades = targetSubject.getGrades();
+			Long subGrades = targetSubject.getCredits();
 			
 			// 현재 학점 + 신청 강의 학점이 최대 수강 가능 학점을 초과한다면
 			if ((sumGrades + subGrades) > Define.MAX_GRADES) {

@@ -36,7 +36,7 @@ public class Subject {
     private String subDay;
     private Long startTime;
     private Long endTime;
-    private Long grades;
+    private Long credits; // 과목 당 학점
     private Long capacity; // 정원
     private Long numOfStudent;
 

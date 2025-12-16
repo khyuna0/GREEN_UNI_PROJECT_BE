@@ -6,11 +6,9 @@ import com.green.university.domain.grade.dto.GradeDto;
 import com.green.university.domain.grade.dto.GradeForScholarshipDto;
 import com.green.university.domain.grade.dto.MyGradeDto;
 import com.green.university.domain.grade.entity.Grade;
-import com.green.university.domain.grade.repository.GradeRepository;
 import com.green.university.domain.subject.entity.StuSub;
 import com.green.university.domain.subject.entity.Subject;
 import com.green.university.domain.subject.repository.StuSubRepository;
-import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.global.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,15 +23,8 @@ public class GradeService {
 
     @Autowired
     private StuSubRepository stuSubRepository;
-
-    @Autowired
-    private GradeRepository gradeRepository;
-
     @Autowired
     private EvaluationRepository evaluationRepository;
-
-    @Autowired
-    private SubjectRepository subjectRepository;
 
     // 학생이 수강신청한 연도 조회
     public List<GradeDto> readGradeYearByStudentId(Long studentId) {
@@ -199,18 +190,18 @@ public class GradeService {
 
         for(StuSub ss : stuSubs){
             Subject subject = ss.getSubject();
-            Grade grade = ss.getGrade();
+            Grade grade = ss.getLetterGrade();
 
             // subject 또는 grade가 null 이면 계산 스킵
             if(subject == null || grade == null) continue;
 
-            Long subjectGrades = subject.getGrades();
-            Double gradeValue = grade.getGradeValue();
+            Long subjectGrades = subject.getCredits();
+            Double gradePoint = grade.getGradePoint();
 
             // 학점 또는 등급값이 null이면 스킵
-            if(subjectGrades == null || gradeValue == null) continue;
+            if(subjectGrades == null || gradePoint == null) continue;
 
-            totalWeighted += subjectGrades * gradeValue;
+            totalWeighted += subjectGrades * gradePoint;
             totalGrades += subjectGrades;
 
         }
@@ -233,31 +224,29 @@ public class GradeService {
         GradeDto dto = new GradeDto();
 
         Subject subject = ss.getSubject();
-        Grade grade = ss.getGrade();
+        Grade grade = ss.getLetterGrade();
         Evaluation evaluation = evaluationRepository
                 .findByStudent_IdAndSubject_Id(
                         ss.getStudent().getId(),
                         ss.getSubject().getId()
                 )
                 .orElse(null);
-        if (subject != null) {
-            dto.setEvaluationId(
-                    evaluation != null ? evaluation.getId() : null
-            );
-            dto.setSubYear(subject.getSubYear());
-            dto.setSemester(subject.getSemester());
-            dto.setSubjectId(subject.getId());
-            dto.setName(subject.getName());
-            dto.setType(subject.getType());
-            if (subject.getGrades() != null) {
-                dto.setGrades(String.valueOf(subject.getGrades())); // 이수 학점
-            }
+        dto.setEvaluationId(
+                evaluation != null ? evaluation.getId() : null
+        );
+        dto.setSubYear(subject.getSubYear());
+        dto.setSemester(subject.getSemester());
+        dto.setSubjectId(subject.getId());
+        dto.setName(subject.getName());
+        dto.setType(subject.getType());
+        if (subject.getCredits() != null) {
+            dto.setCredits(String.valueOf(subject.getCredits())); // 이수 학점
         }
 
         if (grade != null) {
-            dto.setGrade(grade.getGrade()); // "A+", "B0"
-            if (grade.getGradeValue() != null) {
-                dto.setGradeValue(String.valueOf(grade.getGradeValue())); // "4", "3" 등
+            dto.setLetterGrade(grade.getLetterGrade()); // "A+", "B0"
+            if (grade.getGradePoint() != null) {
+                dto.setGradePoint(String.valueOf(grade.getGradePoint())); // "4", "3" 등
             }
         }
         return dto;
@@ -272,32 +261,32 @@ public class GradeService {
         dto.setSemester(semester);
 
         long sumGrades = 0;  // 이수해야 할 학점(시도 학점)
-        long myGrades = 0;   // 실제 이수 학점
+        long myCredits = 0;   // 실제 이수 학점
 
         double totalWeighted = 0.0;
         double totalGrades = 0.0;
 
         for (StuSub ss : stuSubs) {
             Subject subject = ss.getSubject();
-            Grade grade = ss.getGrade();
+            Grade grade = ss.getLetterGrade();
             if (subject == null) continue;
 
-            Long subjectGrades = subject.getGrades(); // 과목 학점 수
+            Long subjectGrades = subject.getCredits(); // 과목 학점 수
             if (subjectGrades == null) subjectGrades = 0L;
 
             // 전체 시도 학점
             sumGrades += subjectGrades;
 
             // 성적이 있는 과목만 "이수"로 간주
-            if (grade != null && grade.getGradeValue() != null) {
-                myGrades += subjectGrades;
-                totalWeighted += subjectGrades * grade.getGradeValue();
+            if (grade != null && grade.getGradePoint() != null) {
+                myCredits += subjectGrades;
+                totalWeighted += subjectGrades * grade.getGradePoint();
                 totalGrades += subjectGrades;
             }
         }
 
-        dto.setSumGrades(sumGrades);
-        dto.setMyGrades(myGrades);
+        dto.setTotalCredits(sumGrades);
+        dto.setMyGrades(myCredits);
 
         float avg = (totalGrades == 0) ? 0.0f : (float) (totalWeighted / totalGrades);
         dto.setAverage(avg);

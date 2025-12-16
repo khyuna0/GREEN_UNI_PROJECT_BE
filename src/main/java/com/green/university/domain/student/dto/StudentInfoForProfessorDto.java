@@ -29,7 +29,7 @@ public class StudentInfoForProfessorDto {
 	// 총합 환산 점수
 	private Double convertedMark;
     // 등급 (단순확인용)
-    private String grade;
+    private String letterGrade;
     //위험학생 여부
     private String status;
 
@@ -51,18 +51,18 @@ public class StudentInfoForProfessorDto {
         dto.setMidExam(s.getMildExam());        // 엔티티 컬럼명 mildExam 주의
         dto.setFinalExam(s.getFinalExam());
         dto.setConvertedMark(s.getConvertedMark());
-        dto.setGrade(s.getGrade());
-        if(s.getGrade() != null) {
-            dto.setStatus(s.getGrade());
+        dto.setLetterGrade(s.getLetterGrade());
+        if(s.getLetterGrade() != null) {
+            dto.setStatus(s.getLetterGrade());
         }
 
         return dto;
     }
-    private void setStatus (String grade) {
-       if (grade.contains("C0")) {
+    private void setStatus (String letterGrade) {
+       if (letterGrade.contains("C0")) {
             this.status =  "경고";
        }
-        if (grade.contains("D") || grade.contains("F")) {
+        if (letterGrade.contains("D") || letterGrade.contains("F")) {
             this.status =  "위험";
         }
     }

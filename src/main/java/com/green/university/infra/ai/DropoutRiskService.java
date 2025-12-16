@@ -57,7 +57,7 @@ public class DropoutRiskService {
                 .absent(detail.getAbsent())
                 .lateness(detail.getLateness())
                 .convertedMark(detail.getConvertedMark())
-                .grade(detail.getGrade())
+                .letterGrade(detail.getLetterGrade())
                 .semesterGpa(prevGpa)
                 .riskType(analysis.type)
                 .riskLevel(analysis.level)
@@ -101,7 +101,7 @@ public class DropoutRiskService {
         long lateness = detail.getLateness() == null ? 0 : detail.getLateness();
         long totalAbsent = absent + (lateness / 3);
         // 지각 3회 = 결석 1회로 치환한 총 결석 수
-        String grade = detail.getGrade();
+        String grade = detail.getLetterGrade();
         boolean attendanceDanger = totalAbsent >= 4;
         boolean gradeDanger = "F".equalsIgnoreCase(grade);
 

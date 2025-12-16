@@ -12,7 +12,7 @@ public class StuSubAppDto {
     private Long subjectId;
     private String subjectName;
     private String professorName;
-    private Long grades;
+    private Long credits;
     private String subDay;
     private Long startTime;
     private Long endTime;
@@ -27,7 +27,7 @@ public class StuSubAppDto {
         this.subjectId = s.getId();
         this.subjectName = s.getName();
         this.professorName = p.getName();
-        this.grades = s.getGrades();
+        this.credits = s.getCredits();
         this.subDay = s.getSubDay();
         this.startTime = s.getStartTime();
         this.endTime = s.getEndTime();
@@ -42,7 +42,7 @@ public class StuSubAppDto {
         this.subjectId = s.getId();
         this.subjectName = s.getName();
         this.professorName = p.getName();
-        this.grades = s.getGrades();
+        this.credits = s.getCredits();
         this.subDay = s.getSubDay();
         this.startTime = s.getStartTime();
         this.endTime = s.getEndTime();
@@ -62,7 +62,7 @@ public class StuSubAppDto {
         stuSubAppDto.setSubjectId(stuSub.getSubject().getId());
         stuSubAppDto.setSubjectName(stuSub.getSubject().getName());
         stuSubAppDto.setProfessorName(stuSub.getSubject().getProfessor().getName());
-        stuSubAppDto.setGrades(stuSub.getSubject().getGrades());
+        stuSubAppDto.setCredits(stuSub.getSubject().getCredits());
         stuSubAppDto.setSubDay(stuSub.getSubject().getSubDay());
         stuSubAppDto.setStartTime(stuSub.getSubject().getStartTime());
         stuSubAppDto.setEndTime(stuSub.getSubject().getEndTime());
