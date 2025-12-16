@@ -1,9 +1,11 @@
 package com.green.university.global.utils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class LocalDateTimeUtil {
+// 날짜형 타입 관련 유틸
+public class DateTimeUtil {
 
     private static final DateTimeFormatter DATE_TIME_FMT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
