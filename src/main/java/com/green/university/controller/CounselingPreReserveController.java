@@ -64,6 +64,7 @@ public class CounselingPreReserveController {
         ));
     }
 
+
     // 예비 상담 신청
     @PostMapping
     public ResponseEntity<?> preReserve (
@@ -76,6 +77,19 @@ public class CounselingPreReserveController {
         return  ResponseEntity.ok().body("예비 상담 신청이 완료되었습니다!");
     }
 
+    // 교수 - 이번 학기 강의 과목 기준 예비 상담 신청 내역 조회
+    @GetMapping("/preList")
+    public ResponseEntity<?> getPrelist (
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @RequestParam(required = false) Long subjectId
+    ) {
+        Long id = principal.getId(); // 사용자 아이디
+        List<CounselingPreReserveDto> preList = counselingPreReserveService.loadPreList(id, subjectId);
+
+        return ResponseEntity.ok(Map.of(
+                "preList", preList
+        ));
+    }
 
 
 }

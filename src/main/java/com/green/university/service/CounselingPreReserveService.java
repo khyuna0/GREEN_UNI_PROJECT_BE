@@ -73,4 +73,26 @@ public class CounselingPreReserveService {
                 .map(CounselingPreReserveDto::new)
                 .toList();
     }
+
+    // 교수 - 상담 신청 내역 조회
+    public List<CounselingPreReserveDto> loadPreList(Long professorId, Long subjectId) {
+
+        // 조회할 subjectId 목록
+        List<Long> subjectIds;
+
+        if (subjectId != null) {
+            subjectIds = List.of(subjectId);
+        } else {
+            subjectIds = subjectRepository.findByProfessor_Id(professorId)
+                    .stream()
+                    .map(Subject::getId)
+                    .toList();
+        }
+
+        return counselingPreReserveRepository
+                .findBySubject_IdIn(subjectIds)
+                .stream()
+                .map(CounselingPreReserveDto::new)
+                .toList();
+    }
 }

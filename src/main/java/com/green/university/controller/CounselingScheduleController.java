@@ -6,6 +6,7 @@ import com.green.university.dto.WeeklyCounselingScheduleRequest;
 import com.green.university.entity.CounselingSchedule;
 import com.green.university.entity.DropoutRisk;
 import com.green.university.exception.CustomRestfullException;
+import com.green.university.service.CounselingPreReserveService;
 import com.green.university.service.CounselingScheduleService;
 import com.green.university.service.RiskStudentService;
 import jakarta.validation.Valid;
@@ -81,6 +82,8 @@ public class CounselingScheduleController {
 
         return ResponseEntity.ok().body(Map.of("riskStuList",riskStuList));
     }
+    
+
 
 
     /*
