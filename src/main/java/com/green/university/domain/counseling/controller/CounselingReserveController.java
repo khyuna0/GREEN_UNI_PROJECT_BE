@@ -3,6 +3,7 @@ package com.green.university.domain.counseling.controller;
 import com.green.university.domain.counseling.dto.CounselingReserveRequestDto;
 import com.green.university.domain.counseling.service.CounselingReserveService;
 import com.green.university.global.security.CustomUserDetails;
+import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class CounselingReserveController {
     // 학생 상담 신청
     @PostMapping
     public void requestReserve(
-            @RequestBody CounselingReserveRequestDto dto,
+            @Valid @RequestBody CounselingReserveRequestDto dto,
             @AuthenticationPrincipal CustomUserDetails principal
     ) {
         // 로그인한 사용자 ID 추출

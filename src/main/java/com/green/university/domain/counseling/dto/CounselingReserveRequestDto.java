@@ -1,5 +1,7 @@
 package com.green.university.domain.counseling.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 // 학생이 상담을 신청할 때 사용하는 DTO
 public class CounselingReserveRequestDto {
 
@@ -10,6 +12,7 @@ public class CounselingReserveRequestDto {
     private Long subjectId;
 
     // 상담 사유
+    @NotNull(message = "상담 사유를 입력해주세요")
     private String reason;
 
     public Long getCounselingScheduleId() {
