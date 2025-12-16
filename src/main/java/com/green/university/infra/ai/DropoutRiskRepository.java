@@ -24,4 +24,7 @@ public interface DropoutRiskRepository extends JpaRepository<DropoutRisk, Long> 
     List<DropoutRisk> findByStuSub_Subject_Id(Long subjectId);
 
     Optional<DropoutRisk> findByStuSubId(Long id);
+
+    // StuSub 기준으로 위험 학생 조회
+    Optional<DropoutRisk> findByStuSub_Id(Long stuSubId);
 }

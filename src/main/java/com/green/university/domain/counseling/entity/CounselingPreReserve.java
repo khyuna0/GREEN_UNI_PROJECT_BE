@@ -39,7 +39,7 @@ public class CounselingPreReserve { // 상담 신청(예비) 1주 마다 초기�
 
     // 승인 여부
     @Enumerated(EnumType.STRING)
-    private  ReserveStatus approvalState = ReserveStatus.REQUESTED;
+    private ApprovalState approvalState = ApprovalState.REQUESTED;
     // 학생 신청, 교수 승인(승인 시 예약 생성), 반려
 }
 

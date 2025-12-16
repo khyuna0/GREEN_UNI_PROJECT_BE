@@ -1,60 +1,59 @@
 package com.green.university.domain.counseling.controller;
 
-import com.green.university.domain.counseling.dto.CounselingPreReserveFormDto;
-import com.green.university.domain.counseling.dto.CounselingReserveDto;
+import com.green.university.domain.counseling.dto.CounselingReserveRequestDto;
 import com.green.university.domain.counseling.service.CounselingReserveService;
 import com.green.university.global.security.CustomUserDetails;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-
 @RestController
-@RequestMapping("/api/reserve")
+@RequestMapping("/reserve")
 public class CounselingReserveController {
 
-    @Autowired
-    CounselingReserveService counselingReserveService;
+    private final CounselingReserveService counselingReserveService;
 
-    // 가예약 확정 후 요청 받은 같은 시간 예약들 반려로 돌리고, 진짜 예약 생성 + 룸키까지 생성
-    // 반려면 업데이트만 하고 리턴
+    public CounselingReserveController(CounselingReserveService counselingReserveService) {
+        this.counselingReserveService = counselingReserveService;
+    }
+
+    // 학생 상담 신청
     @PostMapping
-    public ResponseEntity<?> reserve(
-            @AuthenticationPrincipal CustomUserDetails principal,
-            @RequestBody CounselingPreReserveFormDto counselingPreReserveFormDto
-            ) {
-        if(counselingPreReserveFormDto.getDecision().equals("반려")) { // 반려일 때
-            counselingReserveService.reject(counselingPreReserveFormDto);
-        } else { // 승인일 때
-            counselingReserveService.confirmReservation
-                    (counselingPreReserveFormDto);
-        }
-        return ResponseEntity.ok().body("예약 승인 또는 반려가 완료되었습니다.");
-    }
-
-    // 학생 - 내 상담 일정 보기
-    @GetMapping("/list")
-    public ResponseEntity<?> getReservationList (@AuthenticationPrincipal CustomUserDetails principal) {
-
+    public void requestReserve(
+            @RequestBody CounselingReserveRequestDto dto,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        // 로그인한 사용자 ID 추출
         Long studentId = principal.getId();
-        List<CounselingReserveDto> reservationList = counselingReserveService.getReservationList(studentId);
 
-        return ResponseEntity.ok(Map.of(
-                "reservationList", reservationList
-        ));
+        counselingReserveService.requestReserve(dto, studentId);
     }
 
+    // 교수 승인 / 반려
+    @PostMapping("/decision")
+    public void decideReserve(
+            @RequestParam Long reserveId,
+            @RequestParam String decision,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        // 교수 권한 체크는 SecurityConfig 또는 AOP에서 처리
+        counselingReserveService.decideReserve(reserveId, decision);
+    }
+
+    // 학생 상담 예약 목록
+    @GetMapping("/list")
+    public Object studentList(
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        Long studentId = principal.getId();
+        return counselingReserveService.getStudentReservationList(studentId);
+    }
+
+    // 교수 상담 예약 목록
     @GetMapping("/list/professor")
-    public ResponseEntity<?> getList (@AuthenticationPrincipal CustomUserDetails principal) {
-
+    public Object professorList(
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
         Long professorId = principal.getId();
-        List<CounselingReserveDto> reservationList = counselingReserveService.getReservationListProfessor(professorId);
-
-        return ResponseEntity.ok(Map.of(
-                "reservationList", reservationList
-        ));
+        return counselingReserveService.getProfessorReservationList(professorId);
     }
 }
