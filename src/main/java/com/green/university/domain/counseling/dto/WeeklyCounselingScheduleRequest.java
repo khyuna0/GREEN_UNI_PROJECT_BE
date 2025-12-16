@@ -1,4 +1,4 @@
-package com.green.university.dto;
+package com.green.university.domain.counseling.dto;
 
 import lombok.Data;
 

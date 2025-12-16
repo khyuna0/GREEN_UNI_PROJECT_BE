@@ -5,7 +5,6 @@ import com.green.university.domain.admin.dto.LoginResponseDto;
 import com.green.university.domain.admin.service.UserService;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.security.CustomUserDetails;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,14 +38,6 @@ public class AuthController {
         }
 
         LoginResponseDto loginResponse = userService.login(loginFormDto); // JWT 발급
-
-        // rememberId 쿠키 처리 - 굳이 백에서처리할 필요없음
-//        if ("on".equals(loginDto.getRememberId())) {
-//            Cookie cookie = new Cookie("id", loginDto.getId().toString());
-//            cookie.setMaxAge(60 * 60 * 24 * 7);
-//            cookie.setPath("/");
-//            response.addCookie(cookie);
-//        }
 
         return ResponseEntity.ok(loginResponse);
     }

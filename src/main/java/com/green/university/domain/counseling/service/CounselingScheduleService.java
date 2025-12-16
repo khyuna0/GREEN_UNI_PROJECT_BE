@@ -1,10 +1,10 @@
-package com.green.university.service;
+package com.green.university.domain.counseling.service;
 
-import com.green.university.dto.WeeklyCounselingScheduleRequest;
-import com.green.university.entity.CounselingSchedule;
-import com.green.university.entity.Professor;
-import com.green.university.repository.CounselingScheduleRepository;
-import com.green.university.repository.ProfessorRepository;
+import com.green.university.domain.counseling.entity.CounselingSchedule;
+import com.green.university.domain.counseling.repository.CounselingScheduleRepository;
+import com.green.university.domain.professor.entity.Professor;
+import com.green.university.domain.professor.repository.ProfessorRepository;
+import com.green.university.domain.counseling.dto.WeeklyCounselingScheduleRequest;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,9 +22,9 @@ public class CounselingScheduleService {
     @Autowired
     private ProfessorRepository professorRepository;
 
-    public List<CounselingSchedule> getSchedulesByWeek ( Long professorId,
-                                                         LocalDate start,
-                                                         LocalDate end) { // 내 상담 목록 불러오기
+    public List<CounselingSchedule> getSchedulesByWeek(Long professorId,
+                                                       LocalDate start,
+                                                       LocalDate end) { // 내 상담 목록 불러오기
         List<CounselingSchedule> lists = scheduleRepository.findByProfessor_IdAndCounselingDateBetween(professorId, start, end);
         return lists;
     }

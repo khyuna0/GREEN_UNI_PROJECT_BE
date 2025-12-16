@@ -1,6 +1,6 @@
 package com.green.university.domain.notice.dto;
 
-import com.green.university.global.utils.LocalDateTimeUtil;
+import com.green.university.global.utils.DateTimeUtil;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -29,15 +29,4 @@ public class NoticeFormDto { // 공지사항 수정, 입력, 출력 시 사용
     private String originFilename;  // 원본 파일명
     private String uuidFilename;    // 서버 저장용 파일명(충돌방지)
 
-    // 공지 시간 처리 (날짜 시간)
-    public String timeFormat() {
-        LocalDateTimeUtil localdatetimeUtil = new LocalDateTimeUtil();
-        return localdatetimeUtil.dateTimeToString(createdTime);
-    }
-
-    // 공지 시간 처리 (날짜)
-    public String dateFormat() {
-        LocalDateTimeUtil localdatetimeUtil = new LocalDateTimeUtil();
-        return localdatetimeUtil.dateToString(createdTime);
-    }
 }

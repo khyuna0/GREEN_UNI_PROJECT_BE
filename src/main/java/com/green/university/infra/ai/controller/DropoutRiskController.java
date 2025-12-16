@@ -1,16 +1,20 @@
 package com.green.university.infra.ai.controller;
 
-import com.green.university.infra.ai.service.AiAnalysisService;
+import com.green.university.global.exception.CustomRestfullException;
+import com.green.university.global.security.CustomUserDetails;
 import com.green.university.infra.ai.DropoutRiskRepository;
 import com.green.university.infra.ai.dto.response.DropoutRiskResponseDto;
+import com.green.university.infra.ai.dto.response.DropoutRiskRowDto;
+import com.green.university.infra.ai.entity.DropoutRisk;
 import com.green.university.infra.ai.entity.RiskStatus;
+import com.green.university.infra.ai.service.AiAnalysisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 

@@ -1,16 +1,15 @@
-package com.green.university.service;
+package com.green.university.domain.counseling.service;
 
-import com.green.university.entity.DropoutRisk;
-import com.green.university.entity.Subject;
-import com.green.university.repository.DropoutRiskRepository;
-import com.green.university.repository.SubjectRepository;
-import com.green.university.utils.Define;
+import com.green.university.domain.subject.entity.Subject;
+import com.green.university.domain.subject.repository.SubjectRepository;
+import com.green.university.global.utils.Define;
+import com.green.university.infra.ai.DropoutRiskRepository;
+import com.green.university.infra.ai.entity.DropoutRisk;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class RiskStudentService {

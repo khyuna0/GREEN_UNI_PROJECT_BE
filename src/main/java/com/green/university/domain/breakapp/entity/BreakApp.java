@@ -1,7 +1,6 @@
 package com.green.university.domain.breakapp.entity;
 
 import com.green.university.domain.student.entity.Student;
-import com.green.university.global.utils.DateUtil;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -38,9 +37,5 @@ public class BreakApp {
     // 날짜 .. 유틸 ..
     private LocalDate appDate;
     private String status;
-
-    public String appDateFormat() {
-        return DateUtil.dateFormat(appDate);
-    }
 
 }

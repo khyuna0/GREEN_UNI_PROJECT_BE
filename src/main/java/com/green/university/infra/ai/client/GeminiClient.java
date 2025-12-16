@@ -1,7 +1,6 @@
 package com.green.university.infra.ai.client;
 
 import com.green.university.infra.ai.dto.response.GeminiResponseDto;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;
@@ -33,7 +32,8 @@ public class GeminiClient implements AiClient {
         );
 
         GeminiResponseDto response = webClient.post()
-                .uri("/models/gemini-2.0-flash:generateContent")
+//                .uri("/models/gemini-2.0-flash:generateContent")
+                .uri("/models/gemini-2.0-flash-lite-001:generateContent")
                 .bodyValue(requestBody)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {

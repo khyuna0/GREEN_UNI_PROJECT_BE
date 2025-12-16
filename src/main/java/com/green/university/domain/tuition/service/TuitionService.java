@@ -35,31 +35,20 @@ public class TuitionService {
 
 	@Autowired
 	private TuitionRepository tuitionRepository;
-
 	@Autowired
 	private ScholarshipRepository scholarshipRepository;
-
 	@Autowired
 	private StuStatService stuStatService;
-
 	@Autowired
 	private BreakAppService breakAppService;
-
-	@Autowired
-	private UserService userService;
-
 	@Autowired
 	private GradeService gradeService;
-
     @Autowired
     private StudentRepository studentRepository;
-
     @Autowired
     private StuSchRepository stuSchRepository;
-
     @Autowired
     private CollTuitRepository collTuitRepository;
-
     @Autowired
     private StuStatRepository stuStatRepository;
 
@@ -69,10 +58,7 @@ public class TuitionService {
 	 */
 	@Transactional
 	public List<Tuition> readTuitionList(Long studentId) { // 안쓰는데?
-
-		List<Tuition> tuitionEntityList = tuitionRepository.findByStudent_Id(studentId);
-
-		return tuitionEntityList;
+        return tuitionRepository.findByStudent_Id(studentId);
 	}
 
 	/**
@@ -82,9 +68,7 @@ public class TuitionService {
 	@Transactional
 	public List<Tuition> readTuitionListByStatus(Long studentId, Boolean status) {
         // 컨트롤러에서 항상 true를 내려주기 때문에, 납부 완료된 등록금 내역 리스트만 뽑아줌
-		List<Tuition> tuitionEntityList = tuitionRepository.findByStudent_IdAndStatus(studentId, status);
-
-		return tuitionEntityList;
+        return tuitionRepository.findByStudent_IdAndStatus(studentId, status);
 	}
 
 	/**
@@ -92,10 +76,7 @@ public class TuitionService {
 	 */
 	@Transactional
 	public Tuition readByStudentIdAndSemester(Long studentId, Long tuiYear, Long semester) {
-
-		Tuition tuitionEntity = tuitionRepository.findByStudent_IdAndTuiYearAndSemester(studentId, tuiYear, semester);
-
-		return tuitionEntity;
+        return tuitionRepository.findByStudent_IdAndTuiYearAndSemester(studentId, tuiYear, semester);
 	}
 
 	/**
@@ -116,7 +97,6 @@ public class TuitionService {
 		// 1학년 2학기 이상의 학생인 경우에만 장학금 1유형(전액) 받을 수 있음
 		if (student.getGrade() > 1 || student.getSemester() == 2) {
 			// 직전 학기 성적 평균
-			// 상수로 선언해둬서 노란줄 뜨는 거니까 무시하기
 			GradeForScholarshipDto gradeDto = null;
 			if (Define.CURRENT_SEMESTER == 1) { // 현재 1학기라면? 전 년도 2학기 성적으로 판단
 				gradeDto = gradeService.readAvgGrade(studentId, Define.CURRENT_YEAR - 1, 2L);

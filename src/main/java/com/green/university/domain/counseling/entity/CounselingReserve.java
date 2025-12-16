@@ -1,9 +1,9 @@
-package com.green.university.entity;
+package com.green.university.domain.counseling.entity;
 
+import com.green.university.domain.professor.entity.Professor;
+import com.green.university.domain.student.entity.Student;
 import jakarta.persistence.*;
 import lombok.Data;
-
-import java.time.LocalDate;
 
 @Entity
 @Data

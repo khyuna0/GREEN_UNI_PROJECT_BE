@@ -1,4 +1,4 @@
-package com.green.university.entity;
+package com.green.university.domain.counseling.entity;
 
 public enum ReserveStatus { // 예약 폼 스테이터스
     REQUESTED,   // 학생 신청

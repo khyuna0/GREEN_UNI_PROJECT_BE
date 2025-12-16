@@ -1,6 +1,6 @@
 package com.green.university.global.websocket;
 
-import com.green.university.infra.ai.MistralClientService;
+import com.green.university.infra.chatbot.service.MistralClientService;
 import com.green.university.infra.chatbot.handler.PortalCatalog;
 import com.green.university.infra.chatbot.intent.ChatIntent;
 import com.green.university.infra.chatbot.intent.ChatRouteResult;

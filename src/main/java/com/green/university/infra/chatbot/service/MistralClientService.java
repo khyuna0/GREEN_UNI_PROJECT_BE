@@ -1,4 +1,4 @@
-package com.green.university.infra.ai;
+package com.green.university.infra.chatbot.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

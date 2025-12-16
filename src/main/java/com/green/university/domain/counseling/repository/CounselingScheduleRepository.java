@@ -1,7 +1,6 @@
-package com.green.university.repository;
+package com.green.university.domain.counseling.repository;
 
-import com.green.university.entity.CounselingSchedule;
-import com.green.university.entity.Professor;
+import com.green.university.domain.counseling.entity.CounselingSchedule;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
@@ -17,9 +16,9 @@ public interface CounselingScheduleRepository extends JpaRepository<CounselingSc
     // 내가 열어 둔 상담 일정 보기
 
     boolean existsByProfessorIdAndCounselingDateAndStartTime( // 상담 등록 중복 방지
-            Long professorId,
-            LocalDate counselingDate,
-            Long startTime
+                                                              Long professorId,
+                                                              LocalDate counselingDate,
+                                                              Long startTime
     );
 
     CounselingSchedule findByProfessor_IdAndCounselingDateAndStartTime(Long professorId, LocalDate date, Long startTime);

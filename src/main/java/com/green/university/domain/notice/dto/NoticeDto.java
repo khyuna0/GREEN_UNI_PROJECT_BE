@@ -1,7 +1,7 @@
 package com.green.university.domain.notice.dto;
 
 import com.green.university.domain.notice.entity.Notice;
-import com.green.university.global.utils.LocalDateTimeUtil;
+import com.green.university.global.utils.DateTimeUtil;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -27,7 +27,7 @@ public class NoticeDto {  // 응답용
         this.content = n.getContent();
         this.views = n.getViews();
         this.createdTime = n.getCreatedTime();
-        this.createdTimeFormatted = LocalDateTimeUtil.dateTimeToString(n.getCreatedTime());
+        this.createdTimeFormatted = DateTimeUtil.dateTimeToString(n.getCreatedTime());
 
         if (n.getFile() != null) {
             this.file = new NoticeFileDto(n.getFile());

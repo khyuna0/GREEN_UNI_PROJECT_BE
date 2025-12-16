@@ -50,20 +50,6 @@ public class AiAnalysisService {
     }
 
 
-    // --- [공통] 프롬프트 & 파싱 ---
-    private String buildPrompt(AiRiskAnalysisRequest req) {
-        return "당신은 20년차 대학 학사 상담 전문가입니다. 아래 학생 데이터를 분석해 중도 이탈 위험을 진단하고 JSON 포맷으로 응답하세요.\n" +
-                "불필요한 서론이나 마크다운(```)은 삭제하세요.\n" +
-                "[학생 정보]\n" +
-                "- 이름: " + req.getStudentName() + "\n" +
-                "- 과목: " + req.getSubjectName() + "\n" +
-                "- 결석/지각: " + req.getAbsent() + "회 / " + req.getLateness() + "회\n" +
-                "- 점수/등급: " + req.getConvertedMark() + "점 / " + req.getGrade() + "\n\n" +
-                "[JSON 필수 키]\n" +
-                "{ \"summary\": \"한줄요약\", \"professorGuide\": \"교수 가이드\", \"studentMessage\": \"학생 메시지\", \"reasonTags\": [\"태그1\"] }";
-    }
-
-
     // ============== 헬퍼 메서드들 ==============
     private AiRiskAnalysisResult parseJson(String rawText) {
         String cleanJson = stripToJson(rawText);

@@ -1,5 +1,8 @@
-package com.green.university.entity;
+package com.green.university.domain.counseling.entity;
 
+import com.green.university.domain.professor.entity.Professor;
+import com.green.university.domain.student.entity.Student;
+import com.green.university.infra.ai.entity.RiskLevel;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -35,7 +38,7 @@ public class CounselingPreReserve { // 상담 신청(예비) 1주 마다 초기�
 
     // 승인 여부
     @Enumerated(EnumType.STRING)
-    private  ReserveStatus status; // 학생 신청, 교수 승인(승인 시 예약 생성), 반려
+    private ReserveStatus status; // 학생 신청, 교수 승인(승인 시 예약 생성), 반려
 }
 
 
