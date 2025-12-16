@@ -708,7 +708,7 @@ VALUES
     (1, 5000000), (2, 2547400);
 
 -- 점수 환산
-INSERT INTO grade (grade, grade_value)
+INSERT INTO grade (letter_grade, grade_point)
 VALUES
     ('A+', 4.5),
     ('A0', 4.0),
@@ -717,6 +717,7 @@ VALUES
     ('C+', 2.5),
     ('C0', 2.0),
     ('D+', 1.5),
+    ('D0', 1.0),
     ('F', 0);
 
 -- 학사일정

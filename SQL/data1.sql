@@ -170,7 +170,7 @@ VALUES
 
 
 -- 강의
-INSERT INTO subject (id, name, professor_id, room_id, department_id, type, sub_year, semester, sub_day, start_time, end_time, grades, capacity, num_of_student)
+INSERT INTO subject (id, name, professor_id, room_id, department_id, type, sub_year, semester, sub_day, start_time, end_time, credits, capacity, num_of_student)
 VALUES
     (22001,'데이터통신21', 23000001, 'E601', 101, '전공', 2022, 1, '월', 14, 17, 3, 20, 5),
     (22002,'딥러닝의 기초21', 23000001, 'E601', 101, '전공', 2022, 1, '수', 9, 12, 3, 20, 3),
@@ -197,7 +197,7 @@ VALUES
     (10019,'신소재공학개론', 23000010, 'E905', 105, '전공', 2023, 1, '월', 9, 12, 3, 30,0),
     (10020,'신소재기초실습', 23000010, 'E905', 105, '전공', 2023, 1, '월', 13, 16, 3, 30,0);
 
-INSERT INTO subject (id, name, professor_id, room_id, department_id, type, sub_year, semester, sub_day, start_time, end_time, grades, capacity, num_of_student)
+INSERT INTO subject (id, name, professor_id, room_id, department_id, type, sub_year, semester, sub_day, start_time, end_time, credits, capacity, num_of_student)
 VALUES
     (10021, '불교철학사', 23000011, 'H101', 106, '전공', 2023, 1, '화', 09, 12, 3, 25, 0),
     (10022, '대륙합리론', 23000012, 'H102', 106, '전공', 2023, 1, '수', 10, 13, 3, 20, 0),
@@ -219,7 +219,7 @@ VALUES
     (10038, '현대영국소설론', 23000020, 'H302', 110, '전공', 2023, 1, '수', 13, 16, 3, 20, 0),
     (10039, '영문학입문', 23000020, 'H302', 110, '교양', 2023, 1, '화', 15, 17, 2, 50, 0);
 
-INSERT INTO subject (id, name, professor_id, room_id, department_id, type, sub_year, semester, sub_day, start_time, end_time, grades, capacity, num_of_student)
+INSERT INTO subject (id, name, professor_id, room_id, department_id, type, sub_year, semester, sub_day, start_time, end_time, credits, capacity, num_of_student)
 VALUES
     (10040, '일반심리학', 23000021, 'S301', 111, '전공', 2023, 1, '월', 9, 12, 3, 10, 0),
     (10041, '적응심리학', 23000021, 'S301', 111, '전공', 2023, 1, '화', 9, 12, 3, 10, 0),
@@ -242,7 +242,7 @@ VALUES
     (10058, '의료인류학', 23000030, 'S310', 115, '전공', 2023, 1, '수', 9, 12, 3, 10, 0),
     (10059, '도시와문화', 23000030, 'S310', 115, '전공', 2023, 1, '목', 9, 12, 3, 10, 0);
 
-INSERT INTO subject (id, name, professor_id, room_id, department_id, type, sub_year, semester, sub_day, start_time, end_time, grades, capacity, num_of_student)
+INSERT INTO subject (id, name, professor_id, room_id, department_id, type, sub_year, semester, sub_day, start_time, end_time, credits, capacity, num_of_student)
 VALUES
     (10060, '기업경영의이해', 23000031, 'C301', 116, '전공', 2023, 1, '월', 9, 12, 3, 10, 0),
     (10061, '경영학원론', 23000031, 'C301', 116, '전공', 2023, 1, '화', 9, 12, 3, 10, 0),
