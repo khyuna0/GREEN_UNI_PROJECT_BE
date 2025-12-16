@@ -30,7 +30,7 @@ public class CounselingReserve { // 확정된 상담
 
     // 학생 위험 상태 - 위험학생 아니면 null
     @ManyToOne
-    @JoinColumn(name = "dropoutRisk_id", nullable = true)
+    @JoinColumn(name = "dropout_risk_id", nullable = true)
     private DropoutRisk dropoutRisk;
 
     // 상담 사유

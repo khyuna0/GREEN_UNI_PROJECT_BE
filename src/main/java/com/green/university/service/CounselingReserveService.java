@@ -4,6 +4,7 @@ import com.green.university.dto.CounselingReserveDto;
 import com.green.university.entity.*;
 import com.green.university.exception.CustomRestfullException;
 import com.green.university.repository.*;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,10 +17,15 @@ public class CounselingReserveService {
 
     @Autowired
     private CounselingReserveRepository counselingReserveRepository;
+    @Autowired
     private CounselingPreReserveRepository counselingPreReserveRepository;
+    @Autowired
     private StudentRepository studentRepository;
+    @Autowired
     private SubjectRepository subjectRepository;
+    @Autowired
     private StuSubRepository stuSubRepository;
+    @Autowired
     private DropoutRiskRepository dropoutRiskRepository;
     
     // 예약 반려 처리 - 가예약의 status 만 바꿔서 업데이트
@@ -30,11 +36,11 @@ public class CounselingReserveService {
         counselingPreReserveRepository.save(preReserve);
     }
 
-
     // 가예약 확정 처리
     // 1. 가예약 승인
     // 2. 본 예약 생성 + 방 코드 발급
     // 3. 위험 학생이면 상담 진행 상태로 변경
+    @Transactional
     public void confirmReservation(CounselingReserveDto dto) {
 
         // ===== 1. 기본 엔티티 조회 =====
@@ -54,17 +60,18 @@ public class CounselingReserveService {
         counselingReserve.setRoomCode(generateRoomCode());
 
         // ===== 3. 위험 학생 처리 =====
-        handleDropoutRiskIfExists(
-                dto.getStudentId(),
-                dto.getSubjectId(),
-                counselingReserve
-        );
+        if(preReserve.getDropoutRisk() != null) {
+            DropoutRisk dropoutRisk = preReserve.getDropoutRisk();
+            counselingReserve.setDropoutRisk(dropoutRisk);
+            dropoutRisk.setStatus(RiskStatus.CONSULT_REQ);
+            dropoutRiskRepository.save(dropoutRisk);
+        }
+
         // 같은 시간대 다른 가예약 반려
         rejectOtherPreReserves(preReserve);
 
         // 상담 스케줄 예약 처리
         markScheduleReserved(preReserve.getCounselingSchedule());
-
 
         // ===== 4. 저장 =====
         counselingReserveRepository.save(counselingReserve);
@@ -90,31 +97,6 @@ public class CounselingReserveService {
     private void markScheduleReserved(CounselingSchedule schedule) {
         schedule.setReserved(true);
     }
-
-
-    private void handleDropoutRiskIfExists( // 위험 학생 확인 메서드
-            Long studentId,
-            Long subjectId,
-            CounselingReserve counselingReserve
-    ) {
-        StuSub stuSub = stuSubRepository
-                .findByStudent_IdAndSubject_Id(studentId, subjectId)
-                .orElseThrow(() ->
-                        new CustomRestfullException(
-                                "성적 정보를 찾을 수 없습니다.",
-                                HttpStatus.NOT_FOUND
-                        )
-                );
-
-        dropoutRiskRepository.findByStuSubId(stuSub.getId())
-                .ifPresent(dropoutRisk -> {
-                    dropoutRisk.setStatus(RiskStatus.CONSULT_REQ);
-                    counselingReserve.setDropoutRisk(dropoutRisk);
-                    dropoutRiskRepository.save(dropoutRisk);
-                });
-    }
-
-
 
     private String generateRoomCode() { // 방 키 생성 메서드
         long now = System.currentTimeMillis();

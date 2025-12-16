@@ -33,7 +33,7 @@ public class CounselingPreReserve { // 상담 신청(예비) 1주 마다 초기�
 
     // 학생 위험 상태 조인/위험학생 아니면 null
     @ManyToOne
-    @JoinColumn(name = "dropoutRisk_id", nullable = true)
+    @JoinColumn(name = "dropout_risk_id", nullable = true)
     private DropoutRisk dropoutRisk;
 
     // 승인 여부
