@@ -3,7 +3,9 @@ package com.green.university.domain.subject.service;
 import com.green.university.domain.subject.dto.AllSubjectSearchFormDto;
 import com.green.university.domain.subject.dto.CurrentSemesterSubjectSearchFormDto;
 import com.green.university.domain.subject.dto.SubjectDto;
+import com.green.university.domain.subject.entity.StuSub;
 import com.green.university.domain.subject.entity.Subject;
+import com.green.university.domain.subject.repository.StuSubRepository;
 import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.domain.subject.specification.SubjectSpecification;
 import com.green.university.global.exception.CustomRestfullException;
@@ -16,12 +18,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Service
 public class SubjectService {
 
     @Autowired
     private SubjectRepository subjectRepository;
+    @Autowired
+    private StuSubRepository stuSubRepository;
 
     // 모든 강의 조회 (전체 연도, 학기) + 페이징 + 검색
     @Transactional(readOnly = true)
@@ -113,6 +120,45 @@ public class SubjectService {
     public Subject readBySubjectId(Long id) {
         return subjectRepository.findById(id).orElseThrow(
                 () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+        );
+    }
+    // 교수 - 이번 학기 강의 과목 뽑기
+    public List<Subject> getMySubjectNames(Long professorId) {
+        return  subjectRepository.findByProfessor_IdAndSubYearAndSemester(
+                professorId,
+                Define.CURRENT_YEAR,
+                Define.CURRENT_SEMESTER
+        );
+    }
+    // 학생 - 이번 학기 수강 과목 뽑기 (subjectId로 선택)
+    public List<Subject> getBySubjectNamesByStuSub(Long studentId, Long subjectId) {
+
+        List<StuSub> stuSubs =
+                stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(
+                        studentId,
+                        Define.CURRENT_YEAR,
+                        Define.CURRENT_SEMESTER
+                );
+
+        List<Subject> subjects = new ArrayList<>();
+
+        for (StuSub ss : stuSubs) {
+            Subject subject = ss.getSubject();
+
+            // 과목 선택 조건
+            if (subjectId == null || subject.getId().equals(subjectId)) {
+                subjects.add(subject);
+            }
+        }
+        return subjects;
+    }
+
+    // 교수 - 이번 학기 수강 과목
+    public List<Subject> getSubjectNames(Long professorId) {
+        return subjectRepository.findByProfessor_IdAndSubYearAndSemester(
+                professorId,
+                Define.CURRENT_YEAR,
+                Define.CURRENT_SEMESTER
         );
     }
 

@@ -1,6 +1,5 @@
 package com.green.university.domain.tuition.service;
 
-import com.green.university.domain.admin.service.UserService;
 import com.green.university.domain.breakapp.entity.BreakApp;
 import com.green.university.domain.breakapp.service.BreakAppService;
 import com.green.university.domain.grade.dto.GradeForScholarshipDto;

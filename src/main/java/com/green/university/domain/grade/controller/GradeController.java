@@ -4,7 +4,6 @@ import com.green.university.domain.grade.dto.GradeDto;
 import com.green.university.domain.grade.dto.MyGradeDto;
 import com.green.university.domain.grade.service.GradeService;
 import com.green.university.global.security.CustomUserDetails;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,11 +23,7 @@ public class GradeController {
     @Autowired
     private GradeService gradeService;
 
-    /**
-     * 금학기 성적조회
-     *
-     * @return
-     */
+    // 금학기 성적조회
     @GetMapping("/current")
     public ResponseEntity<?> thisSemester(@AuthenticationPrincipal CustomUserDetails principal) {
 
@@ -93,11 +88,7 @@ public class GradeController {
         ));
     }
 
-    /**
-     * 총 누계성적 조회
-     *
-     * @return
-     */
+    // 총 누계성적 조회
     @GetMapping("/total")
     public ResponseEntity<?> totalGrade( @AuthenticationPrincipal CustomUserDetails principal) {
 

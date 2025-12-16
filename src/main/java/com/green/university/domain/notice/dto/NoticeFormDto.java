@@ -1,6 +1,5 @@
 package com.green.university.domain.notice.dto;
 
-import com.green.university.global.utils.DateTimeUtil;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Data;

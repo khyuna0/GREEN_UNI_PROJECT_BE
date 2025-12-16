@@ -39,4 +39,5 @@ public class RiskStudentService {
         }
         return dropoutRisks;
     }
+
 }

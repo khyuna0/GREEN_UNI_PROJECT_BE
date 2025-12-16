@@ -52,4 +52,12 @@ public class SubjectSpecification {
                         ? null
                         : cb.like(root.get("name"), "%" + name + "%");
     }
+
+    public static Specification<Subject> findById(Long subjectId) {
+        return (root, query, cb) ->
+                subjectId == null
+                        ? null
+                        : cb.equal(root.get("id"), subjectId);
+    }
+
 }

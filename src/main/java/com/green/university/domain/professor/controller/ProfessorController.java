@@ -40,14 +40,6 @@ public class ProfessorController {
 
 	@Autowired
 	private ProfessorService professorService;
-	@Autowired
-	private HttpSession session;
-	@Autowired
-	private UserService userService;
-	@Autowired
-	private StuSubService stuSubService;
-	@Autowired
-	private SubjectService subjectService;
     @Autowired
     private StuSubDetailService stuSubDetailService;
 	@Autowired
@@ -161,8 +153,6 @@ public class ProfessorController {
 
         // 점수 입력 시 결석 횟수 따라 F, 환산점수 처리
         professorService.updateGrade(subjectId, studentId, dto);
-
-
 
         return ResponseEntity.ok(Map.of(
                 "studentId", studentId,

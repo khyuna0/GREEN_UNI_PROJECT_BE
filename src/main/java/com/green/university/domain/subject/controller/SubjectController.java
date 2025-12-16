@@ -4,7 +4,9 @@ import com.green.university.domain.professor.dto.ReadSyllabusDto;
 import com.green.university.domain.professor.service.ProfessorService;
 import com.green.university.domain.subject.dto.AllSubjectSearchFormDto;
 import com.green.university.domain.subject.dto.SubjectDto;
+import com.green.university.domain.subject.entity.Subject;
 import com.green.university.domain.subject.service.SubjectService;
+import com.green.university.global.security.CustomUserDetails;
 import com.green.university.global.utils.Define;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,15 +14,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-/**
- * @author 서영
- * 강의 목록
- */
 
 @RestController
 @RequestMapping("/api/subject")
@@ -63,6 +63,34 @@ public class SubjectController {
 
         return ResponseEntity.ok(Map.of(
                 "syllabus", readSyllabusDto
+        ));
+    }
+
+    // 학생 - 이번 학기 강의 과목 조회
+    @GetMapping("/semester")
+    public ResponseEntity<?> getSubjectThisSemester(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @RequestParam(required = false) Long subjectId
+    ) {
+        Long id = principal.getId(); // 사용자 아이디 조회
+
+        List<Subject> subjectList = subjectService.getBySubjectNamesByStuSub(id, subjectId);
+        return ResponseEntity.ok(Map.of(
+                "subjectList", subjectList
+        ));
+    }
+
+    // 교수 - 이번 학기 강의 과목 조회
+    @GetMapping("/semester/professor")
+    public ResponseEntity<?> getSubjectList(
+            @AuthenticationPrincipal CustomUserDetails principal
+
+    ) {
+        Long id = principal.getId(); // 사용자 아이디 조회
+        List<Subject> subjectList = subjectService.getSubjectNames(id);
+
+        return ResponseEntity.ok(Map.of(
+                "subjectList", subjectList
         ));
     }
 

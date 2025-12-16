@@ -1,13 +1,13 @@
 package com.green.university.domain.counseling.controller;
 
-import com.green.university.domain.counseling.entity.CounselingSchedule;
-import com.green.university.domain.counseling.service.CounselingScheduleService;
 import com.green.university.domain.counseling.dto.DeleteScheduleRequestDto;
 import com.green.university.domain.counseling.dto.WeeklyCounselingScheduleRequest;
+import com.green.university.domain.counseling.entity.CounselingSchedule;
+import com.green.university.domain.counseling.service.CounselingScheduleService;
+import com.green.university.domain.counseling.service.RiskStudentService;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.security.CustomUserDetails;
 import com.green.university.infra.ai.entity.DropoutRisk;
-import com.green.university.domain.counseling.service.RiskStudentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,7 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/counseling")
-public class CounselingController {
+public class CounselingScheduleController {
 
     @Autowired
     private CounselingScheduleService counselingScheduleService;
@@ -81,6 +81,4 @@ public class CounselingController {
 
         return ResponseEntity.ok().body(Map.of("riskStuList", riskStuList));
     }
-
-
 }

@@ -29,4 +29,6 @@ public class CounselingSchedule { // 교수가 열어주는 상담 일정
     private Long startTime; // 시작 시간
 
     private Long endTime; // 종료 시간
+
+    private boolean reserved = false; // 예약 여부 매칭되면 true
 }
