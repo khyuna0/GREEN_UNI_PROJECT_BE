@@ -1,6 +1,7 @@
 package com.green.university.domain.counseling.entity;
 
 import com.green.university.domain.student.entity.Student;
+import com.green.university.domain.subject.entity.Subject;
 import com.green.university.infra.ai.entity.DropoutRisk;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -22,6 +23,11 @@ public class CounselingReserve { // 확정된 상담
     @ManyToOne
     @JoinColumn(name = "counselingSchedule_id", nullable = false)
     private CounselingSchedule counselingSchedule;
+
+    // 상담 요청한 과목
+    @ManyToOne
+    @JoinColumn(name = "subject_id")
+    private Subject subject;
 
     // 화상 상담 방 코드
     @Column(unique = true)

@@ -1,12 +1,14 @@
 package com.green.university.domain.counseling.service;
 
-import com.green.university.domain.counseling.dto.CounselingReserveDto;
+import com.green.university.domain.counseling.dto.CounselingPreReserveDto;
+import com.green.university.domain.counseling.dto.CounselingPreReserveFormDto;
 import com.green.university.domain.counseling.entity.CounselingPreReserve;
 import com.green.university.domain.counseling.entity.CounselingReserve;
 import com.green.university.domain.counseling.entity.CounselingSchedule;
 import com.green.university.domain.counseling.entity.ReserveStatus;
 import com.green.university.domain.counseling.repository.CounselingPreReserveRepository;
 import com.green.university.domain.counseling.repository.CounselingReserveRepository;
+import com.green.university.domain.counseling.dto.CounselingReserveDto;
 import com.green.university.domain.student.entity.Student;
 import com.green.university.domain.student.repository.StudentRepository;
 import com.green.university.domain.subject.entity.Subject;
@@ -39,9 +41,9 @@ public class CounselingReserveService {
     private StuSubRepository stuSubRepository;
     @Autowired
     private DropoutRiskRepository dropoutRiskRepository;
-    
+
     // 예약 반려 처리 - 가예약의 status 만 바꿔서 업데이트
-    public void reject (CounselingReserveDto dto) {
+    public void reject (CounselingPreReserveFormDto dto) {
         CounselingPreReserve preReserve = counselingPreReserveRepository.findById(dto.getPreReserveId()).orElseThrow(
                 () -> new CustomRestfullException("해당 예비 예약을 조회할 수 없습니다.", HttpStatus.NOT_FOUND));
         preReserve.setApprovalState(ReserveStatus.REJECTED);
@@ -53,7 +55,7 @@ public class CounselingReserveService {
     // 2. 본 예약 생성 + 방 코드 발급
     // 3. 위험 학생이면 상담 진행 상태로 변경
     @Transactional
-    public void confirmReservation(CounselingReserveDto dto) {
+    public void confirmReservation(CounselingPreReserveFormDto dto) {
 
         // ===== 1. 기본 엔티티 조회 =====
         CounselingPreReserve preReserve = getPreReserve(dto.getPreReserveId());
@@ -67,9 +69,12 @@ public class CounselingReserveService {
         // ===== 2. 본 예약 생성 =====
         CounselingReserve counselingReserve = new CounselingReserve();
         counselingReserve.setStudent(student);
+        counselingReserve.setSubject(subject);
         counselingReserve.setCounselingSchedule(preReserve.getCounselingSchedule());
         counselingReserve.setReason(preReserve.getReason());
-        counselingReserve.setRoomCode(generateRoomCode());
+
+        String roomCode = generateRoomCode();
+        counselingReserve.setRoomCode(roomCode);
 
         // ===== 3. 위험 학생 처리 =====
         if(preReserve.getDropoutRisk() != null) {
@@ -117,7 +122,6 @@ public class CounselingReserveService {
     }
 
 
-
     private CounselingPreReserve getPreReserve(Long preReserveId) {
         return counselingPreReserveRepository.findById(preReserveId)
                 .orElseThrow(() ->
@@ -148,8 +152,13 @@ public class CounselingReserveService {
                 );
     }
 
+    // 학생 - 내 본 예약 목록 불러오기
+    public List<CounselingReserveDto> getReservationList (Long id) {
 
+        List<CounselingReserveDto> dtos = counselingReserveRepository.findByStudentId(id);
 
+        return dtos;
+    }
 
 
 
