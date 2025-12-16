@@ -1,14 +1,13 @@
 package com.green.university.domain.counseling.service;
 
-import com.green.university.domain.counseling.dto.CounselingPreReserveDto;
 import com.green.university.domain.counseling.dto.CounselingPreReserveFormDto;
+import com.green.university.domain.counseling.dto.CounselingReserveDto;
 import com.green.university.domain.counseling.entity.CounselingPreReserve;
 import com.green.university.domain.counseling.entity.CounselingReserve;
 import com.green.university.domain.counseling.entity.CounselingSchedule;
 import com.green.university.domain.counseling.entity.ReserveStatus;
 import com.green.university.domain.counseling.repository.CounselingPreReserveRepository;
 import com.green.university.domain.counseling.repository.CounselingReserveRepository;
-import com.green.university.domain.counseling.dto.CounselingReserveDto;
 import com.green.university.domain.student.entity.Student;
 import com.green.university.domain.student.repository.StudentRepository;
 import com.green.university.domain.subject.entity.Subject;
