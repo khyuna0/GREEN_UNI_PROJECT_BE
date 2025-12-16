@@ -4,6 +4,7 @@ package com.green.university.domain.counseling.dto;
 import com.green.university.domain.counseling.entity.CounselingReserve;
 import com.green.university.domain.counseling.entity.CounselingSchedule;
 import com.green.university.domain.student.entity.Student;
+import com.green.university.domain.subject.entity.Subject;
 import com.green.university.infra.ai.entity.DropoutRisk;
 import lombok.Data;
 

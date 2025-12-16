@@ -46,4 +46,15 @@ public class CounselingReserveController {
                 "reservationList", reservationList
         ));
     }
+
+    @GetMapping("/list/professor")
+    public ResponseEntity<?> getList (@AuthenticationPrincipal CustomUserDetails principal) {
+
+        Long professorId = principal.getId();
+        List<CounselingReserveDto> reservationList = counselingReserveService.getReservationListProfessor(professorId);
+
+        return ResponseEntity.ok(Map.of(
+                "reservationList", reservationList
+        ));
+    }
 }
