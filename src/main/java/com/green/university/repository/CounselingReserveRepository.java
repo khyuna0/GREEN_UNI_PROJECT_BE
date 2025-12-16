@@ -8,6 +8,9 @@ import java.util.List;
 
 public interface CounselingReserveRepository extends JpaRepository<CounselingReserve , Long> {
 
-    List<CounselingReserveDto> findByStudentId(Long studentId);
+    List<CounselingReserve> findByStudentId(Long studentId);
+    
+    // 교수 스케쥴로 확정된 아이디 조회
+    List<CounselingReserve> findByCounselingSchedule_IdIn(List<Long> ids);
 
 }

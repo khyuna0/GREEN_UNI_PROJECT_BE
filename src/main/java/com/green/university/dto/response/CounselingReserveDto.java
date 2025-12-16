@@ -1,9 +1,6 @@
 package com.green.university.dto.response;
 
-import com.green.university.entity.CounselingReserve;
-import com.green.university.entity.CounselingSchedule;
-import com.green.university.entity.DropoutRisk;
-import com.green.university.entity.Student;
+import com.green.university.entity.*;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -18,6 +15,9 @@ public class CounselingReserveDto {
     // 교수 오픈 일정
     private CounselingSchedule counselingSchedule;
 
+    // 해당 과목
+    private Subject subject;
+
     // 화상 상담 방 코드
     private String roomCode;
 
@@ -30,6 +30,7 @@ public class CounselingReserveDto {
     public CounselingReserveDto(CounselingReserve entity) {
         this.id = entity.getId();
         this.student = entity.getStudent();
+        this.subject = entity.getSubject();
         this.counselingSchedule = entity.getCounselingSchedule();
         this.roomCode = entity.getRoomCode();
         this.dropoutRisk = entity.getDropoutRisk();

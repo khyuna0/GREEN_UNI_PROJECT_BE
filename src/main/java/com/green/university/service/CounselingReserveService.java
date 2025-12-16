@@ -29,6 +29,8 @@ public class CounselingReserveService {
     private StuSubRepository stuSubRepository;
     @Autowired
     private DropoutRiskRepository dropoutRiskRepository;
+    @Autowired
+    private CounselingScheduleRepository counselingScheduleRepository;
 
     // 예약 반려 처리 - 가예약의 status 만 바꿔서 업데이트
     public void reject (CounselingPreReserveDto dto) {
@@ -143,11 +145,27 @@ public class CounselingReserveService {
     // 학생 - 내 본 예약 목록 불러오기
     public List<CounselingReserveDto> getReservationList (Long id) {
 
-        List<CounselingReserveDto> dtos = counselingReserveRepository.findByStudentId(id);
+        List<CounselingReserve> entity = counselingReserveRepository.findByStudentId(id);
 
-        return dtos;
+        return entity.stream()
+                .map(CounselingReserveDto::new)
+                .toList();
     }
 
+    // 교수 - 내 예약 불러오기
+    public List<CounselingReserveDto> getReservationListProfessor (Long id) {
 
+        List<CounselingSchedule> approvedSchedules = counselingScheduleRepository.findByProfessor_IdAndReserved(id, true);
 
+        List<Long> scheduleIds = approvedSchedules.stream()
+                .map(CounselingSchedule::getId)
+                .toList();
+
+        List<CounselingReserve> reserves =
+                counselingReserveRepository.findByCounselingSchedule_IdIn(scheduleIds);
+
+        return reserves.stream()
+                .map(CounselingReserveDto::new)
+                .toList();
+    }
 }
