@@ -23,9 +23,9 @@ public class CounselingReserveController {
     public ResponseEntity<?> reserve(
             @AuthenticationPrincipal CustomUserDetails principal,
             @RequestBody CounselingReserveDto counselingReserveDto
-            ) {
+    ) {
         if(counselingReserveDto.getDecision().equals("반려")) { // 반려일 때
-            counselingReserveService.reject(counselingReserveDto); 
+            counselingReserveService.reject(counselingReserveDto);
         } else { // 승인일 때
             counselingReserveService.confirmReservation
                     (counselingReserveDto);
