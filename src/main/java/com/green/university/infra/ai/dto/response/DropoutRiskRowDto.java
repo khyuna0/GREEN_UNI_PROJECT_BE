@@ -16,6 +16,7 @@ public class DropoutRiskRowDto {
 
     private Long subjectId;
     private String subjectName;
+    private String professorName;
 
     private String riskType;
     private String riskLevel;
@@ -35,6 +36,7 @@ public class DropoutRiskRowDto {
                 .studentName(r.getStuSub().getStudent().getName())
                 .subjectId(r.getStuSub().getSubject().getId())
                 .subjectName(r.getStuSub().getSubject().getName())
+                .professorName(r.getStuSub().getSubject().getProfessor().getName())
                 .riskType(r.getRiskType() != null ? r.getRiskType().name() : null)
                 .riskLevel(r.getRiskLevel() != null ? r.getRiskLevel().name() : null)
                 .status(r.getStatus() != null ? r.getStatus().name() : null)

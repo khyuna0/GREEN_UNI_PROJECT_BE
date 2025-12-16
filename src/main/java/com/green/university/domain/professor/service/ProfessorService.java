@@ -135,17 +135,17 @@ public class ProfessorService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 과목 id로 과목 Entity 불러오기
-     *
-     * @param id
-     * @return
-     */
-    @Transactional
-    public Subject selectSubjectById(Long id) {
-        Subject subjectEntity = subjectRepository.findById(id).orElseThrow(
-                () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
-        );
+	/**
+	 * 과목 id로 과목 Entity 불러오기
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@Transactional
+	public Subject selectSubjectById(Long id) {
+		Subject subjectEntity = subjectRepository.findById(id).orElseThrow(
+				() -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+		);
 
         return subjectEntity;
     }
@@ -201,28 +201,28 @@ public class ProfessorService {
         detail.setConvertedMark(finalConvertedMark);
 
         // 6. 등급 계산 (선택된 등급이 있으면 환산점수 까지만 계산하고, 등급은 수정됨)
-        String gradeValue = null;
+        String gradeString = null;
 
-        if (numOfStudent < 20) { // 수강생이 20명 미만이면 절대평가
-            gradeValue = getAbsoluteGrade(finalConvertedMark);
-        }
-        /*
-         *   결석 5회 이상
-         *   중간고사, 기말고사 40점 미만
-         *   환산점수 60점 미만이면 - F
-         */
-        if (totalAbsent >= 5 || dto.getMidExam() < 40 || dto.getFinalExam() < 40 || finalConvertedMark < 60) { // 결석 5번 이상이면 F
-            gradeValue = "F";
-        }
+            if(numOfStudent < 20) { // 수강생이 20명 미만이면 절대평가
+                gradeString = getAbsoluteGrade(finalConvertedMark);
+            }
+             /*
+             *   결석 5회 이상
+             *   중간고사, 기말고사 40점 미만
+             *   환산점수 60점 미만이면 - F
+             */
+            if(totalAbsent >= 5 || dto.getMidExam() < 40 || dto.getFinalExam() < 40 || finalConvertedMark < 60) { // 결석 5번 이상이면 F
+                gradeString = "F";
+            }
 
-        if (dto.getGrade() != null && !dto.getGrade().equals(detail.getGrade())) { // 선택된 등급이 있고, 변경되었을 때
-            gradeValue = dto.getGrade();
-            System.out.println("gradeValue = " + gradeValue);
+        if(dto.getGrade() != null && !dto.getGrade().equals(detail.getGrade())) { // 선택된 등급이 있고, 변경되었을 때
+            gradeString = dto.getGrade();
+            System.out.println("gradeValue = " + gradeString);
         }
 
         // 7. 등급 엔티티 조회
-        if (gradeValue != null) {
-            Grade grade = gradeRepository.findByGrade(gradeValue)
+        if(gradeString != null) {
+            Grade grade = gradeRepository.findByGrade(gradeString)
                     .orElseThrow(() -> new RuntimeException("존재하지 않는 학점 등급입니다"));
             stuSub.setGrade(grade);
             detail.setGrade(grade.getGrade()); // 단순 출력용으로 저장함

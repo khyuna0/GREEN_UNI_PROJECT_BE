@@ -14,6 +14,6 @@ public class LoginFormDto { // 로그인 유효성 검증용
     private Long id;
     @Size(min = 6, max = 20, message = "비밀번호는 6~20자 사이여야합니다.")
     private String password;
-    private String rememberId;
+    //private String rememberId;
 
 }
