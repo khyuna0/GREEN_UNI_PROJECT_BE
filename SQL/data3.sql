@@ -893,3 +893,21 @@ VALUES
         - 보담장학회 : 접수중 - 서류심사중 - 최종선발 <br>
         - 김희경유럽정신문화장학재단 : 접수중 - 서류심사중 - 최종선발 <br>
         - 양천장학회 : 접수중 - 서류심사중 - 면접심사중  - 최종선발<br>', 13, (current_timestamp));
+
+-- 교수 이름 채우기
+UPDATE user u
+    JOIN professor p ON u.id = p.id
+    SET u.name = p.name
+WHERE u.user_role = 'professor';
+
+-- 학생 이름 채우기
+UPDATE user u
+    JOIN student s ON u.id = s.id
+    SET u.name = s.name
+WHERE u.user_role = 'student';
+
+-- 교직원 이름 채우기
+UPDATE user u
+    JOIN staff st ON u.id = st.id
+    SET u.name = st.name
+WHERE u.user_role = 'staff';

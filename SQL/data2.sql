@@ -29,10 +29,6 @@ VALUES
   (10070), (10071), (10072), (10073), (10074),
   (10075), (10076), (10077), (10078), (10079);
 
-INSERT INTO syllabus (subject_id)
-VALUES
-    (22001), (22002) , (22003) , (22004);
-
 -- 단과대별 등록금
 INSERT INTO coll_tuit (id, amount, college_id)
 VALUES
