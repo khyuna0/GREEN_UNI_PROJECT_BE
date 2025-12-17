@@ -97,6 +97,9 @@ public class ProfessorService {
     public List<SubjectForProfessorDto> selectSubjectBySemester(
             SubjectPeriodForProfessorDto subjectPeriodForProfessorDto) {
         List<Subject> list = subjectRepository.findByProfessor_IdAndSubYearAndSemester(subjectPeriodForProfessorDto.getId(), subjectPeriodForProfessorDto.getSubYear(), subjectPeriodForProfessorDto.getSemester());
+        if(subjectPeriodForProfessorDto.getSemester() == null || subjectPeriodForProfessorDto.getSubYear() == null) {
+            list = subjectRepository.findByProfessor_Id(subjectPeriodForProfessorDto.getId());
+        }
         return list.stream()
                 .map(subject -> {
                     SubjectForProfessorDto subjectDto = new SubjectForProfessorDto();

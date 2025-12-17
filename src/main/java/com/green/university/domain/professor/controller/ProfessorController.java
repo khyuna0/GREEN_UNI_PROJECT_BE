@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 // 교수 행정 페이지 (자기과목 조회, 학생 성적 기입)
 @RestController
@@ -96,25 +97,47 @@ public class ProfessorController {
 	 * @param period: 조회할 년도 학기
 	 * @return 조회 신청한 학기의 본인 강좌 조회 페이지
 	 */
-	@PostMapping("/subject")
-	public ResponseEntity<?> subjectListProc( @RequestParam String period,
-                                              @AuthenticationPrincipal CustomUserDetails principal) { // period는 "2023년도 1학기" 형식
-		Long professorId = principal.getId();
-		List<SubjectPeriodForProfessorDto> semesterList = professorService.selectSemester(professorId);
-		String[] str = period.split("_");
-		SubjectPeriodForProfessorDto subjectPeriodForProfessorDto = new SubjectPeriodForProfessorDto();
-		subjectPeriodForProfessorDto.setSubYear(Long.valueOf(str[0]));
-		subjectPeriodForProfessorDto.setSemester(Long.valueOf(str[1]));
-		subjectPeriodForProfessorDto.setId(professorId);
-		List<SubjectForProfessorDto> subjectList = professorService.selectSubjectBySemester(subjectPeriodForProfessorDto);
+    @PostMapping("/subject")
+    public ResponseEntity<?> subjectListProc(
+            @RequestParam String period,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        Long professorId = principal.getId();
+
+        List<SubjectPeriodForProfessorDto> semesterList =
+                professorService.selectSemester(professorId);
+
+        List<SubjectForProfessorDto> subjectList;
+
+        if ("ALL".equals(period)) {
+            SubjectPeriodForProfessorDto dto = new SubjectPeriodForProfessorDto();
+            dto.setId(professorId); // 교수 ID만 세팅
+            subjectList = professorService.selectSubjectBySemester(dto);
+
+            return ResponseEntity.ok(Map.of(
+                    "semesterList", semesterList,
+                    "subjectList", subjectList
+            ));
+        }
+
+        String[] str = period.split("_");
+
+        SubjectPeriodForProfessorDto dto = new SubjectPeriodForProfessorDto();
+        dto.setSubYear(Long.valueOf(str[0]));
+        dto.setSemester(Long.valueOf(str[1]));
+        dto.setId(professorId);
+
+        subjectList = professorService.selectSubjectBySemester(dto);
 
         return ResponseEntity.ok(Map.of(
                 "semesterList", semesterList,
                 "subjectList", subjectList
         ));
-	}
+    }
 
-	/**
+
+
+    /**
 	 * @return 해당 과목을 듣는 학생 리스트
 	 */
 	@GetMapping("/subject/{subjectId}")
