@@ -57,4 +57,14 @@ public class CounselingReserveController {
         Long professorId = principal.getId();
         return counselingReserveService.getProfessorReservationList(professorId);
     }
+
+    // 포탈 알림 용 - 교수
+
+    // 오늘의 상담 일정 보기
+//    @GetMapping("/alert/today")
+//    public int
+
+
+    // 미승인/반려 된 상담 요청 개수 보기
+
 }
