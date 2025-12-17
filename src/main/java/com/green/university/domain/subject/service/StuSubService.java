@@ -19,6 +19,7 @@ import com.green.university.domain.subject.specification.SubjectSpecification;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.utils.Define;
 import com.green.university.global.utils.StuSubUtil;
+import com.green.university.global.utils.TermUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -58,7 +59,7 @@ public class StuSubService {
     // 🔥🔥 학생의 해당 학기 수강 신청 내역 조회
     public List<StuSubAppDto> readStuSubList(Long studentId) {
         List<StuSub> stuSubList = stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(
-                studentId, Define.CURRENT_YEAR, Define.CURRENT_SEMESTER);
+                studentId, TermUtil.currentYear(), TermUtil.currentSemester());
         return stuSubList.stream()
                 .map(StuSubAppDto::fromEntity)
                 .collect(Collectors.toList());
@@ -88,13 +89,13 @@ public class StuSubService {
         }
 
         // 이번 학기 과목인지 확인!
-        if (!targetSubject.getSubYear().equals(Define.CURRENT_YEAR) ||
-                !targetSubject.getSemester().equals(Define.CURRENT_SEMESTER)) {
+        if (!targetSubject.getSubYear().equals(TermUtil.currentYear()) ||
+                !targetSubject.getSemester().equals(TermUtil.currentSemester())) {
             throw new CustomRestfullException("이번 학기 과목만 신청 가능", HttpStatus.BAD_REQUEST);
         }
 
         List<StuSub> stuSubList = stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(
-                studentId, Define.CURRENT_YEAR, Define.CURRENT_SEMESTER);
+                studentId, TermUtil.currentYear(), TermUtil.currentSemester());
         // 1. 현재 총 신청 학점 계산
         // StuSub 리스트 → Subject 학점 숫자들 → grade 총합
         Long currentTotalGrade = stuSubList.stream()
@@ -143,8 +144,8 @@ public class StuSubService {
         // 1. 특정 연도, 학기 강의 조회
         //List<Subject> allSubjects = subjectRepository.findAll();
         Specification<Subject> spec = SubjectSpecification.currentSemester(
-                Define.CURRENT_YEAR,
-                Define.CURRENT_SEMESTER
+                TermUtil.currentYear(),
+                TermUtil.currentSemester()
         );
         List<Subject> currentSubjects = subjectRepository.findAll(spec);
         System.out.println("📚 현재 학기 과목 수: " + currentSubjects.size());
@@ -176,8 +177,8 @@ public class StuSubService {
             Subject subject = pre.getSubject();
 
             // 현재 학기 과목이 아니면 스킵 (안전장치)
-            if (!subject.getSubYear().equals(Define.CURRENT_YEAR) ||
-                    !subject.getSemester().equals(Define.CURRENT_SEMESTER)) {
+            if (!subject.getSubYear().equals(TermUtil.currentYear()) ||
+                    !subject.getSemester().equals(TermUtil.currentSemester())) {
                 System.out.println("⏭️ 현재 학기가 아님: " + subject.getName() +
                         " (학생ID: " + student.getId() + ")");
                 continue;

@@ -12,6 +12,7 @@ import com.green.university.domain.subject.repository.SubjectAiJobRepository;
 import com.green.university.domain.subject.service.StuSubDetailService;
 import com.green.university.global.security.CustomUserDetails;
 import com.green.university.global.utils.Define;
+import com.green.university.global.utils.TermUtil;
 import com.green.university.infra.ai.dto.response.SubjectAiStatusResponse;
 import com.green.university.infra.ai.entity.SubjectAiJob;
 import jakarta.validation.Valid;
@@ -77,8 +78,8 @@ public class ProfessorController {
 
 		List<SubjectPeriodForProfessorDto> semesterList = professorService.selectSemester(professorId);
 		SubjectPeriodForProfessorDto subjectPeriodForProfessorDto = new SubjectPeriodForProfessorDto();
-		subjectPeriodForProfessorDto.setSubYear(Define.CURRENT_YEAR);
-		subjectPeriodForProfessorDto.setSemester(Define.CURRENT_SEMESTER);
+		subjectPeriodForProfessorDto.setSubYear(TermUtil.currentYear());
+		subjectPeriodForProfessorDto.setSemester(TermUtil.currentSemester());
 		subjectPeriodForProfessorDto.setId(professorId);
 		List<SubjectForProfessorDto> subjectList = professorService.selectSubjectBySemester(subjectPeriodForProfessorDto);
 

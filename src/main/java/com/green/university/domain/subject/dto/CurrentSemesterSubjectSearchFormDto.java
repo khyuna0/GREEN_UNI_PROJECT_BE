@@ -1,6 +1,7 @@
 package com.green.university.domain.subject.dto;
 
 import com.green.university.global.utils.Define;
+import com.green.university.global.utils.TermUtil;
 import lombok.Data;
 
 @Data
@@ -11,8 +12,8 @@ public class CurrentSemesterSubjectSearchFormDto {
 	private String deptName;
 	private String name;
 	
-	private Long subYear = Define.CURRENT_YEAR;
-	private Long semester = Define.CURRENT_SEMESTER;
+	private Long subYear = TermUtil.currentYear();
+	private Long semester = TermUtil.currentSemester();
 
 	
 }

@@ -10,6 +10,7 @@ import com.green.university.domain.subject.entity.StuSub;
 import com.green.university.domain.subject.entity.Subject;
 import com.green.university.domain.subject.repository.StuSubRepository;
 import com.green.university.global.utils.Define;
+import com.green.university.global.utils.TermUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,8 +81,8 @@ public class GradeService {
     // 금학기 성적 조회
     public List<GradeDto> readThisSemesterByStudentId(Long studentId) {
 
-        Long currentYear = Long.valueOf(Define.CURRENT_YEAR);
-        Long currentSemester = Long.valueOf(Define.CURRENT_SEMESTER);
+        Long currentYear = Long.valueOf(TermUtil.currentYear());
+        Long currentSemester = Long.valueOf(TermUtil.currentSemester());
 
         List<StuSub> stuSubs = stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(studentId, currentYear, currentSemester);
 
@@ -93,8 +94,8 @@ public class GradeService {
 
     // 금학기 누계성적 조회
     public MyGradeDto readMyGradeByStudentId(Long studentId) {
-        Long currentYear = Long.valueOf(Define.CURRENT_YEAR);
-        Long currentSemester = Long.valueOf(Define.CURRENT_SEMESTER);
+        Long currentYear = Long.valueOf(TermUtil.currentYear());
+        Long currentSemester = Long.valueOf(TermUtil.currentSemester());
 
         List<StuSub> stuSubs = stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(studentId, currentYear, currentSemester);
 

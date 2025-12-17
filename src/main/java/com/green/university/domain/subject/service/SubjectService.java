@@ -10,6 +10,7 @@ import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.domain.subject.specification.SubjectSpecification;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.utils.Define;
+import com.green.university.global.utils.TermUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -72,7 +73,7 @@ public class SubjectService {
         Specification<Subject> spec = (root, query, cb) -> null;
 
         // 현재 연도, 학기에 해당하는 과목
-        spec = spec.and(SubjectSpecification.currentSemester(Define.CURRENT_YEAR, Define.CURRENT_SEMESTER));
+        spec = spec.and(SubjectSpecification.currentSemester(TermUtil.currentYear(), TermUtil.currentSemester()));
         // 전공 또는 교양
         if (type != null && !type.isEmpty()) {
             spec = spec.and(SubjectSpecification.hasType(type));
@@ -126,8 +127,8 @@ public class SubjectService {
     public List<Subject> getMySubjectNames(Long professorId) {
         return  subjectRepository.findByProfessor_IdAndSubYearAndSemester(
                 professorId,
-                Define.CURRENT_YEAR,
-                Define.CURRENT_SEMESTER
+                TermUtil.currentYear(),
+                TermUtil.currentSemester()
         );
     }
     // 학생 - 이번 학기 수강 과목 뽑기 (subjectId로 선택)
@@ -136,8 +137,8 @@ public class SubjectService {
         List<StuSub> stuSubs =
                 stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(
                         studentId,
-                        Define.CURRENT_YEAR,
-                        Define.CURRENT_SEMESTER
+                        TermUtil.currentYear(),
+                        TermUtil.currentSemester()
                 );
 
         List<Subject> subjects = new ArrayList<>();
@@ -157,8 +158,8 @@ public class SubjectService {
     public List<Subject> getSubjectNames(Long professorId) {
         return subjectRepository.findByProfessor_IdAndSubYearAndSemester(
                 professorId,
-                Define.CURRENT_YEAR,
-                Define.CURRENT_SEMESTER
+                TermUtil.currentYear(),
+                TermUtil.currentSemester()
         );
     }
 

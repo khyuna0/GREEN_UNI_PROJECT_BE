@@ -5,6 +5,7 @@ import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.global.utils.Define;
 import com.green.university.domain.dropoutrisk.respository.DropoutRiskRepository;
 import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
+import com.green.university.global.utils.TermUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,7 @@ public class RiskStudentService {
 
         List<Subject> subjectList =
                 subjectRepository.findByProfessor_IdAndSubYearAndSemester(
-                        professorId, Define.CURRENT_YEAR, Define.CURRENT_SEMESTER
+                        professorId, TermUtil.currentYear(), TermUtil.currentSemester()
                 );
 
         List<DropoutRisk> dropoutRisks = new ArrayList<>();

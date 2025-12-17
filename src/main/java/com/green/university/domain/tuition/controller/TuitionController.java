@@ -13,6 +13,7 @@ import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.security.CustomUserDetails;
 import com.green.university.global.utils.Define;
 import com.green.university.global.utils.StuStatUtil;
+import com.green.university.global.utils.TermUtil;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -97,8 +98,8 @@ public class TuitionController {
 				.readCollById(collegeService.readDeptById(studentInfo.getDepartment().getId()).getCollege().getId()).getName();
 
 		// principal.getId()를 매개변수로
-		Tuition tuitionEntity = tuitionService.readByStudentIdAndSemester(principal.getId(), Define.CURRENT_YEAR,
-				Define.CURRENT_SEMESTER);
+		Tuition tuitionEntity = tuitionService.readByStudentIdAndSemester(principal.getId(), TermUtil.currentYear(),
+				TermUtil.currentSemester());
 
 		// 등록금 고지서가 생성되어 있지 않다면 들어올 수 없음
 		if (tuitionEntity == null) {

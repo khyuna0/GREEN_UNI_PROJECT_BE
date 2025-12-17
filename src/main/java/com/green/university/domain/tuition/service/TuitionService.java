@@ -18,6 +18,7 @@ import com.green.university.domain.tuition.repository.CollTuitRepository;
 import com.green.university.domain.tuition.repository.TuitionRepository;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.utils.Define;
+import com.green.university.global.utils.TermUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -90,17 +91,17 @@ public class TuitionService {
         );
 		StuSch stuSch = new StuSch();
 		stuSch.setStudent(student);
-		stuSch.setSchYear(Define.CURRENT_YEAR);
-		stuSch.setSemester(Define.CURRENT_SEMESTER);
+		stuSch.setSchYear(TermUtil.currentYear());
+		stuSch.setSemester(TermUtil.currentSemester());
 
 		// 1학년 2학기 이상의 학생인 경우에만 장학금 1유형(전액) 받을 수 있음
 		if (student.getGrade() > 1 || student.getSemester() == 2) {
 			// 직전 학기 성적 평균
 			GradeForScholarshipDto gradeDto = null;
-			if (Define.CURRENT_SEMESTER == 1) { // 현재 1학기라면? 전 년도 2학기 성적으로 판단
-				gradeDto = gradeService.readAvgGrade(studentId, Define.CURRENT_YEAR - 1, 2L);
+			if (TermUtil.currentSemester() == 1) { // 현재 1학기라면? 전 년도 2학기 성적으로 판단
+				gradeDto = gradeService.readAvgGrade(studentId, TermUtil.currentYear() - 1, 2L);
 			} else { // 현재 2학기 - 1학기 성적으로 판단
-				gradeDto = gradeService.readAvgGrade(studentId, Define.CURRENT_YEAR, 1L);
+				gradeDto = gradeService.readAvgGrade(studentId, TermUtil.currentYear(), 1L);
 			}
 
 			if (gradeDto == null) { // 성적을 아직 입력하지 않은 상황?
@@ -146,15 +147,15 @@ public class TuitionService {
 			// 휴학 신청이 승인된 상태일 때
 			if (b.getStatus().equals("승인")) {
 				// 휴학 종료 연도가 현재 연도보다 이후라면 생성하지 않음
-				if (b.getToYear() > Define.CURRENT_YEAR) {
+				if (b.getToYear() > TermUtil.currentYear()) {
 					return 0L;
 					// 휴학 종료 연도가 현재 연도와 같을 경우
-				} else if (b.getToYear().equals(Define.CURRENT_YEAR)) {
+				} else if (b.getToYear().equals(TermUtil.currentYear())) {
 					// 현재 학기 == 1 && 종료 학기 == 1이면 생성하지 않음
 					// 현재 학기 == 1 && 종료 학기 == 2이면 생성하지 않음
 					// 현재 학기 == 2 && 종료 학기 == 1이면 생성함
 					// 현재 학기 == 2 && 종료 학기 == 2이면 생성하지 않음
-					if (b.getToSemester() >= Define.CURRENT_SEMESTER) {
+					if (b.getToSemester() >= TermUtil.currentSemester()) {
 						return 0L;
 					}
 				}
@@ -162,7 +163,7 @@ public class TuitionService {
 		}
 
 		// 이미 해당 학기의 등록금 고지서가 존재한다면 생성하지 않음
-		if (readByStudentIdAndSemester(studentId, Define.CURRENT_YEAR, Define.CURRENT_SEMESTER) != null) {
+		if (readByStudentIdAndSemester(studentId, TermUtil.currentYear(), TermUtil.currentSemester()) != null) {
 			return 0L;
 		}
 
@@ -200,8 +201,8 @@ public class TuitionService {
 		// 등록금 고지서 생성
         Tuition tuition = new Tuition(
                 student,
-                Define.CURRENT_YEAR,
-                Define.CURRENT_SEMESTER,
+                TermUtil.currentYear(),
+                TermUtil.currentSemester(),
                 tuiAmount,
                 payAmount,
                 scholarship,
@@ -221,7 +222,7 @@ public class TuitionService {
 	@Transactional
 	public void updateStatus(Long studentId) {
 
-		Tuition tuition = tuitionRepository.findByStudent_IdAndTuiYearAndSemester(studentId, Define.CURRENT_YEAR, Define.CURRENT_SEMESTER);
+		Tuition tuition = tuitionRepository.findByStudent_IdAndTuiYearAndSemester(studentId, TermUtil.currentYear(), TermUtil.currentSemester());
         tuition.setStatus(true);
         tuitionRepository.save(tuition);
 

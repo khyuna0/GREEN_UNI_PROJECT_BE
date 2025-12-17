@@ -10,6 +10,7 @@ import com.green.university.domain.university.service.CollegeService;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.security.CustomUserDetails;
 import com.green.university.global.utils.Define;
+import com.green.university.global.utils.TermUtil;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -69,8 +70,8 @@ public class BreakAppController {
         // 이미 이번 학기 신청 내역이 있다면 신청 불가능 (반려되지 않았다면)
         if (!breakList.isEmpty()) {
             // 숫자 객체를 == 이 아닌 equals 로 비교하게 변경 -> Long 써서 그런듯
-            if (Objects.equals(breakList.get(0).getFromYear(), Define.CURRENT_YEAR)
-                    && Objects.equals(breakList.get(0).getFromSemester(), Define.CURRENT_SEMESTER)
+            if (Objects.equals(breakList.get(0).getFromYear(), TermUtil.currentYear())
+                    && Objects.equals(breakList.get(0).getFromSemester(), TermUtil.currentSemester())
                     && !breakList.get(0).getStatus().equals("반려")) {
                 throw new CustomRestfullException("이미 휴학 신청 내역이 존재합니다.", HttpStatus.BAD_REQUEST);
             }
@@ -79,7 +80,9 @@ public class BreakAppController {
         return ResponseEntity.ok(Map.of(
                 "student", studentInfo,
                 "deptName", deptName,
-                "collName", collName
+                "collName", collName,
+                "currentYear", TermUtil.currentYear(),          // ✅ 변경: 추가
+                "currentSemester", TermUtil.currentSemester()   // ✅ 변경: 추가
         ));
     }
 
@@ -94,18 +97,39 @@ public class BreakAppController {
 
         Long studentId = principal.getId();
 
-        // 선택한 종료 연도-학기가 시작 연도-학기보다 이전이라면 신청 불가능
-        // ex) 시작 연도-학기 : 2023-2 / 종료 연도-학기 2023-1
-        if (Define.CURRENT_YEAR.equals(breakAppFormDto.getToYear())  // 숫자 객체를 == 이 아닌 equals 로 비교하게 변경
-                && Define.CURRENT_SEMESTER > breakAppFormDto.getToSemester()) {
+        // 시작(현재) 연도/학기
+        long fromYear = TermUtil.currentYear();
+        long fromSem  = TermUtil.currentSemester();
+
+        // 종료(사용자 선택) 연도/학기  (BreakAppFormDto가 Long이면 언박싱)
+        Long toYearObj = breakAppFormDto.getToYear();
+        Long toSemObj  = breakAppFormDto.getToSemester();
+
+        if (toYearObj == null || toSemObj == null) {
+            throw new CustomRestfullException("종료 연도/학기를 입력해주세요.", HttpStatus.BAD_REQUEST);
+        }
+
+
+        long toYear = toYearObj;
+        long toSem  = toSemObj;
+
+        // 종료가 시작보다 이전이면 신청 불가
+        if (toYear < fromYear || (toYear == fromYear && toSem < fromSem)) {
             throw new CustomRestfullException("종료 학기가 시작 학기 이전입니다.", HttpStatus.BAD_REQUEST);
         }
+
+        // 선택한 종료 연도-학기가 시작 연도-학기보다 이전이라면 신청 불가능
+        // ex) 시작 연도-학기 : 2023-2 / 종료 연도-학기 2023-1
+//        if (TermUtil.currentYear().equals(breakAppFormDto.getToYear())  // 숫자 객체를 == 이 아닌 equals 로 비교하게 변경
+//                && TermUtil.currentSemester() > breakAppFormDto.getToSemester()) {
+//            throw new CustomRestfullException("종료 학기가 시작 학기 이전입니다.", HttpStatus.BAD_REQUEST);
+//        }
+
         breakAppFormDto.setStudentId(studentId);
-        breakAppFormDto.setFromYear(Define.CURRENT_YEAR);
-        breakAppFormDto.setFromSemester(Define.CURRENT_SEMESTER);
+        breakAppFormDto.setFromYear(fromYear);
+        breakAppFormDto.setFromSemester(fromSem);
 
         breakAppService.createBreakApp(breakAppFormDto);
-
         return ResponseEntity.ok().body("휴복학 신청이 정상적으로 처리되었습니다.");
 
     }
