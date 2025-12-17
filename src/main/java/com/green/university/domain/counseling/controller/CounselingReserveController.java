@@ -2,8 +2,10 @@ package com.green.university.domain.counseling.controller;
 
 import com.green.university.domain.counseling.dto.CounselingReserveRequestDto;
 import com.green.university.domain.counseling.service.CounselingReserveService;
+import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +19,9 @@ public class CounselingReserveController {
         this.counselingReserveService = counselingReserveService;
     }
 
+    @Autowired
+    private SubjectRepository subjectRepository;
+
     // 학생 상담 신청
     @PostMapping
     public void requestReserve(
@@ -25,7 +30,6 @@ public class CounselingReserveController {
     ) {
         // 로그인한 사용자 ID 추출
         Long studentId = principal.getId();
-
         counselingReserveService.requestReserve(dto, studentId);
     }
 
@@ -58,13 +62,12 @@ public class CounselingReserveController {
         return counselingReserveService.getProfessorReservationList(professorId);
     }
 
-    // 포탈 알림 용 - 교수
-
-    // 오늘의 상담 일정 보기
-//    @GetMapping("/alert/today")
-//    public int
-
-
-    // 미승인/반려 된 상담 요청 개수 보기
-
+    // 처리되지 않은 학생 상담 신청 목록 조회
+    @GetMapping("/notApplicated")
+    public int getNotApplicated (
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        Long professorId = principal.getId();
+        return counselingReserveService.getNotApproved(professorId);
+    }
 }
