@@ -32,4 +32,7 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
             List<Long> subjectIds,
             ApprovalState approvalState
     );
+
+    // 학생 상담 알림용 카운트
+    int countByStudent_IdAndApprovalState(Long studentId, ApprovalState approvalState);
 }

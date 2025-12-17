@@ -208,4 +208,12 @@ public class CounselingReserveService {
                 ).size();
     }
 
+    // 학생 알림용
+    @Transactional(readOnly = true)
+    public java.util.Map<String, Integer> getMyCounts(Long studentId) {
+        int requested = counselingReserveRepository.countByStudent_IdAndApprovalState(studentId, ApprovalState.REQUESTED);
+        int approved  = counselingReserveRepository.countByStudent_IdAndApprovalState(studentId, ApprovalState.APPROVED);
+        return java.util.Map.of("requested", requested, "approved", approved);
+    }
+
 }

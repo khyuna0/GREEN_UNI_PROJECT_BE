@@ -70,4 +70,11 @@ public class CounselingReserveController {
         Long professorId = principal.getId();
         return counselingReserveService.getNotApproved(professorId);
     }
+
+    // 학생 상담 개수 카운트용
+    @GetMapping("/count/student")
+    public java.util.Map<String, Integer> myCounts(@AuthenticationPrincipal CustomUserDetails principal) {
+        Long studentId = principal.getId();
+        return counselingReserveService.getMyCounts(studentId);
+    }
 }
