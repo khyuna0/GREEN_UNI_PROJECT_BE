@@ -1,5 +1,6 @@
 package com.green.university.domain.dropoutrisk.respository;
 
+import com.green.university.domain.dropoutrisk.entity.RiskLevel;
 import com.green.university.domain.subject.entity.StuSub;
 import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
 import com.green.university.domain.dropoutrisk.entity.RiskStatus;
@@ -27,4 +28,17 @@ public interface DropoutRiskRepository extends JpaRepository<DropoutRisk, Long> 
 
     // StuSub 기준으로 위험 학생 조회
     Optional<DropoutRisk> findByStuSub_Id(Long stuSubId);
+
+    List<DropoutRisk> findByStatus(RiskStatus status);
+    List<DropoutRisk> findByStatusIn(List<RiskStatus> status);
+
+    List<DropoutRisk> findByStuSub_Subject_IdAndRiskLevel(Long stuSubSubjectId, RiskLevel riskLevel);
+
+    List<DropoutRisk> findByRiskLevel(RiskLevel riskLevel);
+
+    List<DropoutRisk> findByStuSub_Subject_Professor_Id(Long professorId);
+    List<DropoutRisk> findByStuSub_Subject_Professor_IdAndRiskLevel(
+            Long professorId,
+            RiskLevel riskLevel
+    );
 }

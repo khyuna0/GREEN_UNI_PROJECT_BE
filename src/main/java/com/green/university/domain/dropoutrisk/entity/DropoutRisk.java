@@ -28,6 +28,7 @@ public class DropoutRisk { // 위험 학생 관리 테이블
     @JoinColumn(name = "stu_sub_id", nullable = false)
     private StuSub stuSub;
 
+
     @Enumerated(EnumType.STRING)
     private RiskType riskType; // ATTENDANCE 출석, SUBJECT_GRADE, SEMESTER_GPA
 
@@ -59,11 +60,13 @@ public class DropoutRisk { // 위험 학생 관리 테이블
     @Column(columnDefinition = "TEXT")
     private String aiReasonTags;
 
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
 
     // 편의 메서드
     public void updateFromAiResult(AiRiskAnalysisResult result) {
