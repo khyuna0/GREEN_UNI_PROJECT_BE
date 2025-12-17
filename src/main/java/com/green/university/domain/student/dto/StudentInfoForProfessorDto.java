@@ -32,6 +32,8 @@ public class StudentInfoForProfessorDto {
     private String letterGrade;
     //위험학생 여부
     private String status;
+    // 해당 과목 finalized 여부
+    private boolean finalized;
 
 
 	// StuSubDetail 엔티티 -> StudentInfoForProfessorDto로 변환
@@ -55,7 +57,7 @@ public class StudentInfoForProfessorDto {
         if(s.getLetterGrade() != null) {
             dto.setStatus(s.getLetterGrade());
         }
-
+        dto.setFinalized(s.isFinalized());
         return dto;
     }
     private void setStatus (String letterGrade) {

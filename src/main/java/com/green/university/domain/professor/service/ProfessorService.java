@@ -264,47 +264,6 @@ public class ProfessorService {
         aiBatchService.runSubjectAiAsync(subjectId);
     }
 
-    // 한 과목 전체 학생에 대해 AI 분석을 비동기로 실행
-//    @Async  // @EnableAsync 설정 필요
-//    public void runAiAnalysisInBackground(Long subjectId) {
-//        List<StuSubDetail> details = stuSubDetailRepository.findBySubject_IdAndFinalizedTrue(subjectId);
-//
-//        for (StuSubDetail detail : details) {
-//            try {
-//                StuSub stuSub = detail.getStuSub();
-//
-//                // 1) 위험도 평가 + request 생성 (기존 dropoutRiskService 로직 재사용 가정)
-//                AiRiskAnalysisRequest req = dropoutRiskService.buildRequest(stuSub, detail);
-//
-//                // 2) AI 호출 (mistral/gemini fallback)
-//                AiRiskAnalysisResult aiResult = aiAnalysisService.analyzeRisk(req);
-//
-//                // 3) 위험 타입 계산 (출결/성적/둘다)
-//                RiskType riskType = dropoutRiskService.decideRiskType(stuSub, detail);
-//
-//                // 4) DropoutRisk upsert (최신 1개만 유지)
-//                dropoutRiskService.upsertDropoutRisk(
-//                        stuSub.getStudent(),
-//                        stuSub.getSubject(),
-//                        riskType,
-//                        aiResult
-//                );
-//
-//                // 로그
-//                log.info("학생({}) 과목({}) 위험 분석 완료: {}",
-//                        stuSub.getStudent().getName(),
-//                        stuSub.getSubject().getName(),
-//                        riskType);
-//
-//            } catch (Exception e) {
-//                log.warn("학생({}) AI 분석 실패: {}",
-//                        detail.getStuSub().getStudent().getName(),
-//                        e.getMessage());
-//                // 실패해도 나머지 학생들은 계속 진행
-//            }
-//        }
-//    }
-
 
     /**
      * 교수 강의계획서 조회 (수정 시에도 필요)
