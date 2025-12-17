@@ -28,4 +28,9 @@ public interface EvaluationRepository extends JpaRepository<Evaluation, Long>, J
     @Query("select distinct e.subject from Evaluation e where e.subject.professor.id = :professorId")
     List<Subject> findDistinctSubjectsByProfessorId(@Param("professorId") Long professorId);
 
+    boolean existsByStudent_IdAndSubject_Id(
+            Long studentId,
+            Long subjectId
+    );
+
 }

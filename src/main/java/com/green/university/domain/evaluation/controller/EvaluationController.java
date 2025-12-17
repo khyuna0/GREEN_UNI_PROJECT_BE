@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -68,6 +69,19 @@ public class EvaluationController {
         return ResponseEntity.ok(Map.of(
                 "subNames", subjectName,
                 "eval", eval
+        ));
+    }
+
+    // 이번 학기 수강 과목 강의평가 완료 여부 확인 - 유효성 체크 용
+    @GetMapping("/hasEval")
+    public ResponseEntity<?> hasEval(
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        if(!Objects.equals(principal.getUserRole(), "student")) {
+            throw new CustomRestfullException("접근 권한이 없습니다.", HttpStatus.BAD_REQUEST);
+        }
+        return ResponseEntity.ok(Map.of(
+                "hasEval", evaluationService.isAllEvaluationCompleted(principal.getId())
         ));
     }
 

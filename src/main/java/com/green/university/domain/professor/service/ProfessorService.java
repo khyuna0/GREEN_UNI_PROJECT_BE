@@ -97,6 +97,9 @@ public class ProfessorService {
     public List<SubjectForProfessorDto> selectSubjectBySemester(
             SubjectPeriodForProfessorDto subjectPeriodForProfessorDto) {
         List<Subject> list = subjectRepository.findByProfessor_IdAndSubYearAndSemester(subjectPeriodForProfessorDto.getId(), subjectPeriodForProfessorDto.getSubYear(), subjectPeriodForProfessorDto.getSemester());
+        if(subjectPeriodForProfessorDto.getSemester() == null || subjectPeriodForProfessorDto.getSubYear() == null) {
+            list = subjectRepository.findByProfessor_Id(subjectPeriodForProfessorDto.getId());
+        }
         return list.stream()
                 .map(subject -> {
                     SubjectForProfessorDto subjectDto = new SubjectForProfessorDto();
@@ -145,6 +148,8 @@ public class ProfessorService {
     @Transactional
     public void updateGrade(Long subjectId, Long studentId, UpdateStudentGradeFormDto dto) {
 
+
+
         // 1. StuSub 찾기
         StuSub stuSub = stuSubRepository
                 .findByStudent_IdAndSubject_Id(studentId, subjectId)
@@ -153,6 +158,10 @@ public class ProfessorService {
         // 2. StuSubDetail 찾기
         StuSubDetail detail = stuSubDetailRepository.findByStuSub(stuSub)
                 .orElseThrow(() -> new RuntimeException("출결 정보 없음"));
+
+        if(detail.isFinalized()) {
+            throw new CustomRestfullException("이미 확정된 성적은 수정할 수 없습니다.", HttpStatus.BAD_REQUEST);
+        }
 
         // 3. 해당 강의 듣는 학생 수 계산 (상대평가 계산 용 / 수강 인원이 10명 이하면 절대평가)
         int numOfStudent = subjectRepository.findNumOfStudentById(subjectId);
