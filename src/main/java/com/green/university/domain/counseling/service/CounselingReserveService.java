@@ -123,7 +123,8 @@ public class CounselingReserveService {
 
         // 승인 처리
         reserve.setApprovalState(ApprovalState.APPROVED);
-        reserve.setRoomCode(generateRoomCode());
+        String roomCode = generateRoomCode();
+        reserve.setRoomCode(roomCode);
 
         // 같은 상담 일정의 다른 신청 전부 반려
         rejectOtherReserves(reserve);
@@ -184,4 +185,27 @@ public class CounselingReserveService {
         int random = new SecureRandom().nextInt(100);
         return String.format("%03d%02d", now % 1000, random);
     }
+
+    public int getNotApproved(Long professorId) {
+
+        // 1. 교수의 강의 과목 ID 목록 조회
+        List<Long> subjectIds = subjectRepository
+                .findByProfessor_Id(professorId)
+                .stream()
+                .map(Subject::getId)
+                .toList();
+
+        // 담당 과목이 없으면 빈 리스트
+        if (subjectIds.isEmpty()) {
+            return 0;
+        }
+
+        // 2. 해당 과목들의 미처리 상담 신청 조회
+        return counselingReserveRepository
+                .findBySubject_IdInAndApprovalState(
+                        subjectIds,
+                        ApprovalState.REQUESTED
+                ).size();
+    }
+
 }

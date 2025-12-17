@@ -25,4 +25,11 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
 
     // 같은 학생 + 같은 상담 일정 예약 존재 여부
     boolean existsByStudent_IdAndCounselingSchedule_Id(Long studentId, Long counselingScheduleId);
+
+    // 과목 ID 목록 기준 미처리 상담 신청 목록
+    List<CounselingReserve>
+    findBySubject_IdInAndApprovalState(
+            List<Long> subjectIds,
+            ApprovalState approvalState
+    );
 }

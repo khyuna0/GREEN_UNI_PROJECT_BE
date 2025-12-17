@@ -98,4 +98,17 @@ public class CounselingScheduleController {
         );
     }
 
+    // 포탈 알림 용 - 교수
+
+    // 오늘의 상담 개수 보기
+    @GetMapping("/today")
+    public int getCounselingByDate (
+            @AuthenticationPrincipal CustomUserDetails principal
+    ){
+        Long professorId = principal.getId();
+        return counselingScheduleService.counselingNumByDate(professorId);
+    }
+
+
+
 }
