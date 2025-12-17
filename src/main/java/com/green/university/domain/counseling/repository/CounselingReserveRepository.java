@@ -1,5 +1,6 @@
 package com.green.university.domain.counseling.repository;
 
+import com.green.university.domain.counseling.entity.CounselingPreReserve;
 import com.green.university.domain.counseling.entity.CounselingReserve;
 import com.green.university.domain.counseling.entity.ApprovalState;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,4 +36,6 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
 
     // 학생 상담 알림용 카운트
     int countByStudent_IdAndApprovalState(Long studentId, ApprovalState approvalState);
+
+
 }

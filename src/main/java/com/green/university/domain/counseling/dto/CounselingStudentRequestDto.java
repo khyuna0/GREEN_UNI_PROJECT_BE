@@ -3,7 +3,7 @@ package com.green.university.domain.counseling.dto;
 import jakarta.validation.constraints.NotNull;
 
 // 학생이 상담을 신청할 때 사용하는 DTO
-public class CounselingReserveRequestDto {
+public class CounselingStudentRequestDto {
 
     // 선택한 상담 일정 ID
     private Long counselingScheduleId;
