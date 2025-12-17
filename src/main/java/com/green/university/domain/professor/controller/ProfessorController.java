@@ -38,13 +38,14 @@ public class ProfessorController {
 	private SubjectAiJobRepository subjectAiJobRepository;
 
 
-	// 교수가 성적을 최종으로 확정 지으면 ai가 돌아감
+	// 교수가 성적을 최종으로 확정 짓고 ai가 돌릴 때
 	@PostMapping("/subjects/{subjectId}/finalize")
-	public ResponseEntity<Void> finalizeSubjectGrades(@PathVariable Long subjectId) {
+	public ResponseEntity<?> finalizeSubjectGrades(@PathVariable Long subjectId) {
 		professorService.finalizeGrades(subjectId);
 		return ResponseEntity.ok().build(); // 바로 200 리턴 (AI는 백그라운드)
 	}
 
+	// ai 돌리는 동안 분석 결과 보여주기
 	@GetMapping("/subjects/{subjectId}/ai-status")
 	public ResponseEntity<SubjectAiStatusResponse> aiStatus(@PathVariable Long subjectId) {
 		SubjectAiJob job = subjectAiJobRepository.findBySubject_Id(subjectId)
