@@ -29,5 +29,6 @@ public interface CounselingScheduleRepository extends JpaRepository<CounselingSc
 
     List<CounselingSchedule> findByProfessor_IdAndReservedFalse(Long professorId);
 
+    List<CounselingSchedule> findByProfessor_IdAndCounselingDate(Long professorId, LocalDate today);
 
 }
