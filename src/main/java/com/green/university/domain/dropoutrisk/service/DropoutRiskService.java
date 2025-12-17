@@ -1,10 +1,14 @@
 package com.green.university.domain.dropoutrisk.service;
 
-import com.green.university.domain.dropoutrisk.dto.DropoutRiskRowDto;
+import com.green.university.domain.dropoutrisk.dto.DropoutRiskResponseDto;
 import com.green.university.domain.dropoutrisk.respository.DropoutRiskRepository;
 import com.green.university.domain.grade.service.GradeService;
+import com.green.university.domain.professor.repository.ProfessorRepository;
 import com.green.university.domain.subject.entity.StuSub;
 import com.green.university.domain.subject.entity.StuSubDetail;
+import com.green.university.domain.subject.entity.Subject;
+import com.green.university.domain.subject.repository.SubjectRepository;
+import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.infra.ai.dto.AiRiskAnalysisRequest;
 import com.green.university.infra.ai.dto.response.AiRiskAnalysisResult;
 import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
@@ -14,37 +18,72 @@ import com.green.university.domain.dropoutrisk.entity.RiskType;
 import com.green.university.infra.ai.service.AiAnalysisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 // 출석 및 성적 기반 위험도 계산 + AI 분석 요청 + DB 저장
+// 조회 - 위험 학생 목록 가져오기
 public class DropoutRiskService {
 
     private final DropoutRiskRepository dropoutRiskRepository;
     private final AiAnalysisService aiAnalysisService; // AI API 호출 서비스
     private final GradeService gradeService;
+    private final SubjectRepository subjectRepository;
+
 
     // ================= 조회 로직 추가 =================
+    // 해당 교수의 강의 중 + 상담 미완료, 완료된 학생을 나눠서 보여주기 + 검색 (과목, 위험레벨)
     @Transactional(readOnly = true)
-    public List<DropoutRiskRowDto> getRisksBySubject(Long subjectId) {
-        return dropoutRiskRepository.findByStuSub_Subject_Id(subjectId)
-                .stream()
-                .map(DropoutRiskRowDto::from)
-                .toList();
+    public Map<String, List<DropoutRiskResponseDto>> getRisksByStatus(Long subjectId, RiskLevel riskLevel, Long professorId) {
+        List<DropoutRisk> dropoutRisks;
+
+        // 1. subjectId 있으면 해당 과목이 교수 강의인지 검증
+        if (subjectId != null) {
+            Subject subject = subjectRepository.findById(subjectId).orElseThrow(
+                    () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+            );
+            if (!subject.getProfessor().getId().equals(professorId)) {
+                throw new CustomRestfullException("본인 강의만 조회 할 수 있습니다.", HttpStatus.FORBIDDEN);
+            }
+        }
+
+        // 2. 조건에 따라 조회 (항상 professorId 포함)
+        if (subjectId == null && riskLevel == null) {
+            // 해당 교수의 모든 과목 위험학생
+            dropoutRisks = dropoutRiskRepository.findByStuSub_Subject_Professor_Id(professorId);
+        } else if (riskLevel == null) {
+            // 특정 과목 위험학생 (이미 위에서 교수 검증 완료)
+            dropoutRisks = dropoutRiskRepository.findByStuSub_Subject_Id(subjectId);
+        } else if (subjectId == null) {
+            // 해당 교수의 모든 과목 중 특정 위험레벨
+            dropoutRisks = dropoutRiskRepository.findByStuSub_Subject_Professor_IdAndRiskLevel(professorId, riskLevel);
+        } else {
+            // 특정 과목 + 특정 위험레벨 (이미 교수 검증 완료)
+            dropoutRisks = dropoutRiskRepository.findByStuSub_Subject_IdAndRiskLevel(subjectId, riskLevel);
+        }
+        Map<String, List<DropoutRiskResponseDto>> map = new HashMap<>();
+        map.put("pending", dropoutRisks.stream().filter(
+                r -> r.getStatus().equals(RiskStatus.DETECTED) || r.getStatus().equals(RiskStatus.CONSULT_REQ))
+                .map(DropoutRiskResponseDto::fromEntity)
+                .collect(Collectors.toList()));
+        map.put("resolved", dropoutRisks.stream().filter(
+                r -> r.getStatus().equals(RiskStatus.RESOLVED))
+                .map(DropoutRiskResponseDto::fromEntity)
+                .collect(Collectors.toList()));
+        return map;
     }
 
-    @Transactional(readOnly = true)
-    public List<DropoutRiskRowDto> getAllRisks() {
-        return dropoutRiskRepository.findAll()
-                .stream()
-                .map(DropoutRiskRowDto::from)
-                .toList();
-    }
+
 
     // =============== 기존 평가+저장 로직 ===============
     // 성적 및 출결 변경 시 호출되는 메인 메서드
