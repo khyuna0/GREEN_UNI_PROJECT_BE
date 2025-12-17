@@ -28,18 +28,6 @@ public class DropoutRisk { // 위험 학생 관리 테이블
     @JoinColumn(name = "stu_sub_id", nullable = false)
     private StuSub stuSub;
 
-    /**
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id")
-    private Student student;
-
-    // 출석 위험일 때만 과목 연결 (전체 학점 위험이면 null)
-    // 성적 위험(전체 평점)일 경우 과목이 없을 수 있으므로 nullable
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subject_id")
-    private Subject subject;
-     */
-
     @Enumerated(EnumType.STRING)
     private RiskType riskType; // ATTENDANCE 출석, SUBJECT_GRADE, SEMESTER_GPA
 
@@ -50,10 +38,6 @@ public class DropoutRisk { // 위험 학생 관리 테이블
     @Builder.Default
     private RiskStatus status = RiskStatus.DETECTED; // DETECTED 포착됨, CONSULT_REQ 상담예약, RESOLVED 해결완료
 
-    /**
-    @Column(columnDefinition = "TEXT")
-    private String aiAnalysis; // AI가 분석한 상담 가이드 내용
-    */
 
     // AI에게 넘긴 핵심 요약
     @Column(columnDefinition = "TEXT", nullable = false)

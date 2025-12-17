@@ -1,5 +1,6 @@
-package com.green.university.infra.ai;
+package com.green.university.infra.ai.service;
 
+import com.green.university.domain.dropoutrisk.service.DropoutRiskService;
 import com.green.university.domain.subject.entity.StuSub;
 import com.green.university.domain.subject.entity.StuSubDetail;
 import com.green.university.domain.subject.repository.StuSubDetailRepository;
@@ -16,6 +17,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+// 한 과목 전체 학생을 비동기로 AI 분석 돌리는 배치 실행기
 public class AiBatchService {
 
     private final StuSubDetailRepository stuSubDetailRepository;

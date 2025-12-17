@@ -1,6 +1,6 @@
 package com.green.university.service;
 
-import com.green.university.infra.ai.dto.RiskNotificationFormDto;
+import com.green.university.infra.ai.deprecated.RiskNotificationFormDto;
 import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

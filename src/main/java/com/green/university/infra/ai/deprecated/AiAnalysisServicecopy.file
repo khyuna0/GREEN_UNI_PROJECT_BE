@@ -2,7 +2,7 @@ package com.green.university.service;
 
 import com.green.university.domain.student.entity.Student;
 import com.green.university.domain.subject.entity.Subject;
-import com.green.university.infra.ai.DropoutRiskRepository;
+import com.green.university.domain.dropoutrisk.respository.DropoutRiskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;

@@ -15,6 +15,7 @@ import java.util.Collections;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+// 외부 AI API(Gemini, Mistral) 호출 + JSON 파싱만 담당
 public class AiAnalysisService {
 
     @Qualifier("geminiClient")

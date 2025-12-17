@@ -1,13 +1,13 @@
-package com.green.university.infra.ai.controller;
+package com.green.university.domain.dropoutrisk.controller;
 
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.security.CustomUserDetails;
-import com.green.university.infra.ai.DropoutRiskQueryService;
-import com.green.university.infra.ai.DropoutRiskRepository;
-import com.green.university.infra.ai.dto.response.DropoutRiskResponseDto;
-import com.green.university.infra.ai.dto.response.DropoutRiskRowDto;
+import com.green.university.domain.dropoutrisk.respository.DropoutRiskRepository;
+import com.green.university.domain.dropoutrisk.dto.DropoutRiskResponseDto;
+import com.green.university.domain.dropoutrisk.dto.DropoutRiskRowDto;
 import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
 import com.green.university.domain.dropoutrisk.entity.RiskStatus;
+import com.green.university.domain.dropoutrisk.service.DropoutRiskService;
 import com.green.university.infra.ai.service.AiAnalysisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,18 +26,18 @@ public class DropoutRiskController {
 
     private final DropoutRiskRepository dropoutRiskRepository;
     private final AiAnalysisService aiAnalysisService;
-    private final DropoutRiskQueryService dropoutRiskQueryService;
+    private final DropoutRiskService dropoutRiskService;
 
 
     // 교수가 최종 성적 확정 한 후 ai 위험 분석 결과를 테이블로 보여주기 (전체)
     @GetMapping("/list")
-    public ResponseEntity<List<DropoutRiskRowDto>> getDropoutRisks() {
-        return ResponseEntity.ok(dropoutRiskQueryService.getDropoutRisksList());
+    public ResponseEntity<List<DropoutRiskRowDto>> getRisk() {
+        return ResponseEntity.ok(dropoutRiskService.getAllRisks());
     }
     // 교수가 최종 성적 확정 한 후 ai 위험 분석 결과를 테이블로 보여주기 (과목 별로 보여주기 === 구현해야함 ***)
     @GetMapping("/{subjectId}/dropout-risks")
-    public ResponseEntity<List<DropoutRiskRowDto>> getDropoutRisksBySubject(@PathVariable Long subjectId) {
-        return ResponseEntity.ok(dropoutRiskQueryService.getRisksBySubject(subjectId));
+    public ResponseEntity<List<DropoutRiskRowDto>> getRiskBySubject(@PathVariable Long subjectId) {
+        return ResponseEntity.ok(dropoutRiskService.getRisksBySubject(subjectId));
     }
 
     // 교수가 본인의 특정 과목(subjectId)에서 위험 학생 목록 조회

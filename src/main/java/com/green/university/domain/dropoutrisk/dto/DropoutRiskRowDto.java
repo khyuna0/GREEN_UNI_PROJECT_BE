@@ -1,4 +1,4 @@
-package com.green.university.infra.ai.dto.response;
+package com.green.university.domain.dropoutrisk.dto;
 
 import com.green.university.global.utils.DateTimeUtil;
 import com.green.university.domain.dropoutrisk.entity.DropoutRisk;

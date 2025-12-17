@@ -1,4 +1,4 @@
-package com.green.university.infra.ai;
+package com.green.university.domain.dropoutrisk.respository;
 
 import com.green.university.domain.subject.entity.StuSub;
 import com.green.university.domain.dropoutrisk.entity.DropoutRisk;

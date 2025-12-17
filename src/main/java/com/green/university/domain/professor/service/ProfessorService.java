@@ -2,7 +2,6 @@ package com.green.university.domain.professor.service;
 
 import com.green.university.domain.grade.entity.Grade;
 import com.green.university.domain.grade.repository.GradeRepository;
-import com.green.university.domain.grade.service.GradeService;
 import com.green.university.domain.professor.dto.ProfessorDto;
 import com.green.university.domain.professor.dto.ReadSyllabusDto;
 import com.green.university.domain.professor.dto.SyllaBusFormDto;
@@ -26,11 +25,9 @@ import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.domain.subject.service.StuSubService;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.utils.PenaltyCalculator;
-import com.green.university.infra.ai.AiBatchService;
-import com.green.university.infra.ai.DropoutRiskService;
-import com.green.university.infra.ai.RiskEvaluatorService;
 import com.green.university.infra.ai.entity.JobStatus;
 import com.green.university.infra.ai.entity.SubjectAiJob;
+import com.green.university.infra.ai.service.AiBatchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -63,12 +60,6 @@ public class ProfessorService {
     private static final int PAGE_SIZE = 20; // 교수 리스트 / 검색 페이징 용
     @Autowired
     private GradeRepository gradeRepository;
-    @Autowired
-    private GradeService gradeService;
-    @Autowired
-    private RiskEvaluatorService riskEvaluatorService;
-    @Autowired
-    private DropoutRiskService dropoutRiskService;
     @Autowired
     private AiBatchService aiBatchService;
     @Autowired

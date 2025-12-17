@@ -1,9 +1,9 @@
 package com.green.university.service;
 
-import com.green.university.infra.ai.dto.RiskNotificationFormDto;
+import com.green.university.infra.ai.deprecated.RiskNotificationFormDto;
 import com.green.university.infra.ai.dto.response.AiRiskAnalysisResult;
 import com.green.university.entity.*;
-import com.green.university.infra.ai.DropoutRiskRepository;
+import com.green.university.domain.dropoutrisk.respository.DropoutRiskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
