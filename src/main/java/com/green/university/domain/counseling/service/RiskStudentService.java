@@ -4,7 +4,7 @@ import com.green.university.domain.subject.entity.Subject;
 import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.global.utils.Define;
 import com.green.university.infra.ai.DropoutRiskRepository;
-import com.green.university.infra.ai.entity.DropoutRisk;
+import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,10 +1,9 @@
 package com.green.university.infra.ai.dto.response;
 
-import com.green.university.infra.ai.entity.DropoutRisk;
+import com.green.university.global.utils.DateTimeUtil;
+import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
 import lombok.Builder;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -24,10 +23,9 @@ public class DropoutRiskRowDto {
 
     private String aiSummary;
     private String aiRecommendation;
-    private String aiStudentMessage;
     private String aiReasonTags;
 
-    private LocalDateTime updatedAt;
+    private String updatedAt;
 
     public static DropoutRiskRowDto from(DropoutRisk r) {
         return DropoutRiskRowDto.builder()
@@ -42,9 +40,8 @@ public class DropoutRiskRowDto {
                 .status(r.getStatus() != null ? r.getStatus().name() : null)
                 .aiSummary(r.getAiSummary())
                 .aiRecommendation(r.getAiRecommendation())
-                .aiStudentMessage(r.getAiStudentMessage())
                 .aiReasonTags(r.getAiReasonTags())
-                .updatedAt(r.getUpdatedAt())
+                .updatedAt(DateTimeUtil.dateTimeToString(r.getUpdatedAt()))
                 .build();
     }
 }

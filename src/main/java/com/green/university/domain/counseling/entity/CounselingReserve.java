@@ -2,7 +2,7 @@ package com.green.university.domain.counseling.entity;
 
 import com.green.university.domain.student.entity.Student;
 import com.green.university.domain.subject.entity.Subject;
-import com.green.university.infra.ai.entity.DropoutRisk;
+import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

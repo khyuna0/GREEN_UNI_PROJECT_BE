@@ -1,4 +1,4 @@
-package com.green.university.infra.ai.entity;
+package com.green.university.domain.dropoutrisk.entity;
 
 import com.green.university.domain.subject.entity.StuSub;
 import com.green.university.infra.ai.dto.response.AiRiskAnalysisResult;

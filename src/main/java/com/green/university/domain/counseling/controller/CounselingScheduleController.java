@@ -7,7 +7,7 @@ import com.green.university.domain.counseling.service.CounselingScheduleService;
 import com.green.university.domain.counseling.service.RiskStudentService;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.security.CustomUserDetails;
-import com.green.university.infra.ai.entity.DropoutRisk;
+import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -79,7 +79,7 @@ public class CounselingScheduleController {
         Long professorId = principal.getId(); // 로그인 교수
         List<DropoutRisk> riskStuList = riskStudentService.getRiskStudents(professorId);
 
-        return ResponseEntity.ok().body(Map.of("riskStuList", riskStuList));
+        return ResponseEntity.ok(riskStuList);
     }
 
     @GetMapping("/schedule") // 학생 - 과목별 상담 일정 조회

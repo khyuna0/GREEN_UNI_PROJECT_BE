@@ -1,9 +1,9 @@
 package com.green.university.infra.ai;
 
 import com.green.university.domain.subject.entity.StuSub;
-import com.green.university.infra.ai.entity.DropoutRisk;
-import com.green.university.infra.ai.entity.RiskStatus;
-import com.green.university.infra.ai.entity.RiskType;
+import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
+import com.green.university.domain.dropoutrisk.entity.RiskStatus;
+import com.green.university.domain.dropoutrisk.entity.RiskType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

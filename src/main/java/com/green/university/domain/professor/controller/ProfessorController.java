@@ -25,11 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 교수 행정 페이지 (자기과목 조회, 학생 성적 기입)
- * 
- * @author 김지현
- */
+// 교수 행정 페이지 (자기과목 조회, 학생 성적 기입)
 @RestController
 @RequestMapping("/api/professor")
 public class ProfessorController {
@@ -68,11 +64,7 @@ public class ProfessorController {
 		));
 	}
 
-	// 최종 성적 확정 후 결과를 테이블로 보여주기
-	@GetMapping("/subjects/{subjectId}/dropout-risks")
-	public ResponseEntity<List<DropoutRiskRowDto>> getDropoutRisks(@PathVariable Long subjectId) {
-		return ResponseEntity.ok(dropoutRiskQueryService.getRisksBySubject(subjectId));
-	}
+
 
 
 
