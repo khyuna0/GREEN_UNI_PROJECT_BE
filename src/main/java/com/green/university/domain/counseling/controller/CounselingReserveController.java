@@ -1,11 +1,10 @@
 package com.green.university.domain.counseling.controller;
 
-import com.green.university.domain.counseling.dto.CounselingReserveRequestDto;
+import com.green.university.domain.counseling.dto.CounselingProfessorRequestDto;
+import com.green.university.domain.counseling.dto.CounselingStudentRequestDto;
 import com.green.university.domain.counseling.service.CounselingReserveService;
-import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,13 +18,10 @@ public class CounselingReserveController {
         this.counselingReserveService = counselingReserveService;
     }
 
-    @Autowired
-    private SubjectRepository subjectRepository;
-
     // 학생 상담 신청
     @PostMapping
     public void requestReserve(
-            @Valid @RequestBody CounselingReserveRequestDto dto,
+            @Valid @RequestBody CounselingStudentRequestDto dto,
             @AuthenticationPrincipal CustomUserDetails principal
     ) {
         // 로그인한 사용자 ID 추출
@@ -76,5 +72,45 @@ public class CounselingReserveController {
     public java.util.Map<String, Integer> myCounts(@AuthenticationPrincipal CustomUserDetails principal) {
         Long studentId = principal.getId();
         return counselingReserveService.getMyCounts(studentId);
+    }
+
+    // 교수 -> 학생 상담요청
+    @PostMapping("/pre/professor")
+    public void professorRequest(
+            @Valid @RequestBody CounselingProfessorRequestDto dto,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        Long professorId = principal.getId();
+        counselingReserveService.professorRequest(dto, professorId);
+    }
+
+    // 학생: 내가 받은 교수 상담요청 목록
+    @GetMapping("/pre/list/student")
+    public Object myPreList(
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        Long studentId = principal.getId();
+        return counselingReserveService.getMyPreReserveList(studentId);
+    }
+
+    // 학생: 수락 -> reserve 생성
+    @PostMapping("/pre/accept")
+    public Object acceptPre(
+            @RequestParam Long preReserveId,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        Long studentId = principal.getId();
+        Long reserveId = counselingReserveService.acceptPreReserve(studentId, preReserveId);
+        return java.util.Map.of("reserveId", reserveId);
+    }
+
+    // 학생: 거절
+    @PostMapping("/pre/reject")
+    public void rejectPre(
+            @RequestParam Long preReserveId,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        Long studentId = principal.getId();
+        counselingReserveService.rejectPreReserve(studentId, preReserveId);
     }
 }

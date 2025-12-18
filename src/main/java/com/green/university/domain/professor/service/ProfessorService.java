@@ -241,7 +241,8 @@ public class ProfessorService {
     }
 
     /**
-     * 과목 성적 최종 확정 + AI 분석 비동기 트리거
+     * ☎️ 2. 과목 성적 최종 확정 + Job 저장 (별도 트랜잭션)
+     *  AI 분석 비동기 트리거 (따로 나누기)
      */
     @Transactional
     public void finalizeGrades(Long subjectId) {
@@ -255,22 +256,8 @@ public class ProfessorService {
         stuSubDetailRepository.saveAll(details);
         // 여기까지가 “빠르게 끝나는” 트랜잭션
 
-        // 2) Job 저장/갱신 (과목당 1개 유지)
-        Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new CustomRestfullException("과목이 없습니다.", HttpStatus.NOT_FOUND));
-
-        SubjectAiJob job = subjectAiJobRepository.findBySubject_Id(subjectId)
-                .orElseGet(SubjectAiJob::new);
-
-        job.setSubject(subject);
-        job.setStatus(JobStatus.RUNNING);
-        job.setTotalCount(details.size());
-        job.setDoneCount(0);
-        job.setMessage("AI 분석 준비중...");
-        subjectAiJobRepository.save(job);
-
-        // 여기서 비동기 호출 (다른 서비스 빈)
-        aiBatchService.runSubjectAiAsync(subjectId);
+        // ☎️ Job 저장 (별도 트랜잭션)
+        aiBatchService.createAndStartJob(subjectId, details.size());
     }
 
 

@@ -46,5 +46,10 @@ public class CounselingReserve {
     // 위험 학생인 경우 연결
     @ManyToOne(fetch = FetchType.LAZY)
     private DropoutRisk dropoutRisk;
+
+    // 누가 상담 요청 했는지
+    @Enumerated(EnumType.STRING)
+    private ReserveRequester requester;
+
 }
 

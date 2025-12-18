@@ -9,6 +9,7 @@ import com.green.university.domain.notice.repository.NoticeRepository;
 import com.green.university.domain.notice.specification.NoticeSpecification;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.utils.Define;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -35,10 +36,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class NoticeService {
 
-    @Autowired
-    private NoticeRepository noticeRepository;
+    private final NoticeRepository noticeRepository;
 
     private static final int PAGE_SIZE = 10;
 
@@ -68,11 +69,6 @@ public class NoticeService {
         }
 
         return noticeRepository.findAll(spec, pageable);
-    }
-
-    // 공지 갯수 확인
-    public Long readNoticeAmount(NoticePageFormDto dto, int page) {
-        return readNoticePage(dto, page).getTotalElements();
     }
 
     // 공지 등록
@@ -129,8 +125,7 @@ public class NoticeService {
         long currentViews = notice.getViews() == null ? 0: notice.getViews();
         notice.setViews(currentViews + 1);
 
-        NoticeDto noticeDto = new NoticeDto(notice);
-        return noticeDto;
+        return new NoticeDto(notice);
     }
 
     // 공지 수정

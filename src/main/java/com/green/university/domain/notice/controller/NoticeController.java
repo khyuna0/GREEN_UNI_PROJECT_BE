@@ -5,6 +5,7 @@ import com.green.university.domain.notice.dto.NoticeFormDto;
 import com.green.university.domain.notice.dto.NoticePageFormDto;
 import com.green.university.domain.notice.entity.Notice;
 import com.green.university.domain.notice.service.NoticeService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +16,10 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/notice")
+@RequiredArgsConstructor
 public class NoticeController {
-    @Autowired
-    NoticeService noticeService;
+
+    private final NoticeService noticeService;
 
     // 공지사항 리스트 + 페이지
     @GetMapping("/search/{page}")

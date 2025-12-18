@@ -2,9 +2,11 @@ package com.green.university.domain.counseling.repository;
 
 import com.green.university.domain.counseling.entity.CounselingReserve;
 import com.green.university.domain.counseling.entity.ApprovalState;
+import com.green.university.domain.counseling.entity.ReserveRequester;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CounselingReserveRepository extends JpaRepository<CounselingReserve, Long> {
 
@@ -35,4 +37,14 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
 
     // 학생 상담 알림용 카운트
     int countByStudent_IdAndApprovalState(Long studentId, ApprovalState approvalState);
+
+
+    // 교수요청 최신 1건 조회
+    Optional<CounselingReserve> findTop1ByStudent_IdAndSubject_IdAndRequesterOrderByIdDesc(
+            Long studentId,
+            Long subjectId,
+            ReserveRequester requester
+    );
+
+
 }

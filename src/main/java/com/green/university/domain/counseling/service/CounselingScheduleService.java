@@ -118,9 +118,9 @@ public class CounselingScheduleService {
         }
 
         //예약된 일정이면 삭제 막기
-         if (schedule.isReserved()) {
-             throw new CustomRestfullException("신청자가 있는 예약은 삭제할 수 없습니다.", HttpStatus.BAD_REQUEST);
-         }
+        if (schedule.isReserved()) {
+            throw new CustomRestfullException("예약된 일정은 삭제할 수 없습니다.", HttpStatus.BAD_REQUEST);
+        }
 
         counselingScheduleRepository.delete(schedule);
     }

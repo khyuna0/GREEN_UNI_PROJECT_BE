@@ -38,7 +38,7 @@ public class ProfessorController {
 	private SubjectAiJobRepository subjectAiJobRepository;
 
 
-	// 교수가 성적을 최종으로 확정 짓고 ai가 돌릴 때
+	// ☎️ 1. 교수가 성적을 최종으로 확정 짓고 ai가 돌릴 때
 	@PostMapping("/subjects/{subjectId}/finalize")
 	public ResponseEntity<?> finalizeSubjectGrades(@PathVariable Long subjectId) {
 		professorService.finalizeGrades(subjectId);

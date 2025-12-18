@@ -1,10 +1,14 @@
 package com.green.university.domain.counseling.service;
 
+import com.green.university.domain.counseling.dto.CounselPreReserveDto;
+import com.green.university.domain.counseling.dto.CounselingProfessorRequestDto;
 import com.green.university.domain.counseling.dto.CounselingReserveDto;
-import com.green.university.domain.counseling.dto.CounselingReserveRequestDto;
+import com.green.university.domain.counseling.dto.CounselingStudentRequestDto;
 import com.green.university.domain.counseling.entity.ApprovalState;
 import com.green.university.domain.counseling.entity.CounselingReserve;
 import com.green.university.domain.counseling.entity.CounselingSchedule;
+import com.green.university.domain.counseling.entity.ReserveRequester; // ✅ [추가]
+import com.green.university.domain.counseling.repository.CounselingPreReserveRepository;
 import com.green.university.domain.counseling.repository.CounselingReserveRepository;
 import com.green.university.domain.counseling.repository.CounselingScheduleRepository;
 import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
@@ -24,6 +28,8 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -31,6 +37,8 @@ public class CounselingReserveService {
 
     @Autowired
     private CounselingReserveRepository counselingReserveRepository;
+    @Autowired
+    private CounselingPreReserveRepository counselingPreReserveRepository;
     @Autowired
     private CounselingScheduleRepository counselingScheduleRepository;
     @Autowired
@@ -45,7 +53,7 @@ public class CounselingReserveService {
     // 학생 상담 신청
     // 하나의 상담 일정에 여러 학생이 동시에 신청 가능
     // 최초 상태는 REQUESTED
-    public void requestReserve(CounselingReserveRequestDto dto, Long studentId) {
+    public void requestReserve(CounselingStudentRequestDto dto, Long studentId) {
 
         // 이미 신청한 상담인지 체크
         boolean alreadyReserved =
@@ -86,6 +94,7 @@ public class CounselingReserveService {
         reserve.setCounselingSchedule(schedule);
         reserve.setReason(dto.getReason());
         reserve.setApprovalState(ApprovalState.REQUESTED);
+        reserve.setRequester(ReserveRequester.STUDENT); // 학생이 신청
 
         // 학생 + 과목 기준으로 StuSub 조회
         StuSub stuSub = stuSubRepository
@@ -214,6 +223,148 @@ public class CounselingReserveService {
         int requested = counselingReserveRepository.countByStudent_IdAndApprovalState(studentId, ApprovalState.REQUESTED);
         int approved  = counselingReserveRepository.countByStudent_IdAndApprovalState(studentId, ApprovalState.APPROVED);
         return java.util.Map.of("requested", requested, "approved", approved);
+    }
+
+    // 교수 -> 학생 상담요청
+    @Transactional
+    public void professorRequest(CounselingProfessorRequestDto dto, Long professorId) {
+
+        // schedule 검증 (교수 본인 슬롯인지 + 예약 가능인지)
+        CounselingSchedule schedule = counselingScheduleRepository.findById(dto.getCounselingScheduleId())
+                .orElseThrow(() -> new CustomRestfullException("상담 일정이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+
+        if (schedule.getProfessor() == null || schedule.getProfessor().getId() == null
+                || !schedule.getProfessor().getId().equals(professorId)) {
+            throw new CustomRestfullException("본인의 상담 일정만 요청할 수 있습니다.", HttpStatus.FORBIDDEN);
+        }
+
+        if (schedule.isReserved()) {
+            throw new CustomRestfullException("이미 예약된 상담 시간입니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        // 학생/과목 검증
+        Student student = studentRepository.findById(dto.getStudentId())
+                .orElseThrow(() -> new CustomRestfullException("대상 학생이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+
+        Subject subject = subjectRepository.findById(dto.getSubjectId())
+                .orElseThrow(() -> new CustomRestfullException("과목이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+
+        // 중복 요청 방지: "REQUESTED"만 막고, "REJECTED"는 재요청 가능
+        boolean exists = counselingPreReserveRepository
+                .existsByStudent_IdAndCounselingSchedule_IdAndRequesterAndApprovalState(
+                        student.getId(),
+                        schedule.getId(),
+                        ReserveRequester.PROFESSOR,
+                        ApprovalState.REQUESTED
+                );
+
+        if (exists) {
+            throw new CustomRestfullException("이미 동일한 상담 요청이 존재합니다.", HttpStatus.CONFLICT);
+        }
+
+        // PreReserve 저장 (CounselingReserve를 그대로 사용)
+        CounselingReserve pre = new CounselingReserve();
+        pre.setStudent(student);
+        pre.setCounselingSchedule(schedule);
+        pre.setSubject(subject);
+        pre.setReason(dto.getReason());
+        // 학생 위험 상태 조인/위험학생 아니면 null
+        // pre.setDropoutRisk(...);
+
+        // 위험학생이면 dropoutRisk 연결 (학생+과목의 StuSub 기반)
+        StuSub stuSub = stuSubRepository
+                .findByStudent_IdAndSubject_Id(dto.getStudentId(), dto.getSubjectId())
+                .orElse(null);
+
+        if (stuSub != null) {
+            dropoutRiskRepository.findByStuSub_Id(stuSub.getId()).ifPresent(pre::setDropoutRisk);
+        }
+
+        // 승인 여부
+        pre.setApprovalState(ApprovalState.REQUESTED);
+
+        counselingPreReserveRepository.save(pre);
+
+
+    }
+
+    // 학생: 내가 받은 교수 상담요청 목록
+    @Transactional(readOnly = true)
+    public Object getMyPreReserveList(Long studentId) {
+        List<CounselingReserve> list =
+                counselingPreReserveRepository
+                        .findByStudent_IdAndRequesterAndApprovalState( // 파라미터 맞추기
+                                studentId,
+                                ReserveRequester.PROFESSOR,
+                                ApprovalState.REQUESTED
+                        );
+
+        List<CounselPreReserveDto> dtoList = list.stream()
+                .map(CounselPreReserveDto::new)
+                .collect(Collectors.toList());
+
+        return Map.of("list", dtoList);
+    }
+
+    // 학생: 수락 -> reserve 생성
+    @Transactional
+    public Long acceptPreReserve(Long studentId, Long preReserveId) {
+        CounselingReserve pre = counselingPreReserveRepository.findById(preReserveId)
+                .orElseThrow(() -> new CustomRestfullException("상담 요청이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+
+        if (pre.getStudent() == null || pre.getStudent().getId() == null || !pre.getStudent().getId().equals(studentId)) {
+            throw new CustomRestfullException("본인에게 온 요청만 처리할 수 있습니다.", HttpStatus.FORBIDDEN);
+        }
+
+        if (pre.getApprovalState() != ApprovalState.REQUESTED) {
+            throw new CustomRestfullException("이미 처리된 요청입니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        CounselingSchedule schedule = pre.getCounselingSchedule();
+        if (schedule == null) {
+            throw new CustomRestfullException("상담 일정 정보가 없습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        if (schedule.isReserved()) {
+            throw new CustomRestfullException("이미 예약된 상담 시간입니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        // pre 자체를 확정 처리 (새 엔티티 만들지 않음)
+        pre.setApprovalState(ApprovalState.APPROVED);
+        pre.setRoomCode(generateRoomCode());
+
+        // 상담 일정 예약 완료 처리
+        schedule.setReserved(true);
+
+        counselingScheduleRepository.save(schedule);
+
+        // 같은 슬롯에 걸린 다른 REQUESTED 신청이 있으면 전부 반려
+        rejectOtherReserves(pre);
+
+        // 저장
+        CounselingReserve saved = counselingPreReserveRepository.save(pre);
+
+        return saved.getId();
+    }
+
+    // 학생: 거절
+    @Transactional
+    public void rejectPreReserve(Long studentId, Long preReserveId) {
+        CounselingReserve pre = counselingPreReserveRepository.findById(preReserveId)
+                .orElseThrow(() -> new CustomRestfullException("상담 요청이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+
+        if (pre.getStudent() == null || pre.getStudent().getId() == null || !pre.getStudent().getId().equals(studentId)) {
+            throw new CustomRestfullException("본인에게 온 요청만 처리할 수 있습니다.", HttpStatus.FORBIDDEN);
+        }
+
+        if (pre.getApprovalState() != ApprovalState.REQUESTED) {
+            throw new CustomRestfullException("이미 처리된 요청입니다.", HttpStatus.BAD_REQUEST);
+        }
+
+
+        pre.setApprovalState(ApprovalState.REJECTED);
+        counselingPreReserveRepository.save(pre);
+
     }
 
 }
