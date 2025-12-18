@@ -5,7 +5,6 @@ import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.security.CustomUserDetails;
 import com.green.university.domain.dropoutrisk.respository.DropoutRiskRepository;
 import com.green.university.domain.dropoutrisk.dto.DropoutRiskResponseDto;
-import com.green.university.domain.dropoutrisk.dto.DropoutRiskRowDto;
 import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
 import com.green.university.domain.dropoutrisk.entity.RiskStatus;
 import com.green.university.domain.dropoutrisk.service.DropoutRiskService;
@@ -58,9 +57,9 @@ public class DropoutRiskController {
 
     // 학생 내 위험 과목 리스트 조회
     @GetMapping("/me")
-    public ResponseEntity<List<DropoutRiskRowDto>> getMyRisks(
+    public ResponseEntity<List<DropoutRiskResponseDto>> getMyRisks(
             @AuthenticationPrincipal CustomUserDetails principal
-            // status 파라미터 제거 
+            // status 파라미터 제거
             // DETECTED 때문에 상담요청 오면 리스트에서 사라짐
             // ,@RequestParam(required = false, defaultValue = "DETECTED") RiskStatus status
     ) {
@@ -78,7 +77,7 @@ public class DropoutRiskController {
                         List.of(RiskStatus.DETECTED, RiskStatus.CONSULT_REQ)
                 );
 
-        return ResponseEntity.ok(risks.stream().map(DropoutRiskRowDto::from).toList());
+        return ResponseEntity.ok(risks.stream().map(DropoutRiskResponseDto::fromEntity).toList());
     }
 
 

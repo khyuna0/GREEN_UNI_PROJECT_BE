@@ -3,6 +3,7 @@ package com.green.university.domain.counseling.repository;
 import com.green.university.domain.counseling.entity.CounselingReserve;
 import com.green.university.domain.counseling.entity.ApprovalState;
 import com.green.university.domain.counseling.entity.ReserveRequester;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -29,8 +30,7 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
     boolean existsByStudent_IdAndCounselingSchedule_Id(Long studentId, Long counselingScheduleId);
 
     // 과목 ID 목록 기준 미처리 상담 신청 목록
-    List<CounselingReserve>
-    findBySubject_IdInAndApprovalState(
+    List<CounselingReserve> findBySubject_IdInAndApprovalState(
             List<Long> subjectIds,
             ApprovalState approvalState
     );
@@ -38,6 +38,22 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
     // 학생 상담 알림용 카운트
     int countByStudent_IdAndApprovalState(Long studentId, ApprovalState approvalState);
 
+    // ===================== 교수 -> 학생 요청(PreReserve) 통합 =====================
+
+    // 교수요청만 조회 (requester=PROFESSOR)
+    List<CounselingReserve> findByStudent_IdAndRequesterAndApprovalState(
+            Long studentId,
+            ReserveRequester requester,
+            ApprovalState state
+    );
+
+    // 교수요청 중복 방지 (REQUESTED만 막고, REJECTED는 재요청 가능)
+    boolean existsByStudent_IdAndCounselingSchedule_IdAndRequesterAndApprovalState(
+            Long studentId,
+            Long counselingScheduleId,
+            ReserveRequester requester,
+            ApprovalState approvalState
+    );
 
     // 교수요청 최신 1건 조회
     Optional<CounselingReserve> findTop1ByStudent_IdAndSubject_IdAndRequesterOrderByIdDesc(
@@ -45,6 +61,4 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
             Long subjectId,
             ReserveRequester requester
     );
-
-
 }

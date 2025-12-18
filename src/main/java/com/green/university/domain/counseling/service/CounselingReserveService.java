@@ -8,7 +8,6 @@ import com.green.university.domain.counseling.entity.ApprovalState;
 import com.green.university.domain.counseling.entity.CounselingReserve;
 import com.green.university.domain.counseling.entity.CounselingSchedule;
 import com.green.university.domain.counseling.entity.ReserveRequester; // ✅ [추가]
-import com.green.university.domain.counseling.repository.CounselingPreReserveRepository;
 import com.green.university.domain.counseling.repository.CounselingReserveRepository;
 import com.green.university.domain.counseling.repository.CounselingScheduleRepository;
 import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
@@ -21,6 +20,7 @@ import com.green.university.domain.subject.repository.StuSubRepository;
 import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.domain.dropoutrisk.respository.DropoutRiskRepository;
+
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,16 +37,19 @@ public class CounselingReserveService {
 
     @Autowired
     private CounselingReserveRepository counselingReserveRepository;
-    @Autowired
-    private CounselingPreReserveRepository counselingPreReserveRepository;
+
     @Autowired
     private CounselingScheduleRepository counselingScheduleRepository;
+
     @Autowired
     private StudentRepository studentRepository;
+
     @Autowired
     private SubjectRepository subjectRepository;
+
     @Autowired
     private StuSubRepository stuSubRepository;
+
     @Autowired
     private DropoutRiskRepository dropoutRiskRepository;
 
@@ -96,17 +99,8 @@ public class CounselingReserveService {
         reserve.setApprovalState(ApprovalState.REQUESTED);
         reserve.setRequester(ReserveRequester.STUDENT); // 학생이 신청
 
-        // 학생 + 과목 기준으로 StuSub 조회
-        StuSub stuSub = stuSubRepository
-                .findByStudent_IdAndSubject_Id(studentId, dto.getSubjectId())
-                .orElse(null);
-
-        // 해당 과목의 위험 학생이면 DropoutRisk 연결
-        if (stuSub != null) {
-            dropoutRiskRepository
-                    .findByStuSub_Id(stuSub.getId())
-                    .ifPresent(reserve::setDropoutRisk);
-        }
+        // 위험학생이면 dropoutRisk 연결 (학생+과목의 StuSub 기반)
+        attachDropoutRiskIfExists(reserve, studentId, dto.getSubjectId());
 
         // 저장
         counselingReserveRepository.save(reserve);
@@ -250,7 +244,7 @@ public class CounselingReserveService {
                 .orElseThrow(() -> new CustomRestfullException("과목이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
 
         // 중복 요청 방지: "REQUESTED"만 막고, "REJECTED"는 재요청 가능
-        boolean exists = counselingPreReserveRepository
+        boolean exists = counselingReserveRepository
                 .existsByStudent_IdAndCounselingSchedule_IdAndRequesterAndApprovalState(
                         student.getId(),
                         schedule.getId(),
@@ -268,32 +262,25 @@ public class CounselingReserveService {
         pre.setCounselingSchedule(schedule);
         pre.setSubject(subject);
         pre.setReason(dto.getReason());
-        // 학생 위험 상태 조인/위험학생 아니면 null
-        // pre.setDropoutRisk(...);
 
-        // 위험학생이면 dropoutRisk 연결 (학생+과목의 StuSub 기반)
-        StuSub stuSub = stuSubRepository
-                .findByStudent_IdAndSubject_Id(dto.getStudentId(), dto.getSubjectId())
-                .orElse(null);
-
-        if (stuSub != null) {
-            dropoutRiskRepository.findByStuSub_Id(stuSub.getId()).ifPresent(pre::setDropoutRisk);
-        }
+        // 교수요청 표시/조회/consultState 계산을 위해 반드시 세팅
+        pre.setRequester(ReserveRequester.PROFESSOR);
 
         // 승인 여부
         pre.setApprovalState(ApprovalState.REQUESTED);
 
-        counselingPreReserveRepository.save(pre);
+        // 위험학생이면 dropoutRisk 연결 (학생+과목의 StuSub 기반)
+        attachDropoutRiskIfExists(pre, dto.getStudentId(), dto.getSubjectId());
 
-
+        counselingReserveRepository.save(pre);
     }
 
     // 학생: 내가 받은 교수 상담요청 목록
     @Transactional(readOnly = true)
     public Object getMyPreReserveList(Long studentId) {
         List<CounselingReserve> list =
-                counselingPreReserveRepository
-                        .findByStudent_IdAndRequesterAndApprovalState( // 파라미터 맞추기
+                counselingReserveRepository
+                        .findByStudent_IdAndRequesterAndApprovalState(
                                 studentId,
                                 ReserveRequester.PROFESSOR,
                                 ApprovalState.REQUESTED
@@ -309,16 +296,7 @@ public class CounselingReserveService {
     // 학생: 수락 -> reserve 생성
     @Transactional
     public Long acceptPreReserve(Long studentId, Long preReserveId) {
-        CounselingReserve pre = counselingPreReserveRepository.findById(preReserveId)
-                .orElseThrow(() -> new CustomRestfullException("상담 요청이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
-
-        if (pre.getStudent() == null || pre.getStudent().getId() == null || !pre.getStudent().getId().equals(studentId)) {
-            throw new CustomRestfullException("본인에게 온 요청만 처리할 수 있습니다.", HttpStatus.FORBIDDEN);
-        }
-
-        if (pre.getApprovalState() != ApprovalState.REQUESTED) {
-            throw new CustomRestfullException("이미 처리된 요청입니다.", HttpStatus.BAD_REQUEST);
-        }
+        CounselingReserve pre = getRequestedPreOrThrow(studentId, preReserveId);
 
         CounselingSchedule schedule = pre.getCounselingSchedule();
         if (schedule == null) {
@@ -335,14 +313,13 @@ public class CounselingReserveService {
 
         // 상담 일정 예약 완료 처리
         schedule.setReserved(true);
-
         counselingScheduleRepository.save(schedule);
 
         // 같은 슬롯에 걸린 다른 REQUESTED 신청이 있으면 전부 반려
         rejectOtherReserves(pre);
 
         // 저장
-        CounselingReserve saved = counselingPreReserveRepository.save(pre);
+        CounselingReserve saved = counselingReserveRepository.save(pre);
 
         return saved.getId();
     }
@@ -350,7 +327,28 @@ public class CounselingReserveService {
     // 학생: 거절
     @Transactional
     public void rejectPreReserve(Long studentId, Long preReserveId) {
-        CounselingReserve pre = counselingPreReserveRepository.findById(preReserveId)
+        CounselingReserve pre = getRequestedPreOrThrow(studentId, preReserveId);
+
+        pre.setApprovalState(ApprovalState.REJECTED);
+        counselingReserveRepository.save(pre);
+    }
+
+    // ===================== 중복 제거용 private helper =====================
+
+    // 위험학생이면 dropoutRisk 연결 (학생+과목의 StuSub 기반)
+    private void attachDropoutRiskIfExists(CounselingReserve reserve, Long studentId, Long subjectId) {
+        StuSub stuSub = stuSubRepository
+                .findByStudent_IdAndSubject_Id(studentId, subjectId)
+                .orElse(null);
+
+        if (stuSub != null) {
+            dropoutRiskRepository.findByStuSub_Id(stuSub.getId()).ifPresent(reserve::setDropoutRisk);
+        }
+    }
+
+    // 학생 본인 요청 + REQUESTED 상태인 교수요청만 가져오기
+    private CounselingReserve getRequestedPreOrThrow(Long studentId, Long preReserveId) {
+        CounselingReserve pre = counselingReserveRepository.findById(preReserveId)
                 .orElseThrow(() -> new CustomRestfullException("상담 요청이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
 
         if (pre.getStudent() == null || pre.getStudent().getId() == null || !pre.getStudent().getId().equals(studentId)) {
@@ -361,10 +359,6 @@ public class CounselingReserveService {
             throw new CustomRestfullException("이미 처리된 요청입니다.", HttpStatus.BAD_REQUEST);
         }
 
-
-        pre.setApprovalState(ApprovalState.REJECTED);
-        counselingPreReserveRepository.save(pre);
-
+        return pre;
     }
-
 }
