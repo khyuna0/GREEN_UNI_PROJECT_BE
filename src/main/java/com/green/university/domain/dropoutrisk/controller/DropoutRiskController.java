@@ -59,8 +59,10 @@ public class DropoutRiskController {
     // 학생 내 위험 과목 리스트 조회
     @GetMapping("/me")
     public ResponseEntity<List<DropoutRiskRowDto>> getMyRisks(
-            @AuthenticationPrincipal CustomUserDetails principal,
-            @RequestParam(required = false, defaultValue = "DETECTED") RiskStatus status
+            @AuthenticationPrincipal CustomUserDetails principal
+            // status 파라미터 제거 
+            // DETECTED 때문에 상담요청 오면 리스트에서 사라짐
+            // ,@RequestParam(required = false, defaultValue = "DETECTED") RiskStatus status
     ) {
         if (principal == null || !Objects.equals(principal.getUserRole(), "student")) {
             throw new CustomRestfullException("권한이 없는 페이지입니다.", HttpStatus.UNAUTHORIZED);
@@ -68,8 +70,13 @@ public class DropoutRiskController {
 
         Long studentId = principal.getId();
 
+        //  DETECTED + CONSULT_REQ 둘 다 조회해서
+        // 교수 요청이 와도 위험과목 리스트에서 빠지지 않게 처리
         List<DropoutRisk> risks =
-                dropoutRiskRepository.findByStuSub_Student_IdAndStatus(studentId, status);
+                dropoutRiskRepository.findByStuSub_Student_IdAndStatusIn(
+                        studentId,
+                        List.of(RiskStatus.DETECTED, RiskStatus.CONSULT_REQ)
+                );
 
         return ResponseEntity.ok(risks.stream().map(DropoutRiskRowDto::from).toList());
     }
@@ -78,8 +85,8 @@ public class DropoutRiskController {
 
     // =========================================================
 
-     // (관리자/교수) 특정 riskId를 강제로 AI 재분석하고 싶을 때
-     // - 이벤트 흐름 말고 "즉시 다시 돌리기" 버튼용
+    // (관리자/교수) 특정 riskId를 강제로 AI 재분석하고 싶을 때
+    // - 이벤트 흐름 말고 "즉시 다시 돌리기" 버튼용
 //    @PostMapping("/{riskId}/analyze")
 //    public ResponseEntity<?> analyzeMerged(@PathVariable Long riskId) {
 //        aiAnalysisService.analyzeAndSaveMerged(riskId); // void 메서드 호출

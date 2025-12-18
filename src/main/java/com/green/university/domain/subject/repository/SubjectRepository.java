@@ -39,4 +39,11 @@ public interface SubjectRepository extends JpaRepository<Subject,Long>,
     // 해당 강의실을 사용하는 강의가 하나라도 있는지 체크
     boolean existsByRoom_Id(String roomId);
 
+    // 교수 시간 중복 검사: 같은 교수의 동일 (요일/연도/학기) 강의 목록 조회
+    List<Subject> findByProfessor_IdAndSubDayAndSubYearAndSemester(
+            Long professorId,
+            String subDay,
+            Long subYear,
+            Long semester
+    );
 }

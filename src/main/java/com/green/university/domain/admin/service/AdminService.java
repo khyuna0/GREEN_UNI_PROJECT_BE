@@ -20,7 +20,7 @@ import com.green.university.domain.university.repository.CollegeRepository;
 import com.green.university.domain.university.repository.DepartmentRepository;
 import com.green.university.domain.university.repository.RoomRepository;
 import com.green.university.global.exception.CustomRestfullException;
-import com.green.university.global.utils.SubjectUtil;
+import com.green.university.global.utils.SubjectUtil2;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -296,16 +296,11 @@ public class AdminService {
 
         // 강의실, 강의시간 중복 검사
         System.out.println("subjectFormDto = " + subjectFormDto);
-        List<Subject> subjectList = subjectRepository.findByRoom_IdAndSubDayAndSubYearAndSemester(
-                subjectFormDto.getRoomId(), subjectFormDto.getSubDay(), subjectFormDto.getSubYear(), subjectFormDto.getSemester());
-        System.out.println("subjectList = " + subjectList);
-        if (subjectList != null) {
-            SubjectUtil subjectUtil = new SubjectUtil();
-            boolean result = subjectUtil.calculate(subjectFormDto, subjectList);
-            if (!result) {
-                throw new CustomRestfullException("해당 시간대는 강의실을 사용중입니다! 다시 선택해주세요", HttpStatus.BAD_REQUEST);
-            }
-        }
+
+        // 시작시간 < 종료시간 유효성 검사 (역전 방지)
+        SubjectUtil2.validateTimeRange(subjectFormDto);
+
+        // 담당 교수, 학과, 강의실 엔티티 조회 (교수 시간 겹침 검사에 professorId가 필요해서 먼저 조회)
         Professor professor = professorRepository.findByName(subjectFormDto.getProfessorName())
                 .orElseThrow(() -> new CustomRestfullException("해당 교수 이름이 존재하지 않습니다", HttpStatus.NOT_FOUND));
 
@@ -315,7 +310,31 @@ public class AdminService {
                 () -> new CustomRestfullException("해당 강의실이 존재하지 않습니다.", HttpStatus.NOT_FOUND)
         );
 
-        // 과목 추가 하고, 그 과목 키로 강의 계획서 생성(내용은 없음, 회원가입과 비슷한 느낌?)
+        //강의실 겹침 검사
+        List<Subject> subjectList = subjectRepository.findByRoom_IdAndSubDayAndSubYearAndSemester(
+                subjectFormDto.getRoomId(), subjectFormDto.getSubDay(), subjectFormDto.getSubYear(), subjectFormDto.getSemester());
+        System.out.println("subjectList = " + subjectList);
+
+        if (subjectList != null && !subjectList.isEmpty()) {
+            boolean result = SubjectUtil2.isNotOverlapped(subjectFormDto, subjectList);
+            if (!result) {
+                throw new CustomRestfullException("해당 시간대는 강의실을 사용중입니다! 다시 선택해주세요", HttpStatus.BAD_REQUEST);
+            }
+        }
+
+       // 교수기준 겹침 검사
+        List<Subject> profList = subjectRepository.findByProfessor_IdAndSubDayAndSubYearAndSemester(
+                professor.getId(), subjectFormDto.getSubDay(), subjectFormDto.getSubYear(), subjectFormDto.getSemester()
+        );
+
+        if (profList != null && !profList.isEmpty()) {
+            boolean result = SubjectUtil2.isNotOverlapped(subjectFormDto, profList);
+            if (!result) {
+                throw new CustomRestfullException("해당 시간대에 교수님의 다른 강의가 이미 존재합니다! 시간을 다시 선택해주세요", HttpStatus.BAD_REQUEST);
+            }
+        }
+
+        // 과목 추가 하고, 그 과목 키로 강의 계획서 생성
         Subject subject = new Subject();
         subject.setName(subjectFormDto.getName());
         subject.setProfessor(professor);
@@ -357,7 +376,20 @@ public class AdminService {
                 () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );
 
-        // 강의실, 강의시간 중복 검사
+        // 시작시간 < 종료시간 유효성 검사 (역전 방지)
+        SubjectUtil2.validateTimeRange(subjectFormDto);
+
+        // 담당 교수, 학과, 강의실 엔티티 조회
+        Professor professor = professorRepository.findByName(subjectFormDto.getProfessorName())
+                .orElseThrow(() -> new CustomRestfullException("해당 교수 이름이 존재하지 않습니다", HttpStatus.NOT_FOUND));
+
+        Department department = departmentRepository.findByName(subjectFormDto.getDeptName())
+                .orElseThrow(() -> new CustomRestfullException("해당 학과 이름이 존재하지 않습니다.", HttpStatus.NOT_FOUND));
+
+        Room room = roomRepository.findById(subjectFormDto.getRoomId())
+                .orElseThrow(() -> new CustomRestfullException("해당 강의실이 존재하지 않습니다.", HttpStatus.NOT_FOUND));
+
+        // 현재 수정중 강의 제외 , 강의실 겹침 검사
         List<Subject> subjectList = subjectRepository.findByRoom_IdAndSubDayAndSubYearAndSemester(
                         subjectFormDto.getRoomId(),
                         subjectFormDto.getSubDay(),
@@ -369,22 +401,29 @@ public class AdminService {
                 .toList();
 
         if (!subjectList.isEmpty()) { // 중복 후보가 있을때
-            SubjectUtil subjectUtil = new SubjectUtil();
-            boolean result = subjectUtil.calculate(subjectFormDto, subjectList);
+            boolean result = SubjectUtil2.isNotOverlapped(subjectFormDto, subjectList);
             if (!result) {
                 throw new CustomRestfullException("해당 시간대는 강의실을 사용중입니다! 다시 선택해주세요", HttpStatus.BAD_REQUEST);
             }
         }
 
-        // 담당 교수, 학과, 강의실 엔티티 조회
-        Professor professor = professorRepository.findByName(subjectFormDto.getProfessorName())
-                .orElseThrow(() -> new CustomRestfullException("해당 교수 이름이 존재하지 않습니다", HttpStatus.NOT_FOUND));
+        // 수정중 내용 제외 교수 겹침 검사
+        List<Subject> profList = subjectRepository.findByProfessor_IdAndSubDayAndSubYearAndSemester(
+                        professor.getId(),
+                        subjectFormDto.getSubDay(),
+                        subjectFormDto.getSubYear(),
+                        subjectFormDto.getSemester()
+                )
+                .stream()
+                .filter(s -> !s.getId().equals(id))   // 현재 수정 중인 과목은 제외
+                .toList();
 
-        Department department = departmentRepository.findByName(subjectFormDto.getDeptName())
-                .orElseThrow(() -> new CustomRestfullException("해당 학과 이름이 존재하지 않습니다.", HttpStatus.NOT_FOUND));
-
-        Room room = roomRepository.findById(subjectFormDto.getRoomId())
-                .orElseThrow(() -> new CustomRestfullException("해당 강의실이 존재하지 않습니다.", HttpStatus.NOT_FOUND));
+        if (!profList.isEmpty()) {
+            boolean result = SubjectUtil2.isNotOverlapped(subjectFormDto, profList);
+            if (!result) {
+                throw new CustomRestfullException("해당 시간대에 교수님의 다른 강의가 이미 존재합니다! 시간을 다시 선택해주세요", HttpStatus.BAD_REQUEST);
+            }
+        }
 
         //실제 수정 반영
         subject.setName(subjectFormDto.getName()); // 강의명
