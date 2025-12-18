@@ -16,8 +16,8 @@ public class MistralClientService {
     private final WebClient webClient;
     private final ObjectMapper om = new ObjectMapper();
 
-    @Value("${app.ai.mistral.url}")
-    private String mistralUrl; // 풀 URL 그대로
+//    @Value("${app.ai.mistral.url}")
+//    private String mistralUrl; // 풀 URL 그대로
 
     @Value("${app.ai.mistral.model:mistral-small-latest}")
     private String model;
@@ -38,7 +38,7 @@ public class MistralClientService {
         );
 
         String raw = webClient.post()
-                .uri(mistralUrl)   // URL 호출
+                .uri("/chat/completions")   // URL 호출
                 .bodyValue(body)
                 .retrieve()
                 .bodyToMono(String.class)
