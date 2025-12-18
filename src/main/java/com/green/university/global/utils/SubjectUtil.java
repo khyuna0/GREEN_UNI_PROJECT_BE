@@ -50,29 +50,29 @@ public class SubjectUtil {
 	 */
 
 // 시간 겹침 체크해서 겹치면 바로 예외 던짐
-	public void checkTimeConflict(SubjectFormDto newSubject, List<Subject> existingSubjects) {
-
-		for (Subject existing : existingSubjects) {
-			Long newStart = newSubject.getStartTime();
-			Long newEnd = newSubject.getEndTime();
-			Long existStart = existing.getStartTime();
-			Long existEnd = existing.getEndTime();
-
-			// 겹치는 경우를 직접 체크
-			// 1) 신규 시작이 기존 시간 안에 들어감
-			// 2) 신규 종료가 기존 시간 안에 들어감
-			// 3) 신규가 기존을 완전히 포함함
-			boolean case1 = (newStart >= existStart && newStart < existEnd);
-			boolean case2 = (newEnd > existStart && newEnd <= existEnd);
-			boolean case3 = (newStart <= existStart && newEnd >= existEnd);
-
-			if (case1 || case2 || case3) {
-				throw new CustomRestfullException(
-						"해당 시간대는 강의실을 사용중입니다! (기존: " + existStart + "~" + existEnd + "시)",
-						HttpStatus.BAD_REQUEST
-				);
-			}
-		}
-		// 여기까지 오면 = 겹침 없음
-	}
-}
+//	public void checkTimeConflict(SubjectFormDto newSubject, List<Subject> existingSubjects) {
+//
+//		for (Subject existing : existingSubjects) {
+//			Long newStart = newSubject.getStartTime();
+//			Long newEnd = newSubject.getEndTime();
+//			Long existStart = existing.getStartTime();
+//			Long existEnd = existing.getEndTime();
+//
+//			// 겹치는 경우를 직접 체크
+//			// 1) 신규 시작이 기존 시간 안에 들어감
+//			// 2) 신규 종료가 기존 시간 안에 들어감
+//			// 3) 신규가 기존을 완전히 포함함
+//			boolean case1 = (newStart >= existStart && newStart < existEnd);
+//			boolean case2 = (newEnd > existStart && newEnd <= existEnd);
+//			boolean case3 = (newStart <= existStart && newEnd >= existEnd);
+//
+//			if (case1 || case2 || case3) {
+//				throw new CustomRestfullException(
+//						"해당 시간대는 강의실을 사용중입니다! (기존: " + existStart + "~" + existEnd + "시)",
+//						HttpStatus.BAD_REQUEST
+//				);
+//			}
+//		}
+//		// 여기까지 오면 = 겹침 없음
+//	}
+//}
