@@ -3,7 +3,7 @@ package com.green.university.domain.dropoutrisk.service;
 import com.green.university.domain.counseling.entity.ApprovalState;
 import com.green.university.domain.counseling.entity.CounselingReserve;
 import com.green.university.domain.counseling.entity.ReserveRequester;
-import com.green.university.domain.counseling.repository.CounselingReserveRepository; // ✅ [추가]
+import com.green.university.domain.counseling.repository.CounselingReserveRepository;
 import com.green.university.domain.dropoutrisk.dto.DropoutRiskResponseDto;
 import com.green.university.domain.dropoutrisk.respository.DropoutRiskRepository;
 import com.green.university.domain.grade.service.GradeService;

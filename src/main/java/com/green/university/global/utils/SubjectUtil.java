@@ -2,6 +2,8 @@ package com.green.university.global.utils;
 
 import com.green.university.domain.subject.dto.SubjectFormDto;
 import com.green.university.domain.subject.entity.Subject;
+import com.green.university.global.exception.CustomRestfullException;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -48,3 +50,4 @@ public class SubjectUtil {
  *
  *
  * */
+
