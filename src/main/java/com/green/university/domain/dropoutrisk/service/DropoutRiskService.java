@@ -3,7 +3,7 @@ package com.green.university.domain.dropoutrisk.service;
 import com.green.university.domain.counseling.entity.ApprovalState;
 import com.green.university.domain.counseling.entity.CounselingReserve;
 import com.green.university.domain.counseling.entity.ReserveRequester;
-import com.green.university.domain.counseling.repository.CounselingReserveRepository;
+import com.green.university.domain.counseling.repository.CounselingReserveRepository; // ✅ [추가]
 import com.green.university.domain.dropoutrisk.dto.DropoutRiskResponseDto;
 import com.green.university.domain.dropoutrisk.respository.DropoutRiskRepository;
 import com.green.university.domain.grade.service.GradeService;
@@ -117,8 +117,8 @@ public class DropoutRiskService {
                 );
 
         if (latestOpt.isEmpty()) return null;
-
         CounselingReserve latest = latestOpt.get();
+
         if (latest.getApprovalState() == null) return null;
 
         if (latest.getApprovalState() == ApprovalState.REQUESTED) return "CONSULT_REQ";
@@ -127,7 +127,6 @@ public class DropoutRiskService {
 
         return null;
     }
-
 
     // =============== 기존 평가+저장 로직 ===============
     // 성적 및 출결 변경 시 호출되는 메인 메서드
