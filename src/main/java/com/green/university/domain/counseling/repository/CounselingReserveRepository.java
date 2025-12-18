@@ -39,7 +39,7 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
     int countByStudent_IdAndApprovalState(Long studentId, ApprovalState approvalState);
 
 
-    // 학생+과목+requester 기준 최신 1건 조회 - 최신상태보고 거절(재요청)처리 해야됨.
+    // 교수요청 최신 1건 조회
     Optional<CounselingReserve> findTop1ByStudent_IdAndSubject_IdAndRequesterOrderByIdDesc(
             Long studentId,
             Long subjectId,

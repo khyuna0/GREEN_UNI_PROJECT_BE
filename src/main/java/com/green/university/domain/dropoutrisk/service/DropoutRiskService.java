@@ -116,9 +116,9 @@ public class DropoutRiskService {
                         ReserveRequester.PROFESSOR
                 );
 
-        if (latestOpt == null || latestOpt.isEmpty()) return null;
-        CounselingReserve latest = latestOpt.get();
+        if (latestOpt.isEmpty()) return null;
 
+        CounselingReserve latest = latestOpt.get();
         if (latest.getApprovalState() == null) return null;
 
         if (latest.getApprovalState() == ApprovalState.REQUESTED) return "CONSULT_REQ";
@@ -127,6 +127,7 @@ public class DropoutRiskService {
 
         return null;
     }
+
 
     // =============== 기존 평가+저장 로직 ===============
     // 성적 및 출결 변경 시 호출되는 메인 메서드
