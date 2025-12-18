@@ -1,9 +1,12 @@
 package com.green.university.domain.dropoutrisk.service;
 
+import com.green.university.domain.counseling.entity.ApprovalState;
+import com.green.university.domain.counseling.entity.CounselingReserve;
+import com.green.university.domain.counseling.entity.ReserveRequester;
+import com.green.university.domain.counseling.repository.CounselingReserveRepository; // ✅ [추가]
 import com.green.university.domain.dropoutrisk.dto.DropoutRiskResponseDto;
 import com.green.university.domain.dropoutrisk.respository.DropoutRiskRepository;
 import com.green.university.domain.grade.service.GradeService;
-import com.green.university.domain.professor.repository.ProfessorRepository;
 import com.green.university.domain.subject.entity.StuSub;
 import com.green.university.domain.subject.entity.StuSubDetail;
 import com.green.university.domain.subject.entity.Subject;
@@ -40,6 +43,7 @@ public class DropoutRiskService {
     private final GradeService gradeService;
     private final SubjectRepository subjectRepository;
 
+    private final CounselingReserveRepository counselingReserveRepository; // consultState 계산용
 
     // ================= 조회 로직 추가 =================
     // 해당 교수의 강의 중 + 상담 미완료, 완료된 학생을 나눠서 보여주기 + 검색 (과목, 위험레벨)
@@ -68,22 +72,61 @@ public class DropoutRiskService {
             // 해당 교수의 모든 과목 중 특정 위험레벨
             dropoutRisks = dropoutRiskRepository.findByStuSub_Subject_Professor_IdAndRiskLevel(professorId, riskLevel);
         } else {
-            // 특정 과목 + 특정 위험레벨 (이미 교수 검증 완료)
+            // 특정 과목 + 특정 위험레벨 (이미 위에서 교수 검증 완료)
             dropoutRisks = dropoutRiskRepository.findByStuSub_Subject_IdAndRiskLevel(subjectId, riskLevel);
         }
+
         Map<String, List<DropoutRiskResponseDto>> map = new HashMap<>();
+
         map.put("pending", dropoutRisks.stream().filter(
-                r -> r.getStatus().equals(RiskStatus.DETECTED) || r.getStatus().equals(RiskStatus.CONSULT_REQ))
-                .map(DropoutRiskResponseDto::fromEntity)
+                        r -> r.getStatus().equals(RiskStatus.DETECTED) || r.getStatus().equals(RiskStatus.CONSULT_REQ))
+                .map(r -> {
+                    // 교수요청 최신 상태를 보고 "거절됨(재요청 가능)" 계산
+                    String consultState = computeConsultState(r);
+                    return DropoutRiskResponseDto.fromEntity(r, consultState);
+                })
                 .collect(Collectors.toList()));
+
         map.put("resolved", dropoutRisks.stream().filter(
-                r -> r.getStatus().equals(RiskStatus.RESOLVED))
-                .map(DropoutRiskResponseDto::fromEntity)
+                        r -> r.getStatus().equals(RiskStatus.RESOLVED))
+                .map(r -> {
+                    String consultState = computeConsultState(r); // resolved도 같이 내려주고 싶으면 유지
+                    return DropoutRiskResponseDto.fromEntity(r, consultState);
+                })
                 .collect(Collectors.toList()));
+
         return map;
     }
 
+    // 교수요청 최신 reserve 상태를 기반으로 UI 표시용 문자열 반환
+    // - REQUESTED -> "CONSULT_REQ"
+    // - REJECTED  -> "CONSULT_REJECTED"
+    // - APPROVED  -> "CONSULT_APPROVED"
+    // - 없으면 null
+    private String computeConsultState(DropoutRisk risk) {
+        if (risk == null || risk.getStuSub() == null) return null;
 
+        Long studentId = risk.getStuSub().getStudent().getId();
+        Long subjectId = risk.getStuSub().getSubject().getId();
+
+        Optional<CounselingReserve> latestOpt = counselingReserveRepository
+                .findTop1ByStudent_IdAndSubject_IdAndRequesterOrderByIdDesc(
+                        studentId,
+                        subjectId,
+                        ReserveRequester.PROFESSOR
+                );
+
+        if (latestOpt == null || latestOpt.isEmpty()) return null;
+        CounselingReserve latest = latestOpt.get();
+
+        if (latest.getApprovalState() == null) return null;
+
+        if (latest.getApprovalState() == ApprovalState.REQUESTED) return "CONSULT_REQ";
+        if (latest.getApprovalState() == ApprovalState.REJECTED)  return "CONSULT_REJECTED";
+        if (latest.getApprovalState() == ApprovalState.APPROVED)  return "CONSULT_APPROVED";
+
+        return null;
+    }
 
     // =============== 기존 평가+저장 로직 ===============
     // 성적 및 출결 변경 시 호출되는 메인 메서드
@@ -191,4 +234,3 @@ public class DropoutRiskService {
         return null; // 정상
     }
 }
-

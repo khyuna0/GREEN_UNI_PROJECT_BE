@@ -5,9 +5,9 @@ import com.green.university.domain.counseling.dto.CounselingProfessorRequestDto;
 import com.green.university.domain.counseling.dto.CounselingReserveDto;
 import com.green.university.domain.counseling.dto.CounselingStudentRequestDto;
 import com.green.university.domain.counseling.entity.ApprovalState;
-import com.green.university.domain.counseling.entity.CounselingPreReserve;
 import com.green.university.domain.counseling.entity.CounselingReserve;
 import com.green.university.domain.counseling.entity.CounselingSchedule;
+import com.green.university.domain.counseling.entity.ReserveRequester; // ✅ [추가]
 import com.green.university.domain.counseling.repository.CounselingPreReserveRepository;
 import com.green.university.domain.counseling.repository.CounselingReserveRepository;
 import com.green.university.domain.counseling.repository.CounselingScheduleRepository;
@@ -94,6 +94,7 @@ public class CounselingReserveService {
         reserve.setCounselingSchedule(schedule);
         reserve.setReason(dto.getReason());
         reserve.setApprovalState(ApprovalState.REQUESTED);
+        reserve.setRequester(ReserveRequester.STUDENT); // ✅ [추가] 학생이 신청
 
         // 학생 + 과목 기준으로 StuSub 조회
         StuSub stuSub = stuSubRepository
@@ -249,10 +250,11 @@ public class CounselingReserveService {
                 .orElseThrow(() -> new CustomRestfullException("과목이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
 
         // 중복 요청 방지 (REQUESTED 상태로 동일 슬롯 요청이 이미 있으면 막기)
-        boolean exists = counselingPreReserveRepository
-                .existsByStudent_IdAndCounselingSchedule_IdAndApprovalState(
+        boolean exists = counselingPreReserveRepository // ✅ [수정] requester 포함 중복체크로 변경
+                .existsByStudent_IdAndCounselingSchedule_IdAndRequesterAndApprovalState(
                         student.getId(),
                         schedule.getId(),
+                        ReserveRequester.PROFESSOR,
                         ApprovalState.REQUESTED
                 );
 
@@ -261,11 +263,12 @@ public class CounselingReserveService {
         }
 
         // PreReserve 저장
-        CounselingPreReserve pre = new CounselingPreReserve();
+        CounselingReserve pre = new CounselingReserve();
         pre.setStudent(student);
         pre.setCounselingSchedule(schedule);
         pre.setSubject(subject);
         pre.setReason(dto.getReason());
+        pre.setRequester(ReserveRequester.PROFESSOR); // ✅ [추가] 교수가 신청
         // 학생 위험 상태 조인/위험학생 아니면 null
         // pre.setDropoutRisk(...);
 
@@ -295,10 +298,11 @@ public class CounselingReserveService {
     // 학생: 내가 받은 교수 상담요청 목록
     @Transactional(readOnly = true)
     public Object getMyPreReserveList(Long studentId) {
-        List<CounselingPreReserve> list =
+        List<CounselingReserve> list =
                 counselingPreReserveRepository
-                        .findByStudent_IdAndApprovalStateOrderByCounselingSchedule_CounselingDateAscCounselingSchedule_StartTimeAsc(
+                        .findByStudent_IdAndRequesterAndApprovalState( // 파라미터 맞추기
                                 studentId,
+                                ReserveRequester.PROFESSOR,
                                 ApprovalState.REQUESTED
                         );
 
@@ -312,11 +316,16 @@ public class CounselingReserveService {
     // 학생: 수락 -> reserve 생성
     @Transactional
     public Long acceptPreReserve(Long studentId, Long preReserveId) {
-        CounselingPreReserve pre = counselingPreReserveRepository.findById(preReserveId)
+        CounselingReserve pre = counselingPreReserveRepository.findById(preReserveId)
                 .orElseThrow(() -> new CustomRestfullException("상담 요청이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
 
         if (pre.getStudent() == null || pre.getStudent().getId() == null || !pre.getStudent().getId().equals(studentId)) {
             throw new CustomRestfullException("본인에게 온 요청만 처리할 수 있습니다.", HttpStatus.FORBIDDEN);
+        }
+
+        // 교수요청만 수락/거절 대상
+        if (pre.getRequester() != ReserveRequester.PROFESSOR) { // ✅ [추가]
+            throw new CustomRestfullException("교수가 보낸 요청만 수락할 수 있습니다.", HttpStatus.BAD_REQUEST); // ✅ [추가]
         }
 
         if (pre.getApprovalState() != ApprovalState.REQUESTED) {
@@ -334,47 +343,40 @@ public class CounselingReserveService {
 
         // pre 상태 변경
         pre.setApprovalState(ApprovalState.APPROVED);
+        pre.setRoomCode(generateRoomCode()); // ✅ [추가] 승인 시 방 코드 생성
 
-        // reserve 생성 (교수가 요청한 건 학생 수락 시점에 확정처리)
-        CounselingReserve reserve = CounselingReserve.builder()
-                .student(pre.getStudent())
-                .subject(pre.getSubject())
-                .counselingSchedule(schedule)
-                .reason(pre.getReason())
-                .approvalState(ApprovalState.APPROVED)
-                .roomCode(generateRoomCode())
-                .dropoutRisk(pre.getDropoutRisk())
-                .build();
-
-        // 3) schedule reserved 처리
+        // 상담 일정 예약 완료 처리
         schedule.setReserved(true);
 
-        CounselingReserve saved = counselingReserveRepository.save(reserve);
-
         // 같은 슬롯에 걸린 다른 REQUESTED 신청이 있으면 전부 반려
-        rejectOtherReserves(saved);
+        rejectOtherReserves(pre); // ✅ [수정] saved 대신 pre로 처리 (중복 reserve 생성 제거)
 
-        counselingPreReserveRepository.save(pre);
+        counselingPreReserveRepository.save(pre);      // ✅ [수정] pre 자체가 최종 예약이므로 저장
         counselingScheduleRepository.save(schedule);
 
         // 위험 학생이면 상담 진행 상태로 변경
-        if (saved.getDropoutRisk() != null) {
-            DropoutRisk risk = saved.getDropoutRisk();
+        if (pre.getDropoutRisk() != null) {
+            DropoutRisk risk = pre.getDropoutRisk();
             risk.setStatus(RiskStatus.CONSULT_REQ);
             dropoutRiskRepository.save(risk);
         }
 
-        return saved.getId();
+        return pre.getId(); // ✅ [수정] 새 reserve id가 아니라 pre id가 최종 예약 id
     }
 
     // 학생: 거절
     @Transactional
     public void rejectPreReserve(Long studentId, Long preReserveId) {
-        CounselingPreReserve pre = counselingPreReserveRepository.findById(preReserveId)
+        CounselingReserve pre = counselingPreReserveRepository.findById(preReserveId)
                 .orElseThrow(() -> new CustomRestfullException("상담 요청이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
 
         if (pre.getStudent() == null || pre.getStudent().getId() == null || !pre.getStudent().getId().equals(studentId)) {
             throw new CustomRestfullException("본인에게 온 요청만 처리할 수 있습니다.", HttpStatus.FORBIDDEN);
+        }
+
+        // 교수요청만 수락/거절 대상
+        if (pre.getRequester() != ReserveRequester.PROFESSOR) { // ✅ [추가]
+            throw new CustomRestfullException("교수가 보낸 요청만 거절할 수 있습니다.", HttpStatus.BAD_REQUEST); // ✅ [추가]
         }
 
         if (pre.getApprovalState() != ApprovalState.REQUESTED) {
@@ -383,5 +385,12 @@ public class CounselingReserveService {
 
         pre.setApprovalState(ApprovalState.REJECTED);
         counselingPreReserveRepository.save(pre);
+
+        // 거절 시 다시 재요청 가능하도록 위험 상태 되돌리기
+        if (pre.getDropoutRisk() != null) {
+            DropoutRisk risk = pre.getDropoutRisk();
+            risk.setStatus(RiskStatus.DETECTED);
+            dropoutRiskRepository.save(risk);
+        }
     }
 }

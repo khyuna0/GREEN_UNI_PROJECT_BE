@@ -1,7 +1,7 @@
 package com.green.university.domain.counseling.dto;
 
 import com.green.university.domain.counseling.entity.ApprovalState;
-import com.green.university.domain.counseling.entity.CounselingPreReserve;
+import com.green.university.domain.counseling.entity.CounselingReserve;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -25,7 +25,7 @@ public class CounselPreReserveDto {
     private String reason;
     private ApprovalState approvalState;
 
-    public CounselPreReserveDto(CounselingPreReserve pre) {
+    public CounselPreReserveDto(CounselingReserve pre) {
         this.preReserveId = pre.getId();
         this.reason = pre.getReason();
         this.approvalState = pre.getApprovalState();

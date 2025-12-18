@@ -7,8 +7,6 @@ import com.green.university.domain.dropoutrisk.entity.RiskType;
 import com.green.university.global.utils.DateTimeUtil;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 @Data
 public class DropoutRiskResponseDto {
 
@@ -33,6 +31,9 @@ public class DropoutRiskResponseDto {
     private String createdAt;
     private String updatedAt;
 
+    // 교수요청/거절 표시용 (enum 추가 없이 UI에서 사용)
+    // 예: "CONSULT_REQ" / "CONSULT_REJECTED" / null
+    private String consultState;
 
     public static DropoutRiskResponseDto fromEntity(DropoutRisk risk) {
         DropoutRiskResponseDto dto = new DropoutRiskResponseDto();
@@ -58,5 +59,11 @@ public class DropoutRiskResponseDto {
         dto.setUpdatedAt(DateTimeUtil.dateTimeToString(risk.getUpdatedAt()));
         return dto;
     }
-}
 
+    // consultState까지 세팅하는 오버로드 (기존 코드 호환 유지)
+    public static DropoutRiskResponseDto fromEntity(DropoutRisk risk, String consultState) {
+        DropoutRiskResponseDto dto = fromEntity(risk);
+        dto.setConsultState(consultState);
+        return dto;
+    }
+}
