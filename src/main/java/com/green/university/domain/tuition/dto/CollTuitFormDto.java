@@ -1,6 +1,5 @@
 package com.green.university.domain.tuition.dto;
 
-import com.green.university.global.utils.NumberUtil;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
@@ -22,9 +21,5 @@ public class CollTuitFormDto {
     @NotNull
     @Positive //정수형에 써주는것
     private Long amount;
-
-    public String amountFormat() {
-        return NumberUtil.numberFormat(amount);
-    }
 
 }
