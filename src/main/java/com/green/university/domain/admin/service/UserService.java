@@ -257,59 +257,64 @@ public class UserService {
     }
 
     // 아이디 찾기
-    @Transactional
-    public Long readIdByNameAndEmail(FindIdFormDto findIdFormDto) {
-        return switch (findIdFormDto.getUserRole()) {
+    @Transactional(readOnly = true)
+    public Long readIdByNameAndEmail(FindIdFormDto dto) {
+        Long id = switch (dto.getUserRole()) {
             case "student" ->
-                    studentRepository.findIdByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail());
+                    studentRepository.findIdByNameAndEmail(dto.getName(), dto.getEmail());
             case "professor" ->
-                    professorRepository.findIdByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail());
+                    professorRepository.findIdByNameAndEmail(dto.getName(), dto.getEmail());
             case "staff" ->
-                    staffRepository.findIdByNameAndEmail(findIdFormDto.getName(), findIdFormDto.getEmail());
-            default -> throw new CustomRestfullException("잘못된 userRole 입니다.", HttpStatus.BAD_REQUEST);
+                    staffRepository.findIdByNameAndEmail(dto.getName(), dto.getEmail());
+            default ->
+                    throw new CustomRestfullException("잘못된 userRole 입니다.", HttpStatus.BAD_REQUEST);
         };
-    }
 
-    // 비밀번호 찾기
-    @Transactional
-    public String updateTempPassword(FindPasswordFormDto findPasswordFormDto) {
-        Long userId = findPasswordFormDto.getId();
-        String userName = findPasswordFormDto.getName();
-        String userEmail = findPasswordFormDto.getEmail();
-
-        Long findId = 0L;
-        switch (findPasswordFormDto.getUserRole()) {
-            case "student" -> {
-                findId = studentRepository.findByIdAndNameAndEmail(userId, userName, userEmail);
-                if (findId == null) {
-                    throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST);
-                }
-            }
-            case "professor" -> {
-                findId = professorRepository.findByIdAndNameAndEmail(findPasswordFormDto.getId(), findPasswordFormDto.getName(), findPasswordFormDto.getEmail());
-                if (findId == null) {
-                    throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST);
-                }
-            }
-            case "staff" -> {
-                findId = staffRepository.findByIdAndNameAndEmail(findPasswordFormDto.getId(), findPasswordFormDto.getName(), findPasswordFormDto.getEmail());
-                if (findId == null) {
-                    throw new CustomRestfullException("조건에 맞는 정보를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST);
-                }
-            }
+        if (id == null) {
+            throw new CustomRestfullException(
+                    "조건에 맞는 정보를 찾을 수 없습니다.",
+                    HttpStatus.BAD_REQUEST
+            );
         }
 
-        String tempPassword = new TempPassword().returnTempPassword(); // 임시 비밀번호 생성
-        System.out.println(tempPassword);
+        return id;
+    }
 
-        User user = userRepository.findById(findId).orElseThrow(
-                () -> new CustomRestfullException("조건에 맞는 사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
-        );
+
+    @Transactional
+    public String updateTempPassword(FindPasswordFormDto dto) {
+
+        Long findId = switch (dto.getUserRole()) {
+            case "student" ->
+                    studentRepository.findByIdAndNameAndEmail(dto.getId(), dto.getName(), dto.getEmail());
+            case "professor" ->
+                    professorRepository.findByIdAndNameAndEmail(dto.getId(), dto.getName(), dto.getEmail());
+            case "staff" ->
+                    staffRepository.findByIdAndNameAndEmail(dto.getId(), dto.getName(), dto.getEmail());
+            default ->
+                    throw new CustomRestfullException("잘못된 userRole 입니다.", HttpStatus.BAD_REQUEST);
+        };
+
+        if (findId == null) {
+            throw new CustomRestfullException(
+                    "조건에 맞는 정보를 찾을 수 없습니다.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        String tempPassword = new TempPassword().returnTempPassword();
+
+        User user = userRepository.findById(findId)
+                .orElseThrow(() -> new CustomRestfullException(
+                        "조건에 맞는 사용자를 찾을 수 없습니다.",
+                        HttpStatus.NOT_FOUND
+                ));
+
         user.setPassword(passwordEncoder.encode(tempPassword));
-        userRepository.save(user);
 
         return tempPassword;
     }
+
 
     // studentId로 학생의 학적 변동 내역(StuStat)을 StudentInfoStatListDto로 가져오기
     public List<StudentInfoStatListDto> readStudentInfoStatListByStudentId(Long studentId) {

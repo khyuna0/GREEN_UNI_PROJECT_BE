@@ -148,9 +148,9 @@ public class CounselingScheduleService {
         );
     }
 
-    // 포탈 알림 용 - 교수의 오늘 상담 일정
+    // 포탈 알림 용 - 교수의 예약된 오늘 상담 일정
     public int counselingNumByDate(Long professorId) {
-        return counselingScheduleRepository.findByProfessor_IdAndCounselingDate(professorId, LocalDate.now()).size();
+        return counselingScheduleRepository.findByProfessor_IdAndCounselingDateAndReserved(professorId, LocalDate.now(), true).size();
     }
 
 
