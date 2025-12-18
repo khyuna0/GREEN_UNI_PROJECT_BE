@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+import static com.green.university.global.utils.DateTimeUtil.validateDatePeriod;
+
 
 @RestController
 @RequestMapping("/api/schedule")
@@ -39,6 +41,7 @@ public class ScheduleController {
                                           @AuthenticationPrincipal CustomUserDetails principal) {
 
         Long staffId = principal.getId();
+        validateDatePeriod(scheduleFormDto.getStartDay(), scheduleFormDto.getEndDay());
         scheduleService.createSchedule(staffId, scheduleFormDto);
         return ResponseEntity.ok().body("학사 일정 추가가 완료되었습니다.");
     }

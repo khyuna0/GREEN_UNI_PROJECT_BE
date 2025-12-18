@@ -25,10 +25,12 @@ public class Define {
 //	public final static String[] STUDENT_PATHS = {"/grade/**"};
 //	public final static String[] STAFF_PATHS = { "/user/**" };
 
-	public final static String[] PATHS = { "/api/update", "/api/password", "/api/info/**", "/api/guide", "/api/notice/**"};
-	public final static String[] PROFESSOR_PATHS = { "/api/professor/**" };
-	public final static String[] STUDENT_PATHS = {"/api/grade/**"};
-	public final static String[] STAFF_PATHS = { "/api/user/**", "/api/personal/**" };
+//	public final static String[] PATHS = { "/api/update", "/api/password", "/api/info/**", "/api/guide", "/api/notice/**"};
+//	public final static String[] PROFESSOR_PATHS = { "/api/professor/**", "/api/reserve/**", "/api/counseling/**",
+//			"/api/counsel/**",	"/api/risk/**", "/api/evaluation/**",};
+//	public final static String[] STUDENT_PATHS = {"/api/grade/**", "/api/grade/**", "/api/sugang/**","/api/subject/**",};
+//	public final static String[] STAFF_PATHS = { "/api/admin/**", "/api/auth/**", "/api/sugangperiod/**", "/api/break/**",
+//			"/api/notice/**", "/api/schedule/**", "/api/tuition/**","/api/user/**", "/api/personal/**" };
 
 
 	// 수강 가능한 최대 학점

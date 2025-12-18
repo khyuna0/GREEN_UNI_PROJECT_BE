@@ -40,12 +40,6 @@ public class SecurityConfig {
                         .logoutUrl("/api/auth/logout")   // 프론트에서 호출할 로그아웃 URL
                         .invalidateHttpSession(true)     // 세션 무효화(STATELESS지만 혹시 모를 세션 제거)
                         .clearAuthentication(true)       // SecurityContext 인증정보 제거
-                        .deleteCookies(
-                                "JSESSIONID",
-                                "remember-me",
-                                "auth_code",
-                                "Authorization"
-                        )
                         .logoutSuccessHandler((req, res, auth) ->
                                 res.setStatus(HttpServletResponse.SC_OK))
                 )
@@ -63,14 +57,10 @@ public class SecurityConfig {
                 ).permitAll()
                 // 개발중이라 일단 다 열어두기
                 .requestMatchers("/**").permitAll()
-                /**
-                // 학생 전용
-                .requestMatchers(Define.STUDENT_PATHS).hasRole("STUDENT")
-                // 교수 전용
-                .requestMatchers(Define.PROFESSOR_PATHS).hasRole("PROFESSOR")
-                // 직원 전용
-                .requestMatchers(Define.STAFF_PATHS).hasRole("STAFF")
-                 */
+                // 권한 분리 (학생, 교수, 직원 전용)
+//                .requestMatchers(Define.STUDENT_PATHS).hasRole("student")
+//                .requestMatchers(Define.PROFESSOR_PATHS).hasRole("professor")
+//                .requestMatchers(Define.STAFF_PATHS).hasRole("staff")
 
                 .anyRequest().authenticated()
         );
