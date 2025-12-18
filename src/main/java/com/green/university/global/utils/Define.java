@@ -3,19 +3,11 @@ package com.green.university.global.utils;
 public class Define {
 
 	public final static String PRINCIPAL = "principal";
-
 	public final static String CREATE_FAIL = "생성에 실패하였습니다.";
-
 	public final static String UPDATE_FAIL = "수정에 실패하였습니다.";
-
 	public final static String NOT_FOUND_ID = "아이디를 찾을 수 없습니다.";
-
 	public final static String WRONG_PASSWORD = "비밀번호가 틀렸습니다.";
 
-	// Long로 했더니 ==로 비교하려면 .intValue()를 붙여줘야해서 int로 변경함
-	public final static Long CURRENT_YEAR = 2023L;
-
-	public final static Long CURRENT_SEMESTER = 1L;
 
 	// 이미지 처리 관련
 	// 1KB = 1024byte
