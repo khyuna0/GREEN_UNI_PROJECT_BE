@@ -7,9 +7,12 @@ import com.green.university.domain.evaluation.repository.EvaluationRepository;
 import com.green.university.domain.evaluation.specification.EvaluationSpecification;
 import com.green.university.domain.student.entity.Student;
 import com.green.university.domain.student.repository.StudentRepository;
+import com.green.university.domain.subject.entity.StuSub;
 import com.green.university.domain.subject.entity.Subject;
+import com.green.university.domain.subject.repository.StuSubRepository;
 import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.global.exception.CustomRestfullException;
+import com.green.university.global.utils.TermUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -27,6 +30,8 @@ public class EvaluationService {
     private StudentRepository studentRepository;
     @Autowired
     private SubjectRepository subjectRepository;
+    @Autowired
+    private StuSubRepository stuSubRepository;
 
     // 강의 평가 등록 (학생)
     @Transactional
@@ -144,4 +149,34 @@ public class EvaluationService {
 
         return dto;
     }
+
+    // 강의평가 완료 여부
+    public boolean isAllEvaluationCompleted(Long studentId) {
+
+        Long year = TermUtil.currentYear();
+        Long semester = TermUtil.currentSemester();
+
+        List<StuSub> stuSubs =
+                stuSubRepository.findByStudentAndTerm(
+                        studentId, year, semester
+                );
+
+        // 수강 과목 없으면 평가 대상 아님 → true 처리
+        if (stuSubs.isEmpty()) return true;
+
+        for (StuSub stusub : stuSubs) {
+            boolean exists = evaluationRepository
+                    .existsByStudent_IdAndSubject_Id(
+                            studentId,
+                            stusub.getSubject().getId()
+                    );
+
+            if (!exists) {
+                return false; // 하나라도 없으면 바로 false
+            }
+        }
+
+        return true;
+    }
+
 }

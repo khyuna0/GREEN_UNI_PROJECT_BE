@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 // 교수 행정 페이지 (자기과목 조회, 학생 성적 기입)
 @RestController
@@ -37,13 +38,14 @@ public class ProfessorController {
 	private SubjectAiJobRepository subjectAiJobRepository;
 
 
-	// 교수가 성적을 최종으로 확정 지으면 ai가 돌아감
+	// 교수가 성적을 최종으로 확정 짓고 ai가 돌릴 때
 	@PostMapping("/subjects/{subjectId}/finalize")
-	public ResponseEntity<Void> finalizeSubjectGrades(@PathVariable Long subjectId) {
+	public ResponseEntity<?> finalizeSubjectGrades(@PathVariable Long subjectId) {
 		professorService.finalizeGrades(subjectId);
 		return ResponseEntity.ok().build(); // 바로 200 리턴 (AI는 백그라운드)
 	}
 
+	// ai 돌리는 동안 분석 결과 보여주기
 	@GetMapping("/subjects/{subjectId}/ai-status")
 	public ResponseEntity<SubjectAiStatusResponse> aiStatus(@PathVariable Long subjectId) {
 		SubjectAiJob job = subjectAiJobRepository.findBySubject_Id(subjectId)
@@ -96,25 +98,47 @@ public class ProfessorController {
 	 * @param period: 조회할 년도 학기
 	 * @return 조회 신청한 학기의 본인 강좌 조회 페이지
 	 */
-	@PostMapping("/subject")
-	public ResponseEntity<?> subjectListProc( @RequestParam String period,
-                                              @AuthenticationPrincipal CustomUserDetails principal) { // period는 "2023년도 1학기" 형식
-		Long professorId = principal.getId();
-		List<SubjectPeriodForProfessorDto> semesterList = professorService.selectSemester(professorId);
-		String[] str = period.split("_");
-		SubjectPeriodForProfessorDto subjectPeriodForProfessorDto = new SubjectPeriodForProfessorDto();
-		subjectPeriodForProfessorDto.setSubYear(Long.valueOf(str[0]));
-		subjectPeriodForProfessorDto.setSemester(Long.valueOf(str[1]));
-		subjectPeriodForProfessorDto.setId(professorId);
-		List<SubjectForProfessorDto> subjectList = professorService.selectSubjectBySemester(subjectPeriodForProfessorDto);
+    @PostMapping("/subject")
+    public ResponseEntity<?> subjectListProc(
+            @RequestParam String period,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        Long professorId = principal.getId();
+
+        List<SubjectPeriodForProfessorDto> semesterList =
+                professorService.selectSemester(professorId);
+
+        List<SubjectForProfessorDto> subjectList;
+
+        if ("ALL".equals(period)) {
+            SubjectPeriodForProfessorDto dto = new SubjectPeriodForProfessorDto();
+            dto.setId(professorId); // 교수 ID만 세팅
+            subjectList = professorService.selectSubjectBySemester(dto);
+
+            return ResponseEntity.ok(Map.of(
+                    "semesterList", semesterList,
+                    "subjectList", subjectList
+            ));
+        }
+
+        String[] str = period.split("_");
+
+        SubjectPeriodForProfessorDto dto = new SubjectPeriodForProfessorDto();
+        dto.setSubYear(Long.valueOf(str[0]));
+        dto.setSemester(Long.valueOf(str[1]));
+        dto.setId(professorId);
+
+        subjectList = professorService.selectSubjectBySemester(dto);
 
         return ResponseEntity.ok(Map.of(
                 "semesterList", semesterList,
                 "subjectList", subjectList
         ));
-	}
+    }
 
-	/**
+
+
+    /**
 	 * @return 해당 과목을 듣는 학생 리스트
 	 */
 	@GetMapping("/subject/{subjectId}")
