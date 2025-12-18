@@ -14,7 +14,6 @@ import java.util.Collections;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 // 외부 AI API(Gemini, Mistral) 호출 + JSON 파싱만 담당
 public class AiAnalysisService {
 
@@ -26,10 +25,21 @@ public class AiAnalysisService {
     private final PromptBuilder promptBuilder;
     private final ObjectMapper objectMapper; // JSON 파싱용 (Spring에 기본 내장됨)
 
+    public AiAnalysisService(AiClient geminiClient, AiClient mistralClient, PromptBuilder promptBuilder, ObjectMapper objectMapper) {
+        this.geminiClient = geminiClient;
+        this.mistralClient = mistralClient;
+        this.promptBuilder = promptBuilder;
+        this.objectMapper = objectMapper;
+    }
 
+    // ☎️ ai로 risk 분석하기 (실제로 DropoutRiskService에서 사용 할 메서드)
     public AiRiskAnalysisResult analyzeRisk(AiRiskAnalysisRequest request) {
         String prompt = promptBuilder.buildRiskAnalysisPrompt(request);
+        return callAiWithFallback(prompt);
+    }
 
+    // ☎️ ai로 risk 분석할 때 ai call 하기
+    private AiRiskAnalysisResult callAiWithFallback(String prompt) {
         try {
             // 1차 시도: Gemini
             String responseText = geminiClient.analyze(prompt);
@@ -45,7 +55,7 @@ public class AiAnalysisService {
 
             } catch (Exception ex) {
                 log.error("❌ 모든 AI 실패", ex);
-                return createErrorResponse(); // custom한 error 메시지 반환 (아래 헬퍼에 존재)
+                return createErrorResponse();
             }
         }
     }

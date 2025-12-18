@@ -33,11 +33,17 @@ public class AiBatchService {
 
 
     @Async
+    @Transactional // (비동기 메서드도 트랜잭션 범위 안에 들어감)
     public void runSubjectAiAsync(Long subjectId) {
+        log.info("🚀 비동기 AI 분석 시작 - subjectId: {}", subjectId);
+
         SubjectAiJob job = subjectAiJobRepository.findBySubject_Id(subjectId)
                 .orElseThrow(() -> new RuntimeException("AI Job이 없습니다."));
 
-        List<StuSubDetail> details = stuSubDetailRepository.findBySubject_IdAndFinalizedTrue(subjectId);
+//        List<StuSubDetail> details = stuSubDetailRepository.findBySubject_IdAndFinalizedTrue(subjectId);
+        List<StuSubDetail> details = stuSubDetailRepository.findBySubject_Id(subjectId);
+
+        log.info("📋 분석 대상 학생 수: {}", details.size());
 
         int done = 0;
         int fail = 0;
@@ -46,9 +52,11 @@ public class AiBatchService {
             StuSub stuSub = detail.getStuSub();
             try {
                 dropoutRiskService.evaluateAndAnalyzeRisk(stuSub, detail);
+                log.info("✅ 처리 완료 ({}/{}): {}", done+1, details.size(), stuSub.getStudent().getName());
+
             } catch (Exception e) {
                 fail++;
-                log.warn("AI 분석 실패 - 학생({}): {}", stuSub.getStudent().getName(), e.getMessage());
+                log.error("❌ AI 분석 실패 - 학생: {}", stuSub.getStudent().getName(), e);
             } finally {
                 done++;
                 job.setDoneCount(done);
@@ -66,9 +74,11 @@ public class AiBatchService {
             job.setMessage("AI 분석 일부 실패 (" + fail + "명 실패, " + done + "/" + details.size() + ")");
         }
         subjectAiJobRepository.save(job);
+        log.info("🏁 비동기 작업 종료 - 성공: {}, 실패: {}", done - fail, fail);
+
     }
 
-    // 🔥 Job 저장만 별도 트랜잭션으로 즉시 커밋
+    // ☎️ Job 저장만 별도 트랜잭션으로 즉시 커밋
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void createAndStartJob(long subjectId, int totalCount) {
         // 2) Job 저장/갱신 (과목당 1개 유지)
@@ -85,7 +95,6 @@ public class AiBatchService {
         job.setMessage("AI 분석 준비중...");
         subjectAiJobRepository.save(job);
         // 여기서 트랜잭션 종료(커밋)
-
 
         runSubjectAiAsync(subjectId);
     }
