@@ -23,6 +23,7 @@ public class NoticeController {
     private final NoticeService noticeService;
 
     // 공지사항 리스트 + 페이지
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'STAFF')")
     @GetMapping("/search/{page}")
     public ResponseEntity<?> showNoticeByKeywordAndPage(
             @RequestParam(defaultValue = "select") String crud,
@@ -42,7 +43,6 @@ public class NoticeController {
     }
 
     // 공지사항 페이지 이동
-    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'STAFF')")
     @GetMapping("/list/{page}")
     public ResponseEntity<?> showNoticeListByPage(
             @RequestParam(defaultValue = "select") String crud,
