@@ -25,8 +25,6 @@ import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.domain.subject.service.StuSubService;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.utils.PenaltyCalculator;
-import com.green.university.infra.ai.entity.JobStatus;
-import com.green.university.infra.ai.entity.SubjectAiJob;
 import com.green.university.infra.ai.service.AiBatchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -256,8 +254,8 @@ public class ProfessorService {
         stuSubDetailRepository.saveAll(details);
         // 여기까지가 “빠르게 끝나는” 트랜잭션
 
-        // ☎️ Job 저장 (별도 트랜잭션)
-        aiBatchService.createAndStartJob(subjectId, details.size());
+        // ☎️ 3. Job 저장 (별도 트랜잭션)
+        aiBatchService.createJob(subjectId, details.size());
     }
 
 

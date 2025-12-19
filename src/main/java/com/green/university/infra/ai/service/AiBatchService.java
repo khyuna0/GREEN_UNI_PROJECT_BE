@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -23,7 +22,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-// 한 과목 전체 학생을 비동기로 AI 분석 돌리는 배치 실행기
+// 한 개의 강의를 듣는 모든 학생을 비동기로 AI 분석 돌리는 배치 실행기
 public class AiBatchService {
 
     private final StuSubDetailRepository stuSubDetailRepository;
@@ -34,13 +33,14 @@ public class AiBatchService {
 
     @Async
     @Transactional // (비동기 메서드도 트랜잭션 범위 안에 들어감)
+    // ☎️ 4. 비동기로 진행 (이미 3번에서 SubjectAiJob 저장됨 + DropoutRiskService에서 evaluateAndAnalyzeRisk 메서드 가져오기)
     public void runSubjectAiAsync(Long subjectId) {
         log.info("🚀 비동기 AI 분석 시작 - subjectId: {}", subjectId);
 
         SubjectAiJob job = subjectAiJobRepository.findBySubject_Id(subjectId)
                 .orElseThrow(() -> new RuntimeException("AI Job이 없습니다."));
 
-//        List<StuSubDetail> details = stuSubDetailRepository.findBySubject_IdAndFinalizedTrue(subjectId);
+        //List<StuSubDetail> details = stuSubDetailRepository.findBySubject_IdAndFinalizedTrue(subjectId);
         List<StuSubDetail> details = stuSubDetailRepository.findBySubject_Id(subjectId);
 
         log.info("📋 분석 대상 학생 수: {}", details.size());
@@ -78,10 +78,11 @@ public class AiBatchService {
 
     }
 
-    // ☎️ Job 저장만 별도 트랜잭션으로 즉시 커밋
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void createAndStartJob(long subjectId, int totalCount) {
-        // 2) Job 저장/갱신 (과목당 1개 유지)
+    // ☎️ 3. Job 저장만 별도 트랜잭션으로 즉시 커밋 (ProfessorService에서 사용 할 메서드)
+    //@Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
+    public void createJob(long subjectId, int totalCount) {
+        // Job 저장/갱신 (과목당 1개 유지)
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new CustomRestfullException("과목이 없습니다.", HttpStatus.NOT_FOUND));
 
@@ -96,7 +97,7 @@ public class AiBatchService {
         subjectAiJobRepository.save(job);
         // 여기서 트랜잭션 종료(커밋)
 
-        runSubjectAiAsync(subjectId);
+        runSubjectAiAsync(subjectId); // ☎️ 4. @Async가 알아서 새 스레드+트랜잭션
     }
 
 

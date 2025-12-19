@@ -13,7 +13,7 @@ import com.green.university.domain.subject.entity.Subject;
 import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.infra.ai.dto.AiRiskAnalysisRequest;
-import com.green.university.infra.ai.dto.response.AiRiskAnalysisResult;
+import com.green.university.infra.ai.dto.AiRiskAnalysisResult;
 import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
 import com.green.university.domain.dropoutrisk.entity.RiskLevel;
 import com.green.university.domain.dropoutrisk.entity.RiskStatus;
@@ -34,8 +34,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-// 출석 및 성적 기반 위험도 계산 + AI 분석 요청 + DB 저장
-// 조회 - 위험 학생 목록 가져오기
+// ☎️ 출결 및 성적 기반 위험도 계산 + AI 분석 요청 + DB 저장 + 조회 (위험 학생 목록 가져오기)
 public class DropoutRiskService {
 
     private final DropoutRiskRepository dropoutRiskRepository;
@@ -128,27 +127,33 @@ public class DropoutRiskService {
         return null;
     }
 
-    // =============== 기존 평가+저장 로직 ===============
-    // 성적 및 출결 변경 시 호출되는 메인 메서드
+    // =============== AI 분석 + 저장 로직 ===============
+    // 출결 및 성적 기반 위험도 계산 + AI 분석 요청 + DB 저장
     @Transactional
     public void evaluateAndAnalyzeRisk(StuSub stuSub, StuSubDetail detail) {
+        log.info("🔍 AI 분석 시작 - 학생: {}, 과목: {}",
+                stuSub.getStudent().getName(),
+                stuSub.getSubject().getName());
 
         // 1. 위험도 계산 (비즈니스 로직)
         RiskAnalysis analysis = calculateRisk(detail);
 
         // 위험이 없으면(NULL) 기존 리스크가 있다면 해결(RESOLVED) 처리 후 종료하거나, 그냥 종료
         if (analysis == null) {
+            log.info("⚠ 위험 없음 - 분석 종료 (학생: {})", stuSub.getStudent().getName());
             // 필요하다면 여기서 기존 DETECTED 상태인 리스크를 찾아서 RESOLVED로 바꾸는 로직 추가 가능
             return;
         }
 
+        log.info("📊 위험 감지됨 - Type: {}, Level: {}", analysis.type, analysis.level);
+
         // 2. AI 분석 요청 데이터 생성
         // 직전 학기 평점 가져오기 (없으면 0.0)
-        Double prevGpa = 0.0;
+        double prevGpa = 0.0;
         try {
-            // GradeService의 로직에 따라 약간 다를 수 있음 (Null 체크 필수)
+            // GradeService readMyGradeByStudentId는 금학기 누계 성적임..
             var myGrade = gradeService.readMyGradeByStudentId(stuSub.getStudent().getId());
-            if (myGrade != null) prevGpa = (double) myGrade.getAverage();
+            if (myGrade != null) prevGpa = myGrade.getAverage();
         } catch (Exception e) {
             log.warn("GPA 조회 실패 (신입생 등): {}", e.getMessage());
         }
@@ -167,8 +172,10 @@ public class DropoutRiskService {
                 .riskLevel(analysis.level)
                 .build();
 
-        // 3. AI 서비스 호출 (오래 걸릴 수 있으므로 비동기로 빼는게 좋지만, 일단 동기로 진행)
+        // 3. AI 서비스 호출 (오래 걸릴 수 있음 - 동기 + 블로킹 방식)
+        log.info("🤖 AI 서비스 호출 중...");
         AiRiskAnalysisResult aiResult = aiAnalysisService.analyzeRisk(request);
+        log.info("✅ AI 응답 받음: {}", aiResult.getSummary());
 
         // 4. DB 저장 (Update or Insert)
         DropoutRisk risk = dropoutRiskRepository.findByStuSubAndRiskType(stuSub, analysis.type)
@@ -192,7 +199,7 @@ public class DropoutRiskService {
         }
 
         dropoutRiskRepository.save(risk);
-        log.info("학생({}) 위험 분석 저장 완료: {}", stuSub.getStudent().getName(), analysis.type);
+        log.info("💾 DB 저장 완료 - riskId: {}, studentName: {}, type: {}", risk.getId(), stuSub.getStudent().getName(), analysis.type);
     }
 
     // 내부적으로 쓰는 위험 분석 결과 클래스
