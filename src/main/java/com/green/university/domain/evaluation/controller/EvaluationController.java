@@ -10,6 +10,7 @@ import com.green.university.global.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/evaluation")
+@PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR')")
 public class EvaluationController {
 
     @Autowired
@@ -30,6 +32,7 @@ public class EvaluationController {
 
     // 학생이 하는 강의평가 post
     @PostMapping("/write/{subjectId}")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> EvaluationProc(@PathVariable("subjectId") Long subjectId,
                                             @RequestBody EvaluationFormDto evaluationFormDto,
                                             @AuthenticationPrincipal CustomUserDetails principal) {
@@ -61,6 +64,7 @@ public class EvaluationController {
 
     // 과목별 강의 평가 조회 (교수)
     @GetMapping("/read")
+    @PreAuthorize("hasRole('PROFESSOR')")
     public ResponseEntity<?> readEvaluation(@RequestParam(required = false, value = "subject_Name") String subject_Name,
                                             @AuthenticationPrincipal CustomUserDetails principal) {
         Long professorId = principal.getId();
@@ -74,6 +78,7 @@ public class EvaluationController {
 
     // 이번 학기 수강 과목 강의평가 완료 여부 확인 - 유효성 체크 용
     @GetMapping("/hasEval")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> hasEval(
             @AuthenticationPrincipal CustomUserDetails principal
     ) {

@@ -6,6 +6,7 @@ import com.green.university.domain.grade.service.GradeService;
 import com.green.university.global.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +19,7 @@ import java.util.Map;
 // 금학기,학기별 성적, 누계성적 조회
 @RestController
 @RequestMapping("/api/grade")
+@PreAuthorize("hasRole('STUDENT')")
 public class GradeController {
 
     @Autowired

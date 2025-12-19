@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,7 @@ import java.util.Objects;
  */
 @RestController
 @RequestMapping("/api/break")
+@PreAuthorize("hasAnyRole('STUDENT', 'STAFF')")
 public class BreakAppController {
 
     @Autowired
@@ -48,6 +50,7 @@ public class BreakAppController {
 
     //휴학 신청 페이지
     @GetMapping("/application")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> breakApplication(@AuthenticationPrincipal CustomUserDetails principal) {
 
         // JWT 에서 꺼낸 현재 로그인 학생 ID
@@ -92,6 +95,7 @@ public class BreakAppController {
      * @return 휴복학 신청 내역 페이지
      */
     @PostMapping("/application")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> breakApplicationProc(@Validated @RequestBody BreakAppFormDto breakAppFormDto,
                                                   @AuthenticationPrincipal CustomUserDetails principal) {
 
@@ -138,6 +142,7 @@ public class BreakAppController {
      * @return 휴복학 신청 내역 페이지 (학생용)
      */
     @GetMapping("/list")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> breakAppListByStudentId(@AuthenticationPrincipal CustomUserDetails principal) {
 
         Long studentId = principal.getId();
@@ -153,6 +158,7 @@ public class BreakAppController {
      * @return 처리되지 않은 휴복학 신청 내역 페이지 (교직원용)
      */
     @GetMapping("/list/staff")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<?> breakAppListByState() {
 
         List<BreakApp> breakAppList = breakAppService.readByStatus("처리중");
@@ -166,6 +172,7 @@ public class BreakAppController {
      * @return 휴학 신청서 확인 학생 / 교직원에 따라 옆에 카테고리 바뀌어야 함
      */
     @GetMapping("/detail/{id}")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> breakDetail(@PathVariable("id") Long id) {
 
         // 휴복학 신청
@@ -193,6 +200,7 @@ public class BreakAppController {
      * 휴학 신청 취소 (학생)
      */
     @PostMapping("/delete/{id}")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> deleteBreakApp(@PathVariable("id") Long id,
                                             @AuthenticationPrincipal CustomUserDetails principal) {
 
@@ -213,6 +221,7 @@ public class BreakAppController {
      * 휴학 신청 처리 (교직원)
      */
     @PostMapping("/update/{id}")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<?> updateBreakApp(@PathVariable("id") Long id, String status) {
 
         breakAppService.updateById(id, status);

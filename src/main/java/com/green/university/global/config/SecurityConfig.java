@@ -55,7 +55,9 @@ public class SecurityConfig {
                         "/api/auth/login",
                         "/",
                         "/error",
-                        "/images/**"
+                        "/images/**",
+                        "/api/notice/list/0", // 로그인 화면 - 공지
+                        "/api/schedule" // 학사일정
                 ).permitAll()
                 // 개발중이라 일단 다 열어두기
 //                .requestMatchers("/**").permitAll()

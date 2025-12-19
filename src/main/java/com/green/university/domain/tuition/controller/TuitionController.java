@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +37,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tuition")
+@PreAuthorize("hasAnyRole('STUDENT', 'STAFF')")
 public class TuitionController {
 
 	@Autowired
@@ -60,6 +62,7 @@ public class TuitionController {
 	 * @return 납부된 등록금 내역 조회 페이지
 	 */
 	@GetMapping("/list")
+    @PreAuthorize("hasRole('STUDENT')")
 	public ResponseEntity<?> tuitionList(@AuthenticationPrincipal CustomUserDetails principal) {
 
         Long studentId = principal.getId();
@@ -76,6 +79,7 @@ public class TuitionController {
 	 *         해당 학기 (2023-1)에 등록금을 납부한 기록이 있다면 납부하기 버튼 제거
 	 */
 	@GetMapping("/payment")
+    @PreAuthorize("hasRole('STUDENT')")
 	public ResponseEntity<?> tuitionPayment(@AuthenticationPrincipal CustomUserDetails principal) {
 
 		Long studentId = principal.getId();;
@@ -120,6 +124,7 @@ public class TuitionController {
 	 * @return 등록금 납부 페이지로 다시 돌아가서 납부 완료됨을 보여주기
 	 */
 	@PostMapping("/payment")
+    @PreAuthorize("hasRole('STUDENT')")
 	public ResponseEntity<?> tuitionPaymentProc(@AuthenticationPrincipal CustomUserDetails principal) {
 
 		Long studentId = principal.getId();
@@ -132,6 +137,7 @@ public class TuitionController {
 	 * 등록금 납부 고지서 생성 (학생 id를 가지고 와서 for문으로 돌려서 tuition을 생성하는 것 같은데)
 	 */
 	@GetMapping("/create")
+    @PreAuthorize("hasRole('STAFF')")
 	public ResponseEntity<?> createTuiProc() {
 
 		List<Long> studentIdList = stuStatService.readIdList();

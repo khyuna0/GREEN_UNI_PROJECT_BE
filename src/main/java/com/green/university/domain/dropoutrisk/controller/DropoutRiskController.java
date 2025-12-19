@@ -12,6 +12,7 @@ import com.green.university.infra.ai.service.AiAnalysisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/risk")
+@PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR')")
 public class DropoutRiskController {
 
     private final DropoutRiskRepository dropoutRiskRepository;
@@ -30,6 +32,7 @@ public class DropoutRiskController {
 
     // (조회) 해당 교수 + ai 위험 분석 결과를 상담 완료, 미완료로 테이블로 보여주기 + 검색 필터
     @GetMapping("/list/grouped")
+    @PreAuthorize("hasRole('PROFESSOR')")
     public ResponseEntity<?> getRisksByGroup(@RequestParam(required = false) Long subjectId,
                                              @RequestParam(required = false) String level,
                                              @AuthenticationPrincipal CustomUserDetails customUserDetails) {
@@ -41,6 +44,7 @@ public class DropoutRiskController {
 
     // 교수가 본인의 특정 과목(subjectId)에서 위험 학생 목록 조회
     @GetMapping("/{subjectId}")
+    @PreAuthorize("hasRole('PROFESSOR')")
     public ResponseEntity<List<DropoutRiskResponseDto>> getRiskStudents(
             @PathVariable Long subjectId,
             @RequestParam(required = false, defaultValue = "DETECTED") RiskStatus status) {
@@ -57,6 +61,7 @@ public class DropoutRiskController {
 
     // 학생 내 위험 과목 리스트 조회
     @GetMapping("/me")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<List<DropoutRiskResponseDto>> getMyRisks(
             @AuthenticationPrincipal CustomUserDetails principal
             // status 파라미터 제거
