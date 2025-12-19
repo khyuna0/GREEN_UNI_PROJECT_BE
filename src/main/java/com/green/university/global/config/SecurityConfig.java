@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -21,6 +22,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     @Autowired
@@ -56,7 +58,7 @@ public class SecurityConfig {
                         "/images/**"
                 ).permitAll()
                 // 개발중이라 일단 다 열어두기
-                .requestMatchers("/**").permitAll()
+//                .requestMatchers("/**").permitAll()
                 // 권한 분리 (학생, 교수, 직원 전용)
 //                .requestMatchers(Define.STUDENT_PATHS).hasRole("student")
 //                .requestMatchers(Define.PROFESSOR_PATHS).hasRole("professor")

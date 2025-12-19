@@ -8,6 +8,7 @@ import com.green.university.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,6 +38,7 @@ public class ScheduleController {
 
     // 학사 일정 추가
     @PostMapping("/write")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<?> ScheduleProc(@Valid @RequestBody ScheduleFormDto scheduleFormDto,
                                           @AuthenticationPrincipal CustomUserDetails principal) {
 
@@ -48,6 +50,7 @@ public class ScheduleController {
 
     // 학사 일정 삭제
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<?> deleteSchedule(@PathVariable("id") Long id) {
         scheduleService.deleteSchedule(id);
         return ResponseEntity.ok().body("학사 일정 삭제가 완료되었습니다.");
