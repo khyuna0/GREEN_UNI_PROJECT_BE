@@ -37,15 +37,17 @@ public interface StuSubRepository extends JpaRepository<StuSub, Long> {
     // 학생 ID와 과목 ID로 수강신청 내역 존재 여부 확인
     boolean existsByStudentIdAndSubjectId(Long studentId, Long subjectId);
 
-    // 학생 아이디로 검색한 stuSub 중 년도와 학기 특정된 subject를 가진 stuSub 가져오기
+    // 학생 아이디로 검색한 stuSub 중 년도와 학기 특정된 subject를 가진 stuSub 목록 가져오기
     @Query("""
-        select ss
-        from StuSub ss
-        where ss.student.id = :studentId
-          and ss.subject.subYear = :year
-          and ss.subject.semester = :semester
-    """)
-    List<StuSub> findByStudentAndTerm(
+    select ss
+    from StuSub ss
+    join StuSubDetail sd on sd.stuSub.id = ss.id
+    where ss.student.id = :studentId
+      and ss.subject.subYear = :year
+      and ss.subject.semester = :semester
+      and sd.finalized = true
+""")
+    List<StuSub> findByStudentAndTermAndFinalized(
             @Param("studentId") Long studentId,
             @Param("year") Long year,
             @Param("semester") Long semester

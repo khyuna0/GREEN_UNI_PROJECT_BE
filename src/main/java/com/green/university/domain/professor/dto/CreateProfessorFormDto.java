@@ -25,7 +25,8 @@ public class CreateProfessorFormDto {
     @NotBlank(message = "전화번호를 입력해 주세요")
     @Pattern(regexp = "^010-\\d{3,4}-\\d{4}$", message = "전화번호 양식(010-xxxx-xxxx)을 확인해주세요.")
     private String tel;
-    @NotEmpty(message = "학과 번호를 입력해 주세요")
+    @NotNull(message = "학과 번호를 입력해 주세요")
+    @Positive(message = "학과 번호는는 숫자만 가능합니다.")
 	private Long deptId;
     @Email(message = "이메일 양식이 아닙니다.")
     @NotEmpty(message = "이메일을 입력해 주세요")
