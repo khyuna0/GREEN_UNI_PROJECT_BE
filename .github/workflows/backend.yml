@@ -48,10 +48,10 @@ jobs:
           app:
             ai:
               mistral:
-                api-key: "${{ secrets.MISTRAL_API_KEY }}"
+                api-key: ${{ secrets.MISTRAL_API_KEY }}
                 url: "https://api.mistral.ai/v1/chat/completions"
               gemini:
-                api-key: "${{ secrets.GEMINI_API_KEY }}"
+                api-key: ${{ secrets.GEMINI_API_KEY }}
                 url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
           EOF
 
