@@ -40,15 +40,8 @@ public class UserController {
 
     // staff 입력
     @PostMapping("/staff")
-    public ResponseEntity<?> createStaffProc(@Valid @RequestBody CreateStaffFormDto createStaffFormDto, BindingResult bindingResult) {
+    public ResponseEntity<?> createStaffProc(@Valid @RequestBody CreateStaffFormDto createStaffFormDto) {
 
-        if (bindingResult.hasErrors()) {
-            StringBuilder sb = new StringBuilder();
-            bindingResult.getAllErrors().forEach(error -> {
-                sb.append(error.getDefaultMessage()).append("\\n");
-            });
-            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
-        }
         userService.createStaffToStaffAndUser(createStaffFormDto);
 
         return ResponseEntity.ok().body("직원 입력이 완료되었습니다.");
@@ -57,15 +50,7 @@ public class UserController {
 
     // professor 입력
     @PostMapping("/professor")
-    public ResponseEntity<?> createProfessorProc(@Valid @RequestBody CreateProfessorFormDto createProfessorFormDto, BindingResult bindingResult) {
-
-        if (bindingResult.hasErrors()) {
-            StringBuilder sb = new StringBuilder();
-            bindingResult.getAllErrors().forEach(error -> {
-                sb.append(error.getDefaultMessage()).append("\\n");
-            });
-            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<?> createProfessorProc(@Valid @RequestBody CreateProfessorFormDto createProfessorFormDto) {
 
         userService.createProfessorToProfessorAndUser(createProfessorFormDto);
 
@@ -75,15 +60,7 @@ public class UserController {
 
     // student 입력
     @PostMapping("/student")
-    public ResponseEntity<?> createStudentProc(@Valid @RequestBody CreateStudentFormDto createStudentFormDto, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            bindingResult.getFieldErrors().forEach(err -> {
-                        errors.put(err.getField(), err.getDefaultMessage());
-                    }
-            );
-            System.out.println("학생오류" + errors);
-        }
+    public ResponseEntity<?> createStudentProc(@Valid @RequestBody CreateStudentFormDto createStudentFormDto) {
 
         userService.createStudentToStudentAndUser(createStudentFormDto);
         return ResponseEntity.ok().body("학생 입력이 완료되었습니다.");

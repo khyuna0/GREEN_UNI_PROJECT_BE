@@ -1,8 +1,6 @@
 package com.green.university.domain.admin.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -15,17 +13,28 @@ import java.time.LocalDate;
 @Data
 public class CreateStaffFormDto {
 
-	@NotEmpty
-	@Size(min = 2, max= 30)
+	@NotEmpty(message = "이름을 입력해 주세요")
+    @Size(min = 2, max = 30, message = "이름은 2자 이상 30자 이하로 입력해 주세요")
 	private String name;
+
+    @NotNull(message = "생년월일을 입력해 주세요")
 	private LocalDate birthDate;
+
+    @NotEmpty(message = "성별을 입력해 주세요")
 	private String gender;
-	@NotEmpty
+    
+	@NotEmpty(message = "주소를 입력해 주세요")
 	private String address;
-	@Size(min = 11, max = 13)
+
+    @NotBlank(message = "전화번호를 입력해 주세요")
+    @Pattern(regexp = "^010-\\d{3,4}-\\d{4}$", message = "전화번호 양식(010-xxxx-xxxx)을 확인해주세요.")
 	private String tel;
-	@Email
+
+	@Email(message = "이메일 양식이 아닙니다.")
+    @NotEmpty(message = "이메일을 입력해 주세요")
 	private String email;
+
+    @NotNull(message = "고용 날짜를 입력해 주세요")
 	private LocalDate hireDate;
-	
+
 }

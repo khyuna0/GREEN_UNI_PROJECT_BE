@@ -10,6 +10,7 @@ import lombok.*;
 @Builder
 public class CounselNoteRsponseDto {
 
+
     private String professorNote;
     private String studentNote;
 

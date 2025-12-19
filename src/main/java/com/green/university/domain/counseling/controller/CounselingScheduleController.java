@@ -39,7 +39,7 @@ public class CounselingScheduleController {
             throw new CustomRestfullException("권한이 없는 페이지입니다.", HttpStatus.UNAUTHORIZED);
         }
         Long id = principal.getId();
-        LocalDate weekEndDate = weekStartDate.plusDays(4); // 월~금
+        LocalDate weekEndDate = weekStartDate.plusDays(11); // 월~금 , 다음주 평일까지
         List<CounselingSchedule> list = counselingScheduleService.getSchedulesByWeek(id, weekStartDate, weekEndDate);
 
         return ResponseEntity.ok(Map.of("list", list));

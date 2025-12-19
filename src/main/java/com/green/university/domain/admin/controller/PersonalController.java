@@ -128,19 +128,9 @@ public class PersonalController {
     @PatchMapping("/update")
     public ResponseEntity<?> updateUserProc(
             @Valid @RequestBody UserInfoForUpdateDto userInfoForUpdateDto,
-            BindingResult bindingResult,
             @RequestParam String password,
             @AuthenticationPrincipal CustomUserDetails principal
     ) {
-
-
-        if (bindingResult.hasErrors()) {
-            StringBuilder sb = new StringBuilder();
-            bindingResult.getAllErrors().forEach(error -> {
-                sb.append(error.getDefaultMessage()).append("\\n");
-            });
-            throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
-        }
 
         if (principal == null) {
             throw new CustomRestfullException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);

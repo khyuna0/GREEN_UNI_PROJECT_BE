@@ -150,17 +150,18 @@ public class EvaluationService {
         return dto;
     }
 
-    // 강의평가 완료 여부
+    // 강의평가 완료 여부 - 성적 산출된 과목들만
     public boolean isAllEvaluationCompleted(Long studentId) {
 
         Long year = TermUtil.currentYear();
         Long semester = TermUtil.currentSemester();
 
         List<StuSub> stuSubs =
-                stuSubRepository.findByStudentAndTerm(
+                stuSubRepository.findByStudentAndTermAndFinalized(
                         studentId, year, semester
                 );
 
+        System.out.println(stuSubs + "=======================");
         // 수강 과목 없으면 평가 대상 아님 → true 처리
         if (stuSubs.isEmpty()) return true;
 
