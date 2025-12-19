@@ -40,8 +40,8 @@ public class AiBatchService {
         SubjectAiJob job = subjectAiJobRepository.findBySubject_Id(subjectId)
                 .orElseThrow(() -> new RuntimeException("AI Job이 없습니다."));
 
-        //List<StuSubDetail> details = stuSubDetailRepository.findBySubject_IdAndFinalizedTrue(subjectId);
-        List<StuSubDetail> details = stuSubDetailRepository.findBySubject_Id(subjectId);
+        // 이미 ProfessorService finalizeGrades에서 (2번) 이미 finalized를 변경해서 이렇게 가져와도 됨!
+        List<StuSubDetail> details = stuSubDetailRepository.findBySubject_IdAndFinalizedTrue(subjectId);
 
         log.info("📋 분석 대상 학생 수: {}", details.size());
 
@@ -95,6 +95,7 @@ public class AiBatchService {
         job.setDoneCount(0);
         job.setMessage("AI 분석 준비중...");
         subjectAiJobRepository.save(job);
+        log.info("✅ Job 저장 완료 (아직 커밋 안 됨): jobId={}", job.getId());
         // 여기서 트랜잭션 종료(커밋)
 
         runSubjectAiAsync(subjectId); // ☎️ 4. @Async가 알아서 새 스레드+트랜잭션
