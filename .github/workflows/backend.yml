@@ -31,9 +31,9 @@ jobs:
               time-zone: Asia/Seoul
             datasource:
               driver-class-name: com.mysql.cj.jdbc.Driver
-              url: \${{ secrets.MYSQL_URL }}
+              url: ${{ secrets.MYSQL_URL }}
               username: admin
-              password: \${{ secrets.MYSQL_PASSWORD }}
+              password: ${{ secrets.MYSQL_PASSWORD }}
             jpa:
               hibernate:
                 ddl-auto: update
@@ -43,15 +43,15 @@ jobs:
                 include-stacktrace: always
 
           jwt:
-            secret: \${{ secrets.JWT_SECRET }}
+            secret: ${{ secrets.JWT_SECRET }}
 
           app:
             ai:
               mistral:
-                api-key: \${{ secrets.MISTRAL_API_KEY }}
+                api-key: "${{ secrets.MISTRAL_API_KEY }}"
                 url: "https://api.mistral.ai/v1/chat/completions"
               gemini:
-                api-key: \${{ secrets.GEMINI_API_KEY }}
+                api-key: "${{ secrets.GEMINI_API_KEY }}"
                 url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
           EOF
 
