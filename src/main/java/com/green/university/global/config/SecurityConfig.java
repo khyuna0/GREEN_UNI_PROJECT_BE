@@ -22,7 +22,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -48,15 +48,16 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                 // CORS preflight(OPTIONS) 전부 허용
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-
                 // 에러, 정적 리소스, 로그인, 공지사항, 학사일정, 아이디 비밀번호 찾기 팝업 허용
                 .requestMatchers(
-                        "/api/auth/login",
                         "/",
                         "/error",
                         "/images/**",
-                        "/api/notice/list/0", // 로그인 화면 - 공지
-                        "/api/schedule" // 학사일정
+                        "/api/auth/login",
+                        "/api/notice/list/0",
+                        "/api/schedule",
+                        "/api/personal/find/id",
+                        "/api/personal/find/password"
                 ).permitAll()
                 // 개발중이라 일단 다 열어두기
 //                .requestMatchers("/**").permitAll()
