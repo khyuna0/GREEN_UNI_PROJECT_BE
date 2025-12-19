@@ -10,6 +10,6 @@ import lombok.Data;
  */
 @Data
 public class CollegeFormDto {
-    @NotBlank
+    @NotBlank(message = "단과대 이름을 입력해 주세요")
     private String name;
 }

@@ -11,7 +11,6 @@ import lombok.Data;
  */
 @Data
 public class CollTuitFormDto {
-    //@NotBlank, @NotEmpty는 문자열용 -> NotNull로 변경
 
 
     private Long collegeId;
@@ -19,7 +18,7 @@ public class CollTuitFormDto {
     private String 	name; // 단과대 이름 -> 이름으로 검색
 
     @NotNull
-    @Positive //정수형에 써주는것
+    @Positive(message = "등록금은 숫자만 입력 가능합니다")
     private Long amount;
 
 }

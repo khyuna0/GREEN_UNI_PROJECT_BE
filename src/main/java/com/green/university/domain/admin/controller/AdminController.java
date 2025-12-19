@@ -25,6 +25,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/admin")
+
 public class AdminController {
     @Autowired
     private AdminService adminService;
@@ -47,7 +48,7 @@ public class AdminController {
 
     // 단과대 등록
     @PostMapping("/college")
-    public ResponseEntity<?> collegeProc(@RequestBody@Valid CollegeFormDto collegeFormDto) {
+    public ResponseEntity<?> collegeProc(@RequestBody @Valid CollegeFormDto collegeFormDto) {
         adminService.createCollege(collegeFormDto);
         return ResponseEntity.ok().body("단과대학 입력이 완료되었습니다.");
     }

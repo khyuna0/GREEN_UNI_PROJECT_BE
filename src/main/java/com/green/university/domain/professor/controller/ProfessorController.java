@@ -18,6 +18,7 @@ import com.green.university.infra.ai.entity.SubjectAiJob;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +29,7 @@ import java.util.Objects;
 // 교수 행정 페이지 (자기과목 조회, 학생 성적 기입)
 @RestController
 @RequestMapping("/api/professor")
+@PreAuthorize("hasRole('PROFESSOR')")
 public class ProfessorController {
 
 	@Autowired

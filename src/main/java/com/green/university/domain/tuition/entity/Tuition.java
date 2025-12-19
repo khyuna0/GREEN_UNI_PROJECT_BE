@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -36,6 +38,9 @@ public class Tuition {
     private Long schAmount; // 장학 금액
 
     private boolean status = false; // 납부 여부, 기본값 false인듯 (수정)
+
+    // 장학금 납부 기간 - 생성된 날짜 기준 한 달
+    private LocalDate expireDate = LocalDate.now().plusMonths(1);
 
     // 등록금 고지서 생성을 위한 생성자
     public Tuition(Student student,

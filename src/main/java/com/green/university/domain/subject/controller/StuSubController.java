@@ -27,6 +27,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,6 +39,7 @@ import java.util.Optional;
 // 수강 신청 관련 (preStuSub 포함) 강의 시간표는 SubjectController 대신 일부러 여기에 넣음
 @RestController
 @RequestMapping("/api/sugang")
+@PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'STAFF')")
 public class StuSubController {
 
     @Autowired
@@ -60,12 +62,14 @@ public class StuSubController {
     // 🔥 배치 실행용 엔드포인트 (관리자 전용)
     // 수강신청 변경에 따라 학생의 예비 수강신청 내역이 둘(미완성, 완성)으로 나눠지게 만들어줌
     @PostMapping("/batch/move-pre-to-regular")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<?> executeBatch() {
         stuSubService.movePreToStuSubBatch();
         return ResponseEntity.ok("배치 실행 완료");
     }
 
     @PostMapping("/batch/move-regular-to-detail")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<?> executeBatch2() {
         stuSubService.moveStuSubToDetailBatch();
         return ResponseEntity.ok("배치 실행 완료2");
@@ -74,6 +78,7 @@ public class StuSubController {
     // ========================= 학생 기능 =========================
     // 🔥 수강 신청 탭에서 보여지는 전체 강의 시간표 조회 (현재 연도, 학기에 해당하는 강의 + 페이징 + 검색)
     @GetMapping("/subjectList")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> sugangSubjectList(
             @ModelAttribute CurrentSemesterSubjectSearchFormDto dto,
             @PageableDefault(page = 0, size = Define.SUBJECT_PAGE_SIZE, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
@@ -92,6 +97,7 @@ public class StuSubController {
 
     // 🔥 예비 수강 신청 탭에서 보여지는 강의 목록 (현재 연도, 학기 강의 + 검색 + 페이징 + 수강신청 버튼 존재)
     @GetMapping("/presubjectlist")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> sugangPreSubjectList(
             @ModelAttribute CurrentSemesterSubjectSearchFormDto dto,
             @PageableDefault(page = 0, size = Define.SUBJECT_PAGE_SIZE, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
@@ -124,6 +130,7 @@ public class StuSubController {
 
     // 🔥 예비 수강 신청 처리 (신청)
     @PostMapping("/pre/{subjectId}")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> insertPreStuSubAppProc(@PathVariable Long subjectId,
                                                     @AuthenticationPrincipal CustomUserDetails principal) {
         // 예비 수강 신청 기간이 아니라면
@@ -137,6 +144,7 @@ public class StuSubController {
 
     // 🔥 예비 수강 신청 처리 (취소)
     @DeleteMapping("/pre/{subjectId}")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> deletePreStuSubAppProc(@PathVariable("subjectId") Long subjectId,
                                                     @AuthenticationPrincipal CustomUserDetails principal) {
         // 예비 수강 신청 기간이 아니라면
@@ -151,6 +159,7 @@ public class StuSubController {
 
     // 🔥 수강 신청 탭에서 보여지는 강의 목록 (현재 연도, 학기 강의 + 검색 + 페이징 + 수강신청 버튼 존재)
     @GetMapping("/regularsubjectlist")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> sugangSubjectList(
             @ModelAttribute CurrentSemesterSubjectSearchFormDto dto,
             @PageableDefault(page = 0, size = Define.SUBJECT_PAGE_SIZE, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
@@ -197,6 +206,7 @@ public class StuSubController {
 
     // 🔥 수강 신청
     @PostMapping("/regular/{subjectId}")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> addStuSub(@PathVariable("subjectId") Long subjectId,
                                        @AuthenticationPrincipal CustomUserDetails principal) {
         // 수강 신청 기간이 아니라면
@@ -213,6 +223,7 @@ public class StuSubController {
 
     // 🔥 수강 신청 취소
     @DeleteMapping("/regular/{subjectId}")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> deleteStuSub(@PathVariable("subjectId") Long subjectId,
                                           @AuthenticationPrincipal CustomUserDetails principal) {
         // 수강 신청 기간이 아니라면
@@ -226,6 +237,7 @@ public class StuSubController {
 
     // 🔥 학생의 예비 / 수강 목록 조회 (기간에 따라 다르게)
     @GetMapping("/stusublist")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> getStudentSubList(@AuthenticationPrincipal CustomUserDetails principal) {
         // 이번 학기에 재학 상태가 되지 않는 학생이라면 진입 불가
         Long studentId = principal.getId();
@@ -286,6 +298,7 @@ public class StuSubController {
 
     // 아마도 학생의 최종 수강 신청 내역 (아래 timetable 쓰면 될 듯..)
     @GetMapping("/list")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> stuSubAppList(@AuthenticationPrincipal CustomUserDetails principal) {
 
         // 예비 수강 신청 기간이라면
@@ -320,6 +333,7 @@ public class StuSubController {
 
     // 최종 수강 신청 timetable 조회
     @GetMapping("/timetable")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> getMyTimetable(@AuthenticationPrincipal CustomUserDetails principal) {
 
         // 예비 수강 신청 기간이면 최종 시간표 조회 불가

@@ -5,11 +5,13 @@ import com.green.university.domain.counseling.dto.CounselingStudentRequestDto;
 import com.green.university.domain.counseling.service.CounselingReserveService;
 import com.green.university.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/reserve")
+@PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR')")
 public class CounselingReserveController {
 
     private final CounselingReserveService counselingReserveService;
@@ -20,6 +22,7 @@ public class CounselingReserveController {
 
     // 학생 상담 신청
     @PostMapping
+    @PreAuthorize("hasRole('STUDENT')")
     public void requestReserve(
             @Valid @RequestBody CounselingStudentRequestDto dto,
             @AuthenticationPrincipal CustomUserDetails principal
@@ -31,6 +34,7 @@ public class CounselingReserveController {
 
     // 교수 승인 / 반려
     @PostMapping("/decision")
+    @PreAuthorize("hasRole('PROFESSOR')")
     public void decideReserve(
             @RequestParam Long reserveId,
             @RequestParam String decision,
@@ -42,6 +46,7 @@ public class CounselingReserveController {
 
     // 학생 상담 예약 목록
     @GetMapping("/list")
+    @PreAuthorize("hasRole('STUDENT')")
     public Object studentList(
             @AuthenticationPrincipal CustomUserDetails principal
     ) {
@@ -51,6 +56,7 @@ public class CounselingReserveController {
 
     // 교수 상담 예약 목록
     @GetMapping("/list/professor")
+    @PreAuthorize("hasRole('PROFESSOR')")
     public Object professorList(
             @AuthenticationPrincipal CustomUserDetails principal
     ) {
@@ -60,6 +66,7 @@ public class CounselingReserveController {
 
     // 처리되지 않은 학생 상담 신청 목록 조회
     @GetMapping("/notApplicated")
+    @PreAuthorize("hasRole('PROFESSOR')")
     public int getNotApplicated (
             @AuthenticationPrincipal CustomUserDetails principal
     ) {
@@ -69,6 +76,7 @@ public class CounselingReserveController {
 
     // 학생 상담 개수 카운트용
     @GetMapping("/count/student")
+    @PreAuthorize("hasRole('STUDENT')")
     public java.util.Map<String, Integer> myCounts(@AuthenticationPrincipal CustomUserDetails principal) {
         Long studentId = principal.getId();
         return counselingReserveService.getMyCounts(studentId);
@@ -76,6 +84,7 @@ public class CounselingReserveController {
 
     // 교수 -> 학생 상담요청
     @PostMapping("/pre/professor")
+    @PreAuthorize("hasRole('PROFESSOR')")
     public void professorRequest(
             @Valid @RequestBody CounselingProfessorRequestDto dto,
             @AuthenticationPrincipal CustomUserDetails principal
@@ -86,6 +95,7 @@ public class CounselingReserveController {
 
     // 학생: 내가 받은 교수 상담요청 목록
     @GetMapping("/pre/list/student")
+    @PreAuthorize("hasRole('STUDENT')")
     public Object myPreList(
             @AuthenticationPrincipal CustomUserDetails principal
     ) {
@@ -95,6 +105,7 @@ public class CounselingReserveController {
 
     // 학생: 수락 -> reserve 생성
     @PostMapping("/pre/accept")
+    @PreAuthorize("hasRole('STUDENT')")
     public Object acceptPre(
             @RequestParam Long preReserveId,
             @AuthenticationPrincipal CustomUserDetails principal
@@ -106,6 +117,7 @@ public class CounselingReserveController {
 
     // 학생: 거절
     @PostMapping("/pre/reject")
+    @PreAuthorize("hasRole('STUDENT')")
     public void rejectPre(
             @RequestParam Long preReserveId,
             @AuthenticationPrincipal CustomUserDetails principal

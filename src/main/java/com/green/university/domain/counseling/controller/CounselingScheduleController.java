@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,7 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/counseling")
+@PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR')")
 public class CounselingScheduleController {
 
     @Autowired
@@ -31,6 +33,7 @@ public class CounselingScheduleController {
     private RiskStudentService riskStudentService;
 
     @GetMapping("/professor") // 교수 - 이번 주 내 상담 일정 불러오기
+    @PreAuthorize("hasRole('PROFESSOR')")
     public ResponseEntity<?> getSchedule(
             @AuthenticationPrincipal CustomUserDetails principal,
             @RequestParam LocalDate weekStartDate
@@ -46,6 +49,7 @@ public class CounselingScheduleController {
     }
 
     @PostMapping("/professor") // 교수 - 내 상담 일정 등록
+    @PreAuthorize("hasRole('PROFESSOR')")
     public ResponseEntity<?> weeklyCounselingSchedule(@AuthenticationPrincipal CustomUserDetails principal, @Valid @RequestBody WeeklyCounselingScheduleRequest weeklyDto) {
         if (principal == null || !Objects.equals(principal.getUserRole(), "professor")) {
             throw new CustomRestfullException("권한이 없는 페이지입니다.", HttpStatus.UNAUTHORIZED);
@@ -58,6 +62,7 @@ public class CounselingScheduleController {
     }
 
     @DeleteMapping("/professor") // 교수 - 내 상담 일정 삭제
+    @PreAuthorize("hasRole('PROFESSOR')")
     public ResponseEntity<?> deleteSchedule(
             @AuthenticationPrincipal CustomUserDetails principal,
             @RequestBody DeleteScheduleRequestDto req
@@ -71,6 +76,7 @@ public class CounselingScheduleController {
     }
 
     @GetMapping("/riskStu") // 교수 - 이번 학기 내 담당 위험 학생 조회 (과목 별)
+    @PreAuthorize("hasRole('PROFESSOR')")
     public ResponseEntity<?> getMyRiskStu(@AuthenticationPrincipal CustomUserDetails principal) {
         if (principal == null || !Objects.equals(principal.getUserRole(), "professor")) {
             throw new CustomRestfullException("권한이 없는 페이지입니다.", HttpStatus.UNAUTHORIZED);
@@ -83,6 +89,7 @@ public class CounselingScheduleController {
     }
 
     @GetMapping("/schedule") // 학생 - 과목별 상담 일정 조회
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> getScheduleBySubject(
             @AuthenticationPrincipal CustomUserDetails principal,
             @RequestParam Long subjectId
@@ -102,6 +109,7 @@ public class CounselingScheduleController {
 
     // 오늘의 상담 개수 보기
     @GetMapping("/today")
+    @PreAuthorize("hasRole('PROFESSOR')")
     public int getCounselingByDate (
             @AuthenticationPrincipal CustomUserDetails principal
     ){

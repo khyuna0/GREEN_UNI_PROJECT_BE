@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/subject")
+@PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'STAFF')")
 public class SubjectController {
 
     @Autowired
@@ -68,6 +70,7 @@ public class SubjectController {
 
     // 학생 - 이번 학기 강의 과목 조회
     @GetMapping("/semester")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> getSubjectThisSemester(
             @AuthenticationPrincipal CustomUserDetails principal,
             @RequestParam(required = false) Long subjectId
@@ -82,6 +85,7 @@ public class SubjectController {
 
     // 교수 - 이번 학기 강의 과목 조회
     @GetMapping("/semester/professor")
+    @PreAuthorize("hasRole('PROFESSOR')")
     public ResponseEntity<?> getSubjectList(
             @AuthenticationPrincipal CustomUserDetails principal
 

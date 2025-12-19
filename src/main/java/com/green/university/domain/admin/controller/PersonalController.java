@@ -22,6 +22,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
@@ -51,6 +52,7 @@ public class PersonalController {
 
     // 메인 홈에 필요한 데이터 (공지, 일정, 사용자 정보)
     @GetMapping
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'STAFF')")
     public ResponseEntity<?> home(@AuthenticationPrincipal CustomUserDetails principal) {
 
         Long userId = principal.getId();
@@ -220,6 +222,7 @@ public class PersonalController {
     }
 
     // 학생 정보 조회
+    @PreAuthorize("hasRole('STUDENT')")
     @GetMapping("/info/student")
     public ResponseEntity<?> readStudentInfo(@AuthenticationPrincipal CustomUserDetails principal) {
 
@@ -240,6 +243,7 @@ public class PersonalController {
 
     // 직원 정보 조회
     @GetMapping("/info/staff")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<?> readStaffInfo(@AuthenticationPrincipal CustomUserDetails principal) {
 
         if (principal == null) {
@@ -256,6 +260,7 @@ public class PersonalController {
 
     // 교수 정보 조회
     @GetMapping("/info/professor")
+    @PreAuthorize("hasRole('PROFESSOR')")
     public ResponseEntity<?> readProfessorInfo(@AuthenticationPrincipal CustomUserDetails principal) {
 
         if (principal == null) {

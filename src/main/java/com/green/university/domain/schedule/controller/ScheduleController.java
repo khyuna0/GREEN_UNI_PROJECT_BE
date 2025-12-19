@@ -58,6 +58,7 @@ public class ScheduleController {
 
     // 학사 일정 수정
     @PatchMapping("/update/{id}")
+    @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<?> updateSchedule(@RequestBody ScheduleFormDto scheduleFormDto, @PathVariable("id") Long id) {
         scheduleService.updateSchedule(scheduleFormDto, id);
         return ResponseEntity.ok().body("학사 일정 수정이 완료되었습니다.");
@@ -65,6 +66,7 @@ public class ScheduleController {
 
     // 선택한 학사 일정 상세 보기
     @GetMapping("/detail/{id}")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'STAFF')")
     public ResponseEntity<?> detailSchedule(@PathVariable("id") Long id) {
         ScheduleDto schedule = scheduleService.readScheduleById(id);
         return ResponseEntity.ok(Map.of(
