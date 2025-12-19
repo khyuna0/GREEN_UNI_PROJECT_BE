@@ -95,7 +95,8 @@ public class TuitionService {
 		stuSch.setSemester(TermUtil.currentSemester());
 
 		// 1학년 2학기 이상의 학생인 경우에만 장학금 1유형(전액) 받을 수 있음
-		if (student.getGrade() > 1 || student.getSemester() == 2) {
+		if (student.getGrade() > 1 ||
+                (student.getGrade() == 1 && TermUtil.currentSemester() == 2)) {
 			// 직전 학기 성적 평균
 			GradeForScholarshipDto gradeDto = null;
 			if (TermUtil.currentSemester() == 1) { // 현재 1학기라면? 전 년도 2학기 성적으로 판단

@@ -1,6 +1,7 @@
 package com.green.university.global.config;
 
 import com.green.university.global.security.JwtAuthenticationFilter;
+import com.green.university.global.utils.Define;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -63,14 +64,13 @@ public class SecurityConfig {
                 ).permitAll()
                 // 개발중이라 일단 다 열어두기
                 .requestMatchers("/**").permitAll()
-                /**
-                // 학생 전용
-                .requestMatchers(Define.STUDENT_PATHS).hasRole("STUDENT")
-                // 교수 전용
-                .requestMatchers(Define.PROFESSOR_PATHS).hasRole("PROFESSOR")
-                // 직원 전용
-                .requestMatchers(Define.STAFF_PATHS).hasRole("STAFF")
-                 */
+
+//                // 학생 전용
+//                .requestMatchers(Define.STUDENT_PATHS).hasRole("STUDENT")
+//                // 교수 전용
+//                .requestMatchers(Define.PROFESSOR_PATHS).hasRole("PROFESSOR")
+//                // 직원 전용
+//                .requestMatchers(Define.STAFF_PATHS).hasRole("STAFF")
 
                 .anyRequest().authenticated()
         );
