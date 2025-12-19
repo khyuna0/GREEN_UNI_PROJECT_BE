@@ -3,6 +3,7 @@ package com.green.university.domain.counseling.service;
 import com.green.university.domain.counseling.dto.CounselingInfoDto;
 import com.green.university.domain.counseling.dto.WeeklyCounselingScheduleRequest;
 import com.green.university.domain.counseling.entity.CounselingSchedule;
+import com.green.university.domain.counseling.repository.CounselingReserveRepository;
 import com.green.university.domain.counseling.repository.CounselingScheduleRepository;
 import com.green.university.domain.professor.entity.Professor;
 import com.green.university.domain.professor.repository.ProfessorRepository;
@@ -27,6 +28,8 @@ public class CounselingScheduleService {
     private ProfessorRepository professorRepository;
     @Autowired
     private SubjectRepository subjectRepository;
+    @Autowired
+    private CounselingReserveRepository counselingReserveRepository;
 
     // 교수 id로 상담 목록 불러오기
     public List<CounselingSchedule> getSchedulesByWeek(Long professorId,
@@ -117,10 +120,11 @@ public class CounselingScheduleService {
             return;
         }
 
-        //예약된 일정이면 삭제 막기
-        if (schedule.isReserved()) {
-            throw new CustomRestfullException("예약된 일정은 삭제할 수 없습니다.", HttpStatus.BAD_REQUEST);
+        // 예약된 일정이거나, 신청자가 있으면 삭제 막기
+        if (schedule.isReserved() || counselingReserveRepository.existsByCounselingSchedule_Id(schedule.getId())) {
+            throw new CustomRestfullException("이미 예약됐거나 신청자가 있는 일정은 삭제할 수 없습니다.", HttpStatus.BAD_REQUEST);
         }
+
 
         counselingScheduleRepository.delete(schedule);
     }

@@ -2,21 +2,22 @@ package com.green.university.domain.admin.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 
 @Data
 public class UserInfoForUpdateDto { 
+
     
-    // 유저 정보를 업데이트 하기 전!!! 정보를 확인할 때 부르는 DTO (업데이트, 엔티티 저장 용 DTO는 따로 있다)
-    // 직원, 교수, 학생 구분 없음
-    
-	@NotBlank
+	@NotBlank(message = "주소를 입력해 주세요")
 	private String address;
-	@Size(min = 11, max = 13)
+    @NotBlank(message = "전화번호를 입력해 주세요")
+    @Pattern(regexp = "^010-\\d{3,4}-\\d{4}$", message = "전화번호 양식(010-xxxx-xxxx)을 확인해주세요.")
 	private String tel;
-	@Email
+	@Email(message = "이메일 양식이 아닙니다.")
+    @NotBlank(message = "이메일을 입력해 주세요")
 	private String email;
 	
 }
