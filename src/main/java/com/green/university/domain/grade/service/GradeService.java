@@ -9,7 +9,6 @@ import com.green.university.domain.grade.entity.Grade;
 import com.green.university.domain.subject.entity.StuSub;
 import com.green.university.domain.subject.entity.Subject;
 import com.green.university.domain.subject.repository.StuSubRepository;
-import com.green.university.global.utils.Define;
 import com.green.university.global.utils.TermUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -94,8 +93,8 @@ public class GradeService {
 
     // 금학기 누계성적 조회
     public MyGradeDto readMyGradeByStudentId(Long studentId) {
-        Long currentYear = Long.valueOf(TermUtil.currentYear());
-        Long currentSemester = Long.valueOf(TermUtil.currentSemester());
+        Long currentYear = TermUtil.currentYear();
+        Long currentSemester = TermUtil.currentSemester();
 
         List<StuSub> stuSubs = stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_Semester(studentId, currentYear, currentSemester);
 

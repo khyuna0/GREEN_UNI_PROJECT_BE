@@ -1,4 +1,4 @@
-package com.green.university.infra.ai.dto.response;
+package com.green.university.infra.ai.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
