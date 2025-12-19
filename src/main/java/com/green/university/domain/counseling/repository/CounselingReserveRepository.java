@@ -29,6 +29,29 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
     // 같은 학생 + 같은 상담 일정 예약 존재 여부
     boolean existsByStudent_IdAndCounselingSchedule_Id(Long studentId, Long counselingScheduleId);
 
+    // REJECTED는 재신청 가능하게 하려면 "REQUESTED/APPROVED만" 막는 게 안전
+    boolean existsByStudent_IdAndCounselingSchedule_IdAndApprovalStateIn(
+            Long studentId,
+            Long counselingScheduleId,
+            List<ApprovalState> states
+    );
+
+    // 같은 학생 + 같은 과목 기준 "REQUESTED" 중복 방지 (학생발/교수발 구분)
+    // 이거 없으면 학생이 상담신청 무한으로 가능
+    boolean existsByStudent_IdAndSubject_IdAndApprovalStateAndRequester(
+            Long studentId,
+            Long subjectId,
+            ApprovalState approvalState,
+            ReserveRequester requester
+    );
+
+    // 교수 화면 상담요청: 학생 신청만 보이게 처리 -> 프론트 필터로도 가능
+    List<CounselingReserve> findByCounselingSchedule_Professor_IdAndApprovalStateAndRequester(
+            Long professorId,
+            ApprovalState approvalState,
+            ReserveRequester requester
+    );
+
     // 이미 예약 신청된 예약이 있는지 확인
     boolean existsByCounselingSchedule_Id(Long counselingScheduleId);
 
