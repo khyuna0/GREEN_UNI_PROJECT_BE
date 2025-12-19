@@ -45,7 +45,7 @@ public class GeminiClient implements AiClient {
                             .map(body -> new RuntimeException("Gemini 4xx 에러: " + body));
                 })
                 .bodyToMono(GeminiResponseDto.class)
-                .retryWhen(Retry.backoff(3, Duration.ofSeconds(10))
+                .retryWhen(Retry.backoff(2, Duration.ofSeconds(5))
                         .filter(t -> t instanceof WebClientResponseException.TooManyRequests))
                 .block();
 

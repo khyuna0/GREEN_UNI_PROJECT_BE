@@ -50,7 +50,7 @@ public class PersonalController {
     private JwtUtil jwtUtil;
 
     // 메인 홈에 필요한 데이터 (공지, 일정, 사용자 정보)
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<?> home(@AuthenticationPrincipal CustomUserDetails principal) {
 
         Long userId = principal.getId();

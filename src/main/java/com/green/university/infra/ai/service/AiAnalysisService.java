@@ -2,9 +2,8 @@ package com.green.university.infra.ai.service;
 
 import com.green.university.infra.ai.client.AiClient;
 import com.green.university.infra.ai.dto.AiRiskAnalysisRequest;
-import com.green.university.infra.ai.dto.response.AiRiskAnalysisResult;
+import com.green.university.infra.ai.dto.AiRiskAnalysisResult;
 import com.green.university.infra.ai.util.PromptBuilder;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -32,25 +31,25 @@ public class AiAnalysisService {
         this.objectMapper = objectMapper;
     }
 
-    // ☎️ ai로 risk 분석하기 (실제로 DropoutRiskService에서 사용 할 메서드)
+    // ai로 risk 분석하기 (실제로 DropoutRiskService에서 사용 할 메서드)
     public AiRiskAnalysisResult analyzeRisk(AiRiskAnalysisRequest request) {
         String prompt = promptBuilder.buildRiskAnalysisPrompt(request);
         return callAiWithFallback(prompt);
     }
 
-    // ☎️ ai로 risk 분석할 때 ai call 하기
+    // ai로 risk 분석할 때 ai call 하기
     private AiRiskAnalysisResult callAiWithFallback(String prompt) {
         try {
-            // 1차 시도: Gemini
-            String responseText = geminiClient.analyze(prompt);
+            // 1차 시도: Mistral
+            String responseText = mistralClient.analyze(prompt);
             return parseJson(responseText);
 
         } catch (Exception e) {
-            log.warn("⚠ Primary AI(Gemini) 실패: {}. Fallback 시도...", e.getMessage());
+            log.warn("⚠ Primary AI(Mistral) 실패: {}. Fallback 시도...", e.getMessage());
 
             try {
-                // 2차 시도: Mistral
-                String responseText = mistralClient.analyze(prompt);
+                // 2차 시도: Gemini
+                String responseText = geminiClient.analyze(prompt);
                 return parseJson(responseText);
 
             } catch (Exception ex) {

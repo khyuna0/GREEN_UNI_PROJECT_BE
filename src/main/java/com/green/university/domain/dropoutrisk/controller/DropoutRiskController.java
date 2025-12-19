@@ -28,7 +28,7 @@ public class DropoutRiskController {
     private final AiAnalysisService aiAnalysisService;
     private final DropoutRiskService dropoutRiskService;
 
-    // 해당 교수 + ai 위험 분석 결과를 상담 완료, 미완료로 테이블로 보여주기 + 검색 필터
+    // (조회) 해당 교수 + ai 위험 분석 결과를 상담 완료, 미완료로 테이블로 보여주기 + 검색 필터
     @GetMapping("/list/grouped")
     public ResponseEntity<?> getRisksByGroup(@RequestParam(required = false) Long subjectId,
                                              @RequestParam(required = false) String level,
