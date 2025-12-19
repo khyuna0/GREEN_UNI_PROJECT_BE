@@ -45,7 +45,7 @@ jobs:
           jwt:
             secret: ${{ secrets.JWT_SECRET }}
           
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} # 제미나이 인식 못해서 이 코드 추가함
           app:
             ai:
               mistral:
