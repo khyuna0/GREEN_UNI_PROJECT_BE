@@ -29,7 +29,7 @@ import java.util.Objects;
 // 교수 행정 페이지 (자기과목 조회, 학생 성적 기입)
 @RestController
 @RequestMapping("/api/professor")
-@PreAuthorize("hasAnyRole('PROFESSOR', 'student')")
+@PreAuthorize("hasAnyRole('PROFESSOR', 'STUDENT')")
 public class ProfessorController {
 
 	@Autowired
