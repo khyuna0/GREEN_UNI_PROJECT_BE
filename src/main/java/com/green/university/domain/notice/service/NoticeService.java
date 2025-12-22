@@ -10,7 +10,6 @@ import com.green.university.domain.notice.specification.NoticeSpecification;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.utils.Define;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -28,6 +27,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -40,6 +41,7 @@ import java.util.stream.Collectors;
 public class NoticeService {
 
     private final NoticeRepository noticeRepository;
+    private final S3UploaderService s3UploaderService; // s3 image
 
     private static final int PAGE_SIZE = 10;
 
@@ -74,44 +76,67 @@ public class NoticeService {
     // 공지 등록
     @Transactional
     public void createNotice(@Validated NoticeFormDto noticeFormDto) {
-
         Notice notice = new Notice();
         notice.setCategory(noticeFormDto.getCategory());
         notice.setTitle(noticeFormDto.getTitle());
         notice.setContent(noticeFormDto.getContent());
 
-        Long views =  noticeFormDto.getViews();
+        Long views = noticeFormDto.getViews();
         notice.setViews(views != null ? views : 0L);
 
-        // createTime 비었으면 지금 시간으로
         notice.setCreatedTime(noticeFormDto.getCreatedTime() != null
-                ? noticeFormDto.getCreatedTime(): LocalDateTime.now());
+                ? noticeFormDto.getCreatedTime() : LocalDateTime.now());
 
         // 먼저 notice 저장
         Notice saved = noticeRepository.save(notice);
 
         // 파일 있으면 저장 + notice 연결
         MultipartFile file = noticeFormDto.getFile();
-        if( file != null && !file.isEmpty()) {
+        if (file != null && !file.isEmpty()) {
             validateFileSize(file);
 
-            StoredFileInfo info = storeFileToDisk(file);
+//            StoredFileInfo info = storeFileToDisk(file);
+//            NoticeFile noticeFile = new NoticeFile();
+//            noticeFile.setOriginFilename(info.originName);
+//            noticeFile.setUuidFilename(info.uuidName);
+//            //notice.setFile이 양방향 연결까지 처리
+//            saved.setFile(noticeFile);
+//            //cascade로 NoticeFile 저장
+//            noticeRepository.save(saved);
+//            //DTO에도 필요하면 채워줌
+//            noticeFormDto.setOriginFilename(info.originName);
+//            noticeFormDto.setUuidFilename(info.uuidName);
+//        }
+//        noticeFormDto.setNoticeId(saved.getId());
+//        noticeFormDto.setId(saved.getId());
 
-            NoticeFile noticeFile = new NoticeFile();
-            noticeFile.setOriginFilename(info.originName);
-            noticeFile.setUuidFilename(info.uuidName);
+            try {
+                // S3 업로드 ("notice" 폴더 사용)
+                String s3Url = s3UploaderService.upload(file, "notice");
 
-            //notice.setFile이 양방향 연결까지 처리
-            saved.setFile(noticeFile);
+                // s3Url 예시: https://.../notice/uuid_파일.jpg
+                // DB에 저장할 파일명 추출 (경로 포함된 "notice/uuid_파일.jpg" 형태로 저장하는 게 관리하기 편함)
+                // 하지만 기존 로직(getOriginalFilename)을 유지하기 위해 여기선 UUID만 뽑거나 전체 경로를 활용
 
-            //cascade로 NoticeFile 저장
-            noticeRepository.save(saved);
+                // 여기선 "notice/uuid_파일.jpg" 자체를 uuidFilename 필드에 저장하는 걸 추천!
+                // (나중에 삭제할 때 경로를 알기 쉬움)
+                String savedFileName = s3Url.substring(s3Url.indexOf("notice/"));
 
-            //DTO에도 필요하면 채워줌
-            noticeFormDto.setOriginFilename(info.originName);
-            noticeFormDto.setUuidFilename(info.uuidName);
+                NoticeFile noticeFile = new NoticeFile();
+                noticeFile.setOriginFilename(file.getOriginalFilename());
+                noticeFile.setUuidFilename(savedFileName); // 경로 포함 저장 (예: notice/uuid_a.jpg)
+
+                saved.setFile(noticeFile);
+                noticeRepository.save(saved); // 업데이트
+
+                // DTO 세팅
+                noticeFormDto.setOriginFilename(file.getOriginalFilename());
+                noticeFormDto.setUuidFilename(savedFileName);
+
+            } catch (IOException e) {
+                throw new CustomRestfullException("파일 업로드 실패", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
-
         noticeFormDto.setNoticeId(saved.getId());
         noticeFormDto.setId(saved.getId());
     }
@@ -122,7 +147,7 @@ public class NoticeService {
         Notice notice = noticeRepository.findById(id)
                 .orElseThrow(() -> new CustomRestfullException("공지 없음", HttpStatus.NOT_FOUND));
 
-        long currentViews = notice.getViews() == null ? 0: notice.getViews();
+        long currentViews = notice.getViews() == null ? 0 : notice.getViews();
         notice.setViews(currentViews + 1);
 
         return new NoticeDto(notice);
@@ -141,25 +166,47 @@ public class NoticeService {
         MultipartFile newFile = noticeFormDto.getFile();
 
         // 새파일 올라온 경우
-        if(newFile != null && !newFile.isEmpty()){
+        if (newFile != null && !newFile.isEmpty()) {
             validateFileSize(newFile);
 
-            //기존 파일 삭제
-            if(notice.getFile() != null){
-                deleteFileFromDisk(notice.getFile().getUuidFilename());
+//            //기존 파일 삭제
+//            if (notice.getFile() != null) {
+//                deleteFileFromDisk(notice.getFile().getUuidFilename());
+//            }
+//
+//            //기존 파일 엔티티 제거(orphanRemoval로 DB에서 삭제됨)
+//            notice.setFile(null);
+//
+//            //새파일 제거
+//            StoredFileInfo info = storeFileToDisk(newFile);
+//
+//            NoticeFile noticeFile = new NoticeFile();
+//            noticeFile.setOriginFilename(info.originName);
+//            noticeFile.setUuidFilename(info.uuidName);
+//
+//            notice.setFile(noticeFile); // 양방향 연결
+//        }
+//    }
+
+            try {
+                // 기존 파일 있으면 삭제
+                if (notice.getFile() != null) {
+                    s3UploaderService.delete(notice.getFile().getUuidFilename());
+                }
+
+                // 새 파일 업로드
+                String s3Url = s3UploaderService.upload(newFile, "notice");
+                String savedFileName = s3Url.substring(s3Url.indexOf("notice/"));
+
+                NoticeFile noticeFile = new NoticeFile();
+                noticeFile.setOriginFilename(newFile.getOriginalFilename());
+                noticeFile.setUuidFilename(savedFileName);
+
+                notice.setFile(noticeFile);
+
+            } catch (IOException e) {
+                throw new CustomRestfullException("파일 수정 실패", HttpStatus.INTERNAL_SERVER_ERROR);
             }
-
-            //기존 파일 엔티티 제거(orphanRemoval로 DB에서 삭제됨)
-            notice.setFile(null);
-
-            //새파일 제거
-            StoredFileInfo info = storeFileToDisk(newFile);
-
-            NoticeFile noticeFile = new NoticeFile();
-            noticeFile.setOriginFilename(info.originName);
-            noticeFile.setUuidFilename(info.uuidName);
-
-            notice.setFile(noticeFile); // 양방향 연결
         }
     }
 
@@ -168,10 +215,11 @@ public class NoticeService {
     public void deleteNotice(Long id) {
 
         Notice notice = noticeRepository.findById(id)
-                .orElseThrow(() -> new CustomRestfullException("공지사항이 없습니다.",HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomRestfullException("공지사항이 없습니다.", HttpStatus.NOT_FOUND));
 
-        if(notice.getFile() != null) {
-            deleteFileFromDisk(notice.getFile().getUuidFilename());
+        if (notice.getFile() != null) {
+            //deleteFileFromDisk(notice.getFile().getUuidFilename());
+            s3UploaderService.delete(notice.getFile().getUuidFilename());
         }
         noticeRepository.delete(notice);
     }
@@ -197,34 +245,36 @@ public class NoticeService {
     }
 
 
-
     // 파일 처리 메서드들
     // 로직들이 공지에 종속되어있어서 일단 여기에 두는게 나음
     // 빼려고 하면 FileStorageService로 분리
-    
+
     // 파일 사이즈 제한
-    private void validateFileSize(MultipartFile file){
-        if(file.getSize() > Define.MAX_FILE_SIZE){
-            throw new CustomRestfullException("파일 크기는 20MB 이상 클 수 없습니다.",HttpStatus.BAD_REQUEST);
+    private void validateFileSize(MultipartFile file) {
+        if (file.getSize() > Define.MAX_FILE_SIZE) {
+            throw new CustomRestfullException("파일 크기는 20MB 이상 클 수 없습니다.", HttpStatus.BAD_REQUEST);
         }
     }
+
+
 
     // 파일 저장 결과를 묶어두는 작은 내부 클래스
     private static class StoredFileInfo {
         String originName;
         String uuidName;
-        StoredFileInfo(String originName, String uuidName){
+
+        StoredFileInfo(String originName, String uuidName) {
             this.originName = originName;
             this.uuidName = uuidName;
         }
     }
 
-    private StoredFileInfo storeFileToDisk(MultipartFile file){
+    private StoredFileInfo storeFileToDisk(MultipartFile file) {
         try {
             String saveDirectory = Define.UPLOAD_DIRECTORY;
 
             File dir = new File(saveDirectory);
-            if(!dir.exists()){
+            if (!dir.exists()) {
                 dir.mkdirs();
             }
 
@@ -236,48 +286,67 @@ public class NoticeService {
 
             file.transferTo(destination);
 
-            return new StoredFileInfo(origin,uuid);
+            return new StoredFileInfo(origin, uuid);
         } catch (Exception e) {
-            throw new CustomRestfullException("파일 저장 중 오류가 발생했습니다.",HttpStatus.BAD_REQUEST);
+            throw new CustomRestfullException("파일 저장 중 오류가 발생했습니다.", HttpStatus.BAD_REQUEST);
         }
     }
 
     //  첨부파일 다운로드 (noticeId 기준)
-    public ResponseEntity<Resource> downloadFileByNoticeId(Long noticeId) {
-
+//    public ResponseEntity<Resource> downloadFileByNoticeId(Long noticeId) {
+//
+//        Notice notice = noticeRepository.findById(noticeId)
+//                .orElseThrow(() -> new CustomRestfullException("공지 사항이 존재하지 않습니다.", HttpStatus.NOT_FOUND));
+//
+//        if (notice.getFile() == null) {
+//            throw new CustomRestfullException("첨부파일 없음", HttpStatus.NOT_FOUND);
+//        }
+//
+//        String uuid = notice.getFile().getUuidFilename();
+//        String origin = notice.getFile().getOriginFilename();
+//
+//        File file = new File(Define.UPLOAD_DIRECTORY + File.separator + uuid);
+//        if (!file.exists()) {
+//            throw new CustomRestfullException("파일이 존재하지 않습니다.", HttpStatus.NOT_FOUND);
+//        }
+//
+//        Resource resource = new FileSystemResource(file);
+//
+//        String encoded = URLEncoder.encode(origin, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+//
+//        return ResponseEntity.ok()
+//                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encoded)
+//                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+//                .body(resource);
+//    }
+    // [핵심] 다운로드 로직 변경 -> S3 URL로 리다이렉트
+    public ResponseEntity<Object> downloadFileByNoticeId(Long noticeId) {
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new CustomRestfullException("공지 사항이 존재하지 않습니다.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomRestfullException("공지 없음", HttpStatus.NOT_FOUND));
 
         if (notice.getFile() == null) {
             throw new CustomRestfullException("첨부파일 없음", HttpStatus.NOT_FOUND);
         }
 
-        String uuid = notice.getFile().getUuidFilename();
-        String origin = notice.getFile().getOriginFilename();
+        // DB에 저장된 uuidFilename이 "notice/uuid_파일.jpg" 형태라고 가정
+        // S3 전체 URL 조합 (CloudFront 주소 있으면 그걸 써도 됨)
+        // 여기선 간단히 S3 직접 URL 사용
+        String fileUrl = "https://green-uni-s3-bucket.s3.ap-northeast-2.amazonaws.com/" + notice.getFile().getUuidFilename();
 
-        File file = new File(Define.UPLOAD_DIRECTORY + File.separator + uuid);
-        if (!file.exists()) {
-            throw new CustomRestfullException("파일이 존재하지 않습니다.", HttpStatus.NOT_FOUND);
-        }
-
-        Resource resource = new FileSystemResource(file);
-
-        String encoded = URLEncoder.encode(origin, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encoded)
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(resource);
+        // 302 Found로 리다이렉트 -> 브라우저가 알아서 다운로드함
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(fileUrl))
+                .build();
     }
 
     // 파일 삭제
-    private void deleteFileFromDisk(String uuidFilename){
-        if(uuidFilename == null) return;
+    private void deleteFileFromDisk(String uuidFilename) {
+        if (uuidFilename == null) return;
 
         String path = Define.UPLOAD_DIRECTORY + File.separator + uuidFilename;
         File file = new File(path);
 
-        if(file.exists()){
+        if (file.exists()) {
             file.delete();
         }
     }

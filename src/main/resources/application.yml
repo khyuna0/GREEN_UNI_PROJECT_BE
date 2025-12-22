@@ -1,6 +1,7 @@
 server:
   port: 8888
 
+
 spring:
   # 1. env
   config:
@@ -16,6 +17,14 @@ spring:
     encoding:
       charset: utf-8
       force: true
+
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+      region:
+        static: ap-northeast-2
 
   # 3. DB
   datasource:
@@ -55,3 +64,9 @@ app:
     gemini:
       api-key: ${GEMINI_API_KEY}
       url: https://generativelanguage.googleapis.com/v1
+
+# 7. s3 image upload
+custom:
+  s3:
+    bucket: green-uni-s3-bucket
+
