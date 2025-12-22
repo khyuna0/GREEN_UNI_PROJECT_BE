@@ -216,7 +216,7 @@ public class StuSubService {
                 stuSubRepository.save(stuSub);
 
                 // 과목 현재 인원 +1
-                subject.setNumOfStudent(subject.getNumOfStudent() + 1);
+                subject.setNumOfStudent(subject.getNumOfStudent());
                 subjectRepository.save(subject);
 
                 // 예비 삭제
