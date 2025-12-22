@@ -50,10 +50,12 @@ jobs:
             ai:
               mistral:
                 api-key: ${{ secrets.MISTRAL_API_KEY }}
-                url: "https://api.mistral.ai/v1/chat/completions"
+                # /chat/completions를 제거합니다.
+                url: "https://api.mistral.ai/v1"
               gemini:
                 api-key: ${{ secrets.GEMINI_API_KEY }}
-                url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+                # 모델명 이전인 /v1beta 까지만 적습니다.
+                url: "https://generativelanguage.googleapis.com/v1beta"
           EOF
 
       - name: Grant execute permission for Gradle
