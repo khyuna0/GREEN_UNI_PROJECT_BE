@@ -121,7 +121,7 @@ public class StuSubService {
         stuSub.setStudent(targetStudent);
         stuSubRepository.save(stuSub); // 수강신청 내역 추가
 
-        // 해당 강의 현재인원 +1
+        // 해당 강의 신청인원
         subjectService.updatePlusNumOfStudent(subjectId);
     }
 

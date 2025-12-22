@@ -29,7 +29,7 @@ import java.util.Objects;
 // 교수 행정 페이지 (자기과목 조회, 학생 성적 기입)
 @RestController
 @RequestMapping("/api/professor")
-@PreAuthorize("hasRole('PROFESSOR')")
+@PreAuthorize("hasAnyRole('PROFESSOR', 'student')")
 public class ProfessorController {
 
 	@Autowired
@@ -42,6 +42,7 @@ public class ProfessorController {
 
 	// ☎️ 1. 교수가 성적을 최종으로 확정 짓고 ai가 돌릴 때
 	@PostMapping("/subjects/{subjectId}/finalize")
+    @PreAuthorize("hasRole('PROFESSOR')")
 	public ResponseEntity<?> finalizeSubjectGrades(@PathVariable Long subjectId) {
 		professorService.finalizeGrades(subjectId);
 		return ResponseEntity.ok().build(); // 바로 200 리턴 (AI는 백그라운드)
@@ -144,6 +145,7 @@ public class ProfessorController {
 	 * @return 해당 과목을 듣는 학생 리스트
 	 */
 	@GetMapping("/subject/{subjectId}")
+    @PreAuthorize("hasRole('PROFESSOR')")
 	public ResponseEntity<?> subjectStudentList(@PathVariable("subjectId") Long subjectId) {
 		List<StudentInfoForProfessorDto> studentList = professorService.selectBySubjectId(subjectId);
 		Subject subject = professorService.selectSubjectById(subjectId);
@@ -157,6 +159,7 @@ public class ProfessorController {
 
     // 교수의 성적 입력 (절대평가 : 등급까지 산출 / 상대평가 : 환산점수까지만 산출, 과락, 결석 F 처리만)
     @PatchMapping("/subject/{subjectId}/{studentId}")
+    @PreAuthorize("hasRole('PROFESSOR')")
     public ResponseEntity<?> updateStudentDetailProc(
             @PathVariable Long subjectId,
             @PathVariable Long studentId,
@@ -173,6 +176,7 @@ public class ProfessorController {
 
     // 상대평가 과목: 전체 학생 등급 산출
     @PatchMapping("/relativeGrade/{subjectId}")
+    @PreAuthorize("hasRole('PROFESSOR')")
     public ResponseEntity<?> relativeGrade (
             @PathVariable Long subjectId
     ) {
@@ -200,6 +204,7 @@ public class ProfessorController {
 	 * @return 강의계획서 업데이트 창
 	 */
 	@PatchMapping("/syllabus/{subjectId}")
+    @PreAuthorize("hasRole('PROFESSOR')")
 	public ResponseEntity<?> createSyllabusProc(@PathVariable("subjectId") Long subjectId, @RequestBody SyllaBusFormDto syllaBusFormDto) {
 		professorService.updateSyllabus(subjectId, syllaBusFormDto);
 
