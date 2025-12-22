@@ -80,8 +80,7 @@ public class NoticeService {
         notice.setTitle(noticeFormDto.getTitle());
         notice.setContent(noticeFormDto.getContent());
 
-        Long views =  noticeFormDto.getViews();
-        notice.setViews(views != null ? views : 0L);
+        notice.setViews(noticeFormDto.getViews() != null ? noticeFormDto.getViews() : 0L);
 
         // createTime 비었으면 지금 시간으로
         notice.setCreatedTime(noticeFormDto.getCreatedTime() != null
