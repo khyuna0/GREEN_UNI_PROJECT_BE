@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-
+// 배포 테스트
 @RestController
 @RequestMapping("/api/sugangperiod")
 @PreAuthorize("hasRole('STAFF')")
