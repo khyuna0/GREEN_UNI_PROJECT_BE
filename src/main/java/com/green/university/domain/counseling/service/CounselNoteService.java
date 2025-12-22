@@ -15,7 +15,7 @@ public class CounselNoteService {
 
     private final CounselNoteRepository repo;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public CounselNoteRsponseDto getNotes(String roomCode) {
         CounselNote note = repo.findByRoomCode(roomCode)
                 .orElseGet(() -> repo.save(CounselNote.builder().roomCode(roomCode).build()));
