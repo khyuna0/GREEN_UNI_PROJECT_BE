@@ -123,6 +123,7 @@ public class DropoutRiskService {
         if (latest.getApprovalState() == ApprovalState.REQUESTED) return "CONSULT_REQ";
         if (latest.getApprovalState() == ApprovalState.REJECTED)  return "CONSULT_REJECTED";
         if (latest.getApprovalState() == ApprovalState.APPROVED)  return "CONSULT_APPROVED";
+        if (latest.getApprovalState() == ApprovalState.CANCELED)  return "CONSULT_CANCELED"; // 상담 취소됨 표시 - 재신청 가능하게
 
         return null;
     }

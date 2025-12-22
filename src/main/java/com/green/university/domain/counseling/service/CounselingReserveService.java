@@ -431,4 +431,64 @@ public class CounselingReserveService {
 
         return pre;
     }
+
+    // 학생이 확정 상담 취소
+    @Transactional
+    public void cancelApprovedByStudent(Long studentId, Long reserveId) {
+        CounselingReserve reserve = getApprovedReserveOrThrow(reserveId);
+
+        if (reserve.getStudent() == null || reserve.getStudent().getId() == null
+                || !reserve.getStudent().getId().equals(studentId)) {
+            throw new CustomRestfullException("본인 예약만 취소할 수 있습니다.", HttpStatus.FORBIDDEN);
+        }
+
+        cancelApprovedInternal(reserve);
+    }
+
+    // 교수가 확정 상담 취소
+    @Transactional
+    public void cancelApprovedByProfessor(Long professorId, Long reserveId) {
+        CounselingReserve reserve = getApprovedReserveOrThrow(reserveId);
+
+        CounselingSchedule schedule = reserve.getCounselingSchedule();
+        if (schedule == null || schedule.getProfessor() == null || schedule.getProfessor().getId() == null) {
+            throw new CustomRestfullException("상담 일정 정보가 없습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        if (!schedule.getProfessor().getId().equals(professorId)) {
+            throw new CustomRestfullException("본인 상담 예약만 취소할 수 있습니다.", HttpStatus.FORBIDDEN);
+        }
+
+        cancelApprovedInternal(reserve);
+    }
+
+    private void cancelApprovedInternal(CounselingReserve reserve) {
+        CounselingSchedule schedule = reserve.getCounselingSchedule();
+        if (schedule == null) {
+            throw new CustomRestfullException("상담 일정 정보가 없습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        // 슬롯 다시 열기
+        schedule.setReserved(false);
+        counselingScheduleRepository.save(schedule);
+
+        // 취소 상태로 변경 (이력 남김)
+        reserve.setApprovalState(ApprovalState.CANCELED);
+        reserve.setRoomCode(null); // 선택 (보안/혼선 방지)
+
+        // DropoutRisk / RiskStatus는 유지 (위험학생 유지 목적)
+        counselingReserveRepository.save(reserve);
+    }
+
+    private CounselingReserve getApprovedReserveOrThrow(Long reserveId) {
+        CounselingReserve reserve = counselingReserveRepository.findById(reserveId)
+                .orElseThrow(() -> new CustomRestfullException("상담 예약을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+
+        if (reserve.getApprovalState() != ApprovalState.APPROVED) {
+            throw new CustomRestfullException("확정된 상담만 취소할 수 있습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        return reserve;
+    }
+
 }

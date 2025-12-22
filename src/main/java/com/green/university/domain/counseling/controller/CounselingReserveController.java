@@ -125,4 +125,20 @@ public class CounselingReserveController {
         Long studentId = principal.getId();
         counselingReserveService.rejectPreReserve(studentId, preReserveId);
     }
+
+    // 학생: 확정 상담 취소
+    @DeleteMapping("/cancel/student")
+    @PreAuthorize("hasRole('STUDENT')")
+    public void cancelByStudent(@RequestParam Long reserveId,
+                                @AuthenticationPrincipal CustomUserDetails principal) {
+        counselingReserveService.cancelApprovedByStudent(principal.getId(), reserveId);
+    }
+
+    // 교수: 확정 상담 취소
+    @DeleteMapping("/cancel/professor")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public void cancelByProfessor(@RequestParam Long reserveId,
+                                  @AuthenticationPrincipal CustomUserDetails principal) {
+        counselingReserveService.cancelApprovedByProfessor(principal.getId(), reserveId);
+    }
 }
