@@ -16,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 
@@ -142,13 +144,27 @@ public class CounselingScheduleService {
         Long professorId = subject.getProfessor().getId();
 
         // 3. 교수의 상담 일정 중 예약 안 된 것만 조회
+        LocalDate nowDate = LocalDate.now(); // 날짜 필터링
+        Long nowTime = (long) LocalTime.now(ZoneId.of("Asia/Seoul")).getHour(); // 시간 필터링
+
         List<CounselingSchedule> schedules =
                 counselingScheduleRepository
-                        .findByProfessor_IdAndReservedFalse(professorId);
+                        .findByProfessor_IdAndReservedFalseAndCounselingDateAfterOrderByCounselingDateAscStartTimeAsc(professorId, nowDate);
+
+        List<CounselingSchedule> afterNowTime = schedules.stream()
+                .filter(s -> {
+                    // 내일 이후 날짜는 무조건 포함
+                    if (s.getCounselingDate().isAfter(nowDate)) return true;
+
+                    // 오늘 날짜라면: 상담 시작 시각(Hour)이 현재 시각보다 커야 함
+                    // s.getStartTime()이 LocalTime 타입이라고 가정합니다.
+                    return s.getStartTime() > nowTime;
+                })
+                .toList();
 
         return Map.of(
                 "subjectName", subject.getName(),
-                "scheduleList", schedules
+                "scheduleList", afterNowTime
         );
     }
 
