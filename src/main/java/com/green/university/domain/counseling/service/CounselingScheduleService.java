@@ -151,7 +151,7 @@ public class CounselingScheduleService {
 
         List<CounselingSchedule> schedules =
                 counselingScheduleRepository
-                        .findByProfessor_IdAndReservedFalseAndCounselingDateAfter(professorId, nowDate);
+                        .findByProfessor_IdAndReservedFalseAndCounselingDateAfterOrderByCounselingDateAscStartTimeAsc(professorId, nowDate);
 
         List<CounselingSchedule> afterNowTime = schedules.stream()
                 .filter(s -> {
