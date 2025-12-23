@@ -149,15 +149,13 @@ public class CounselingScheduleService {
 
         List<CounselingSchedule> schedules =
                 counselingScheduleRepository
-                        .findByProfessor_IdAndReservedFalseAndCounselingDateAfterOrderByCounselingDateAscStartTimeAsc(professorId, nowDate);
+                        .findByProfessor_IdAndReservedFalseAndCounselingDateGreaterThanEqualOrderByCounselingDateAscStartTimeAsc(professorId, nowDate);
 
         List<CounselingSchedule> afterNowTime = schedules.stream()
                 .filter(s -> {
                     // 내일 이후 날짜는 무조건 포함
                     if (s.getCounselingDate().isAfter(nowDate)) return true;
 
-                    // 오늘 날짜라면: 상담 시작 시각(Hour)이 현재 시각보다 커야 함
-                    // s.getStartTime()이 LocalTime 타입이라고 가정합니다.
                     return s.getStartTime() > nowTime;
                 })
                 .toList();

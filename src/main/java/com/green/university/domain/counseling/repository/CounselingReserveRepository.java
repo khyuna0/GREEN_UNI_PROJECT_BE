@@ -94,4 +94,21 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
             Long studentId,
             ReserveRequester requester
     );
+
+    // 학생 아이디, 방 번호, 예약 상태로 유효한 방 조회
+    boolean existsByStudent_IdAndRoomCodeAndApprovalState(
+            Long studentId,
+            String roomCode,
+            ApprovalState approvalState
+    );
+
+    // 교수의 과목 코드 리스트, 방 번호, 예약 상태로 유효한 방 조회
+    boolean existsBySubject_IdInAndRoomCodeAndApprovalState(
+            List<Long> subjectId,
+            String roomCode,
+            ApprovalState approvalState
+    );
+
+    // 룸코드, 예약 상태로 방 조회
+    CounselingReserve findByRoomCodeAndApprovalState(String roomCode, ApprovalState approvalState);
 }

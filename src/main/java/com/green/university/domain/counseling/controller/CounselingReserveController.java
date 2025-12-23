@@ -5,9 +5,13 @@ import com.green.university.domain.counseling.dto.CounselingStudentRequestDto;
 import com.green.university.domain.counseling.service.CounselingReserveService;
 import com.green.university.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalTime;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/reserve")
@@ -141,4 +145,33 @@ public class CounselingReserveController {
                                   @AuthenticationPrincipal CustomUserDetails principal) {
         counselingReserveService.cancelApprovedByProfessor(principal.getId(), reserveId);
     }
+
+    // 자신의 상담 방 코드 확인 (사용자 역할 별 구분, 룸 코드, 신청완료된 일정만)
+    @GetMapping("/verify")
+    public ResponseEntity<?> verifyRoomCode(@RequestParam("code") String roomCode, @AuthenticationPrincipal CustomUserDetails principal) {
+
+        String room = roomCode.trim();
+
+        boolean isValid;
+        if(principal.getUserRole().equals("professor")) {
+            Long professorId = principal.getId();
+            isValid = counselingReserveService.isValidRoomPro(professorId, room);
+
+        } else {
+            Long studentId = principal.getId();
+            isValid = counselingReserveService.isValidRoomStu(studentId,room);
+        }
+
+        return ResponseEntity.ok(isValid);
+
+    }
+
+    // 상담 진행 중 - 남은 시간 확인용
+    @GetMapping("/timeCheck")
+    public ResponseEntity<?> timeCheck(@RequestParam("roomCode") String roomCode) {
+
+        return ResponseEntity.ok(counselingReserveService.getEndTimeMinus10(roomCode));
+    }
 }
+
+
