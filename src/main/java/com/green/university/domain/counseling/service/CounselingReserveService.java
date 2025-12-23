@@ -513,7 +513,7 @@ public class CounselingReserveService {
 
     // 시간 검증( 남은 시간 체크 )
     @Transactional(readOnly = true)
-    public Long getEndTimeMinus10(String roomCode) {
+    public Long getEndAtEpoch(String roomCode) {
 
         CounselingReserve reserve = counselingReserveRepository
                 .findByRoomCodeAndApprovalState(roomCode, ApprovalState.APPROVED);
@@ -522,9 +522,19 @@ public class CounselingReserveService {
             throw new CustomRestfullException("상담 일정이 없습니다.", HttpStatus.NOT_FOUND);
         }
 
-        return  reserve.getCounselingSchedule().getEndTime();
+        CounselingSchedule s = reserve.getCounselingSchedule();
 
+        LocalDateTime startDateTime = s.getCounselingDate()
+                .atTime(s.getStartTime().intValue(), 0);
+
+        LocalDateTime endDateTime = startDateTime.plusMinutes(50);
+
+        return endDateTime
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli();
     }
+
 
 
 }
