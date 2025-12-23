@@ -1,6 +1,7 @@
 package com.green.university.domain.counseling.service;
 
 import com.green.university.domain.counseling.dto.CounselPreReserveDto;
+import com.green.university.domain.counseling.dto.CounselingProfessorOverallRequestDto;
 import com.green.university.domain.counseling.dto.CounselingProfessorRequestDto;
 import com.green.university.domain.counseling.dto.CounselingReserveDto;
 import com.green.university.domain.counseling.dto.CounselingStudentRequestDto;
@@ -12,6 +13,7 @@ import com.green.university.domain.counseling.repository.CounselingReserveReposi
 import com.green.university.domain.counseling.repository.CounselingScheduleRepository;
 import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
 import com.green.university.domain.dropoutrisk.entity.RiskStatus;
+import com.green.university.domain.dropoutrisk.respository.DropoutRiskRepository;
 import com.green.university.domain.student.entity.Student;
 import com.green.university.domain.student.repository.StudentRepository;
 import com.green.university.domain.subject.entity.StuSub;
@@ -19,8 +21,6 @@ import com.green.university.domain.subject.entity.Subject;
 import com.green.university.domain.subject.repository.StuSubRepository;
 import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.global.exception.CustomRestfullException;
-import com.green.university.domain.dropoutrisk.respository.DropoutRiskRepository;
-
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,7 +59,26 @@ public class CounselingReserveService {
     // 최초 상태는 REQUESTED
     public void requestReserve(CounselingStudentRequestDto dto, Long studentId) {
 
-        // 같은 과목으로 "무한 신청" 막기 (REQUESTED 기준, requester 구분)
+        // 위험과목 상담만 동기화
+        // 해당 (학생+과목)에 DropoutRisk가 존재하면, DropoutRisk 기준으로 활성 상담(REQUESTED/APPROVED)이 이미 있으면 막는다.
+        // 일반 상담(위험과목 아닌 상담)은 consultState/동기화 대상이 아니므로 여기에서 제외된다.
+        Optional<DropoutRisk> riskOpt = findDropoutRiskIfExists(studentId, dto.getSubjectId());
+        if (riskOpt.isPresent()) {
+            Long riskId = riskOpt.get().getId();
+            boolean activeRiskCounselExists =
+                    counselingReserveRepository.existsByDropoutRisk_IdAndApprovalStateIn(
+                            riskId,
+                            List.of(ApprovalState.REQUESTED, ApprovalState.APPROVED)
+                    );
+            if (activeRiskCounselExists) {
+                throw new CustomRestfullException(
+                        "이미 해당 위험과목 상담 요청/확정 내역이 있습니다.",
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+        }
+
+        // 같은 과목으로 무한신청막기 (REQUESTED 기준, requester 구분)
         boolean hasMyRequested =
                 counselingReserveRepository.existsByStudent_IdAndSubject_IdAndApprovalStateAndRequester(
                         studentId,
@@ -177,6 +197,7 @@ public class CounselingReserveService {
         schedule.setReserved(true);
 
         // 위험 학생이면 상담 진행 상태로 변경
+        // ✅Overall 상담은 DropoutRisk를 attach하지 않기 때문에 여기서 특정 과목만 바뀌는 일이 사라짐
         if (reserve.getDropoutRisk() != null) {
             DropoutRisk risk = reserve.getDropoutRisk();
             risk.setStatus(RiskStatus.CONSULT_REQ);
@@ -205,7 +226,7 @@ public class CounselingReserveService {
     @Transactional(readOnly = true)
     public List<CounselingReserveDto> getStudentReservationList(Long studentId) {
 
-        return counselingReserveRepository.findByStudentId(studentId)
+        return counselingReserveRepository.findByStudent_Id(studentId)
                 .stream()
                 .map(CounselingReserveDto::new)
                 .toList();
@@ -231,24 +252,12 @@ public class CounselingReserveService {
 
     public int getNotApproved(Long professorId) {
 
-        // 1. 교수의 강의 과목 ID 목록 조회
-        List<Long> subjectIds = subjectRepository
-                .findByProfessor_Id(professorId)
-                .stream()
-                .map(Subject::getId)
-                .toList();
-
-        // 담당 과목이 없으면 빈 리스트
-        if (subjectIds.isEmpty()) {
-            return 0;
-        }
-
-        // 2. 해당 과목들의 미처리 상담 신청 조회
-        return counselingReserveRepository
-                .findBySubject_IdInAndApprovalState(
-                        subjectIds,
-                        ApprovalState.REQUESTED
-                ).size();
+        // 교수의 내 상담슬롯기준 학생이 신청한 REQUESTED만 카운트
+        return counselingReserveRepository.countByCounselingSchedule_Professor_IdAndApprovalStateAndRequester(
+                professorId,
+                ApprovalState.REQUESTED,
+                ReserveRequester.STUDENT
+        );
     }
 
     // 학생 알림용
@@ -282,6 +291,21 @@ public class CounselingReserveService {
 
         Subject subject = subjectRepository.findById(dto.getSubjectId())
                 .orElseThrow(() -> new CustomRestfullException("과목이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+
+        // 위험과목 상담 동기화/중복방지
+        Optional<DropoutRisk> riskOpt = findDropoutRiskIfExists(dto.getStudentId(), dto.getSubjectId());
+        if (riskOpt.isPresent()) {
+            Long riskId = riskOpt.get().getId();
+            boolean activeRiskCounselExists =
+                    counselingReserveRepository.existsByDropoutRisk_IdAndApprovalStateIn(
+                            riskId,
+                            List.of(ApprovalState.REQUESTED, ApprovalState.APPROVED)
+                    );
+
+            if (activeRiskCounselExists) {
+                throw new CustomRestfullException("이미 해당 위험과목 상담 요청/확정 내역이 있습니다.", HttpStatus.CONFLICT);
+            }
+        }
 
         // 과목 기준으로도 중복 요청 방지: 학생이 이미 요청했거나, 교수요청이 이미 있으면 막기
         boolean studentRequested =
@@ -405,6 +429,17 @@ public class CounselingReserveService {
 
     // ===================== 중복 제거용 private helper =====================
 
+    // 위험과목 여부 판단용: (학생+과목)에서 DropoutRisk가 있으면 반환
+    private Optional<DropoutRisk> findDropoutRiskIfExists(Long studentId, Long subjectId) {
+        StuSub stuSub = stuSubRepository
+                .findByStudent_IdAndSubject_Id(studentId, subjectId)
+                .orElse(null);
+
+        if (stuSub == null) return Optional.empty();
+
+        return dropoutRiskRepository.findByStuSub_Id(stuSub.getId());
+    }
+
     // 위험학생이면 dropoutRisk 연결 (학생+과목의 StuSub 기반)
     private void attachDropoutRiskIfExists(CounselingReserve reserve, Long studentId, Long subjectId) {
         StuSub stuSub = stuSubRepository
@@ -490,5 +525,4 @@ public class CounselingReserveService {
 
         return reserve;
     }
-
 }

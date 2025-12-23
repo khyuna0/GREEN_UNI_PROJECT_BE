@@ -62,8 +62,9 @@ public class DropoutRiskService {
         map.put("pending", dropoutRisks.stream().filter(
                         r -> r.getStatus().equals(RiskStatus.DETECTED) || r.getStatus().equals(RiskStatus.CONSULT_REQ))
                 .map(r -> {
-                    // 교수요청 최신 상태를 보고 "거절됨(재요청 가능)" 계산
-                    String consultState = computeConsultState(r);
+                    // 위험과목 상담 동기화: DropoutRisk에 연결된 상담예약 기준으로 상태 계산
+                    // 내 통합상담을 내 과목 위험row에 반영해야 하므로 professorId도 같이 넘긴다.
+                    String consultState = computeConsultState(r, professorId);
                     return DropoutRiskResponseDto.fromEntity(r, consultState);
                 })
                 .collect(Collectors.toList()));
@@ -71,7 +72,7 @@ public class DropoutRiskService {
         map.put("resolved", dropoutRisks.stream().filter(
                         r -> r.getStatus().equals(RiskStatus.RESOLVED))
                 .map(r -> {
-                    String consultState = computeConsultState(r); // resolved도 같이 내려주고 싶으면 유지
+                    String consultState = computeConsultState(r, professorId); // resolved도 같이 내려주고 싶으면 유지
                     return DropoutRiskResponseDto.fromEntity(r, consultState);
                 })
                 .collect(Collectors.toList()));
@@ -154,41 +155,32 @@ public class DropoutRiskService {
         } else {
             // 해당 학과 + 특정 과목 + 특정 위험레벨
             return dropoutRiskRepository.findByStuSub_Student_Department_IdAndStuSub_Subject_IdAndRiskLevel(
-                    departmentId, subjectId, riskLevel
+                    departmentId,
+                    subjectId,
+                    riskLevel
             );
         }
     }
 
-    // 교수요청 최신 reserve 상태를 기반으로 UI 표시용 문자열 반환
-    // - REQUESTED -> "CONSULT_REQ"
-    // - REJECTED  -> "CONSULT_REJECTED"
-    // - APPROVED  -> "CONSULT_APPROVED"
-    // - 없으면 null
+    // 위험과목 상담 동기화 전용 consultState 계산
+    // DropoutRisk에 연결된 CounselingReserve 최신 1건을 기준으로 UI 상태를 계산한다.
+    // 일반 상담(위험과목 아닌 상담)은 consultState에 영향을 주지 않음.
     private String computeConsultState(DropoutRisk risk) {
-        if (risk == null || risk.getStuSub() == null) return null;
+        if (risk == null || risk.getId() == null) return null;
 
-        Long studentId = risk.getStuSub().getStudent().getId();
-        Long subjectId = risk.getStuSub().getSubject().getId();
-
-        Optional<CounselingReserve> latestOpt = counselingReserveRepository
-                .findTop1ByStudent_IdAndSubject_IdAndRequesterOrderByIdDesc(
-                        studentId,
-                        subjectId,
-                        ReserveRequester.PROFESSOR
-                );
-
-        if (latestOpt.isEmpty()) return null;
-        CounselingReserve latest = latestOpt.get();
-
-        if (latest.getApprovalState() == null) return null;
-
-        if (latest.getApprovalState() == ApprovalState.REQUESTED) return "CONSULT_REQ";
-        if (latest.getApprovalState() == ApprovalState.REJECTED)  return "CONSULT_REJECTED";
-        if (latest.getApprovalState() == ApprovalState.APPROVED)  return "CONSULT_APPROVED";
-        if (latest.getApprovalState() == ApprovalState.CANCELED)  return "CONSULT_CANCELED"; // 상담 취소됨 표시 - 재신청 가능하게
-
-        return null;
+        return counselingReserveRepository.findTop1ByDropoutRisk_IdOrderByIdDesc(risk.getId())
+                .map(r -> {
+                    if (r.getApprovalState() == null) return null;
+                    return switch (r.getApprovalState()) {
+                        case REQUESTED -> "CONSULT_REQ";
+                        case APPROVED  -> "CONSULT_APPROVED";
+                        case REJECTED  -> "CONSULT_REJECTED";
+                        case CANCELED  -> "CONSULT_CANCELED";
+                    };
+                })
+                .orElse(null);
     }
+
 
     // =============== AI 분석 + 저장 로직 ===============
     // 출결 및 성적 기반 위험도 계산 + AI 분석 요청 + DB 저장
@@ -304,7 +296,7 @@ public class DropoutRiskService {
         return null; // 정상
     }
 
-    // ===================== 학생 통합(탈락 위험) 리스트 =====================
+    // 학생 통합(탈락 위험) 리스트
     // 학과 교수들" 화면에서 학생 단위로 위험을 합쳐서 보여주기
     // - rule: 위험 과목이 여러 개면 overall DANGER/WARNING 상승
     // - 담당(지정) 교수: 학생 기준 최신 "교수요청" 상담예약(Reserve)에서 계산
@@ -345,6 +337,9 @@ public class DropoutRiskService {
                     // 담당 교수(지정) 표시: 학생 기준 가장 최근 교수요청
                     AssignedProfessor assigned = computeAssignedProfessor(studentId);
 
+                    // ✅ [MOD] 내(로그인 교수) 기준 통합상담 상태 (다른 교수 통합상담과 분리)
+                    ApprovalState myOverall = computeMyOverallApprovalState(studentId, professorId);
+
                     return DropoutStudentRiskRowDto.builder()
                             .studentId(studentId)
                             .studentName(studentName)
@@ -356,6 +351,8 @@ public class DropoutRiskService {
                             .assignedProfessorId(assigned.professorId)
                             .assignedProfessorName(assigned.professorName)
                             .assignedAt(assigned.assignedAt)
+                            .assignedApprovalState(assigned.approvalState)
+                            .myOverallApprovalState(myOverall)
                             .build();
                 })
                 // 위험도 높은 학생 먼저 + 최신 업데이트 먼저
@@ -376,7 +373,7 @@ public class DropoutRiskService {
         return students;
     }
 
-    // ✅ 학생 통합 위험 등급 계산 (최소 규칙)
+    // 학생 통합 위험 등급 계산 (최소 규칙)
     // - DANGER 과목이 2개 이상 -> DANGER
     // - DANGER 1개 + WARNING 1개 이상 -> DANGER
     // - DANGER 1개 -> WARNING
@@ -396,40 +393,63 @@ public class DropoutRiskService {
         return 1;
     }
 
-    // ===================== 담당(지정) 교수 계산 =====================
-    // 학생 기준으로 가장 최근에 "교수 요청" 상담예약을 만든 교수를 담당으로 표시
-    // 둘 다에게 노출되지만, 책임자 표시가 생김
+    // 내(로그인 교수) 기준 통합상담 상태 조회
+    // - 통합상담은 subject=null && dropoutRisk=null && requester=PROFESSOR 로 판별한다.
+    private ApprovalState computeMyOverallApprovalState(Long studentId, Long professorId) {
+        Optional<CounselingReserve> myOverallOpt =
+                counselingReserveRepository.findTop1OverallByStudentAndProfessor(studentId, professorId);
+
+        return myOverallOpt.map(CounselingReserve::getApprovalState).orElse(null);
+    }
+
+    // 학생 기준 가장 최근에 교수 요청 상담예약을 만든 교수를 담당으로 표시
+    // 통합상담/교수요청 기준 담당교수 계산 + approvalState(처리중 표시용)까지 같이 내려줌
     private AssignedProfessor computeAssignedProfessor(Long studentId) {
+
+        // 1) 통합(OVERALL) 상담이 있으면 그걸 우선
+        // 통합상담 판별을 "dropoutRisk null"이 아니라 "subject null && dropoutRisk null"로 고정한다.
+        Optional<CounselingReserve> overallOpt =
+                counselingReserveRepository.findTop1OverallByStudent(studentId);
+
+        if (overallOpt.isPresent()) {
+            CounselingReserve latest = overallOpt.get();
+            return buildAssignedFromReserve(latest);
+        }
+
+        // 2) 통합이 없으면 기존 방식: 학생 기준 가장 최근 교수요청 1건
         Optional<CounselingReserve> latestOpt = counselingReserveRepository
-                .findTop1ByStudent_IdAndRequesterOrderByIdDesc(studentId, ReserveRequester.PROFESSOR);
+                .findTop1ByStudent_IdAndRequesterOrderByIdDesc(
+                        studentId,
+                        com.green.university.domain.counseling.entity.ReserveRequester.PROFESSOR
+                );
 
         if (latestOpt.isEmpty()) {
-            return new AssignedProfessor(null, null, null);
+            return new AssignedProfessor(null, null, null, null);
         }
 
-        CounselingReserve latest = latestOpt.get();
+        return buildAssignedFromReserve(latestOpt.get());
+    }
 
-        // CounselingReserve에는 professor/createdAt이 없어서
-        // 교수는 CounselingSchedule -> Professor 로 접근해야 함
-        if (latest.getCounselingSchedule() == null || latest.getCounselingSchedule().getProfessor() == null) {
-            return new AssignedProfessor(null, null, null);
+    // reserve -> AssignedProfessor 변환 (중복 제거)
+    private AssignedProfessor buildAssignedFromReserve(CounselingReserve reserve) {
+        if (reserve == null) return new AssignedProfessor(null, null, null, null);
+
+        if (reserve.getCounselingSchedule() == null || reserve.getCounselingSchedule().getProfessor() == null) {
+            return new AssignedProfessor(null, null, null, reserve.getApprovalState());
         }
 
-        Long pid = latest.getCounselingSchedule().getProfessor().getId();
-        String pname = latest.getCounselingSchedule().getProfessor().getName();
+        Long pid = reserve.getCounselingSchedule().getProfessor().getId();
+        String pname = reserve.getCounselingSchedule().getProfessor().getName();
 
-
-        // 정시에 받고 50분까지 (예: 15:00 ~ 15:50)
-        // -> "상담 일정 날짜 + 시작시간"으로 assignedAt 표기
-        LocalDate date = latest.getCounselingSchedule().getCounselingDate();
-        LocalTime time = toLocalTime(latest.getCounselingSchedule().getStartTime());
+        LocalDate date = reserve.getCounselingSchedule().getCounselingDate();
+        LocalTime time = toLocalTime(reserve.getCounselingSchedule().getStartTime());
 
         LocalDateTime at = null;
         if (date != null && time != null) {
             at = LocalDateTime.of(date, time);
         }
 
-        return new AssignedProfessor(pid, pname, at);
+        return new AssignedProfessor(pid, pname, at, reserve.getApprovalState());
     }
 
     // startTime(Long)을 LocalTime으로 변환
@@ -453,5 +473,30 @@ public class DropoutRiskService {
     }
 
     // 내부용 record (DTO에 바로 넣기 전 중간값)
-    private record AssignedProfessor(Long professorId, String professorName, LocalDateTime assignedAt) {}
+    private record AssignedProfessor(Long professorId, String professorName, LocalDateTime assignedAt, ApprovalState approvalState) {}
+
+    // 학과 기준: 선택 학생의 위험과목 전체
+    @Transactional(readOnly = true)
+    public List<DropoutRiskResponseDto> getDepartmentPendingRisks(Long studentId, RiskLevel level, Long professorId) {
+
+        // 교수의 학과를 얻어서 같은 학과 학생만 보이게
+        Long deptId = professorRepository.findById(professorId)
+                .orElseThrow(() -> new CustomRestfullException("교수 정보 없음", HttpStatus.BAD_REQUEST))
+                .getDepartment().getId();
+
+        // 같은 학과의 위험 데이터 중에서, studentId만 필터
+        List<DropoutRisk> list;
+
+        if (level == null) {
+            list = dropoutRiskRepository
+                    .findByStuSub_Student_Department_IdAndStuSub_Student_Id(deptId, studentId);
+        } else {
+            list = dropoutRiskRepository
+                    .findByStuSub_Student_Department_IdAndStuSub_Student_IdAndRiskLevel(deptId, studentId, level);
+        }
+
+        return list.stream()
+                .map(r -> DropoutRiskResponseDto.fromEntity(r, computeConsultState(r, professorId)) /* + consultState 필요하면 여기서 계산 */)
+                .toList();
+    }
 }

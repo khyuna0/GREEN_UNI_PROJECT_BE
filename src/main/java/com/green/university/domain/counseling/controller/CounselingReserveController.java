@@ -1,13 +1,17 @@
 package com.green.university.domain.counseling.controller;
 
+import com.green.university.domain.counseling.dto.CounselingProfessorOverallRequestDto;
 import com.green.university.domain.counseling.dto.CounselingProfessorRequestDto;
 import com.green.university.domain.counseling.dto.CounselingStudentRequestDto;
 import com.green.university.domain.counseling.service.CounselingReserveService;
 import com.green.university.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/reserve")
@@ -63,6 +67,7 @@ public class CounselingReserveController {
         Long professorId = principal.getId();
         return counselingReserveService.getProfessorReservationList(professorId);
     }
+
 
     // 처리되지 않은 학생 상담 신청 목록 조회
     @GetMapping("/notApplicated")

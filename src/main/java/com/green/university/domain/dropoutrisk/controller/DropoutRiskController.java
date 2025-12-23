@@ -1,14 +1,13 @@
 package com.green.university.domain.dropoutrisk.controller;
 
-import com.green.university.domain.dropoutrisk.entity.RiskLevel;
-import com.green.university.global.exception.CustomRestfullException;
-import com.green.university.global.security.CustomUserDetails;
-import com.green.university.domain.dropoutrisk.respository.DropoutRiskRepository;
 import com.green.university.domain.dropoutrisk.dto.DropoutRiskResponseDto;
 import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
+import com.green.university.domain.dropoutrisk.entity.RiskLevel;
 import com.green.university.domain.dropoutrisk.entity.RiskStatus;
+import com.green.university.domain.dropoutrisk.respository.DropoutRiskRepository;
 import com.green.university.domain.dropoutrisk.service.DropoutRiskService;
-import com.green.university.infra.ai.service.AiAnalysisService;
+import com.green.university.global.exception.CustomRestfullException;
+import com.green.university.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 public class DropoutRiskController {
 
     private final DropoutRiskRepository dropoutRiskRepository;
-    private final AiAnalysisService aiAnalysisService;
     private final DropoutRiskService dropoutRiskService;
 
     // (조회) 해당 교수 + ai 위험 분석 결과를 상담 완료, 미완료로 테이블로 보여주기 + 검색 필터
@@ -69,6 +68,20 @@ public class DropoutRiskController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(dtos);
+    }
+
+    // 우리학과 중도이탈 위험 학생: 선택 학생의 위험과목 전체 조회
+    @GetMapping("/list/department")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public Map<String, Object> departmentPending(
+            @RequestParam Long studentId,
+            @RequestParam(required = false) RiskLevel level,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        Long professorId = principal.getId();
+        List<DropoutRiskResponseDto> pending =
+                dropoutRiskService.getDepartmentPendingRisks(studentId, level, professorId);
+        return Map.of("pending", pending);
     }
 
     // 학생 내 위험 과목 리스트 조회
