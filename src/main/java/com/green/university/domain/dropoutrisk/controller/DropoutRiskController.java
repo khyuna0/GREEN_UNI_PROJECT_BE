@@ -36,11 +36,23 @@ public class DropoutRiskController {
     public ResponseEntity<?> getRisksByGroup(@RequestParam(required = false) Long subjectId,
                                              @RequestParam(required = false) String level,
                                              @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
         Long professorId = customUserDetails.getId();
         RiskLevel riskLevel = (level != null && !level.isEmpty()) ? RiskLevel.valueOf(level) : null;
-        return ResponseEntity.ok(dropoutRiskService.getRisksByStatus(subjectId, riskLevel, professorId));
-    }
 
+        // 과목 담당교수 기준
+        var grouped = dropoutRiskService.getRisksByStatus(subjectId, riskLevel, professorId);
+
+        // 학과 기준 통합(탈락 위험)
+        // subjectId는 통합 학생 리스트에선 보통 의미 없어서(학과 전체) 무시 추천
+        var students = dropoutRiskService.getStudentOverallRisks(null, riskLevel, professorId);
+
+        return ResponseEntity.ok(java.util.Map.of(
+                "pending", grouped.get("pending"),
+                "resolved", grouped.get("resolved"),
+                "students", students
+        ));
+    }
 
     // 교수가 본인의 특정 과목(subjectId)에서 위험 학생 목록 조회
     @GetMapping("/{subjectId}")
@@ -85,8 +97,6 @@ public class DropoutRiskController {
         return ResponseEntity.ok(risks.stream().map(DropoutRiskResponseDto::fromEntity).toList());
     }
 
-
-
     // =========================================================
 
     // (관리자/교수) 특정 riskId를 강제로 AI 재분석하고 싶을 때
@@ -98,29 +108,5 @@ public class DropoutRiskController {
 //                "riskId", riskId,
 //                "message", "AI 분석 요청 완료"
 //        ));
-//    }
-
-//     // (교수용) 내 강의의 위험 학생 리스트 조회
-//    @GetMapping("/professor/list")
-//    public ResponseEntity<?> getRiskStudentsForProfessor(@AuthenticationPrincipal CustomUserDetails principal) {
-//        // principal.getId()가 교수 ID라고 가정
-//        List<DropoutRisk> risks = dropoutRiskRepository.findBySubject_Professor_Id(principal.getId());
-//        return ResponseEntity.ok(risks);
-//    }
-//
-//    // (학생용) 나의 경고/위험 알림 조회 (홈 화면 배너용)
-//    @GetMapping("/my-status")
-//    public ResponseEntity<?> getMyRiskStatus(@AuthenticationPrincipal CustomUserDetails principal) {
-//        // 해결된(RESOLVED) 건은 제외하고 조회
-//        List<DropoutRisk> myRisks = dropoutRiskRepository.findByStudent_IdAndStatusNot(principal.getId(), RiskStatus.RESOLVED);
-//        return ResponseEntity.ok(myRisks);
-//    }
-//
-//    // (공통) 위험 상세 조회 (AI 분석 내용 포함)
-//    @GetMapping("/{riskId}")
-//    public ResponseEntity<?> getRiskDetail(@PathVariable Long riskId) {
-//        DropoutRisk risk = dropoutRiskRepository.findById(riskId)
-//                .orElseThrow(() -> new RuntimeException("해당 내역이 없습니다."));
-//        return ResponseEntity.ok(risk);
 //    }
 }

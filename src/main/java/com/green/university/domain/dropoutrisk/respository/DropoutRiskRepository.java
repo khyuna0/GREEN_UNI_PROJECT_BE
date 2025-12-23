@@ -36,12 +36,28 @@ public interface DropoutRiskRepository extends JpaRepository<DropoutRisk, Long> 
 
     List<DropoutRisk> findByRiskLevel(RiskLevel riskLevel);
 
+    // ===================== 기존: 과목 담당교수 기준 =====================
     List<DropoutRisk> findByStuSub_Subject_Professor_Id(Long professorId);
+
     List<DropoutRisk> findByStuSub_Subject_Professor_IdAndRiskLevel(
             Long professorId,
             RiskLevel riskLevel
     );
 
-    List<DropoutRisk> findByStuSub_Student_IdAndStatusIn(Long studentId, List<RiskStatus> statusList);
+    // 학생 소속 학과 기준
+    // Student 엔티티 필드가 department가 아니라면 여기 경로를 맞춰줘야 함.
+    List<DropoutRisk> findByStuSub_Student_Department_Id(Long departmentId);
 
+    List<DropoutRisk> findByStuSub_Student_Department_IdAndRiskLevel(Long departmentId, RiskLevel riskLevel);
+
+    List<DropoutRisk> findByStuSub_Student_Department_IdAndStuSub_Subject_Id(Long departmentId, Long subjectId);
+
+    List<DropoutRisk> findByStuSub_Student_Department_IdAndStuSub_Subject_IdAndRiskLevel(
+            Long departmentId,
+            Long subjectId,
+            RiskLevel riskLevel
+    );
+
+    // 학생 내 위험 과목 리스트(상태 in)
+    List<DropoutRisk> findByStuSub_Student_IdAndStatusIn(Long studentId, List<RiskStatus> statusList);
 }

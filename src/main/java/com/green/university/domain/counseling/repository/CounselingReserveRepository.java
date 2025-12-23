@@ -87,4 +87,11 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
             Long subjectId,
             ReserveRequester requester
     );
+
+
+    // 학생 기준 가장 최근 교수요청 1건 가져오기 (담당교수 표시용)
+    Optional<CounselingReserve> findTop1ByStudent_IdAndRequesterOrderByIdDesc(
+            Long studentId,
+            ReserveRequester requester
+    );
 }

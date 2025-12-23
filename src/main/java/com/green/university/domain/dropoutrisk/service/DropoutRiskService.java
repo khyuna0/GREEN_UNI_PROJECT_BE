@@ -3,10 +3,17 @@ package com.green.university.domain.dropoutrisk.service;
 import com.green.university.domain.counseling.entity.ApprovalState;
 import com.green.university.domain.counseling.entity.CounselingReserve;
 import com.green.university.domain.counseling.entity.ReserveRequester;
-import com.green.university.domain.counseling.repository.CounselingReserveRepository; // ✅ [추가]
+import com.green.university.domain.counseling.repository.CounselingReserveRepository;
 import com.green.university.domain.dropoutrisk.dto.DropoutRiskResponseDto;
+import com.green.university.domain.dropoutrisk.dto.DropoutStudentRiskRowDto;
+import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
+import com.green.university.domain.dropoutrisk.entity.RiskLevel;
+import com.green.university.domain.dropoutrisk.entity.RiskStatus;
+import com.green.university.domain.dropoutrisk.entity.RiskType;
 import com.green.university.domain.dropoutrisk.respository.DropoutRiskRepository;
 import com.green.university.domain.grade.service.GradeService;
+import com.green.university.domain.professor.entity.Professor;
+import com.green.university.domain.professor.repository.ProfessorRepository;
 import com.green.university.domain.subject.entity.StuSub;
 import com.green.university.domain.subject.entity.StuSubDetail;
 import com.green.university.domain.subject.entity.Subject;
@@ -14,10 +21,6 @@ import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.infra.ai.dto.AiRiskAnalysisRequest;
 import com.green.university.infra.ai.dto.AiRiskAnalysisResult;
-import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
-import com.green.university.domain.dropoutrisk.entity.RiskLevel;
-import com.green.university.domain.dropoutrisk.entity.RiskStatus;
-import com.green.university.domain.dropoutrisk.entity.RiskType;
 import com.green.university.infra.ai.service.AiAnalysisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,10 +28,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -44,36 +47,15 @@ public class DropoutRiskService {
 
     private final CounselingReserveRepository counselingReserveRepository; // consultState 계산용
 
+    private final ProfessorRepository professorRepository; // 학과 교수들에게 보여주기위해 교수의 학과ID 조회용
+
     // ================= 조회 로직 추가 =================
     // 해당 교수의 강의 중 + 상담 미완료, 완료된 학생을 나눠서 보여주기 + 검색 (과목, 위험레벨)
     @Transactional(readOnly = true)
     public Map<String, List<DropoutRiskResponseDto>> getRisksByStatus(Long subjectId, RiskLevel riskLevel, Long professorId) {
-        List<DropoutRisk> dropoutRisks;
 
-        // 1. subjectId 있으면 해당 과목이 교수 강의인지 검증
-        if (subjectId != null) {
-            Subject subject = subjectRepository.findById(subjectId).orElseThrow(
-                    () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
-            );
-            if (!subject.getProfessor().getId().equals(professorId)) {
-                throw new CustomRestfullException("본인 강의만 조회 할 수 있습니다.", HttpStatus.FORBIDDEN);
-            }
-        }
-
-        // 2. 조건에 따라 조회 (항상 professorId 포함)
-        if (subjectId == null && riskLevel == null) {
-            // 해당 교수의 모든 과목 위험학생
-            dropoutRisks = dropoutRiskRepository.findByStuSub_Subject_Professor_Id(professorId);
-        } else if (riskLevel == null) {
-            // 특정 과목 위험학생 (이미 위에서 교수 검증 완료)
-            dropoutRisks = dropoutRiskRepository.findByStuSub_Subject_Id(subjectId);
-        } else if (subjectId == null) {
-            // 해당 교수의 모든 과목 중 특정 위험레벨
-            dropoutRisks = dropoutRiskRepository.findByStuSub_Subject_Professor_IdAndRiskLevel(professorId, riskLevel);
-        } else {
-            // 특정 과목 + 특정 위험레벨 (이미 위에서 교수 검증 완료)
-            dropoutRisks = dropoutRiskRepository.findByStuSub_Subject_IdAndRiskLevel(subjectId, riskLevel);
-        }
+        // 과목 담당교수 기준으로 위험학생 조회 (subjectId/riskLevel 필터 가능)
+        List<DropoutRisk> dropoutRisks = loadDropoutRisksBySubjectProfessor(professorId, subjectId, riskLevel);
 
         Map<String, List<DropoutRiskResponseDto>> map = new HashMap<>();
 
@@ -95,6 +77,86 @@ public class DropoutRiskService {
                 .collect(Collectors.toList()));
 
         return map;
+    }
+
+    // 과목 담당교수 기준 위험학생 조회 (subjectId/riskLevel 필터)
+    private List<DropoutRisk> loadDropoutRisksBySubjectProfessor(Long professorId, Long subjectId, RiskLevel riskLevel) {
+
+        // subjectId가 들어오면, "내 과목인지" 검증
+        if (subjectId != null) {
+            Subject subject = subjectRepository.findById(subjectId).orElseThrow(
+                    () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+            );
+
+            if (subject.getProfessor() == null || subject.getProfessor().getId() == null ||
+                    !subject.getProfessor().getId().equals(professorId)) {
+                throw new CustomRestfullException("본인 강의만 조회 할 수 있습니다.", HttpStatus.FORBIDDEN);
+            }
+        }
+
+        // 조건에 따라 조회
+        if (subjectId == null && riskLevel == null) {
+            // 해당 교수의 모든 과목 위험학생
+            return dropoutRiskRepository.findByStuSub_Subject_Professor_Id(professorId);
+        } else if (subjectId != null && riskLevel == null) {
+            // 특정 과목 위험학생 (이미 위에서 교수 검증 완료)
+            return dropoutRiskRepository.findByStuSub_Subject_Id(subjectId);
+        } else if (subjectId == null) {
+            // 해당 교수의 모든 과목 중 특정 위험레벨
+            return dropoutRiskRepository.findByStuSub_Subject_Professor_IdAndRiskLevel(professorId, riskLevel);
+        } else {
+            // 특정 과목 + 특정 위험레벨 (이미 위에서 교수 검증 완료)
+            return dropoutRiskRepository.findByStuSub_Subject_IdAndRiskLevel(subjectId, riskLevel);
+        }
+    }
+
+    // 교수의 소속 학과 id 가져오기
+    private Long getProfessorDepartmentId(Long professorId) {
+        Professor professor = professorRepository.findById(professorId).orElseThrow(
+                () -> new CustomRestfullException("교수 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+        );
+
+        // ⚠️ 교수 엔티티에서 학과 필드명이 다르면 여기만 수정
+        if (professor.getDepartment() == null) {
+            throw new CustomRestfullException("교수의 소속 학과 정보가 없습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        return professor.getDepartment().getId();
+    }
+
+    // 학과 기준 위험학생 조회 (subjectId/riskLevel 필터)
+    // (통합(탈락위험) 학생 목록에서 사용)
+    private List<DropoutRisk> loadDropoutRisksByDepartment(Long departmentId, Long subjectId, RiskLevel riskLevel) {
+
+        // subjectId가 들어오면, 학과 과목인지 검증
+        if (subjectId != null) {
+            Subject subject = subjectRepository.findById(subjectId).orElseThrow(
+                    () -> new CustomRestfullException("해당 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
+            );
+
+            // ⚠️ Subject에 department가 없을 수 있으므로 professor.department 기준으로 검증 (필드명 다르면 여기만 수정)
+            if (subject.getProfessor() == null || subject.getProfessor().getDepartment() == null ||
+                    !subject.getProfessor().getDepartment().getId().equals(departmentId)) {
+                throw new CustomRestfullException("본인 학과 과목만 조회 할 수 있습니다.", HttpStatus.FORBIDDEN);
+            }
+        }
+
+        // 조건에 따라 조회
+        if (subjectId == null && riskLevel == null) {
+            // 해당 학과 학생들의 모든 위험학생
+            return dropoutRiskRepository.findByStuSub_Student_Department_Id(departmentId);
+        } else if (subjectId != null && riskLevel == null) {
+            // 해당 학과 + 특정 과목
+            return dropoutRiskRepository.findByStuSub_Student_Department_IdAndStuSub_Subject_Id(departmentId, subjectId);
+        } else if (subjectId == null) {
+            // 해당 학과 + 특정 위험레벨
+            return dropoutRiskRepository.findByStuSub_Student_Department_IdAndRiskLevel(departmentId, riskLevel);
+        } else {
+            // 해당 학과 + 특정 과목 + 특정 위험레벨
+            return dropoutRiskRepository.findByStuSub_Student_Department_IdAndStuSub_Subject_IdAndRiskLevel(
+                    departmentId, subjectId, riskLevel
+            );
+        }
     }
 
     // 교수요청 최신 reserve 상태를 기반으로 UI 표시용 문자열 반환
@@ -123,6 +185,7 @@ public class DropoutRiskService {
         if (latest.getApprovalState() == ApprovalState.REQUESTED) return "CONSULT_REQ";
         if (latest.getApprovalState() == ApprovalState.REJECTED)  return "CONSULT_REJECTED";
         if (latest.getApprovalState() == ApprovalState.APPROVED)  return "CONSULT_APPROVED";
+        if (latest.getApprovalState() == ApprovalState.CANCELED)  return "CONSULT_CANCELED"; // 상담 취소됨 표시 - 재신청 가능하게
 
         return null;
     }
@@ -240,4 +303,155 @@ public class DropoutRiskService {
 
         return null; // 정상
     }
+
+    // ===================== 학생 통합(탈락 위험) 리스트 =====================
+    // 학과 교수들" 화면에서 학생 단위로 위험을 합쳐서 보여주기
+    // - rule: 위험 과목이 여러 개면 overall DANGER/WARNING 상승
+    // - 담당(지정) 교수: 학생 기준 최신 "교수요청" 상담예약(Reserve)에서 계산
+    @Transactional(readOnly = true)
+    public List<DropoutStudentRiskRowDto> getStudentOverallRisks(Long subjectId, RiskLevel riskLevel, Long professorId) {
+
+        // 교수의 소속 학과 id
+        Long departmentId = getProfessorDepartmentId(professorId);
+
+        // 학과 기준으로 위험학생 조회
+        List<DropoutRisk> dropoutRisks = loadDropoutRisksByDepartment(departmentId, subjectId, riskLevel);
+
+        // 학생 통합 위험은 보통 미완료(=현재 개입 필요) 기준
+        // DETECTED/CONSULT_REQ만 모아서 학생 단위로 합산함
+        Map<Long, List<DropoutRisk>> groupedByStudent = dropoutRisks.stream()
+                .filter(r -> r.getStatus() == RiskStatus.DETECTED || r.getStatus() == RiskStatus.CONSULT_REQ)
+                .filter(r -> r.getStuSub() != null && r.getStuSub().getStudent() != null)
+                .collect(Collectors.groupingBy(r -> r.getStuSub().getStudent().getId()));
+
+        List<DropoutStudentRiskRowDto> students = groupedByStudent.entrySet().stream()
+                .map(e -> {
+                    Long studentId = e.getKey();
+                    List<DropoutRisk> rs = e.getValue();
+
+                    String studentName = rs.get(0).getStuSub().getStudent().getName();
+
+                    int dangerCount = (int) rs.stream().filter(r -> r.getRiskLevel() == RiskLevel.DANGER).count();
+                    int warningCount = (int) rs.stream().filter(r -> r.getRiskLevel() == RiskLevel.WARNING).count();
+
+                    String overallLevel = computeOverallLevel(dangerCount, warningCount);
+
+                    LocalDateTime latest = rs.stream()
+                            .map(DropoutRisk::getUpdatedAt)
+                            .filter(Objects::nonNull)
+                            .max(Comparator.naturalOrder())
+                            .orElse(null);
+
+                    // 담당 교수(지정) 표시: 학생 기준 가장 최근 교수요청
+                    AssignedProfessor assigned = computeAssignedProfessor(studentId);
+
+                    return DropoutStudentRiskRowDto.builder()
+                            .studentId(studentId)
+                            .studentName(studentName)
+                            .dangerCount(dangerCount)
+                            .warningCount(warningCount)
+                            .overallLevel(overallLevel)
+                            .reason("DANGER " + dangerCount + ", WARNING " + warningCount)
+                            .updatedAt(latest)
+                            .assignedProfessorId(assigned.professorId)
+                            .assignedProfessorName(assigned.professorName)
+                            .assignedAt(assigned.assignedAt)
+                            .build();
+                })
+                // 위험도 높은 학생 먼저 + 최신 업데이트 먼저
+                .sorted((a, b) -> {
+                    int ra = overallRank(a.getOverallLevel());
+                    int rb = overallRank(b.getOverallLevel());
+                    if (ra != rb) return Integer.compare(rb, ra);
+
+                    LocalDateTime ta = a.getUpdatedAt();
+                    LocalDateTime tb = b.getUpdatedAt();
+                    if (ta == null && tb == null) return 0;
+                    if (ta == null) return 1;
+                    if (tb == null) return -1;
+                    return tb.compareTo(ta);
+                })
+                .toList();
+
+        return students;
+    }
+
+    // ✅ 학생 통합 위험 등급 계산 (최소 규칙)
+    // - DANGER 과목이 2개 이상 -> DANGER
+    // - DANGER 1개 + WARNING 1개 이상 -> DANGER
+    // - DANGER 1개 -> WARNING
+    // - WARNING 2개 이상 -> WARNING
+    // - 그 외 -> NORMAL
+    private String computeOverallLevel(int dangerCount, int warningCount) {
+        if (dangerCount >= 2) return "DANGER";
+        if (dangerCount >= 1 && warningCount >= 1) return "DANGER";
+        if (dangerCount >= 1) return "WARNING";
+        if (warningCount >= 2) return "WARNING";
+        return "NORMAL";
+    }
+
+    private int overallRank(String lvl) {
+        if ("DANGER".equals(lvl)) return 3;
+        if ("WARNING".equals(lvl)) return 2;
+        return 1;
+    }
+
+    // ===================== 담당(지정) 교수 계산 =====================
+    // 학생 기준으로 가장 최근에 "교수 요청" 상담예약을 만든 교수를 담당으로 표시
+    // 둘 다에게 노출되지만, 책임자 표시가 생김
+    private AssignedProfessor computeAssignedProfessor(Long studentId) {
+        Optional<CounselingReserve> latestOpt = counselingReserveRepository
+                .findTop1ByStudent_IdAndRequesterOrderByIdDesc(studentId, ReserveRequester.PROFESSOR);
+
+        if (latestOpt.isEmpty()) {
+            return new AssignedProfessor(null, null, null);
+        }
+
+        CounselingReserve latest = latestOpt.get();
+
+        // CounselingReserve에는 professor/createdAt이 없어서
+        // 교수는 CounselingSchedule -> Professor 로 접근해야 함
+        if (latest.getCounselingSchedule() == null || latest.getCounselingSchedule().getProfessor() == null) {
+            return new AssignedProfessor(null, null, null);
+        }
+
+        Long pid = latest.getCounselingSchedule().getProfessor().getId();
+        String pname = latest.getCounselingSchedule().getProfessor().getName();
+
+
+        // 정시에 받고 50분까지 (예: 15:00 ~ 15:50)
+        // -> "상담 일정 날짜 + 시작시간"으로 assignedAt 표기
+        LocalDate date = latest.getCounselingSchedule().getCounselingDate();
+        LocalTime time = toLocalTime(latest.getCounselingSchedule().getStartTime());
+
+        LocalDateTime at = null;
+        if (date != null && time != null) {
+            at = LocalDateTime.of(date, time);
+        }
+
+        return new AssignedProfessor(pid, pname, at);
+    }
+
+    // startTime(Long)을 LocalTime으로 변환
+    // - 주로 HHmm(예: 900, 1500) 형태를 가정
+    // - 혹시 15 처럼 시간만 저장해도 대응(정시)
+    private LocalTime toLocalTime(Long v) {
+        if (v == null) return null;
+
+        // 15, 9 처럼 "시간만" 들어오면 정시로 처리
+        if (v >= 0 && v <= 23) {
+            return LocalTime.of(v.intValue(), 0);
+        }
+
+        // 900, 1500 같은 HHmm
+        String s = String.format("%04d", v);
+        int hh = Integer.parseInt(s.substring(0, 2));
+        int mm = Integer.parseInt(s.substring(2, 4));
+
+        if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return null;
+        return LocalTime.of(hh, mm);
+    }
+
+    // 내부용 record (DTO에 바로 넣기 전 중간값)
+    private record AssignedProfessor(Long professorId, String professorName, LocalDateTime assignedAt) {}
 }
