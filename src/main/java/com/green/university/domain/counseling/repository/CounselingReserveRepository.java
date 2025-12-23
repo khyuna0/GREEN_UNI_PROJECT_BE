@@ -6,6 +6,8 @@ import com.green.university.domain.counseling.entity.ReserveRequester;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -95,19 +97,27 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
             ReserveRequester requester
     );
 
-    // 학생 아이디, 방 번호, 예약 상태로 유효한 방 조회
-    boolean existsByStudent_IdAndRoomCodeAndApprovalState(
+    // 학생 아이디, 방 번호, 예약 상태, 시간으로 유효한 방 조회
+    boolean existsByStudent_IdAndRoomCodeAndApprovalStateAndCounselingSchedule_StartTimeAndCounselingSchedule_EndTimeAndCounselingSchedule_CounselingDate(
             Long studentId,
             String roomCode,
-            ApprovalState approvalState
+            ApprovalState approvalState,
+            Long now,
+            Long now2,
+            LocalDate date
+
     );
 
-    // 교수의 과목 코드 리스트, 방 번호, 예약 상태로 유효한 방 조회
-    boolean existsBySubject_IdInAndRoomCodeAndApprovalState(
-            List<Long> subjectId,
+    // 교수의 과목 코드 리스트, 방 번호, 예약 상태, 시간으로 유효한 방 조회
+    boolean existsBySubject_IdInAndRoomCodeAndApprovalStateAndCounselingSchedule_StartTimeAndCounselingSchedule_EndTimeAndCounselingSchedule_CounselingDate(
+            List<Long> subjectIds,
             String roomCode,
-            ApprovalState approvalState
+            ApprovalState approvalState,
+            Long now,
+            Long now2,
+            LocalDate date
     );
+
 
     // 룸코드, 예약 상태로 방 조회
     CounselingReserve findByRoomCodeAndApprovalState(String roomCode, ApprovalState approvalState);

@@ -146,7 +146,7 @@ public class CounselingReserveController {
         counselingReserveService.cancelApprovedByProfessor(principal.getId(), reserveId);
     }
 
-    // 자신의 상담 방 코드 확인 (사용자 역할 별 구분, 룸 코드, 신청완료된 일정만)
+    // 자신의 상담 방 코드 확인 (사용자 역할 별 구분, 룸 코드, 신청완료된 일정만, 시작시간 ~ 종료시간 사이만 입장가능)
     @GetMapping("/verify")
     public ResponseEntity<?> verifyRoomCode(@RequestParam("code") String roomCode, @AuthenticationPrincipal CustomUserDetails principal) {
 
@@ -170,7 +170,7 @@ public class CounselingReserveController {
     @GetMapping("/timeCheck")
     public ResponseEntity<?> timeCheck(@RequestParam("roomCode") String roomCode) {
 
-        return ResponseEntity.ok(counselingReserveService.getEndTimeMinus10(roomCode));
+        return ResponseEntity.ok(Map.of("endAt", counselingReserveService.getEndAtEpoch(roomCode)));
     }
 }
 
