@@ -1,6 +1,5 @@
 package com.green.university.domain.counseling.controller;
 
-import com.green.university.domain.counseling.dto.CounselingProfessorOverallRequestDto;
 import com.green.university.domain.counseling.dto.CounselingProfessorRequestDto;
 import com.green.university.domain.counseling.dto.CounselingStudentRequestDto;
 import com.green.university.domain.counseling.service.CounselingReserveService;
@@ -11,7 +10,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalTime;
 import java.util.Map;
 
 @RestController
