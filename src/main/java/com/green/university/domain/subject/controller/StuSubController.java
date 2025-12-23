@@ -6,7 +6,10 @@ import com.green.university.domain.breakapp.entity.BreakApp;
 import com.green.university.domain.breakapp.service.BreakAppService;
 import com.green.university.domain.student.dto.StuStatDto;
 import com.green.university.domain.student.dto.StudentDto;
+import com.green.university.domain.student.entity.Student;
+import com.green.university.domain.student.repository.StudentRepository;
 import com.green.university.domain.student.service.StuStatService;
+import com.green.university.domain.student.service.StudentService;
 import com.green.university.domain.subject.dto.CurrentSemesterSubjectSearchFormDto;
 import com.green.university.domain.subject.dto.StuSubAppDto;
 import com.green.university.domain.subject.dto.SubjectDto;
@@ -56,6 +59,8 @@ public class StuSubController {
     private UserService userService;
     @Autowired
     private SugangPeriodService sugangPeriodService;
+    @Autowired
+    private StudentService studentService;
 
 
     // ========================= 관리자 기능 =========================
@@ -77,14 +82,20 @@ public class StuSubController {
 
     // ========================= 학생 기능 =========================
     // 🔥 수강 신청 탭에서 보여지는 전체 강의 시간표 조회 (현재 연도, 학기에 해당하는 강의 + 페이징 + 검색)
+    // 로그인한 학생의 전공 + 모든 교양 과목
     @GetMapping("/subjectList")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<?> sugangSubjectList(
+    public ResponseEntity<?> sugangSubjectList2(
             @ModelAttribute CurrentSemesterSubjectSearchFormDto dto,
-            @PageableDefault(page = 0, size = Define.SUBJECT_PAGE_SIZE, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+            @PageableDefault(page = 0, size = Define.SUBJECT_PAGE_SIZE, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
+            @AuthenticationPrincipal CustomUserDetails principal) {
+
+        // 로그인한 학생의 학과 ID 추출
+        Long studentId = principal.getId();
+        Long studentDeptId = studentService.getStudentDepartmentId(studentId);
 
         // 현재 연도, 학기에 맞는 강의 목록
-        Page<SubjectDto> subjectList = subjectService.readSubjectListByCurrentSemesterPage(dto, pageable);
+        Page<SubjectDto> subjectList = subjectService.readSubjectListByCurrentSemesterPage(dto, studentDeptId, pageable);
 
         Map<String, Object> pagingResponse = new HashMap<>();
         pagingResponse.put("listCount", subjectList.getTotalElements());
@@ -108,10 +119,14 @@ public class StuSubController {
         if (currentStatus != 0) {
             throw new CustomRestfullException("예비 수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
         }
-        Long studentId = principal.getId();
 
+        Long studentId = principal.getId();
+        // 학과 ID 추출 추가
+        Long studentDeptId = studentService.getStudentDepartmentId(studentId);
+
+        Page<SubjectDto> subjectList = subjectService.readSubjectListByCurrentSemesterPage(dto, studentDeptId, pageable);
         // 현재 연도, 학기에 맞는 강의 목록
-        Page<SubjectDto> subjectList = subjectService.readSubjectListByCurrentSemesterPage(dto, pageable); // 현재 학기에 맞는 강의 목록
+        //Page<SubjectDto> subjectList = subjectService.readSubjectListByCurrentSemesterPage(dto, pageable); // 현재 학기에 맞는 강의 목록
 
         // 학생이 예비 수강 신청을 했는지 여부 (status = false, true)
         for (SubjectDto sub : subjectList) {
@@ -170,10 +185,14 @@ public class StuSubController {
         if (currentStatus != 1) {
             throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
         }
-        Long studentId = principal.getId();
 
+        Long studentId = principal.getId();
+        Long studentDeptId = studentService.getStudentDepartmentId(studentId);
+
+        // studentDeptId 추가!
+        Page<SubjectDto> subjectPage = subjectService.readSubjectListByCurrentSemesterPage(dto, studentDeptId, pageable);
         // 현재 연도, 학기에 맞는 강의 목록
-        Page<SubjectDto> subjectPage = subjectService.readSubjectListByCurrentSemesterPage(dto, pageable);
+        //Page<SubjectDto> subjectPage = subjectService.readSubjectListByCurrentSemesterPage(dto, pageable);
 
         // 방법1. 학생의 수강 신청 여부(status)를 SubjectDto에 추가하는 것
         for (SubjectDto sub : subjectPage) {
@@ -214,8 +233,7 @@ public class StuSubController {
         if (currentStatus != 1) {
             throw new CustomRestfullException("수강 신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
         }
-        System.out.println("subjectId = " + subjectId);
-        System.out.println("principal = " + principal.getId());
+
         stuSubService.createStuSub(principal.getId(), subjectId);
         preStuSubService.deleteBySubject_Id(subjectId);
         return ResponseEntity.ok().body("수강 신청이 정상적으로 처리되었습니다.");
@@ -296,7 +314,7 @@ public class StuSubController {
     }
 
 
-    // 아마도 학생의 최종 수강 신청 내역 (아래 timetable 쓰면 될 듯..)
+    // 아마도 학생의 최종 수강 신청 내역
     @GetMapping("/list")
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> stuSubAppList(@AuthenticationPrincipal CustomUserDetails principal) {

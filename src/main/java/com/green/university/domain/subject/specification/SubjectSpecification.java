@@ -8,6 +8,27 @@ import org.springframework.data.jpa.domain.Specification;
 // 데이터베이스에서 데이터를 조회할 때 동적인 쿼리를 작성할 수 있는 jpa에서 제공하는 인터페이스
 public class SubjectSpecification {
 
+    // 학생의 전공 과목 + 모든 교양 과목만
+    public static Specification<Subject> forStudentDepartment(Long studentDeptId) {
+        return (root, query, cb) -> {
+            if (studentDeptId == null) {
+                return null;
+            }
+
+            return cb.or(
+                    // 조건1: 전공 과목 중 학생의 전공만
+                    cb.and(
+                            cb.equal(root.get("type"), "전공"),
+                            cb.equal(root.get("department").get("id"), studentDeptId)
+                    ),
+                    // 조건2: 모든 교양
+                    cb.equal(root.get("type"), "교양")
+            );
+        };
+    }
+
+
+
     // 현재 연도, 학기로 찾기
     public static Specification<Subject> currentSemester(Long subYear, Long semester) {
         return (root, query, cb) ->

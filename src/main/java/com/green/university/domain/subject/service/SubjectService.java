@@ -63,29 +63,38 @@ public class SubjectService {
     }
 
     // 🔥 수강 신청에 사용할 강의 정보 (학생용) 현재 연도-학기에 해당하는 강의만 출력 + 페이징 처리 + 검색
+    // 로그인한 학생의 전공 + 모든 교양 과목
     @Transactional(readOnly = true)
-    public Page<SubjectDto> readSubjectListByCurrentSemesterPage(CurrentSemesterSubjectSearchFormDto dto, Pageable pageable) {
+    public Page<SubjectDto> readSubjectListByCurrentSemesterPage(CurrentSemesterSubjectSearchFormDto dto, Long studentDeptId, Pageable pageable) {
         String type = dto.getType();
         String deptName = dto.getDeptName();
         String name = dto.getName();
 
-        // 조건 없이 전체 조회
-        Specification<Subject> spec = (root, query, cb) -> null;
+        // 1️⃣ 기본 조건: 현재 연도, 학기
+        Specification<Subject> spec = Specification.where(
+                SubjectSpecification.currentSemester(TermUtil.currentYear(), TermUtil.currentSemester())
+        );
 
-        // 현재 연도, 학기에 해당하는 과목
-        spec = spec.and(SubjectSpecification.currentSemester(TermUtil.currentYear(), TermUtil.currentSemester()));
-        // 전공 또는 교양
-        if (type != null && !type.isEmpty()) {
-            spec = spec.and(SubjectSpecification.hasType(type));
+        // 2️⃣ type 검색 안 하면 → 내 전공 + 모든 교양
+        if (type == null || type.isEmpty()) {
+            spec = spec.and(SubjectSpecification.forStudentDepartment(studentDeptId));
         }
-        // 학과명
-        if (deptName != null) {
+        // 3️⃣ type 검색하면 → 전공이면 내 학과만, 교양이면 모든 교양
+        else {
+            spec = spec.and(SubjectSpecification.hasType(type));
+            if ("전공".equals(type)) {
+                spec = spec.and(SubjectSpecification.hasDepartmentId(studentDeptId));
+            }
+        }
+
+        // 4️⃣ 추가 검색 조건
+        if (deptName != null && !deptName.isEmpty()) {
             spec = spec.and(SubjectSpecification.hasDepartmentName(deptName));
         }
-        // 강의명
         if (name != null && !name.isEmpty()) {
             spec = spec.and(SubjectSpecification.nameContains(name));
         }
+
         Page<Subject> subjectPage = subjectRepository.findAll(spec, pageable);
         return subjectPage.map(SubjectDto::fromEntity);
     }

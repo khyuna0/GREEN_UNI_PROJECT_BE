@@ -64,9 +64,3 @@ app:
     gemini:
       api-key: ${GEMINI_API_KEY}
       url: https://generativelanguage.googleapis.com/v1
-
-# 7. s3 image upload
-custom:
-  s3:
-    bucket: green-uni-s3-bucket
-
