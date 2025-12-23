@@ -27,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -496,7 +497,8 @@ public class CounselingReserveService {
 
     // 할당된 방 검증 - 학생
     public boolean isValidRoomStu(Long studentId, String roomCode) {
-        return counselingReserveRepository.existsByStudent_IdAndRoomCodeAndApprovalState(studentId, roomCode, ApprovalState.APPROVED);
+        long startTime = LocalTime.now().getHour();
+        return counselingReserveRepository.existsByStudent_IdAndRoomCodeAndApprovalStateAndCounselingSchedule_StartTimeAndCounselingSchedule_EndTimeAndCounselingSchedule_CounselingDate(studentId, roomCode, ApprovalState.APPROVED, startTime, startTime+1, LocalDate.now());
     }
 
     // 할당된 방 검증 - 교수
@@ -505,7 +507,8 @@ public class CounselingReserveService {
         List<Long> subjectIds = subjects.stream()
                 .map(Subject::getId)
                 .toList();
-        return counselingReserveRepository.existsBySubject_IdInAndRoomCodeAndApprovalState(subjectIds, roomCode, ApprovalState.APPROVED);
+        long startTime = LocalTime.now().getHour();
+        return counselingReserveRepository.existsBySubject_IdInAndRoomCodeAndApprovalStateAndCounselingSchedule_StartTimeAndCounselingSchedule_EndTimeAndCounselingSchedule_CounselingDate(subjectIds, roomCode, ApprovalState.APPROVED, startTime, startTime+1, LocalDate.now());
     }
 
     // 시간 검증( 남은 시간 체크 )
