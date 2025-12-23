@@ -70,4 +70,6 @@ public interface DropoutRiskRepository extends JpaRepository<DropoutRisk, Long> 
             Long studentId,
             RiskLevel riskLevel
     );
+    // 학생 내 위험 과목 리스트
+    List<DropoutRisk> findByStuSub_Student_Id(Long studentId);
 }

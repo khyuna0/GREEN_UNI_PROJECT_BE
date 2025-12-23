@@ -10,7 +10,6 @@ import com.green.university.domain.notice.specification.NoticeSpecification;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.utils.Define;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -201,7 +200,7 @@ public class NoticeService {
     // 파일 처리 메서드들
     // 로직들이 공지에 종속되어있어서 일단 여기에 두는게 나음
     // 빼려고 하면 FileStorageService로 분리
-    
+
     // 파일 사이즈 제한
     private void validateFileSize(MultipartFile file){
         if(file.getSize() > Define.MAX_FILE_SIZE){

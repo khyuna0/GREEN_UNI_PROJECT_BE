@@ -1,6 +1,7 @@
 server:
   port: 8888
 
+
 spring:
   # 1. env
   config:
@@ -16,6 +17,14 @@ spring:
     encoding:
       charset: utf-8
       force: true
+
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+      region:
+        static: ap-northeast-2
 
   # 3. DB
   datasource:

@@ -5,10 +5,12 @@ import com.green.university.domain.student.entity.Student;
 import com.green.university.domain.student.repository.StudentRepository;
 import com.green.university.domain.student.specification.StudentSpecification;
 import com.green.university.domain.university.repository.DepartmentRepository;
+import com.green.university.global.exception.CustomRestfullException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -85,6 +87,13 @@ public class StudentService {
             }
         }
         return totalUpdated;
+    }
 
+    @Transactional (readOnly = true)
+    public Long getStudentDepartmentId (Long studentId) {
+        Student student = studentRepository.findById(studentId).orElseThrow(
+                () -> new CustomRestfullException("학생 정보를 찾을 수 없습니다",  HttpStatus.NOT_FOUND)
+        );
+        return student.getDepartment().getId();
     }
 }

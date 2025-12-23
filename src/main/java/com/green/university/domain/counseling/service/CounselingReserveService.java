@@ -27,6 +27,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,19 +42,14 @@ public class CounselingReserveService {
 
     @Autowired
     private CounselingReserveRepository counselingReserveRepository;
-
     @Autowired
     private CounselingScheduleRepository counselingScheduleRepository;
-
     @Autowired
     private StudentRepository studentRepository;
-
     @Autowired
     private SubjectRepository subjectRepository;
-
     @Autowired
     private StuSubRepository stuSubRepository;
-
     @Autowired
     private DropoutRiskRepository dropoutRiskRepository;
 
@@ -197,7 +196,6 @@ public class CounselingReserveService {
         schedule.setReserved(true);
 
         // 위험 학생이면 상담 진행 상태로 변경
-        // ✅Overall 상담은 DropoutRisk를 attach하지 않기 때문에 여기서 특정 과목만 바뀌는 일이 사라짐
         if (reserve.getDropoutRisk() != null) {
             DropoutRisk risk = reserve.getDropoutRisk();
             risk.setStatus(RiskStatus.CONSULT_REQ);
@@ -264,7 +262,7 @@ public class CounselingReserveService {
     @Transactional(readOnly = true)
     public java.util.Map<String, Integer> getMyCounts(Long studentId) {
         int requested = counselingReserveRepository.countByStudent_IdAndApprovalState(studentId, ApprovalState.REQUESTED);
-        int approved  = counselingReserveRepository.countByStudent_IdAndApprovalState(studentId, ApprovalState.APPROVED);
+        int approved = counselingReserveRepository.countByStudent_IdAndApprovalState(studentId, ApprovalState.APPROVED);
         return java.util.Map.of("requested", requested, "approved", approved);
     }
 
@@ -497,6 +495,35 @@ public class CounselingReserveService {
         cancelApprovedInternal(reserve);
     }
 
+    // ===================== 중복 제거용 private helper =====================
+
+    // 위험학생이면 dropoutRisk 연결 (학생+과목의 StuSub 기반)
+    private void attachDropoutRiskIfExists(CounselingReserve reserve, Long studentId, Long subjectId) {
+        StuSub stuSub = stuSubRepository
+                .findByStudent_IdAndSubject_Id(studentId, subjectId)
+                .orElse(null);
+
+        if (stuSub != null) {
+            dropoutRiskRepository.findByStuSub_Id(stuSub.getId()).ifPresent(reserve::setDropoutRisk);
+        }
+    }
+
+    // 학생 본인 요청 + REQUESTED 상태인 교수요청만 가져오기
+    private CounselingReserve getRequestedPreOrThrow(Long studentId, Long preReserveId) {
+        CounselingReserve pre = counselingReserveRepository.findById(preReserveId)
+                .orElseThrow(() -> new CustomRestfullException("상담 요청이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+
+        if (pre.getStudent() == null || pre.getStudent().getId() == null || !pre.getStudent().getId().equals(studentId)) {
+            throw new CustomRestfullException("본인에게 온 요청만 처리할 수 있습니다.", HttpStatus.FORBIDDEN);
+        }
+
+        if (pre.getApprovalState() != ApprovalState.REQUESTED) {
+            throw new CustomRestfullException("이미 처리된 요청입니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        return pre;
+    }
+
     private void cancelApprovedInternal(CounselingReserve reserve) {
         CounselingSchedule schedule = reserve.getCounselingSchedule();
         if (schedule == null) {
@@ -525,4 +552,43 @@ public class CounselingReserveService {
 
         return reserve;
     }
-}
+
+    // 할당된 방 검증 - 학생
+    public boolean isValidRoomStu(Long studentId, String roomCode) {
+        long startTime = LocalTime.now().getHour();
+        return counselingReserveRepository.existsByStudent_IdAndRoomCodeAndApprovalStateAndCounselingSchedule_StartTimeAndCounselingSchedule_EndTimeAndCounselingSchedule_CounselingDate(studentId, roomCode, ApprovalState.APPROVED, startTime, startTime+1, LocalDate.now());
+    }
+
+    // 할당된 방 검증 - 교수
+    public boolean isValidRoomPro(Long professorId, String roomCode) {
+        List<Subject> subjects = subjectRepository.findByProfessor_Id(professorId);
+        List<Long> subjectIds = subjects.stream()
+                .map(Subject::getId)
+                .toList();
+        long startTime = LocalTime.now().getHour();
+        return counselingReserveRepository.existsBySubject_IdInAndRoomCodeAndApprovalStateAndCounselingSchedule_StartTimeAndCounselingSchedule_EndTimeAndCounselingSchedule_CounselingDate(subjectIds, roomCode, ApprovalState.APPROVED, startTime, startTime+1, LocalDate.now());
+    }
+
+    // 시간 검증( 남은 시간 체크 )
+    @Transactional(readOnly = true)
+    public Long getEndAtEpoch(String roomCode) {
+
+        CounselingReserve reserve = counselingReserveRepository
+                .findByRoomCodeAndApprovalState(roomCode, ApprovalState.APPROVED);
+
+        if (reserve == null) {
+            throw new CustomRestfullException("상담 일정이 없습니다.", HttpStatus.NOT_FOUND);
+        }
+
+        CounselingSchedule s = reserve.getCounselingSchedule();
+
+        LocalDateTime startDateTime = s.getCounselingDate()
+                .atTime(s.getStartTime().intValue(), 0);
+
+        LocalDateTime endDateTime = startDateTime.plusMinutes(50);
+
+        return endDateTime
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli();
+    }

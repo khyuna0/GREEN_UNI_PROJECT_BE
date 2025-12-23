@@ -49,7 +49,7 @@ public class DropoutRiskService {
 
     private final ProfessorRepository professorRepository; // 학과 교수들에게 보여주기위해 교수의 학과ID 조회용
 
-    // ================= 조회 로직 추가 =================
+
     // 해당 교수의 강의 중 + 상담 미완료, 완료된 학생을 나눠서 보여주기 + 검색 (과목, 위험레벨)
     @Transactional(readOnly = true)
     public Map<String, List<DropoutRiskResponseDto>> getRisksByStatus(Long subjectId, RiskLevel riskLevel, Long professorId) {
@@ -180,6 +180,10 @@ public class DropoutRiskService {
                 })
                 .orElse(null);
     }
+        if (latest.getApprovalState() == ApprovalState.REQUESTED) return "CONSULT_REQ";
+        if (latest.getApprovalState() == ApprovalState.REJECTED) return "CONSULT_REJECTED";
+        if (latest.getApprovalState() == ApprovalState.APPROVED) return "CONSULT_APPROVED";
+        if (latest.getApprovalState() == ApprovalState.CANCELED) return "CONSULT_CANCELED"; // 상담 취소됨 표시 - 재신청 가능하게
 
 
     // =============== AI 분석 + 저장 로직 ===============
@@ -257,6 +261,23 @@ public class DropoutRiskService {
         log.info("💾 DB 저장 완료 - riskId: {}, studentName: {}, type: {}", risk.getId(), stuSub.getStudent().getName(), analysis.type);
     }
 
+    // 룸코드 + 예약승인된 예약의 상태 RESOLVED, FINISHED로 변경하기
+    @Transactional
+    public void completeCounseling(String roomCode) {
+        CounselingReserve reserve = counselingReserveRepository.findByRoomCodeAndApprovalState(roomCode, ApprovalState.APPROVED);
+        if (reserve == null) {
+            throw new CustomRestfullException("승인된 상담 예약을 찾을 수 없습니다. (roomCode: " + roomCode + ")", HttpStatus.NOT_FOUND);
+        }
+        DropoutRisk dropoutRisk = reserve.getDropoutRisk();
+        if (dropoutRisk != null) {
+            dropoutRisk.setStatus(RiskStatus.RESOLVED);
+            dropoutRiskRepository.save(dropoutRisk);
+        }
+        reserve.setApprovalState(ApprovalState.FINISHED);
+    }
+
+
+    // ================= 헬퍼 메서드 =================
     // 내부적으로 쓰는 위험 분석 결과 클래스
     private record RiskAnalysis(RiskType type, RiskLevel level) {
     }
@@ -498,5 +519,7 @@ public class DropoutRiskService {
         return list.stream()
                 .map(r -> DropoutRiskResponseDto.fromEntity(r, computeConsultState(r, professorId)) /* + consultState 필요하면 여기서 계산 */)
                 .toList();
+    }
+    private record AssignedProfessor(Long professorId, String professorName, LocalDateTime assignedAt) {
     }
 }

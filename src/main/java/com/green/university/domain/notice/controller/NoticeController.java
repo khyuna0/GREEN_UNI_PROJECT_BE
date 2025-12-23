@@ -6,7 +6,6 @@ import com.green.university.domain.notice.dto.NoticePageFormDto;
 import com.green.university.domain.notice.entity.Notice;
 import com.green.university.domain.notice.service.NoticeService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
