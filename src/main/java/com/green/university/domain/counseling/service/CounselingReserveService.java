@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -51,6 +52,18 @@ public class CounselingReserveService {
     private StuSubRepository stuSubRepository;
     @Autowired
     private DropoutRiskRepository dropoutRiskRepository;
+
+    // reserve db의 내용을 가져오기 (requester에 따라 나누기)
+    public Map<String, List<CounselingReserve>> getListByRequester() {
+        counselingReserveRepository.findByRequester(ReserveRequester.STUDENT);
+        counselingReserveRepository.findByRequester(ReserveRequester.PROFESSOR);
+
+        // dto 형식이 있는 지 확인 ..
+        Map<String, List<CounselingReserve>> map = new HashMap<>();
+        map.put("student", counselingReserveRepository.findByRequester(ReserveRequester.STUDENT));
+        map.put("professor", counselingReserveRepository.findByRequester(ReserveRequester.PROFESSOR));
+        return map;
+    }
 
     // 학생 상담 신청
     // 하나의 상담 일정에 여러 학생이 동시에 신청 가능

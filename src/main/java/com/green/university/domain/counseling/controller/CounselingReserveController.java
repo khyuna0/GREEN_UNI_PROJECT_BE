@@ -2,6 +2,8 @@ package com.green.university.domain.counseling.controller;
 
 import com.green.university.domain.counseling.dto.CounselingProfessorRequestDto;
 import com.green.university.domain.counseling.dto.CounselingStudentRequestDto;
+import com.green.university.domain.counseling.entity.CounselingReserve;
+import com.green.university.domain.counseling.repository.CounselingReserveRepository;
 import com.green.university.domain.counseling.service.CounselingReserveService;
 import com.green.university.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
@@ -11,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -20,8 +23,18 @@ public class CounselingReserveController {
 
     private final CounselingReserveService counselingReserveService;
 
-    public CounselingReserveController(CounselingReserveService counselingReserveService) {
+    public CounselingReserveController(CounselingReserveService counselingReserveService, CounselingReserveRepository counselingReserveRepository) {
         this.counselingReserveService = counselingReserveService;
+    }
+
+    // reserve db의 내용을 가져오기 (requester에 따라 나누기)
+    @GetMapping("/list/requester")
+    public ResponseEntity<?> getListByRequester(@AuthenticationPrincipal CustomUserDetails principal) {
+        Map<String, List<CounselingReserve>> listByRequester = counselingReserveService.getListByRequester();
+        return ResponseEntity.ok(Map.of(
+                "student", listByRequester.get("student"),
+                "professor", listByRequester.get("professor")
+        ));
     }
 
     // 학생 상담 신청

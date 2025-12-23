@@ -14,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -42,7 +43,7 @@ public class DropoutRiskController {
         // subjectId는 통합 학생 리스트에선 보통 의미 없어서(학과 전체) 무시 추천
         var students = dropoutRiskService.getStudentOverallRisks(null, riskLevel, professorId);
 
-        return ResponseEntity.ok(java.util.Map.of(
+        return ResponseEntity.ok(Map.of(
                 "pending", grouped.get("pending"),
                 "resolved", grouped.get("resolved"),
                 "students", students
