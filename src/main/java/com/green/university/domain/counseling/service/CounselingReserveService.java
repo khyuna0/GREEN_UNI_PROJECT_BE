@@ -41,19 +41,14 @@ public class CounselingReserveService {
 
     @Autowired
     private CounselingReserveRepository counselingReserveRepository;
-
     @Autowired
     private CounselingScheduleRepository counselingScheduleRepository;
-
     @Autowired
     private StudentRepository studentRepository;
-
     @Autowired
     private SubjectRepository subjectRepository;
-
     @Autowired
     private StuSubRepository stuSubRepository;
-
     @Autowired
     private DropoutRiskRepository dropoutRiskRepository;
 
@@ -407,35 +402,6 @@ public class CounselingReserveService {
         counselingReserveRepository.save(pre);
     }
 
-    // ===================== 중복 제거용 private helper =====================
-
-    // 위험학생이면 dropoutRisk 연결 (학생+과목의 StuSub 기반)
-    private void attachDropoutRiskIfExists(CounselingReserve reserve, Long studentId, Long subjectId) {
-        StuSub stuSub = stuSubRepository
-                .findByStudent_IdAndSubject_Id(studentId, subjectId)
-                .orElse(null);
-
-        if (stuSub != null) {
-            dropoutRiskRepository.findByStuSub_Id(stuSub.getId()).ifPresent(reserve::setDropoutRisk);
-        }
-    }
-
-    // 학생 본인 요청 + REQUESTED 상태인 교수요청만 가져오기
-    private CounselingReserve getRequestedPreOrThrow(Long studentId, Long preReserveId) {
-        CounselingReserve pre = counselingReserveRepository.findById(preReserveId)
-                .orElseThrow(() -> new CustomRestfullException("상담 요청이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
-
-        if (pre.getStudent() == null || pre.getStudent().getId() == null || !pre.getStudent().getId().equals(studentId)) {
-            throw new CustomRestfullException("본인에게 온 요청만 처리할 수 있습니다.", HttpStatus.FORBIDDEN);
-        }
-
-        if (pre.getApprovalState() != ApprovalState.REQUESTED) {
-            throw new CustomRestfullException("이미 처리된 요청입니다.", HttpStatus.BAD_REQUEST);
-        }
-
-        return pre;
-    }
-
     // 학생이 확정 상담 취소
     @Transactional
     public void cancelApprovedByStudent(Long studentId, Long reserveId) {
@@ -464,6 +430,35 @@ public class CounselingReserveService {
         }
 
         cancelApprovedInternal(reserve);
+    }
+
+    // ===================== 중복 제거용 private helper =====================
+
+    // 위험학생이면 dropoutRisk 연결 (학생+과목의 StuSub 기반)
+    private void attachDropoutRiskIfExists(CounselingReserve reserve, Long studentId, Long subjectId) {
+        StuSub stuSub = stuSubRepository
+                .findByStudent_IdAndSubject_Id(studentId, subjectId)
+                .orElse(null);
+
+        if (stuSub != null) {
+            dropoutRiskRepository.findByStuSub_Id(stuSub.getId()).ifPresent(reserve::setDropoutRisk);
+        }
+    }
+
+    // 학생 본인 요청 + REQUESTED 상태인 교수요청만 가져오기
+    private CounselingReserve getRequestedPreOrThrow(Long studentId, Long preReserveId) {
+        CounselingReserve pre = counselingReserveRepository.findById(preReserveId)
+                .orElseThrow(() -> new CustomRestfullException("상담 요청이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+
+        if (pre.getStudent() == null || pre.getStudent().getId() == null || !pre.getStudent().getId().equals(studentId)) {
+            throw new CustomRestfullException("본인에게 온 요청만 처리할 수 있습니다.", HttpStatus.FORBIDDEN);
+        }
+
+        if (pre.getApprovalState() != ApprovalState.REQUESTED) {
+            throw new CustomRestfullException("이미 처리된 요청입니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        return pre;
     }
 
     private void cancelApprovedInternal(CounselingReserve reserve) {

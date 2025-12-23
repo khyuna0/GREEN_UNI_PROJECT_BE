@@ -119,6 +119,6 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
     );
 
 
-    // 룸코드, 예약 상태로 방 조회
+    // 룸코드, 상담 예약 승인 상태로 방 조회
     CounselingReserve findByRoomCodeAndApprovalState(String roomCode, ApprovalState approvalState);
 }

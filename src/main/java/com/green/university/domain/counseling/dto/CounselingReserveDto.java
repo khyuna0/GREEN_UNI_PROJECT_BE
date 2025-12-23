@@ -40,9 +40,6 @@ public class CounselingReserveDto {
     // 누가 요청했는지 (STUDENT / PROFESSOR)
     private ReserveRequester requester;
 
-    // 상담 날짜가 지났는지(상담완료 분리용)
-    private boolean past;
-
     public CounselingReserveDto(CounselingReserve entity) {
         this.id = entity.getId();
         this.student = entity.getStudent();
@@ -53,14 +50,5 @@ public class CounselingReserveDto {
         this.reason = entity.getReason();
         this.approvalState = entity.getApprovalState();
         this.requester = entity.getRequester();
-
-        // past 계산 (상담일정 날짜 기준)
-        // 상담일정이 없거나 날짜가 없으면 false
-        if (this.counselingSchedule != null && this.counselingSchedule.getCounselingDate() != null) {
-            LocalDate date = this.counselingSchedule.getCounselingDate();
-            this.past = date.isBefore(LocalDate.now());
-        } else {
-            this.past = false;
-        }
     }
 }
