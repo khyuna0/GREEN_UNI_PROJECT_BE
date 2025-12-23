@@ -27,6 +27,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -255,7 +258,7 @@ public class CounselingReserveService {
     @Transactional(readOnly = true)
     public java.util.Map<String, Integer> getMyCounts(Long studentId) {
         int requested = counselingReserveRepository.countByStudent_IdAndApprovalState(studentId, ApprovalState.REQUESTED);
-        int approved  = counselingReserveRepository.countByStudent_IdAndApprovalState(studentId, ApprovalState.APPROVED);
+        int approved = counselingReserveRepository.countByStudent_IdAndApprovalState(studentId, ApprovalState.APPROVED);
         return java.util.Map.of("requested", requested, "approved", approved);
     }
 
@@ -490,5 +493,35 @@ public class CounselingReserveService {
 
         return reserve;
     }
+
+    // 할당된 방 검증 - 학생
+    public boolean isValidRoomStu(Long studentId, String roomCode) {
+        return counselingReserveRepository.existsByStudent_IdAndRoomCodeAndApprovalState(studentId, roomCode, ApprovalState.APPROVED);
+    }
+
+    // 할당된 방 검증 - 교수
+    public boolean isValidRoomPro(Long professorId, String roomCode) {
+        List<Subject> subjects = subjectRepository.findByProfessor_Id(professorId);
+        List<Long> subjectIds = subjects.stream()
+                .map(Subject::getId)
+                .toList();
+        return counselingReserveRepository.existsBySubject_IdInAndRoomCodeAndApprovalState(subjectIds, roomCode, ApprovalState.APPROVED);
+    }
+
+    // 시간 검증( 남은 시간 체크 )
+    @Transactional(readOnly = true)
+    public Long getEndTimeMinus10(String roomCode) {
+
+        CounselingReserve reserve = counselingReserveRepository
+                .findByRoomCodeAndApprovalState(roomCode, ApprovalState.APPROVED);
+
+        if (reserve == null) {
+            throw new CustomRestfullException("상담 일정이 없습니다.", HttpStatus.NOT_FOUND);
+        }
+
+        return  reserve.getCounselingSchedule().getEndTime();
+
+    }
+
 
 }
