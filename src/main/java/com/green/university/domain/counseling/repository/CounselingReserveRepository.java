@@ -7,7 +7,6 @@ import com.green.university.domain.counseling.entity.ReserveRequester;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -122,6 +121,7 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
     // 룸코드, 상담 예약 승인 상태로 방 조회
     CounselingReserve findByRoomCodeAndApprovalState(String roomCode, ApprovalState approvalState);
 
-    // Requester가 누군지에 따라 상담 내역 조회
-    List<CounselingReserve> findByRequester(ReserveRequester requester);
+    // 로그인한 유저 + Requester 따라 상담 내역 조회
+    List<CounselingReserve> findByStudent_Id(Long studentId);
+    List<CounselingReserve> findBySubject_IdIn(List<Long> subjectIds);
 }

@@ -10,6 +10,7 @@ import com.green.university.domain.counseling.entity.CounselingSchedule;
 import com.green.university.domain.counseling.entity.ReserveRequester;
 import com.green.university.domain.counseling.repository.CounselingReserveRepository;
 import com.green.university.domain.counseling.repository.CounselingScheduleRepository;
+import com.green.university.domain.dropoutrisk.dto.DropoutRiskResponseDto;
 import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
 import com.green.university.domain.dropoutrisk.entity.RiskStatus;
 import com.green.university.domain.student.entity.Student;
@@ -31,6 +32,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,15 +55,33 @@ public class CounselingReserveService {
     @Autowired
     private DropoutRiskRepository dropoutRiskRepository;
 
-    // reserve db의 내용을 가져오기 (requester에 따라 나누기)
-    public Map<String, List<CounselingReserve>> getListByRequester() {
-        counselingReserveRepository.findByRequester(ReserveRequester.STUDENT);
-        counselingReserveRepository.findByRequester(ReserveRequester.PROFESSOR);
-
-        // dto 형식이 있는 지 확인 ..
+    // 로그인 유저 + requester에 따라 reserve db의 모든 내용을 가져오기
+    public Map<String, List<CounselingReserve>> getListByRequester(Long id, String userRole) {
+        List<CounselingReserve> reserves;
         Map<String, List<CounselingReserve>> map = new HashMap<>();
-        map.put("student", counselingReserveRepository.findByRequester(ReserveRequester.STUDENT));
-        map.put("professor", counselingReserveRepository.findByRequester(ReserveRequester.PROFESSOR));
+
+        // 학생이라면 -> 학생의 모든 상담 내역을 일단 가지고 온 후 requester 로 나눈다
+        if (userRole.equals("student")) {
+            reserves = counselingReserveRepository.findByStudent_Id(id);
+            map.put("RequestedByStudent", reserves.stream().filter(
+                            r -> r.getRequester().equals(ReserveRequester.STUDENT))
+                    .collect(Collectors.toList()));
+            map.put("RequestedByProfessor", reserves.stream().filter(
+                            r -> r.getRequester().equals(ReserveRequester.PROFESSOR))
+                    .collect(Collectors.toList()));
+        }
+        // 교수라면 -> 자신의 과목 아이디로 모든 상담 내역을 가지고 온 후 requester로 나눈다
+        else if (userRole.equals("professor")) {
+            List<Subject> subjects = subjectRepository.findByProfessor_Id(id);
+            List<Long> subjectIds = subjects.stream().map(Subject::getId).collect(Collectors.toList());
+            reserves = counselingReserveRepository.findBySubject_IdIn(subjectIds);
+            map.put("RequestedByStudent", reserves.stream().filter(
+                            r -> r.getRequester().equals(ReserveRequester.STUDENT))
+                    .collect(Collectors.toList()));
+            map.put("RequestedByProfessor", reserves.stream().filter(
+                            r -> r.getRequester().equals(ReserveRequester.PROFESSOR))
+                    .collect(Collectors.toList()));
+        }
         return map;
     }
 

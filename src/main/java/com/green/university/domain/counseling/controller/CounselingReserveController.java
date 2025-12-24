@@ -27,14 +27,13 @@ public class CounselingReserveController {
         this.counselingReserveService = counselingReserveService;
     }
 
-    // reserve db의 내용을 가져오기 (requester에 따라 나누기)
+    // 로그인 유저 + requester에 따라 reserve db의 모든 내용을 가져오기
     @GetMapping("/list/requester")
     public ResponseEntity<?> getListByRequester(@AuthenticationPrincipal CustomUserDetails principal) {
-        Map<String, List<CounselingReserve>> listByRequester = counselingReserveService.getListByRequester();
-        return ResponseEntity.ok(Map.of(
-                "student", listByRequester.get("student"),
-                "professor", listByRequester.get("professor")
-        ));
+        Long id = principal.getId();
+        String userRole = principal.getUserRole();
+        Map<String, List<CounselingReserve>> listByRequester = counselingReserveService.getListByRequester(id, userRole);
+        return ResponseEntity.ok(listByRequester);
     }
 
     // 학생 상담 신청
