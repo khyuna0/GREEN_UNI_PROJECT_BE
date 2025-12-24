@@ -7,7 +7,6 @@ import lombok.Data;
 public class ChatFormDto {
 
     private String message;
-    // private Long userId
-    // private String userRole
+    private String userRole; // "student" | "professor" | "staff"
 
 }
