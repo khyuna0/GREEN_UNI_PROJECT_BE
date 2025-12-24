@@ -63,7 +63,7 @@ public class CounselingReserveService {
         // 학생이라면 -> 학생의 모든 상담 내역을 일단 가지고 온 후 requester 로 나눈다
         if (userRole.equals("student")) {
             reserves = counselingReserveRepository.findByStudent_Id(id);
-            map.put("RequestedByStudent", reserves.stream().filter(
+            map.put("RequestedByStudent", reserves.stream().filter( // 내가보낸거
                             r -> r.getRequester().equals(ReserveRequester.STUDENT))
                     .collect(Collectors.toList()));
             map.put("RequestedByProfessor", reserves.stream().filter(
@@ -78,7 +78,7 @@ public class CounselingReserveService {
             map.put("RequestedByStudent", reserves.stream().filter(
                             r -> r.getRequester().equals(ReserveRequester.STUDENT))
                     .collect(Collectors.toList()));
-            map.put("RequestedByProfessor", reserves.stream().filter(
+            map.put("RequestedByProfessor", reserves.stream().filter( // 내가 보낸거
                             r -> r.getRequester().equals(ReserveRequester.PROFESSOR))
                     .collect(Collectors.toList()));
         }
@@ -190,7 +190,8 @@ public class CounselingReserveService {
     // 교수 승인 / 반려 처리
     // 승인 시 같은 일정의 다른 신청은 전부 반려
     // 승인 시 방 코드 생성
-    // 위험 학생이면 RiskStatus를 CONSULT_REQ 로 변경
+    // 위험 학생이면 RiskStatus를 CONSULT_REQ 로 변경]
+    @Transactional
     public void decideReserve(Long reserveId, String decision) {
 
         CounselingReserve reserve = counselingReserveRepository.findById(reserveId)

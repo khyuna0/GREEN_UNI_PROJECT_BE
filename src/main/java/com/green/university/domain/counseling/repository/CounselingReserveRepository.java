@@ -15,8 +15,6 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
 
     List<CounselingReserve> findByCounselingSchedule_Id(Long counselingScheduleId);
 
-    List<CounselingReserve> findByStudent_Id(Long studentId);
-
     List<CounselingReserve> findByCounselingSchedule_Professor_Id(Long professorId);
 
     int countByStudent_IdAndApprovalState(Long studentId, ApprovalState approvalState);
