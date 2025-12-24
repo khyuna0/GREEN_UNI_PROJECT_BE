@@ -10,6 +10,7 @@ import com.green.university.domain.professor.repository.ProfessorRepository;
 import com.green.university.domain.subject.entity.Subject;
 import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.global.exception.CustomRestfullException;
+import com.green.university.global.utils.TermUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -92,8 +93,8 @@ public class CounselingScheduleService {
                 // 새 슬롯만 INSERT
                 CounselingSchedule cs = new CounselingSchedule();
                 cs.setProfessor(professor);
-                cs.setSubYear(request.getSubYear());
-                cs.setSemester(request.getSemester());
+                cs.setSubYear(TermUtil.currentYear());
+                cs.setSemester(TermUtil.currentSemester());
                 cs.setCounselingDate(date);
                 cs.setDayOfWeek(dayOfWeek);
                 cs.setStartTime(startTime);
