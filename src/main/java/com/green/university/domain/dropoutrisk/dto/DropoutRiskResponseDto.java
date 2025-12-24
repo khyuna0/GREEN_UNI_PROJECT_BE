@@ -17,6 +17,8 @@ public class DropoutRiskResponseDto {
 
     private Long subjectId;
     private String subjectName;
+
+    private Long subjectProfessorId;   //  내 과목 판별용
     private String professorName;
 
     private RiskType riskType;
@@ -35,6 +37,8 @@ public class DropoutRiskResponseDto {
     // 예: "CONSULT_REQ" / "CONSULT_REJECTED" / null
     private String consultState;
 
+    private boolean mySubject; // 내 과목이면 상담신청 가능 표시
+
     public static DropoutRiskResponseDto fromEntity(DropoutRisk risk) {
         DropoutRiskResponseDto dto = new DropoutRiskResponseDto();
         dto.setId(risk.getId());
@@ -44,7 +48,11 @@ public class DropoutRiskResponseDto {
 
         dto.setSubjectId(risk.getStuSub().getSubject().getId());
         dto.setSubjectName(risk.getStuSub().getSubject().getName());
-        dto.setProfessorName(risk.getStuSub().getSubject().getProfessor().getName());
+
+        if (risk.getStuSub().getSubject().getProfessor() != null) {
+            dto.setSubjectProfessorId(risk.getStuSub().getSubject().getProfessor().getId());
+            dto.setProfessorName(risk.getStuSub().getSubject().getProfessor().getName());
+        }
 
         dto.setRiskType(risk.getRiskType());
         dto.setRiskLevel(risk.getRiskLevel());
@@ -64,6 +72,13 @@ public class DropoutRiskResponseDto {
     public static DropoutRiskResponseDto fromEntity(DropoutRisk risk, String consultState) {
         DropoutRiskResponseDto dto = fromEntity(risk);
         dto.setConsultState(consultState);
+        return dto;
+    }
+
+    // consultState + mySubject까지 세팅
+    public static DropoutRiskResponseDto fromEntity(DropoutRisk risk, String consultState, boolean mySubject) {
+        DropoutRiskResponseDto dto = fromEntity(risk, consultState);
+        dto.setMySubject(mySubject);
         return dto;
     }
 }

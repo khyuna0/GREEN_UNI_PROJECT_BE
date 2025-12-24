@@ -3,7 +3,6 @@ package com.green.university.domain.counseling.controller;
 import com.green.university.domain.counseling.dto.CounselingProfessorRequestDto;
 import com.green.university.domain.counseling.dto.CounselingStudentRequestDto;
 import com.green.university.domain.counseling.entity.CounselingReserve;
-import com.green.university.domain.counseling.repository.CounselingReserveRepository;
 import com.green.university.domain.counseling.service.CounselingReserveService;
 import com.green.university.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
@@ -12,7 +11,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +21,7 @@ public class CounselingReserveController {
 
     private final CounselingReserveService counselingReserveService;
 
-    public CounselingReserveController(CounselingReserveService counselingReserveService, CounselingReserveRepository counselingReserveRepository) {
+    public CounselingReserveController(CounselingReserveService counselingReserveService) {
         this.counselingReserveService = counselingReserveService;
     }
 

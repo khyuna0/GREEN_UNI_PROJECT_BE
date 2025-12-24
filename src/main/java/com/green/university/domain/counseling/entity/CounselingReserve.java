@@ -51,5 +51,7 @@ public class CounselingReserve {
     @Enumerated(EnumType.STRING)
     private ReserveRequester requester;
 
+
+
 }
 

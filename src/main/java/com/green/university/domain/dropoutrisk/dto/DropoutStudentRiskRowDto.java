@@ -1,6 +1,8 @@
 package com.green.university.domain.dropoutrisk.dto;
 
+import com.green.university.domain.counseling.entity.ApprovalState;
 import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Getter
@@ -21,10 +23,10 @@ public class DropoutStudentRiskRowDto {
 
     private LocalDateTime updatedAt; // 학생 기준 최신 업데이트
 
-    // 담당(지정) 교수 표시용
-    // 학과 교수 2명 모두에게 노출
-    // 담당은 "먼저 개입한 교수"로 자동 표시 (상담요청 만든 교수)
+    // 담당(지정) 교수 표시용 , 학과 교수 2명 모두에게 노출
     private Long assignedProfessorId;
     private String assignedProfessorName;
     private LocalDateTime assignedAt;
+
+
 }

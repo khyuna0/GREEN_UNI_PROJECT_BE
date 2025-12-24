@@ -39,15 +39,28 @@ public class DropoutRiskController {
         // 과목 담당교수 기준
         var grouped = dropoutRiskService.getRisksByStatus(subjectId, riskLevel, professorId);
 
-        // 학과 기준 통합(탈락 위험)
-        // subjectId는 통합 학생 리스트에선 보통 의미 없어서(학과 전체) 무시 추천
-        var students = dropoutRiskService.getStudentOverallRisks(null, riskLevel, professorId);
-
+        // 통합신청(학생 통합 리스트) 제거 → students 내려주지 않음
         return ResponseEntity.ok(Map.of(
                 "pending", grouped.get("pending"),
-                "resolved", grouped.get("resolved"),
-                "students", students
+                "resolved", grouped.get("resolved")
         ));
+    }
+
+    // 교수 위험학생 페이지 한 방에 내려주는 API
+    // 우리학과 위험 학생(학생 단위)
+    // 내 과목 위험 학생(pending/resolved)
+    // 과목 옵션
+    @GetMapping("/professor/overview")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public ResponseEntity<?> professorOverview(@RequestParam(required = false) Long subjectId,
+                                               @RequestParam(required = false) String level,
+                                               @AuthenticationPrincipal CustomUserDetails principal) {
+
+        Long professorId = principal.getId();
+        RiskLevel riskLevel = (level != null && !level.isEmpty()) ? RiskLevel.valueOf(level) : null;
+
+        Map<String, Object> res = dropoutRiskService.getProfessorRiskOverview(subjectId, riskLevel, professorId);
+        return ResponseEntity.ok(res);
     }
 
     // 교수가 본인의 특정 과목(subjectId)에서 위험 학생 목록 조회
@@ -57,14 +70,30 @@ public class DropoutRiskController {
             @PathVariable Long subjectId,
             @RequestParam(required = false, defaultValue = "DETECTED") RiskStatus status) {
 
-        // Repository에 쿼리 메서드 필요: findByStuSub_Subject_IdAndStatus(Long subjectId, RiskStatus status)
         var risks = dropoutRiskRepository.findByStuSub_Subject_IdAndStatus(subjectId, status);
 
         List<DropoutRiskResponseDto> dtos = risks.stream()
-                .map(DropoutRiskResponseDto::fromEntity) // DTO 변환 메서드 사용
+                .map(DropoutRiskResponseDto::fromEntity)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(dtos);
+    }
+
+    // 우리학과 중도이탈 위험 학생: 선택 학생의 위험과목 전체 조회
+    @GetMapping("/list/department")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public Map<String, Object> departmentPending(
+            @RequestParam Long studentId,
+            @RequestParam(required = false) RiskLevel level,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        Long professorId = principal.getId();
+
+        // mySubject까지 내려주도록 서비스에서 처리
+        List<DropoutRiskResponseDto> pending =
+                dropoutRiskService.getDepartmentPendingRisks(studentId, level, professorId);
+
+        return Map.of("pending", pending);
     }
 
     // 학생 내 위험 과목 리스트 조회
@@ -77,7 +106,6 @@ public class DropoutRiskController {
         return ResponseEntity.ok(risks.stream().map(DropoutRiskResponseDto::fromEntity).toList());
     }
 
-
     // 교수가 상담 종료를 눌렀을 때 /videotest?code=1234 로 온 값 받아서 status를 resolved/finished로 바꾸기
     @GetMapping("/counseling/done")
     @PreAuthorize("hasRole('PROFESSOR')")
@@ -86,5 +114,4 @@ public class DropoutRiskController {
         dropoutRiskService.completeCounseling(roomCode);
         return ResponseEntity.ok("상담 완료");
     }
-
 }
