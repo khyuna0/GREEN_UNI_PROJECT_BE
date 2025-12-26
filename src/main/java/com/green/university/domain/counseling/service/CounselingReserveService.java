@@ -291,7 +291,7 @@ public class CounselingReserveService {
     @Transactional
     public void professorRequest(CounselingProfessorRequestDto dto, Long professorId) {
 
-        // schedule 검증 (교수 본인 슬롯인지 + 예약 가능인지)
+        // schedule 검증 (교수 본인 인지 + 예약 가능인지)
         CounselingSchedule schedule = counselingScheduleRepository.findById(dto.getCounselingScheduleId())
                 .orElseThrow(() -> new CustomRestfullException("상담 일정이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
 
