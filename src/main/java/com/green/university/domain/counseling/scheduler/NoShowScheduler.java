@@ -21,8 +21,8 @@ public class NoShowScheduler {
     private final CounselingReserveRepository reserveRepository;
 
         @Transactional
-        @Scheduled(cron = "0 0 * * * *") // 매 정시
-//        @Scheduled(cron = "0 */5 * * * *") // 5분 간격 (테스트용)
+//        @Scheduled(cron = "0 0 * * * *") // 매 정시
+        @Scheduled(cron = "0 */5 * * * *") // 5분 간격 (테스트용)
         public void markNoShow() {
             System.out.println("노쇼 감지 시작");
             LocalDate today = LocalDate.now();

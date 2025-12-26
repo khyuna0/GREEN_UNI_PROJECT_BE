@@ -221,7 +221,7 @@ public class CounselingReserveService {
         CounselingSchedule schedule = reserve.getCounselingSchedule();
         schedule.setReserved(true);
 
-        if (reserve.getDropoutRisk() != null) {
+        if (reserve.getDropoutRisk() != null && reserve.getDropoutRisk().getStatus() == RiskStatus.DETECTED) {
             DropoutRisk risk = reserve.getDropoutRisk();
             risk.setStatus(RiskStatus.CONSULT_REQ);
             dropoutRiskRepository.save(risk);
