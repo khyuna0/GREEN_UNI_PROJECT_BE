@@ -98,5 +98,4 @@ public class CounselingScheduleController {
         return counselingScheduleService.counselingNumByDate(professorId);
     }
 
-
 }

@@ -1,5 +1,8 @@
 package com.green.university.domain.counseling.service;
 
+import com.green.university.domain.counseling.dto.CounselingInfoDto;
+import com.green.university.domain.counseling.dto.CounselingReserveDto;
+import com.green.university.domain.counseling.dto.CounselingScheduleDto;
 import com.green.university.domain.counseling.dto.WeeklyCounselingScheduleRequest;
 import com.green.university.domain.counseling.entity.CounselingSchedule;
 import com.green.university.domain.counseling.repository.CounselingReserveRepository;
@@ -34,10 +37,13 @@ public class CounselingScheduleService {
     private CounselingReserveRepository counselingReserveRepository;
 
     // 교수 id로 교수 상담 목록 불러오기
-    public List<CounselingSchedule> getSchedulesByWeek(Long professorId,
-                                                       LocalDate start,
-                                                       LocalDate end) {
-        return counselingScheduleRepository.findByProfessor_IdAndCounselingDateBetween(professorId, start, end);
+    public List<CounselingScheduleDto> getSchedulesByWeek(Long professorId,
+                                                          LocalDate start,
+                                                          LocalDate end) { // 내 상담 목록 불러오기
+        List<CounselingSchedule> lists = counselingScheduleRepository.findByProfessor_IdAndCounselingDateBetween(professorId, start, end);
+        return lists.stream()
+                .map(CounselingScheduleDto::new)
+                .toList();
     }
 
     // 과목 아이디로 교수 찾아 상담 목록 불러오기
@@ -141,19 +147,16 @@ public class CounselingScheduleService {
         Long professorId = subject.getProfessor().getId();
         // 3. 교수의 상담 일정 중 예약 안 된 것만 조회
         LocalDate nowDate = LocalDate.now(); // 날짜 필터링
-        System.out.println("nowDate: " + nowDate);
         Long nowTime = (long) LocalTime.now(ZoneId.of("Asia/Seoul")).getHour(); // 시간 필터링
-        System.out.println("nowTime: " + nowTime);
 
         List<CounselingSchedule> schedules =
                 counselingScheduleRepository
                         .findByProfessor_IdAndReservedFalseAndCounselingDateGreaterThanEqualOrderByCounselingDateAscStartTimeAsc(professorId, nowDate);
-        System.out.println("schedules: " + schedules);
+
         List<CounselingSchedule> afterNowTime = schedules.stream()
                 .filter(s -> {
                     // 내일 이후 날짜는 무조건 포함
                     if (s.getCounselingDate().isAfter(nowDate)) return true;
-
                     return s.getStartTime() > nowTime;
                 })
                 .toList();
@@ -164,9 +167,10 @@ public class CounselingScheduleService {
         );
     }
 
-    // 포탈 알림 용 - 교수의 예약된 오늘 상담 일정
+    // 포탈 알림 용 - 교수의 예약된 오늘 상담 일정 - endTime 기준 이후의 상담요청만 (endTime 이후의 것들은 노쇼로 걸러야 하기 때문에 이렇게 처리함)
     public int counselingNumByDate(Long professorId) {
-        return counselingScheduleRepository.findByProfessor_IdAndCounselingDateAndReserved(professorId, LocalDate.now(), true).size();
+        Long nowHour = (long) LocalTime.now().getHour();
+        return counselingScheduleRepository.findByProfessor_IdAndCounselingDateAndReservedAndEndTimeGreaterThan(professorId, LocalDate.now(), true, nowHour).size();
     }
 
 

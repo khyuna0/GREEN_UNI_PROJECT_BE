@@ -6,4 +6,5 @@ public enum ApprovalState { // 예약 폼 스테이터스
     REJECTED,    // 반려 (교수, 학생)
     CANCELED,  // 확정 후 취소
     FINISHED, // 상담 완료
+    NO_SHOW // 노쇼 
 }
