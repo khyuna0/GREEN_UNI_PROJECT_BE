@@ -239,6 +239,7 @@ public class DropoutRiskService {
                         case REJECTED  -> "CONSULT_REJECTED";
                         case CANCELED  -> "CONSULT_CANCELED";
                         case FINISHED  -> "CONSULT_FINISHED";
+                        case NO_SHOW -> "CONSULT_NO_SHOW";
                     };
                 })
                 .orElse(null);

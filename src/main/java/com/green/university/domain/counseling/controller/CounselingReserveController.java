@@ -68,25 +68,25 @@ public class CounselingReserveController {
         return counselingReserveService.getStudentReservationList(studentId);
     }
 
-    // 교수 상담 예약 목록
-    @GetMapping("/list/professor")
-    @PreAuthorize("hasRole('PROFESSOR')")
-    public Object professorList(
-            @AuthenticationPrincipal CustomUserDetails principal
-    ) {
-        Long professorId = principal.getId();
-        return counselingReserveService.getProfessorReservationList(professorId);
-    }
+//    // 교수 상담 예약 목록
+//    @GetMapping("/list/professor")
+//    @PreAuthorize("hasRole('PROFESSOR')")
+//    public Object professorList(
+//            @AuthenticationPrincipal CustomUserDetails principal
+//    ) {
+//        Long professorId = principal.getId();
+//        return counselingReserveService.getProfessorReservationList(professorId);
+//    }
 
-    // 처리되지 않은 학생 상담 신청 목록 조회
-    @GetMapping("/notApplicated")
-    @PreAuthorize("hasRole('PROFESSOR')")
-    public int getNotApplicated (
-            @AuthenticationPrincipal CustomUserDetails principal
-    ) {
-        Long professorId = principal.getId();
-        return counselingReserveService.getNotApproved(professorId);
-    }
+//    // 처리되지 않은 학생 상담 신청 목록 조회
+//    @GetMapping("/notApplicated")
+//    @PreAuthorize("hasRole('PROFESSOR')")
+//    public int getNotApplicated (
+//            @AuthenticationPrincipal CustomUserDetails principal
+//    ) {
+//        Long professorId = principal.getId();
+//        return counselingReserveService.getNotApproved(professorId);
+//    }
 
     // 학생 상담 개수 카운트용
     @GetMapping("/count/student")

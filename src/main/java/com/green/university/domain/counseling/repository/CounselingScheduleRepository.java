@@ -29,7 +29,8 @@ public interface CounselingScheduleRepository extends JpaRepository<CounselingSc
 
     // 날짜, 시간 기준 미래의 상담 시간만
     List<CounselingSchedule> findByProfessor_IdAndReservedFalseAndCounselingDateGreaterThanEqualOrderByCounselingDateAscStartTimeAsc(Long professorId, LocalDate now);
-
-    List<CounselingSchedule> findByProfessor_IdAndCounselingDateAndReserved(Long professorId, LocalDate today, boolean reserved);
+    
+    // 포탈 알림 용 - 오늘의 상담 개수 보기
+    List<CounselingSchedule> findByProfessor_IdAndCounselingDateAndReservedAndEndTimeGreaterThan(Long professorId, LocalDate today, boolean reserved, Long nowHour);
 
 }

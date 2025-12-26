@@ -32,20 +32,27 @@ public class CounselingScheduleController {
     @Autowired
     private RiskStudentService riskStudentService;
 
-    @GetMapping("/professor") // 교수 - 이번 주 내 상담 일정 불러오기
+
+    // 학생 - 과목별 상담 일정 조회 (오늘 이후 + 예약 안 된 것만)
+    @GetMapping("/schedule")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<?> getScheduleBySubject(@AuthenticationPrincipal CustomUserDetails principal,
+                                                  @RequestParam Long subjectId) {
+        return ResponseEntity.ok(counselingScheduleService.getSchedulesBySubject(subjectId));
+    }
+
+    // 교수 - 프론트에서 넘어온 날짜(week의 월요일) 기준으로 2주 + 예약 여부 상관없이 내 상담 일정 불러오기
+    @GetMapping("/professor")
     @PreAuthorize("hasRole('PROFESSOR')")
     public ResponseEntity<?> getSchedule(
             @AuthenticationPrincipal CustomUserDetails principal,
-            @RequestParam LocalDate weekStartDate
-    ) {
-        if (principal == null || !Objects.equals(principal.getUserRole(), "professor")) {
-            throw new CustomRestfullException("권한이 없는 페이지입니다.", HttpStatus.UNAUTHORIZED);
-        }
+            @RequestParam LocalDate weekStartDate) {
         Long id = principal.getId();
         LocalDate weekEndDate = weekStartDate.plusDays(11); // 월~금 , 다음주 평일까지
-        List<CounselingSchedule> list = counselingScheduleService.getSchedulesByWeek(id, weekStartDate, weekEndDate);
 
-        return ResponseEntity.ok(Map.of("list", list));
+        List<CounselingSchedule> list = counselingScheduleService.getSchedulesByWeek(id, weekStartDate, weekEndDate);
+        System.out.println("list: " + list);
+        return ResponseEntity.ok(list);
     }
 
     @PostMapping("/professor") // 교수 - 내 상담 일정 등록
@@ -81,41 +88,21 @@ public class CounselingScheduleController {
         if (principal == null || !Objects.equals(principal.getUserRole(), "professor")) {
             throw new CustomRestfullException("권한이 없는 페이지입니다.", HttpStatus.UNAUTHORIZED);
         }
-
         Long professorId = principal.getId(); // 로그인 교수
-        List<DropoutRisk> riskStuList = riskStudentService.getRiskStudents(professorId);
-
-        return ResponseEntity.ok(riskStuList);
+        return ResponseEntity.ok(riskStudentService.getRiskStudents(professorId));
     }
 
-    @GetMapping("/schedule") // 학생 - 과목별 상담 일정 조회
-    @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<?> getScheduleBySubject(
-            @AuthenticationPrincipal CustomUserDetails principal,
-            @RequestParam Long subjectId
-    ) {
-        if (principal == null || !Objects.equals(principal.getUserRole(), "student")) {
-            throw new CustomRestfullException("권한이 없는 페이지입니다.", HttpStatus.UNAUTHORIZED);
-        }
-
-        Long studentId = principal.getId();
-
-        return ResponseEntity.ok(
-                counselingScheduleService.getSchedulesBySubject(subjectId)
-        );
-    }
 
     // 포탈 알림 용 - 교수
     // 오늘의 상담 개수 보기
     @GetMapping("/today")
     @PreAuthorize("hasRole('PROFESSOR')")
-    public int getCounselingByDate (
+    public int getCounselingByDate(
             @AuthenticationPrincipal CustomUserDetails principal
-    ){
+    ) {
         Long professorId = principal.getId();
         return counselingScheduleService.counselingNumByDate(professorId);
     }
-
 
 
 }
