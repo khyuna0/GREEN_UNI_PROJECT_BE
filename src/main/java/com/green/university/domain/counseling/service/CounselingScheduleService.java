@@ -1,5 +1,8 @@
 package com.green.university.domain.counseling.service;
 
+import com.green.university.domain.counseling.dto.CounselingInfoDto;
+import com.green.university.domain.counseling.dto.CounselingReserveDto;
+import com.green.university.domain.counseling.dto.CounselingScheduleDto;
 import com.green.university.domain.counseling.dto.WeeklyCounselingScheduleRequest;
 import com.green.university.domain.counseling.entity.CounselingSchedule;
 import com.green.university.domain.counseling.repository.CounselingReserveRepository;
@@ -153,7 +156,6 @@ public class CounselingScheduleService {
                 .filter(s -> {
                     // 내일 이후 날짜는 무조건 포함
                     if (s.getCounselingDate().isAfter(nowDate)) return true;
-
                     return s.getStartTime() > nowTime;
                 })
                 .toList();
@@ -164,9 +166,10 @@ public class CounselingScheduleService {
         );
     }
 
-    // 포탈 알림 용 - 교수의 예약된 오늘 상담 일정
+    // 포탈 알림 용 - 교수의 예약된 오늘 상담 일정 - endTime 기준 이후의 상담요청만 (endTime 이후의 것들은 노쇼로 걸러야 하기 때문에 이렇게 처리함)
     public int counselingNumByDate(Long professorId) {
-        return counselingScheduleRepository.findByProfessor_IdAndCounselingDateAndReserved(professorId, LocalDate.now(), true).size();
+        Long nowHour = (long) LocalTime.now().getHour();
+        return counselingScheduleRepository.findByProfessor_IdAndCounselingDateAndReservedAndEndTimeGreaterThan(professorId, LocalDate.now(), true, nowHour).size();
     }
 
 
