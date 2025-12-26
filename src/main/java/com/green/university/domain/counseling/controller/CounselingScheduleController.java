@@ -43,9 +43,8 @@ public class CounselingScheduleController {
         }
         Long id = principal.getId();
         LocalDate weekEndDate = weekStartDate.plusDays(11); // 월~금 , 다음주 평일까지
-        List<CounselingSchedule> list = counselingScheduleService.getSchedulesByWeek(id, weekStartDate, weekEndDate);
 
-        return ResponseEntity.ok(Map.of("list", list));
+        return ResponseEntity.ok(Map.of("list", counselingScheduleService.getSchedulesByWeek(id, weekStartDate, weekEndDate)));
     }
 
     @PostMapping("/professor") // 교수 - 내 상담 일정 등록
@@ -81,11 +80,8 @@ public class CounselingScheduleController {
         if (principal == null || !Objects.equals(principal.getUserRole(), "professor")) {
             throw new CustomRestfullException("권한이 없는 페이지입니다.", HttpStatus.UNAUTHORIZED);
         }
-
         Long professorId = principal.getId(); // 로그인 교수
-        List<DropoutRisk> riskStuList = riskStudentService.getRiskStudents(professorId);
-
-        return ResponseEntity.ok(riskStuList);
+        return ResponseEntity.ok(riskStudentService.getRiskStudents(professorId));
     }
 
     @GetMapping("/schedule") // 학생 - 과목별 상담 일정 조회
