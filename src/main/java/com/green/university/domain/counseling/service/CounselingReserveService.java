@@ -255,14 +255,14 @@ public class CounselingReserveService {
     }
 
     // 교수 기준 상담 예약 목록 조회
-    @Transactional(readOnly = true)
-    public List<CounselingReserveDto> getProfessorReservationList(Long professorId) {
-        return counselingReserveRepository
-                .findByCounselingSchedule_Professor_Id(professorId)
-                .stream()
-                .map(CounselingReserveDto::new)
-                .toList();
-    }
+//    @Transactional(readOnly = true)
+//    public List<CounselingReserveDto> getProfessorReservationList(Long professorId) {
+//        return counselingReserveRepository
+//                .findByCounselingSchedule_Professor_Id(professorId)
+//                .stream()
+//                .map(CounselingReserveDto::new)
+//                .toList();
+//    }
 
     // 화상 상담 방 코드 생성
     private String generateRoomCode() {
@@ -404,7 +404,7 @@ public class CounselingReserveService {
 
         List<CounselPreReserveDto> dtoList = list.stream()
                 .map(CounselPreReserveDto::new)
-                .collect(Collectors.toList());
+                .toList();
 
         return Map.of("list", dtoList);
     }

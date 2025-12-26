@@ -1,16 +1,12 @@
 package com.green.university.domain.counseling.controller;
 
+import com.green.university.domain.counseling.dto.CounselingScheduleDto;
 import com.green.university.domain.counseling.dto.DeleteScheduleRequestDto;
 import com.green.university.domain.counseling.dto.WeeklyCounselingScheduleRequest;
-import com.green.university.domain.counseling.entity.CounselingSchedule;
 import com.green.university.domain.counseling.service.CounselingScheduleService;
-import com.green.university.domain.counseling.service.RiskStudentService;
-import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.security.CustomUserDetails;
-import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,8 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/counseling")
@@ -46,7 +40,7 @@ public class CounselingScheduleController {
             @RequestParam LocalDate weekStartDate) {
         Long id = principal.getId();
         LocalDate weekEndDate = weekStartDate.plusDays(11); // 월~금 , 다음주 평일까지
-        List<CounselingSchedule> list = counselingScheduleService.getSchedulesByWeek(id, weekStartDate, weekEndDate);
+        List<CounselingScheduleDto> list = counselingScheduleService.getSchedulesByWeek(id, weekStartDate, weekEndDate);
         System.out.println("list: " + list);
         return ResponseEntity.ok(list);
     }

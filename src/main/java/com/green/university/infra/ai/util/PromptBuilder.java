@@ -22,9 +22,10 @@ public class PromptBuilder {
                 
                 [JSON 필수 키]
                 { "summary": "학생 상태에 대한 날카로운 1줄 핵심 요약",
-                  "professorGuide": "교수가 학생과 상담할 때 던져야 할 구체적인 조언 (경어체 사용)",
+                  "professorGuide": "교수가 학생과 상담할 때 던져야 할 구체적인 조언 (경어체 사용), 120자 이내",
                   "studentMessage": "학생에게 시스템 알림으로 보낼 따뜻하지만 경각심을 주는 격려의 문장 (2문장 이내)",
-                  "reasonTags": "위험 원인 태그 배열 (예: ['잦은결석', '학업성취도저하', '중도포기위험'])" }
+                  "reasonTags": "위험 원인 태그 배열 (예: ['잦은결석', '잦은지각', '성적과출석률불일치'
+                  '학업성취도우수', '학업성취도저하', '중도포기위험'])" }
 
                 [주의]
                 summary, professorGuide, studentMessage 세 필드는 모두 반드시 문자열(String)로만 작성하세요.
