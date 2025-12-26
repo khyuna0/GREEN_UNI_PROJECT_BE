@@ -96,17 +96,17 @@ public class CounselingReserveController {
         return counselingReserveService.getMyCounts(studentId);
     }
 
-//    // 교수 -> 학생 상담요청
-//    @PostMapping("/pre/professor")
-//    @PreAuthorize("hasRole('PROFESSOR')")
-//    public void professorRequest(
-//            @Valid @RequestBody CounselingProfessorRequestDto dto,
-//            @AuthenticationPrincipal CustomUserDetails principal
-//    ) {
-//        Long professorId = principal.getId();
-//        counselingReserveService.professorRequest(dto, professorId);
-//    }
-//
+    // 교수 -> 학생 상담요청
+    @PostMapping("/pre/professor")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public void professorRequest(
+            @Valid @RequestBody CounselingProfessorRequestDto dto,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        Long professorId = principal.getId();
+        counselingReserveService.professorRequest(dto, professorId);
+    }
+
 //    // 학생: 내가 받은 교수 상담요청 목록
 //    @GetMapping("/pre/list/student")
 //    @PreAuthorize("hasRole('STUDENT')")
