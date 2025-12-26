@@ -29,6 +29,9 @@ public class CounselingScheduleController {
     @Autowired
     private CounselingScheduleService counselingScheduleService;
 
+    @Autowired
+    private RiskStudentService riskStudentService;
+
 
     // 학생 - 과목별 상담 일정 조회 (오늘 이후 + 예약 안 된 것만)
     @GetMapping("/schedule")
@@ -47,7 +50,6 @@ public class CounselingScheduleController {
         Long id = principal.getId();
         LocalDate weekEndDate = weekStartDate.plusDays(11); // 월~금 , 다음주 평일까지
 
-        return ResponseEntity.ok(Map.of("list", counselingScheduleService.getSchedulesByWeek(id, weekStartDate, weekEndDate)));
         List<CounselingSchedule> list = counselingScheduleService.getSchedulesByWeek(id, weekStartDate, weekEndDate);
         System.out.println("list: " + list);
         return ResponseEntity.ok(list);
@@ -90,22 +92,6 @@ public class CounselingScheduleController {
         return ResponseEntity.ok(riskStudentService.getRiskStudents(professorId));
     }
 
-    @GetMapping("/schedule") // 학생 - 과목별 상담 일정 조회
-    @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<?> getScheduleBySubject(
-            @AuthenticationPrincipal CustomUserDetails principal,
-            @RequestParam Long subjectId
-    ) {
-        if (principal == null || !Objects.equals(principal.getUserRole(), "student")) {
-            throw new CustomRestfullException("권한이 없는 페이지입니다.", HttpStatus.UNAUTHORIZED);
-        }
-
-        Long studentId = principal.getId();
-
-        return ResponseEntity.ok(
-                counselingScheduleService.getSchedulesBySubject(subjectId)
-        );
-    }
 
     // 포탈 알림 용 - 교수
     // 오늘의 상담 개수 보기
