@@ -58,16 +58,16 @@ public class CounselingReserveController {
         counselingReserveService.decideReserve(reserveId, decision);
     }
 
-//    // 학생 상담 예약 목록
-//    @GetMapping("/list")
-//    @PreAuthorize("hasRole('STUDENT')")
-//    public Object studentList(
-//            @AuthenticationPrincipal CustomUserDetails principal
-//    ) {
-//        Long studentId = principal.getId();
-//        return counselingReserveService.getStudentReservationList(studentId);
-//    }
-//
+    // 학생 상담 예약 목록
+    @GetMapping("/list")
+    @PreAuthorize("hasRole('STUDENT')")
+    public Object studentList(
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        Long studentId = principal.getId();
+        return counselingReserveService.getStudentReservationList(studentId);
+    }
+
 //    // 교수 상담 예약 목록
 //    @GetMapping("/list/professor")
 //    @PreAuthorize("hasRole('PROFESSOR')")
@@ -107,15 +107,15 @@ public class CounselingReserveController {
         counselingReserveService.professorRequest(dto, professorId);
     }
 
-//    // 학생: 내가 받은 교수 상담요청 목록
-//    @GetMapping("/pre/list/student")
-//    @PreAuthorize("hasRole('STUDENT')")
-//    public Object myPreList(
-//            @AuthenticationPrincipal CustomUserDetails principal
-//    ) {
-//        Long studentId = principal.getId();
-//        return counselingReserveService.getMyPreReserveList(studentId);
-//    }
+    // 학생: 내가 받은 교수 상담요청 목록
+    @GetMapping("/pre/list/student")
+    @PreAuthorize("hasRole('STUDENT')")
+    public Object myPreList(
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        Long studentId = principal.getId();
+        return counselingReserveService.getMyPreReserveList(studentId);
+    }
 
     // 학생: 수락 -> reserve 생성
     @PostMapping("/pre/accept")
