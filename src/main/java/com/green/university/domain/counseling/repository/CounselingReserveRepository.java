@@ -104,5 +104,11 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
     List<CounselingReserve> findBySubject_IdIn(List<Long> subjectIds);
 
     // 오늘로 조회, approvalState.approved 로 조회 -> 노쇼 감지 용
-    List<CounselingReserve> findByApprovalStateAndCounselingSchedule_CounselingDate(ApprovalState approvalState, LocalDate today);
+    List<CounselingReserve> findByApprovalStateAndCounselingSchedule_CounselingDateLessThanEqual
+    (ApprovalState approvalState, LocalDate today);
+
+    // 오늘로 조회, approvalState.approved 로 조회, startTime으로 조회 -> 교수발 예약 승인 노쇼
+    List<CounselingReserve> findByApprovalStateAndCounselingSchedule_CounselingDateLessThanEqualAndCounselingSchedule_StartTimeLessThanEqual(ApprovalState approvalState, LocalDate today, Long nowHour);
+
+
 }
