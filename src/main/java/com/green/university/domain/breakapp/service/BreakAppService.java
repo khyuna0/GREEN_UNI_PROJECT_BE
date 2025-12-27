@@ -1,13 +1,15 @@
 package com.green.university.domain.breakapp.service;
 
 import com.green.university.domain.breakapp.dto.BreakAppFormDto;
+import com.green.university.domain.breakapp.dto.BreakUpdateDto;
 import com.green.university.domain.breakapp.entity.BreakApp;
 import com.green.university.domain.breakapp.repository.BreakAppRepository;
 import com.green.university.domain.student.entity.Student;
 import com.green.university.domain.student.repository.StudentRepository;
 import com.green.university.domain.student.service.StuStatService;
 import com.green.university.global.exception.CustomRestfullException;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.green.university.global.utils.TermUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,28 +17,18 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * @author 서영
- *
- */
 
 @Service
+@RequiredArgsConstructor
 public class BreakAppService {
 
-    @Autowired
-    private BreakAppRepository breakAppRepository;
-
-    @Autowired
-    private StuStatService stuStatService;
-
-    @Autowired
-    private StudentRepository studentRepository;
+    private final BreakAppRepository breakAppRepository;
+    private final StuStatService stuStatService;
+    private final StudentRepository studentRepository;
 
     // 휴학 신청
     @Transactional
     public void createBreakApp(BreakAppFormDto dto) {
-
-        // 학생 엔티티 조회 (기존: studentId Long만 다님 → JPA는 객체로!)
         Student student = studentRepository.findById(dto.getStudentId())
                 .orElseThrow(() -> new CustomRestfullException("학생을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
@@ -50,7 +42,7 @@ public class BreakAppService {
 
         // 엔티티 값 세팅
         BreakApp breakApp = new BreakApp();
-        breakApp.setStudent(student);                         // 외래키 대신 엔티티
+        breakApp.setStudent(student);
         breakApp.setStudentGrade(dto.getStudentGrade());
         breakApp.setFromYear(dto.getFromYear());
         breakApp.setFromSemester(dto.getFromSemester());
@@ -60,7 +52,6 @@ public class BreakAppService {
         breakApp.setAppDate(LocalDate.now());   // 신청일 오늘
         breakApp.setStatus("처리중");
 
-        // 저장
         breakAppRepository.save(breakApp);
     }
 
@@ -93,6 +84,45 @@ public class BreakAppService {
                     HttpStatus.BAD_REQUEST);
         }
         breakAppRepository.delete(breakApp);
+    }
+
+    // 처리되지 않은 휴학 신청 수정
+    @Transactional
+    public void updateBreakApp(Long id, Long studentId, BreakUpdateDto dto){
+
+        BreakApp breakApp = breakAppRepository.findById(id)
+                .orElseThrow(() -> new CustomRestfullException("휴학 신청을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+        
+        // 처리중인 휴학신청만 수정가능
+        if (!"처리중".equals(breakApp.getStatus())) {
+            throw new CustomRestfullException("처리중인 신청만 수정할 수 있습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        Long ownerId = breakApp.getStudent().getId();
+        if (!ownerId.equals(studentId)) {
+            throw new CustomRestfullException("본인 신청서만 수정할 수 있습니다.", HttpStatus.FORBIDDEN);
+        }
+
+        // ---- 비교키 만들기: (년도,학기) => 하나의 숫자로 비교 ----
+        long nowKey  = TermUtil.currentYear() * 10 + TermUtil.currentSemester();   // 예: 20252
+        long fromKey = breakApp.getFromYear() * 10 + breakApp.getFromSemester();  // 예: 20252
+        long toKey   = dto.getToYear() * 10 + dto.getToSemester();               // 예: 20261
+
+        // 종료가 '현재 학기' 이하이면 불가
+        if (toKey <= nowKey) {
+            throw new CustomRestfullException("종료 학기는 현재 학기 이후로만 설정할 수 있습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        // 종료가 '시작 학기'보다 이전이면 불가
+        // (현재보다 이후로 강제하면 보통 자동으로 걸리지만, 정책상 명시하는 게 좋음)
+//        if (toKey < fromKey) {
+//            throw new CustomRestfullException("종료 학기는 시작 학기보다 빠를 수 없습니다.", HttpStatus.BAD_REQUEST);
+//        }
+
+        breakApp.setToYear(dto.getToYear());
+        breakApp.setToSemester(dto.getToSemester());
+        breakApp.setType(dto.getType());
+
     }
 
     // 휴학 신청 처리 (교직원)

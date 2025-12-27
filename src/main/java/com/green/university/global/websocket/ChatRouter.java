@@ -1,16 +1,17 @@
 package com.green.university.global.websocket;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.green.university.infra.chatbot.handler.PortalCatalog;
 import com.green.university.infra.chatbot.intent.ChatIntent;
 import com.green.university.infra.chatbot.intent.ChatRouteResult;
+import com.green.university.infra.chatbot.intent.RouteMode;
 import com.green.university.infra.chatbot.service.MistralClientService;
 import org.springframework.stereotype.Component;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
 
 @Component
 public class ChatRouter {
@@ -19,21 +20,23 @@ public class ChatRouter {
     private final PortalCatalog catalog;
     private final ObjectMapper om = new ObjectMapper();
 
-
     public ChatRouter(MistralClientService mistral, PortalCatalog catalog) {
         this.mistral = mistral;
         this.catalog = catalog;
     }
 
-    public ChatRouteResult route(String message) {
+    // 기존 route(String message)만 쓰는 구조였다면 여기서 오버로드로 받아도 됨
+    public ChatRouteResult route(String message, String userRole) {
         String m = normalize(message);
 
-
         // 규칙(키워드) 기반 라우팅: 가장 정확하고 빠름
-        //  긴 키워드 우선 매칭(“휴학 내역”이 “휴학”보다 우선)
+        // 긴 키워드 우선 매칭(“휴학 내역”이 “휴학”보다 우선)
         ChatIntent ruleHit = ruleMatchByCatalog(m);
         if (ruleHit != null) {
-            return new ChatRouteResult(ruleHit, "rule:catalog_keyword");
+            ChatRouteResult r = new ChatRouteResult(ruleHit, "rule:catalog_keyword");
+            r.setConfidence(1.0);
+            r.setMode(RouteMode.NAVIGATE); // ✅ 규칙 hit면 무조건 NAVIGATE로
+            return r;
         }
 
         // 3) Mistral에게 intent 분류 요청(애매한 케이스만)
@@ -66,20 +69,36 @@ public class ChatRouter {
                 intent = ChatIntent.OUT_OF_SCOPE;
             }
 
-            return new ChatRouteResult(intent, reason);
+            if (intent == ChatIntent.OUT_OF_SCOPE) {
+                ChatRouteResult r = new ChatRouteResult(ChatIntent.OUT_OF_SCOPE, reason);
+                r.setConfidence(0.0);
+                r.setMode(RouteMode.OUT_OF_SCOPE);
+                return r;
+            }
+
+            ChatRouteResult r = new ChatRouteResult(intent, reason);
+            r.setConfidence(0.75);
+            r.setMode(RouteMode.QA);
+            return r;
+
         } catch (Exception e) {
-            return new ChatRouteResult(ChatIntent.OUT_OF_SCOPE, "parse_fail");
+            // parse_fail도 OUT_OF_SCOPE로 처리하는 게 registry.get에서 안전
+            ChatRouteResult r = new ChatRouteResult(ChatIntent.OUT_OF_SCOPE, "parse_fail");
+            r.setConfidence(0.0);
+            r.setMode(RouteMode.OUT_OF_SCOPE);
+            return r;
         }
     }
 
-    /**
-     * Catalog에 있는 Topic 키워드로 intent 매칭
-     * - "휴학 내역" > "휴학"처럼 긴 표현 우선
-     */
+    // catalog 에있는 topic 키워드로 intent 매칭
+    //  "휴학 내역" > "휴학"처럼 긴 표현 우선
     private ChatIntent ruleMatchByCatalog(String normalizedMessage) {
 
+        // 불변 리스트(List.of 등) 정렬하면 바로 터짐
+        // 반드시 가변 리스트로 복사해서 정렬
+        List<PortalCatalog.Topic> topics = new ArrayList<>(catalog.topicList());
+
         // Topic들을 키워드 최대 길이 기준으로 정렬(긴 표현 우선)
-        List<PortalCatalog.Topic> topics = catalog.topicList();
         topics.sort(
                 Comparator.comparingInt((PortalCatalog.Topic t) ->
                         t.keywords().stream()

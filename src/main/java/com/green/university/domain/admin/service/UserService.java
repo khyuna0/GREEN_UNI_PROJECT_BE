@@ -119,7 +119,7 @@ public class UserService {
     @Transactional
     public LoginResponseDto login(LoginFormDto loginFormDto) {
         //유저 조회
-        User user = userRepository.findById(loginFormDto.getId()).orElseThrow(
+        User user = userRepository.findById(Long.valueOf(loginFormDto.getId())).orElseThrow(
                 () -> new CustomRestfullException("아이디를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );
 

@@ -52,29 +52,30 @@ public class AiBatchService {
             StuSub stuSub = detail.getStuSub();
             try {
                 dropoutRiskService.evaluateAndAnalyzeRisk(stuSub, detail);
-                log.info("✅ 처리 완료 ({}/{}): {}", done+1, details.size(), stuSub.getStudent().getName());
+                done++;
+                log.info("✅ 처리 완료 ({}/{}): {}", done + fail, details.size(), stuSub.getStudent().getName());
 
             } catch (Exception e) {
                 fail++;
                 log.error("❌ AI 분석 실패 - 학생: {}", stuSub.getStudent().getName(), e);
             } finally {
-                done++;
-                job.setDoneCount(done);
-                job.setMessage("AI 분석중... (" + done + "/" + details.size() + ")");
+                // 진행률 업데이트
+                job.setDoneCount(done + fail);
+                job.setMessage("AI 분석중... (" + (done + fail) + "/" + details.size() + ")");
                 subjectAiJobRepository.save(job);
             }
         }
 
-        // 최종 상태
-        if (fail == 0) {
-            job.setStatus(JobStatus.SUCCESS);
-            job.setMessage("AI 분석 완료 (" + done + "/" + details.size() + ")");
-        } else {
+        // 최종 상태 (1명이라도 실패하면 FAIL)
+        if (fail > 0) {
             job.setStatus(JobStatus.FAIL);
             job.setMessage("AI 분석 일부 실패 (" + fail + "명 실패, " + done + "/" + details.size() + ")");
+        } else {
+            job.setStatus(JobStatus.SUCCESS);
+            job.setMessage("AI 분석 완료 (" + done + "/" + details.size() + ")");
         }
         subjectAiJobRepository.save(job);
-        log.info("🏁 비동기 작업 종료 - 성공: {}, 실패: {}", done - fail, fail);
+        log.info("🏁 비동기 작업 종료 - 성공: {}, 실패: {}", done, fail);
 
     }
 

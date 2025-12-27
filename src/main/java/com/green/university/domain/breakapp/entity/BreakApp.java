@@ -17,25 +17,20 @@ public class BreakApp {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Student 엔티티 (studentId)
     @ManyToOne
     @JoinColumn(name = "student_id")
     private Student student;
 
     private Long studentGrade;
 
-    private Long fromYear;
-
+    private Long fromYear; // 휴학 시작 하기 원하는 연도
     private Long fromSemester;
-
-    private Long toYear;
-
+    private Long toYear; // 휴학 끝내기 원하는 연도
     private Long toSemester;
 
-    private String type;
+    private String type; // 휴학 이유
+    private String status; // 휴학 처리 상태
+    private LocalDate appDate; // 휴학 신청서를 쓴 날짜
 
-    // 날짜 .. 유틸 ..
-    private LocalDate appDate;
-    private String status;
 
 }

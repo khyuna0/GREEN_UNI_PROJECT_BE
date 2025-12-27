@@ -255,14 +255,14 @@ public class CounselingReserveService {
     }
 
     // 교수 기준 상담 예약 목록 조회
-    @Transactional(readOnly = true)
-    public List<CounselingReserveDto> getProfessorReservationList(Long professorId) {
-        return counselingReserveRepository
-                .findByCounselingSchedule_Professor_Id(professorId)
-                .stream()
-                .map(CounselingReserveDto::new)
-                .toList();
-    }
+//    @Transactional(readOnly = true)
+//    public List<CounselingReserveDto> getProfessorReservationList(Long professorId) {
+//        return counselingReserveRepository
+//                .findByCounselingSchedule_Professor_Id(professorId)
+//                .stream()
+//                .map(CounselingReserveDto::new)
+//                .toList();
+//    }
 
     // 화상 상담 방 코드 생성
     private String generateRoomCode() {
@@ -291,7 +291,7 @@ public class CounselingReserveService {
     @Transactional
     public void professorRequest(CounselingProfessorRequestDto dto, Long professorId) {
 
-        // schedule 검증 (교수 본인 슬롯인지 + 예약 가능인지)
+        // schedule 검증 (교수 본인 인지 + 예약 가능인지)
         CounselingSchedule schedule = counselingScheduleRepository.findById(dto.getCounselingScheduleId())
                 .orElseThrow(() -> new CustomRestfullException("상담 일정이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
 
@@ -404,7 +404,7 @@ public class CounselingReserveService {
 
         List<CounselPreReserveDto> dtoList = list.stream()
                 .map(CounselPreReserveDto::new)
-                .collect(Collectors.toList());
+                .toList();
 
         return Map.of("list", dtoList);
     }

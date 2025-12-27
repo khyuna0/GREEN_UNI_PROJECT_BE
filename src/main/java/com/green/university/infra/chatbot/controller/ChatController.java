@@ -20,7 +20,7 @@ public class ChatController {
 
     @PostMapping("/chat")
     public ChatResponseDto chat(@RequestBody ChatFormDto req) {
-        return chatService.handle(req.getMessage());
+        return chatService.handle(req.getMessage(), req.getUserRole());
     }
 
 }
