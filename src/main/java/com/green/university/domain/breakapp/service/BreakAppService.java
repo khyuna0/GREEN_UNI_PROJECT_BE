@@ -8,6 +8,7 @@ import com.green.university.domain.student.entity.Student;
 import com.green.university.domain.student.repository.StudentRepository;
 import com.green.university.domain.student.service.StuStatService;
 import com.green.university.global.exception.CustomRestfullException;
+import com.green.university.global.utils.TermUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -101,6 +102,22 @@ public class BreakAppService {
         if (!ownerId.equals(studentId)) {
             throw new CustomRestfullException("본인 신청서만 수정할 수 있습니다.", HttpStatus.FORBIDDEN);
         }
+
+        // ---- 비교키 만들기: (년도,학기) => 하나의 숫자로 비교 ----
+        long nowKey  = TermUtil.currentYear() * 10 + TermUtil.currentSemester();   // 예: 20252
+        long fromKey = breakApp.getFromYear() * 10 + breakApp.getFromSemester();  // 예: 20252
+        long toKey   = dto.getToYear() * 10 + dto.getToSemester();               // 예: 20261
+
+        // 종료가 '현재 학기' 이하이면 불가
+        if (toKey <= nowKey) {
+            throw new CustomRestfullException("종료 학기는 현재 학기 이후로만 설정할 수 있습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        // 종료가 '시작 학기'보다 이전이면 불가
+        // (현재보다 이후로 강제하면 보통 자동으로 걸리지만, 정책상 명시하는 게 좋음)
+//        if (toKey < fromKey) {
+//            throw new CustomRestfullException("종료 학기는 시작 학기보다 빠를 수 없습니다.", HttpStatus.BAD_REQUEST);
+//        }
 
         breakApp.setToYear(dto.getToYear());
         breakApp.setToSemester(dto.getToSemester());

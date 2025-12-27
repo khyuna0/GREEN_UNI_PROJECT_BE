@@ -204,7 +204,7 @@ public class BreakAppController {
     }
     
     // 휴학신청 수정
-    @PatchMapping("/break/{id}")
+    @PatchMapping("/update/{id}")
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> updateBreak(
             @PathVariable Long id,

@@ -5,9 +5,11 @@ import com.green.university.domain.counseling.dto.DeleteScheduleRequestDto;
 import com.green.university.domain.counseling.dto.WeeklyCounselingScheduleRequest;
 import com.green.university.domain.counseling.service.CounselingScheduleService;
 import com.green.university.domain.counseling.service.RiskStudentService;
+import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/counseling")
