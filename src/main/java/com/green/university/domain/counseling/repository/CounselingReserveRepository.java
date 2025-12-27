@@ -15,9 +15,8 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
 
     List<CounselingReserve> findByCounselingSchedule_Id(Long counselingScheduleId);
 
-    List<CounselingReserve> findByCounselingSchedule_Professor_Id(Long professorId);
-
     int countByStudent_IdAndApprovalState(Long studentId, ApprovalState approvalState);
+    int countByStudent_IdAndRequesterAndApprovalState(Long studentId, ReserveRequester requester, ApprovalState approvalState);
 
     // 교수 미처리 상담(학생 신청만) 카운트
     int countByCounselingSchedule_Professor_IdAndApprovalStateAndRequester(
@@ -65,14 +64,7 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
             ApprovalState approvalState
     );
 
-    // 학생 기준 최신 교수요청 1건
-    Optional<CounselingReserve> findTop1ByStudent_IdAndRequesterOrderByIdDesc(
-            Long studentId,
-            ReserveRequester requester
-    );
-
     boolean existsByCounselingSchedule_Id(Long counselingScheduleId);
-
 
     // 학생 아이디, 방 번호, 예약 상태, 시간으로 유효한 방 조회
     boolean existsByStudent_IdAndRoomCodeAndApprovalStateAndCounselingSchedule_StartTimeAndCounselingSchedule_EndTimeAndCounselingSchedule_CounselingDate(

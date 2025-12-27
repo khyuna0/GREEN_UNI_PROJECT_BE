@@ -10,7 +10,6 @@ import com.green.university.domain.counseling.entity.CounselingSchedule;
 import com.green.university.domain.counseling.entity.ReserveRequester;
 import com.green.university.domain.counseling.repository.CounselingReserveRepository;
 import com.green.university.domain.counseling.repository.CounselingScheduleRepository;
-import com.green.university.domain.dropoutrisk.dto.DropoutRiskResponseDto;
 import com.green.university.domain.dropoutrisk.entity.DropoutRisk;
 import com.green.university.domain.dropoutrisk.entity.RiskStatus;
 import com.green.university.domain.dropoutrisk.respository.DropoutRiskRepository;
@@ -21,6 +20,7 @@ import com.green.university.domain.subject.entity.Subject;
 import com.green.university.domain.subject.repository.StuSubRepository;
 import com.green.university.domain.subject.repository.SubjectRepository;
 import com.green.university.global.exception.CustomRestfullException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,7 +31,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,20 +39,15 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class CounselingReserveService {
 
-    @Autowired
-    private CounselingReserveRepository counselingReserveRepository;
-    @Autowired
-    private CounselingScheduleRepository counselingScheduleRepository;
-    @Autowired
-    private StudentRepository studentRepository;
-    @Autowired
-    private SubjectRepository subjectRepository;
-    @Autowired
-    private StuSubRepository stuSubRepository;
-    @Autowired
-    private DropoutRiskRepository dropoutRiskRepository;
+    private final CounselingReserveRepository counselingReserveRepository;
+    private final CounselingScheduleRepository counselingScheduleRepository;
+    private final StudentRepository studentRepository;
+    private final SubjectRepository subjectRepository;
+    private final StuSubRepository stuSubRepository;
+    private final DropoutRiskRepository dropoutRiskRepository;
 
     // 로그인 유저 + requester에 따라 reserve db의 모든 내용을 가져오기
     public Map<String, List<CounselingReserve>> getListByRequester(Long id, String userRole) {
@@ -279,10 +273,10 @@ public class CounselingReserveService {
         );
     }
 
-    // 학생 알림용
+    // 학생 알림용 (교수가 학생에게 requested 한 것, 교수와 학생이 approved 한 것)
     @Transactional(readOnly = true)
     public java.util.Map<String, Integer> getMyCounts(Long studentId) {
-        int requested = counselingReserveRepository.countByStudent_IdAndApprovalState(studentId, ApprovalState.REQUESTED);
+        int requested = counselingReserveRepository.countByStudent_IdAndRequesterAndApprovalState(studentId, ReserveRequester.PROFESSOR, ApprovalState.REQUESTED);
         int approved = counselingReserveRepository.countByStudent_IdAndApprovalState(studentId, ApprovalState.APPROVED);
         return java.util.Map.of("requested", requested, "approved", approved);
     }

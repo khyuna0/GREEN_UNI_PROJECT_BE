@@ -88,7 +88,7 @@ public class CounselingReserveController {
 //        return counselingReserveService.getNotApproved(professorId);
 //    }
 
-    // 학생 상담 개수 카운트용
+    // 학생: 교수가 보낸 상담 요청 requested, approved된 상담 개수
     @GetMapping("/count/student")
     @PreAuthorize("hasRole('STUDENT')")
     public java.util.Map<String, Integer> myCounts(@AuthenticationPrincipal CustomUserDetails principal) {
