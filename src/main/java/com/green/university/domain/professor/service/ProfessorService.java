@@ -159,7 +159,7 @@ public class ProfessorService {
         detail.setAbsent(dto.getAbsent()); // 결석
         detail.setLateness(dto.getLateness()); // 지각
         detail.setHomework(dto.getHomework()); // 과제점수
-        detail.setMildExam(dto.getMidExam()); // 중간
+        detail.setMidExam(dto.getMidExam()); // 중간
         detail.setFinalExam(dto.getFinalExam()); // 기말
 
 

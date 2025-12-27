@@ -27,7 +27,7 @@ public class StuSubDetail {
     private Long absent;
     private Long lateness;
     private Long homework;
-    private Long mildExam;
+    private Long midExam;
     private Long finalExam;
     private Double convertedMark; // 환산점수
     private String letterGrade; // 등급 (단순 출력용)

@@ -50,7 +50,7 @@ public class StudentInfoForProfessorDto {
         dto.setAbsent(s.getAbsent());
         dto.setLateness(s.getLateness());
         dto.setHomework(s.getHomework());
-        dto.setMidExam(s.getMildExam());        // 엔티티 컬럼명 mildExam 주의
+        dto.setMidExam(s.getMidExam());
         dto.setFinalExam(s.getFinalExam());
         dto.setConvertedMark(s.getConvertedMark());
         dto.setLetterGrade(s.getLetterGrade());
