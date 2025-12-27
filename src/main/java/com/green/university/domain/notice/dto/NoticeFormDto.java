@@ -28,4 +28,6 @@ public class NoticeFormDto { // 공지사항 수정, 입력, 출력 시 사용
     private String originFilename;  // 원본 파일명
     private String uuidFilename;    // 서버 저장용 파일명(충돌방지)
 
+    // 프론트에서 removeFile=true 보내면, 파일 삭제
+    private Boolean removeFile;
 }
