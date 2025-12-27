@@ -24,27 +24,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * @author 서영
- * 휴학 신청 관련 컨트롤러
- */
 @RestController
 @RequestMapping("/api/break")
 @PreAuthorize("hasAnyRole('STUDENT', 'STAFF')")
 public class BreakAppController {
 
     @Autowired
-    private HttpSession session;
-
-    @Autowired
     private BreakAppService breakAppService;
-
     @Autowired
     private StuStatService stuStatService;
-
     @Autowired
     private UserService userService;
-
     @Autowired
     private CollegeService collegeService;
 
@@ -103,19 +93,18 @@ public class BreakAppController {
 
         // 시작(현재) 연도/학기
         long fromYear = TermUtil.currentYear();
-        long fromSem  = TermUtil.currentSemester();
+        long fromSem = TermUtil.currentSemester();
 
         // 종료(사용자 선택) 연도/학기  (BreakAppFormDto가 Long이면 언박싱)
         Long toYearObj = breakAppFormDto.getToYear();
-        Long toSemObj  = breakAppFormDto.getToSemester();
+        Long toSemObj = breakAppFormDto.getToSemester();
 
         if (toYearObj == null || toSemObj == null) {
             throw new CustomRestfullException("종료 연도/학기를 입력해주세요.", HttpStatus.BAD_REQUEST);
         }
 
-
         long toYear = toYearObj;
-        long toSem  = toSemObj;
+        long toSem = toSemObj;
 
         // 종료가 시작보다 이전이면 신청 불가
         if (toYear < fromYear || (toYear == fromYear && toSem < fromSem)) {
@@ -134,7 +123,7 @@ public class BreakAppController {
         breakAppFormDto.setFromSemester(fromSem);
 
         breakAppService.createBreakApp(breakAppFormDto);
-        return ResponseEntity.ok().body("휴복학 신청이 정상적으로 처리되었습니다.");
+        return ResponseEntity.ok().body("휴•복학 신청이 정상적으로 처리되었습니다.");
 
     }
 
@@ -172,18 +161,13 @@ public class BreakAppController {
      * @return 휴학 신청서 확인 학생 / 교직원에 따라 옆에 카테고리 바뀌어야 함
      */
     @GetMapping("/detail/{id}")
-    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<?> breakDetail(@PathVariable("id") Long id) {
-
         // 휴복학 신청
         BreakApp breakApp = breakAppService.readById(id);
-
         // 신청한 학생
         StudentDto studentInfo = userService.readStudent(breakApp.getStudent().getId());
-
         // 학과 이름
         String deptName = collegeService.readDeptById(studentInfo.getDepartment().getId()).getName();
-
         // 단과대 이름
         String collName = collegeService
                 .readCollById(collegeService.readDeptById(studentInfo.getDepartment().getId()).getCollege().getId()).getName();

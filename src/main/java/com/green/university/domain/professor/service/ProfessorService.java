@@ -26,6 +26,7 @@ import com.green.university.domain.subject.service.StuSubService;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.utils.PenaltyCalculator;
 import com.green.university.infra.ai.service.AiBatchService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -40,28 +41,18 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ProfessorService {
 
-    @Autowired
-    private SubjectRepository subjectRepository;
-    @Autowired
-    private StuSubRepository stuSubRepository;
-    @Autowired
-    private StuSubDetailRepository stuSubDetailRepository;
-    @Autowired
-    private SyllaBusRepository syllaBusRepository;
-    @Autowired
-    private ProfessorRepository professorRepository;
-    @Autowired
-    private StuSubService stuSubService;
-
+    private final SubjectRepository subjectRepository;
+    private final StuSubRepository stuSubRepository;
+    private final StuSubDetailRepository stuSubDetailRepository;
+    private final SyllaBusRepository syllaBusRepository;
+    private final ProfessorRepository professorRepository;
+    private final StuSubService stuSubService;
+    private final GradeRepository gradeRepository;
+    private final AiBatchService aiBatchService;
     private static final int PAGE_SIZE = 20; // 교수 리스트 / 검색 페이징 용
-    @Autowired
-    private GradeRepository gradeRepository;
-    @Autowired
-    private AiBatchService aiBatchService;
-    @Autowired
-    private SubjectAiJobRepository subjectAiJobRepository;
 
     /**
      * 교수가 맡은 과목들의 학기 검색
@@ -168,7 +159,7 @@ public class ProfessorService {
         detail.setAbsent(dto.getAbsent()); // 결석
         detail.setLateness(dto.getLateness()); // 지각
         detail.setHomework(dto.getHomework()); // 과제점수
-        detail.setMildExam(dto.getMidExam()); // 중간
+        detail.setMidExam(dto.getMidExam()); // 중간
         detail.setFinalExam(dto.getFinalExam()); // 기말
 
 

@@ -5,7 +5,6 @@ import com.green.university.domain.admin.dto.LoginResponseDto;
 import com.green.university.domain.admin.service.UserService;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.security.CustomUserDetails;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,14 +24,11 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(
-            @Valid @RequestBody LoginFormDto loginFormDto,
-            BindingResult bindingResult,
-            HttpServletResponse response
-    ) {
+            @Valid @RequestBody LoginFormDto loginFormDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             StringBuilder sb = new StringBuilder();
             bindingResult.getAllErrors().forEach(error -> {
-                sb.append(error.getDefaultMessage()).append("\\n");
+                sb.append(error.getDefaultMessage()).append("\n");
             });
             throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
         }
@@ -49,10 +45,10 @@ public class AuthController {
         }
         Long id = principal.getId();
         String userRole = principal.getUserRole();
-        String username = principal.getUsername();
-        String name = (principal.getName() != null ? principal.getName() : "사용자" ); // 더미에 username없어서 만듬
+        //String username = principal.getUsername();
+        String name = (principal.getName() != null ? principal.getName() : "사용자"); // 더미에 username없어서 만듬
 
-        return ResponseEntity.ok(Map.of("id", id, "username", username, "role", userRole, "name", name));
+        return ResponseEntity.ok(Map.of("id", id, "role", userRole, "name", name));
     }
 
 }

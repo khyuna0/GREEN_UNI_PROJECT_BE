@@ -192,7 +192,7 @@ public class PersonalController {
         if (bindingResult.hasErrors()) {
             StringBuilder sb = new StringBuilder();
             bindingResult.getAllErrors().forEach(error -> {
-                sb.append(error.getDefaultMessage()).append("\\n");
+                sb.append(error.getDefaultMessage()).append("\n");
             });
             throw new CustomRestfullException(sb.toString(), HttpStatus.BAD_REQUEST);
         }

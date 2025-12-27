@@ -100,9 +100,9 @@ public interface CounselingReserveRepository extends JpaRepository<CounselingRes
     CounselingReserve findByRoomCodeAndApprovalState(String roomCode, ApprovalState approvalState);
 
     // 로그인한 유저 + Requester 따라 상담 내역 조회
+    List<CounselingReserve> findByStudent_Id(Long studentId);
     List<CounselingReserve> findBySubject_IdIn(List<Long> subjectIds);
 
     // 오늘로 조회, approvalState.approved 로 조회 -> 노쇼 감지 용
     List<CounselingReserve> findByApprovalStateAndCounselingSchedule_CounselingDate(ApprovalState approvalState, LocalDate today);
-    List<CounselingReserve> findByStudent_Id(Long studentId);
 }

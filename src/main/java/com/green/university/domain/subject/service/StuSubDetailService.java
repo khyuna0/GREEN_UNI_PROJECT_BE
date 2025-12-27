@@ -101,7 +101,7 @@ public class StuSubDetailService {
                 else letterGrade = "D0";
             }
 
-            if(totalAbsent > 5 || d.getMildExam() < 40 || d.getFinalExam() < 40 || d.getConvertedMark() < 60) {
+            if(totalAbsent > 5 || d.getMidExam() < 40 || d.getFinalExam() < 40 || d.getConvertedMark() < 60) {
                 letterGrade = "F";
                 }
 

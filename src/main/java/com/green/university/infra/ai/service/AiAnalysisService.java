@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -54,17 +57,34 @@ public class AiAnalysisService {
 
             } catch (Exception ex) {
                 log.error("❌ 모든 AI 실패", ex);
-                return createErrorResponse();
+                throw new RuntimeException("AI 분석 API 호출 실패: " + ex.getMessage(), ex);
             }
         }
     }
 
 
     // ============== 헬퍼 메서드들 ==============
+    private static final Set<String> VALID_TAGS = Set.of(
+            "잦은결석", "결석경고", "지각누적",
+            "학점F", "성적저조", "성적우수",
+            "출석성적불일치", "이탈위험", "동기부족"
+    );
+
+
     private AiRiskAnalysisResult parseJson(String rawText) {
         String cleanJson = stripToJson(rawText);
         try {
-            return objectMapper.readValue(cleanJson, AiRiskAnalysisResult.class);
+            ObjectMapper mapper = new ObjectMapper();
+            AiRiskAnalysisResult result = mapper.readValue(cleanJson, AiRiskAnalysisResult.class);
+            // ✅ 태그 검증 (유효한 태그만 필터링)
+            if (result.getReasonTags() != null) {
+                List<String> validTags = result.getReasonTags().stream()
+                        .filter(VALID_TAGS::contains)
+                        .limit(3) // 최대 3개
+                        .collect(Collectors.toList());
+                result.setReasonTags(validTags);
+            }
+            return result;
         } catch (Exception e) {
             log.error("JSON 파싱 에러. 원문: {}", rawText);
             throw new RuntimeException("AI 응답이 JSON 형식 아님", e);
@@ -88,13 +108,4 @@ public class AiAnalysisService {
         return t;
     }
 
-
-    private AiRiskAnalysisResult createErrorResponse() {
-        return new AiRiskAnalysisResult(
-                "AI 분석 실패",
-                "시스템 과부하로 분석 불가",
-                "잠시 후 다시 시도해주세요.",
-                Collections.emptyList()
-        );
-    }
 }
