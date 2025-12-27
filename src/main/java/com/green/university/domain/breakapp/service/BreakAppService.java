@@ -87,7 +87,7 @@ public class BreakAppService {
 
     // 처리되지 않은 휴학 신청 수정
     @Transactional
-    public void updateById(Long id, Long studentId, BreakUpdateDto dto){
+    public void updateBreakApp(Long id, Long studentId, BreakUpdateDto dto){
 
         BreakApp breakApp = breakAppRepository.findById(id)
                 .orElseThrow(() -> new CustomRestfullException("휴학 신청을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));

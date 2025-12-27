@@ -2,6 +2,7 @@ package com.green.university.domain.breakapp.controller;
 
 import com.green.university.domain.admin.service.UserService;
 import com.green.university.domain.breakapp.dto.BreakAppFormDto;
+import com.green.university.domain.breakapp.dto.BreakUpdateDto;
 import com.green.university.domain.breakapp.entity.BreakApp;
 import com.green.university.domain.breakapp.service.BreakAppService;
 import com.green.university.domain.student.dto.StudentDto;
@@ -12,6 +13,7 @@ import com.green.university.global.security.CustomUserDetails;
 import com.green.university.global.utils.Define;
 import com.green.university.global.utils.TermUtil;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -199,6 +201,19 @@ public class BreakAppController {
 
         return ResponseEntity.ok().body("휴학 신청 취소가 정상적으로 처리되었습니다.");
 
+    }
+    
+    // 휴학신청 수정
+    @PatchMapping("/break/{id}")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<?> updateBreak(
+            @PathVariable Long id,
+            @Valid @RequestBody BreakUpdateDto dto,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long studentId = userDetails.getId(); // 또는 studentId 매핑 방식에 맞게
+        breakAppService.updateBreakApp(id, studentId, dto);
+        return ResponseEntity.ok().build();
     }
 
     /**
