@@ -5,7 +5,6 @@ import com.green.university.domain.admin.dto.LoginResponseDto;
 import com.green.university.domain.admin.service.UserService;
 import com.green.university.global.exception.CustomRestfullException;
 import com.green.university.global.security.CustomUserDetails;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -46,10 +45,10 @@ public class AuthController {
         }
         Long id = principal.getId();
         String userRole = principal.getUserRole();
-        String username = principal.getUsername();
+        //String username = principal.getUsername();
         String name = (principal.getName() != null ? principal.getName() : "사용자"); // 더미에 username없어서 만듬
 
-        return ResponseEntity.ok(Map.of("id", id, "username", username, "role", userRole, "name", name));
+        return ResponseEntity.ok(Map.of("id", id, "role", userRole, "name", name));
     }
 
 }

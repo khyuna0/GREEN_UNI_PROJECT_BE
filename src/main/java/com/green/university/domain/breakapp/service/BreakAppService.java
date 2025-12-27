@@ -7,7 +7,7 @@ import com.green.university.domain.student.entity.Student;
 import com.green.university.domain.student.repository.StudentRepository;
 import com.green.university.domain.student.service.StuStatService;
 import com.green.university.global.exception.CustomRestfullException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,28 +15,18 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * @author 서영
- *
- */
 
 @Service
+@RequiredArgsConstructor
 public class BreakAppService {
 
-    @Autowired
-    private BreakAppRepository breakAppRepository;
-
-    @Autowired
-    private StuStatService stuStatService;
-
-    @Autowired
-    private StudentRepository studentRepository;
+    private final BreakAppRepository breakAppRepository;
+    private final StuStatService stuStatService;
+    private final StudentRepository studentRepository;
 
     // 휴학 신청
     @Transactional
     public void createBreakApp(BreakAppFormDto dto) {
-
-        // 학생 엔티티 조회 (기존: studentId Long만 다님 → JPA는 객체로!)
         Student student = studentRepository.findById(dto.getStudentId())
                 .orElseThrow(() -> new CustomRestfullException("학생을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
@@ -50,7 +40,7 @@ public class BreakAppService {
 
         // 엔티티 값 세팅
         BreakApp breakApp = new BreakApp();
-        breakApp.setStudent(student);                         // 외래키 대신 엔티티
+        breakApp.setStudent(student);
         breakApp.setStudentGrade(dto.getStudentGrade());
         breakApp.setFromYear(dto.getFromYear());
         breakApp.setFromSemester(dto.getFromSemester());
@@ -60,7 +50,6 @@ public class BreakAppService {
         breakApp.setAppDate(LocalDate.now());   // 신청일 오늘
         breakApp.setStatus("처리중");
 
-        // 저장
         breakAppRepository.save(breakApp);
     }
 
