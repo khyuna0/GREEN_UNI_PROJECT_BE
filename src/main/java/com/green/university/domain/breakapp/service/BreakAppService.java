@@ -1,6 +1,7 @@
 package com.green.university.domain.breakapp.service;
 
 import com.green.university.domain.breakapp.dto.BreakAppFormDto;
+import com.green.university.domain.breakapp.dto.BreakUpdateDto;
 import com.green.university.domain.breakapp.entity.BreakApp;
 import com.green.university.domain.breakapp.repository.BreakAppRepository;
 import com.green.university.domain.student.entity.Student;
@@ -93,6 +94,29 @@ public class BreakAppService {
                     HttpStatus.BAD_REQUEST);
         }
         breakAppRepository.delete(breakApp);
+    }
+
+    // 처리되지 않은 휴학 신청 수정
+    @Transactional
+    public void updateById(Long id, Long studentId, BreakUpdateDto dto){
+
+        BreakApp breakApp = breakAppRepository.findById(id)
+                .orElseThrow(() -> new CustomRestfullException("휴학 신청을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+        
+        // 처리중인 휴학신청만 수정가능
+        if (!"처리중".equals(breakApp.getStatus())) {
+            throw new CustomRestfullException("처리중인 신청만 수정할 수 있습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        Long ownerId = breakApp.getStudent().getId();
+        if (!ownerId.equals(studentId)) {
+            throw new CustomRestfullException("본인 신청서만 수정할 수 있습니다.", HttpStatus.FORBIDDEN);
+        }
+
+        breakApp.setToYear(dto.getToYear());
+        breakApp.setToSemester(dto.getToSemester());
+        breakApp.setType(dto.getType());
+
     }
 
     // 휴학 신청 처리 (교직원)
