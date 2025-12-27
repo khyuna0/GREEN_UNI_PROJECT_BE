@@ -1,10 +1,12 @@
 package com.green.university.global.config;
 
+import com.green.university.global.security.JwtAuthenticationEntryPoint;
 import com.green.university.global.security.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -27,6 +29,8 @@ public class SecurityConfig {
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+    @Autowired
+    private JwtAuthenticationEntryPoint  jwtAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -37,6 +41,9 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
+                .exceptionHandling(handling -> handling
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                )
                 // logout 설정
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")   // 프론트에서 호출할 로그아웃 URL
@@ -47,7 +54,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                 // CORS preflight(OPTIONS) 전부 허용
-                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // 에러, 정적 리소스, 로그인, 공지사항, 학사일정, 아이디 비밀번호 찾기 팝업 허용
                 .requestMatchers(
                         "/",

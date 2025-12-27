@@ -17,6 +17,7 @@ public class JwtUtil {
     private String secretKey;
 
     private static final long ACCESS_TOKEN_EXP = 1000L * 60 * 60; // 1시간
+//    private static final long ACCESS_TOKEN_EXP = 1000L * 60; // 테스트용 : 1분
 
     public String createAccessToken(Long userId, String role) {
         Date now = new Date();
