@@ -22,7 +22,7 @@ public class NoShowScheduler {
 
         @Transactional
         @Scheduled(cron = "0 0 * * * *") // 매 정시
-//        @Scheduled(cron = "0 */5 * * * *") // 10분 간격 (테스트용)
+//        @Scheduled(cron = "0 */1 * * * *") // 5분 간격 (테스트용)
         public void markNoShow() {
             System.out.println("노쇼 감지 시작");
             LocalDate today = LocalDate.now();
@@ -30,7 +30,7 @@ public class NoShowScheduler {
 
             List<CounselingReserve> targets =
                     reserveRepository
-                            .findByApprovalStateAndCounselingSchedule_CounselingDate(
+                            .findByApprovalStateAndCounselingSchedule_CounselingDateLessThanEqual(
                                     ApprovalState.APPROVED, today
                             )
                             .stream()
@@ -55,7 +55,8 @@ public class NoShowScheduler {
         }
 
         public void returnDetected(CounselingReserve counselingReserve) {
-            if(counselingReserve.getDropoutRisk() != null) { // 위험 학생이 노쇼 했을 때
+            if(counselingReserve.getDropoutRisk() != null && counselingReserve.getDropoutRisk().getStatus() != RiskStatus.RESOLVED) {
+                // 위험 학생이 노쇼 했을 때, 완료 상태가 아닌 경우
                 counselingReserve.getDropoutRisk().setStatus(RiskStatus.DETECTED);
             }
 

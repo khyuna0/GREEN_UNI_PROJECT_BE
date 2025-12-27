@@ -5,6 +5,7 @@ import com.green.university.domain.notice.dto.NoticeFormDto;
 import com.green.university.domain.notice.dto.NoticePageFormDto;
 import com.green.university.domain.notice.entity.Notice;
 import com.green.university.domain.notice.entity.NoticeFile;
+import com.green.university.domain.notice.repository.NoticeFileRepository;
 import com.green.university.domain.notice.repository.NoticeRepository;
 import com.green.university.domain.notice.specification.NoticeSpecification;
 import com.green.university.global.exception.CustomRestfullException;
@@ -39,6 +40,7 @@ import java.util.stream.Collectors;
 public class NoticeService {
 
     private final NoticeRepository noticeRepository;
+    private final NoticeFileRepository noticeFileRepository;
 
     private static final int PAGE_SIZE = 10;
 
@@ -138,20 +140,20 @@ public class NoticeService {
         notice.setContent(noticeFormDto.getContent());
 
         MultipartFile newFile = noticeFormDto.getFile();
+        boolean removeFile = Boolean.TRUE.equals(noticeFormDto.getRemoveFile());
 
-        // 새파일 올라온 경우
-        if(newFile != null && !newFile.isEmpty()){
+        // 파일 올렸던거 제거
+        if (removeFile) {
+            removeExistingFile(notice);
+        }
+
+        // 교체: 새 파일 올라오면 기존 제거 후 새로 저장
+        if (newFile != null && !newFile.isEmpty()) {
             validateFileSize(newFile);
 
-            //기존 파일 삭제
-            if(notice.getFile() != null){
-                deleteFileFromDisk(notice.getFile().getUuidFilename());
-            }
+            // 기존 파일 있으면 제거(디스크+DB)
+            removeExistingFile(notice);
 
-            //기존 파일 엔티티 제거(orphanRemoval로 DB에서 삭제됨)
-            notice.setFile(null);
-
-            //새파일 제거
             StoredFileInfo info = storeFileToDisk(newFile);
 
             NoticeFile noticeFile = new NoticeFile();
@@ -161,6 +163,29 @@ public class NoticeService {
             notice.setFile(noticeFile); // 양방향 연결
         }
     }
+
+    // 파일 처리 메서드들
+    // 로직들이 공지에 종속되어있어서 일단 여기에 두는게 나음
+    // 빼려고 하면 FileStorageService로 분리
+    private void removeExistingFile(Notice notice) {
+        if (notice.getFile() == null) return;
+
+        NoticeFile old = notice.getFile();
+
+        // 기존 파일 삭제(디스크)
+        deleteFileFromDisk(old.getUuidFilename());
+
+        // 기존 파일 엔티티 제거(orphanRemoval로 DB에서 삭제됨 기대)
+        // mappedBy 구조라 orphanRemoval 타이밍/순서 이슈가 생길 수 있어서 delete+flush로 확실히 처리
+        notice.setFile(null);
+
+        // DB에서 기존 notice_file 행 먼저 삭제
+        noticeFileRepository.delete(old);
+
+        // delete가 먼저 반영되도록 flush (insert보다 앞서게)
+        noticeFileRepository.flush();
+    }
+
 
     // 공지 삭제  + 파일 삭제
     @Transactional
@@ -194,7 +219,6 @@ public class NoticeService {
                 })
                 .collect(Collectors.toList());
     }
-
 
 
     // 파일 처리 메서드들

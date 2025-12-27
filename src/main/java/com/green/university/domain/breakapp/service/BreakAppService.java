@@ -26,6 +26,21 @@ public class BreakAppService {
     private final StuStatService stuStatService;
     private final StudentRepository studentRepository;
 
+    // 종료학기는 현재 학기 이후만 허용
+    private void validateToAfterNow(long toYear, long toSemester) {
+        // ---- 비교키 만들기: (년도,학기) => 하나의 숫자로 비교 ----
+        long nowKey = TermUtil.currentYear() * 10L + TermUtil.currentSemester(); // 예: 20252
+        long toKey  = toYear * 10L + toSemester;                                // 예: 20261
+
+        // 종료가 '현재 학기' 이하이면 불가
+        if (toKey <= nowKey) {
+            throw new CustomRestfullException(
+                    "종료 학기는 현재 학기 이후로만 설정할 수 있습니다.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
+
     // 휴학 신청
     @Transactional
     public void createBreakApp(BreakAppFormDto dto) {
@@ -39,6 +54,9 @@ public class BreakAppService {
                 throw new CustomRestfullException("이미 처리중인 신청 내역이 존재합니다.", HttpStatus.CONFLICT);
             }
         }
+
+        // 종료 학기 검증(현재 학기 이후만 가능)
+        validateToAfterNow(dto.getToYear(), dto.getToSemester());
 
         // 엔티티 값 세팅
         BreakApp breakApp = new BreakApp();
@@ -92,7 +110,7 @@ public class BreakAppService {
 
         BreakApp breakApp = breakAppRepository.findById(id)
                 .orElseThrow(() -> new CustomRestfullException("휴학 신청을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
-        
+
         // 처리중인 휴학신청만 수정가능
         if (!"처리중".equals(breakApp.getStatus())) {
             throw new CustomRestfullException("처리중인 신청만 수정할 수 있습니다.", HttpStatus.BAD_REQUEST);
@@ -103,21 +121,8 @@ public class BreakAppService {
             throw new CustomRestfullException("본인 신청서만 수정할 수 있습니다.", HttpStatus.FORBIDDEN);
         }
 
-        // ---- 비교키 만들기: (년도,학기) => 하나의 숫자로 비교 ----
-        long nowKey  = TermUtil.currentYear() * 10 + TermUtil.currentSemester();   // 예: 20252
-        long fromKey = breakApp.getFromYear() * 10 + breakApp.getFromSemester();  // 예: 20252
-        long toKey   = dto.getToYear() * 10 + dto.getToSemester();               // 예: 20261
-
-        // 종료가 '현재 학기' 이하이면 불가
-        if (toKey <= nowKey) {
-            throw new CustomRestfullException("종료 학기는 현재 학기 이후로만 설정할 수 있습니다.", HttpStatus.BAD_REQUEST);
-        }
-
-        // 종료가 '시작 학기'보다 이전이면 불가
-        // (현재보다 이후로 강제하면 보통 자동으로 걸리지만, 정책상 명시하는 게 좋음)
-//        if (toKey < fromKey) {
-//            throw new CustomRestfullException("종료 학기는 시작 학기보다 빠를 수 없습니다.", HttpStatus.BAD_REQUEST);
-//        }
+        // 종료 학기 검증(현재 학기 이후만 가능)
+        validateToAfterNow(dto.getToYear(), dto.getToSemester());
 
         breakApp.setToYear(dto.getToYear());
         breakApp.setToSemester(dto.getToSemester());
@@ -143,13 +148,7 @@ public class BreakAppService {
 
             Long studentId = breakApp.getStudent().getId();   // 엔티티에서 ID 꺼내기
 
-            // 원래 StudentService.updateStatus(...) 라고 되어있던 걸
-            // 실제 사용하는 Service 빈으로 변경해야 함. (예: stuStatService)
             stuStatService.updateStatus(studentId, "휴학", newToDate, id);
         }
     }
 }
-
-
-
-
