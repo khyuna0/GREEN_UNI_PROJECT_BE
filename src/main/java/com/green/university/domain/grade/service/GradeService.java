@@ -115,10 +115,31 @@ public class GradeService {
             return Collections.emptyList();
         }
 
+        // 이번학기 강의평가 완료 여부 확인
+        Long currentYear = TermUtil.currentYear();
+        Long currentSemester = TermUtil.currentSemester();
+
+        // 이번학기 수강과목만 추출
+        List<StuSub> currentTermStuSubs = stuSubs.stream()
+                .filter(ss -> ss.getSubject() != null)
+                .filter(ss -> ss.getSubject().getSubYear() != null && ss.getSubject().getSemester() != null)
+                .filter(ss -> Objects.equals(ss.getSubject().getSubYear(), currentYear)
+                        && Objects.equals(ss.getSubject().getSemester(), currentSemester))
+                .collect(Collectors.toList());
+
+        // 강의평가가 모두 완료되지 않았으면, 이번학기 성적은 "표시에서만" 제외(접근은 허용)
+        boolean hasAllEvalThisTerm = hasCompletedAllEvaluations(studentId, currentTermStuSubs);
+
         //연도, 학기별 그룹 TODO 그룹화 하는 이유?
         Map<String, List<StuSub>> grouped = stuSubs.stream()
                 .filter(ss -> ss.getSubject() != null)
                 .filter(ss -> ss.getSubject().getSubYear() != null && ss.getSubject().getSemester() != null)
+                // ✅ 강의평가 미완료면 이번학기만 그룹에서 제외
+                .filter(ss -> {
+                    if (hasAllEvalThisTerm) return true;
+                    return !(Objects.equals(ss.getSubject().getSubYear(), currentYear)
+                            && Objects.equals(ss.getSubject().getSemester(), currentSemester));
+                })
                 .collect(Collectors.groupingBy(
                         ss -> ss.getSubject().getSubYear()+"-"+ss.getSubject().getSemester()
                 ));
@@ -136,7 +157,6 @@ public class GradeService {
             result.add(calculateMyGradeDto(studentId, year, semester, list));
         }
 
-
         return result;
 
     }
@@ -150,15 +170,15 @@ public class GradeService {
                 .map(this::toGradeDto)
                 .collect(Collectors.toList());
     }
-    
+
     // 학기별 성적 조회 (선택 조회 - type 필터)
     public List<GradeDto> readGradeByType(Long studentId, Long subYear, Long semester, String type) {
 
-       List<StuSub> stuSubs = stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_SemesterAndSubject_Type(studentId, subYear, semester, type);
+        List<StuSub> stuSubs = stuSubRepository.findByStudent_IdAndSubject_SubYearAndSubject_SemesterAndSubject_Type(studentId, subYear, semester, type);
 
-       return stuSubs.stream()
-               .map(this::toGradeDto)
-               .collect(Collectors.toList());
+        return stuSubs.stream()
+                .map(this::toGradeDto)
+                .collect(Collectors.toList());
 
     }
 
@@ -251,7 +271,29 @@ public class GradeService {
         }
         return dto;
     }
-    
+
+    // ✅ 헬퍼 : 이번학기 수강 과목들에 대해 "모든 강의평가 완료" 여부 확인
+    private boolean hasCompletedAllEvaluations(Long studentId, List<StuSub> currentTermStuSubs) {
+        // 이번학기 수강이 없으면 제한할 필요 없음
+        if (currentTermStuSubs == null || currentTermStuSubs.isEmpty()) {
+            return true;
+        }
+
+        for (StuSub ss : currentTermStuSubs) {
+            if (ss == null || ss.getSubject() == null || ss.getSubject().getId() == null) continue;
+
+            boolean exists = evaluationRepository
+                    .findByStudent_IdAndSubject_Id(studentId, ss.getSubject().getId())
+                    .isPresent();
+
+            if (!exists) {
+                return false; // 하나라도 없으면 미완료
+            }
+        }
+
+        return true;
+    }
+
     // 헬퍼 : 누계 성적(MyGradeDto) 계산
     private MyGradeDto calculateMyGradeDto(Long studentId, Long year, Long semester, List<StuSub> stuSubs) {
 

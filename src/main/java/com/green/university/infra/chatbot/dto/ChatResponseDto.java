@@ -15,11 +15,9 @@ public class ChatResponseDto {
     private List<Link> links;              // “바로가기” 버튼들
     private List<String> references;       // “포털 > … > …” 같은 참고 경로 텍스트
 
-    /**
-     * 기존 ChatLinkFormDto를 응답 DTO 내부로 합침
-     * - DTO 파일 수 줄이기
-     * - 응답에서만 쓰이는 타입을 응답 안으로 캡슐화
-     */
+
+    // 기존 ChatLinkFormDto를 응답 DTO 내부로 합침
+    // 응답에서만 쓰이는 타입을 응답안으로
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
