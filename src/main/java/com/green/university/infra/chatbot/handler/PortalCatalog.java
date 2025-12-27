@@ -2,6 +2,7 @@ package com.green.university.infra.chatbot.handler;
 
 import com.green.university.infra.chatbot.dto.ChatResponseDto;
 import com.green.university.infra.chatbot.intent.ChatIntent;
+import com.green.university.infra.chatbot.util.RoleNormalizer;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -19,11 +20,11 @@ public class PortalCatalog {
     public record Topic(
             ChatIntent intent,
             String title,
-            String pageSummary,            // ✅ 세부 안내용(없으면 "")
+            String pageSummary,            // 세부 안내용
             List<String> references,
-            List<ChatResponseDto.Link> links, // ✅ ChatLinkFormDto -> ChatResponseDto.Link 로 변경
+            List<ChatResponseDto.Link> links,
             List<String> keywords,
-            List<String> roles             // ✅ ["student","professor","staff"]
+            List<String> roles             // student,professor,staff
     ) {}
 
     // 한 번만 만들어서 재사용(캐싱)
@@ -62,14 +63,13 @@ public class PortalCatalog {
         return sb.toString();
     }
 
-    /**
-     * ✅ (옵션) role 기반으로 Topic을 필터링하고 싶으면 이 메서드를 라우터에서 쓰면 됨.
-     *  - role이 null/empty면 전체 반환
-     */
+
+    //role 기반 필터링
     public List<Topic> topicListByRole(String role) {
-        if (role == null || role.isBlank()) return topicList();
+        String r = RoleNormalizer.normalize(role);
+        if (r == null || r.isBlank()) return topicList();
         return topicList().stream()
-                .filter(t -> t.roles() == null || t.roles().isEmpty() || t.roles().contains(role))
+                .filter(t -> t.roles() == null || t.roles().isEmpty() || t.roles().contains(r))
                 .toList();
     }
 
@@ -232,7 +232,7 @@ public class PortalCatalog {
                         List.of("포털 > MY > 휴학 신청"),
                         List.of(new ChatResponseDto.Link("휴학 신청 바로가기", "/break/application")),
                         List.of("휴학신청", "휴학 신청", "휴학", "break application"),
-                        List.of("student")
+                        List.of("student", "staff")
                 ),
                 new Topic(
                         ChatIntent.BREAK_LIST_STUDENT,
@@ -251,6 +251,52 @@ public class PortalCatalog {
                         List.of(new ChatResponseDto.Link("휴학 처리 바로가기", "/break/list/staff")),
                         List.of("휴학처리", "휴학 처리", "휴학승인", "휴학 신청 리스트"),
                         List.of("staff")
+                ),
+
+                new Topic(
+                        ChatIntent.COUNSELING_STATUS,
+                        "내 학업 상태 안내",
+                        "나의 학업 상태를 확인하는 메뉴입니다.",
+                        List.of("포털 > 학업지원·상담 > 내 학업 상태"),
+                        List.of(new ChatResponseDto.Link("내 학업 상태 바로가기", "/status")),
+                        List.of("학업상태", "내 학업 상태", "상태", "status"),
+                        List.of("student")
+                ),
+                new Topic(
+                        ChatIntent.COUNSELING_MANAGE,
+                        "상담 관리 안내",
+                        "상담 신청/현황 확인 등 상담 관련 기능을 관리하는 메뉴입니다.",
+                        List.of("포털 > 학업지원·상담 > 상담 관리"),
+                        List.of(new ChatResponseDto.Link("상담 관리 바로가기", "/counseling/manage")),
+                        List.of("상담관리", "상담 관리", "상담 신청", "상담 현황", "counseling manage"),
+                        List.of("student", "professor")
+                ),
+                new Topic(
+                        ChatIntent.COUNSELING_VIDEO,
+                        "상담 바로가기 안내",
+                        "예약된 상담이 있다면 이 메뉴에서 바로 상담(화상상담 등)으로 이동할 수 있어요.",
+                        List.of("포털 > 학업지원·상담 > 상담 바로가기"),
+                        List.of(new ChatResponseDto.Link("상담 바로가기", "/videotest")),
+                        List.of("상담바로가기", "상담 바로가기", "화상상담", "video", "videotest"),
+                        List.of("student", "professor")
+                ),
+                new Topic(
+                        ChatIntent.PROFESSOR_COUNSELING_RISK,
+                        "위험 학생 관리 안내",
+                        "교수가 담당 학생의 위험 상태를 확인하고 상담 요청/관리할 수 있는 메뉴입니다.",
+                        List.of("포털 > 모니터링·상담 > 위험 학생 관리"),
+                        List.of(new ChatResponseDto.Link("위험 학생 관리 바로가기", "/professor/counseling/risk")),
+                        List.of("위험학생", "위험 학생", "리스크", "risk student"),
+                        List.of("professor")
+                ),
+                new Topic(
+                        ChatIntent.PROFESSOR_COUNSELING_SCHEDULE,
+                        "상담 시간 설정 안내",
+                        "교수가 상담 가능 시간(스케줄)을 등록/수정하는 메뉴입니다.",
+                        List.of("포털 > 모니터링·상담 > 상담 시간 설정"),
+                        List.of(new ChatResponseDto.Link("상담 시간 설정 바로가기", "/professor/counseling/schedule")),
+                        List.of("상담시간", "상담 시간 설정", "상담스케줄", "schedule counseling"),
+                        List.of("professor")
                 ),
 
                 // ===================== 등록금 =====================

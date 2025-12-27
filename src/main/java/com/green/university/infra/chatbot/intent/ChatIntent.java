@@ -41,6 +41,13 @@ public enum ChatIntent {
     PROFESSOR_SUBJECT,
     PROFESSOR_EVALUATION,
 
+    // 상담
+    COUNSELING_STATUS,               // 학생: 내 학업 상태
+    COUNSELING_MANAGE,               // 학생/교수: 상담 관리
+    COUNSELING_VIDEO,                // 학생/교수: 상담 바로가기
+    PROFESSOR_COUNSELING_RISK,        // 교수: 위험 학생 관리
+    PROFESSOR_COUNSELING_SCHEDULE,    // 교수: 상담 시간 설정
+
     // 관리자(등록)
     ADMIN_COLLEGE,
     ADMIN_DEPARTMENT,
