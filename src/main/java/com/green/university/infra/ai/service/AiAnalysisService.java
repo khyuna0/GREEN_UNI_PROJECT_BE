@@ -66,7 +66,7 @@ public class AiAnalysisService {
     // ============== 헬퍼 메서드들 ==============
     private static final Set<String> VALID_TAGS = Set.of(
             "잦은결석", "결석경고", "지각누적",
-            "학점F", "성적저조", "성적우수",
+            "성적저조", "성적우수",
             "출석성적불일치", "이탈위험", "동기부족"
     );
 
