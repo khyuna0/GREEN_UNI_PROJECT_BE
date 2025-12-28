@@ -35,4 +35,18 @@ public class StuSubDetail {
     @Column(nullable = false)
     private boolean finalized = false; // 성적 최종 확정 여부
 
+    // 과제 + 중간 + 기말 = 평균 점수 계산 로직
+    public double getCalculatedAvg() {
+        double hw = this.homework == null ? 0 : this.homework;
+        double mid = this.midExam == null ? 0 : this.midExam;
+        double fin = this.finalExam == null ? 0 : this.finalExam;
+        return (hw + mid + fin) / 3.0;
+    }
+
+    // 총 결석 횟수 계산 (지각 3회 = 결석 1회)
+    public long getCalculatedAbsent() {
+        long abs = this.absent == null ? 0 : this.absent;
+        long lat = this.lateness == null ? 0 : this.lateness;
+        return abs + (lat / 3);
+    }
 }

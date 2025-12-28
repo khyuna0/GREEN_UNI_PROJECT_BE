@@ -287,6 +287,11 @@ public class DropoutRiskService {
 
         log.info("📊 위험 감지됨 - Type: {}, Level: {}", analysis.type, analysis.level);
 
+        // 1. 상세 점수 추출 (Null Safe 처리)
+        Long homeworkScore = detail.getHomework() == null ? 0L : detail.getHomework().longValue();
+        Long midScore = detail.getMidExam() == null ? 0L : detail.getMidExam().longValue();
+        Long finalScore = detail.getFinalExam() == null ? 0L : detail.getFinalExam().longValue();
+
         double prevGpa = 0.0;
         try {
             var myGrade = gradeService.readMyGradeByStudentId(stuSub.getStudent().getId());
@@ -302,7 +307,10 @@ public class DropoutRiskService {
                 .subjectName(stuSub.getSubject().getName())
                 .absent(detail.getAbsent())
                 .lateness(detail.getLateness())
-                .convertedMark(detail.getConvertedMark())
+                .homework(homeworkScore)
+                .midExam(midScore)
+                .finalExam(finalScore)
+                .convertedMark(detail.getConvertedMark() == null ? 0.0 : detail.getConvertedMark())
                 .letterGrade(detail.getLetterGrade())
                 .semesterGpa(prevGpa)
                 .riskType(analysis.type)
@@ -353,29 +361,33 @@ public class DropoutRiskService {
     private record RiskAnalysis(RiskType type, RiskLevel level) {}
 
     private RiskAnalysis calculateRisk(StuSubDetail detail) {
-        long absent = detail.getAbsent() == null ? 0 : detail.getAbsent();
-        long lateness = detail.getLateness() == null ? 0 : detail.getLateness();
-        long totalAbsent = absent + (lateness / 3);
+        long totalAbsent = detail.getCalculatedAbsent();
 
-        String grade = detail.getLetterGrade();
-        boolean attendanceDanger = totalAbsent >= 4;
-        boolean gradeDanger = "F".equalsIgnoreCase(grade);
+        //double score = detail.getConvertedMark() == null ? 0.0 : detail.getConvertedMark();
+        double avgScore = detail.getCalculatedAvg();
 
-        if (attendanceDanger && gradeDanger) {
+        boolean isAbsentDanger = totalAbsent >= 5; // 5회 이상이면 F니까 위험 (학교 규칙 반영)
+        boolean isAbsentWarning = totalAbsent >= 3 && totalAbsent < 5;
+        boolean isScoreDanger = avgScore < 60.0;
+        boolean isScoreWarning = avgScore >= 60.0 && avgScore < 70.0; // 70점 미만 경고
+
+        // CASE 1: 출석도 안 하고, 시험도 못 봄
+        if (isAbsentDanger && isScoreDanger) {
             return new RiskAnalysis(RiskType.BOTH, RiskLevel.DANGER);
         }
-        if (attendanceDanger) {
+        // CASE 2: 출석은 많이 빠졌지만, 시험은 잘 봄
+        if (isAbsentDanger && !isScoreDanger) {
             return new RiskAnalysis(RiskType.ATTENDANCE, RiskLevel.DANGER);
         }
-        if (gradeDanger) {
+        // CASE 3: 출석은 잘 했는데, 시험을 못 봄
+        if (!isAbsentDanger && isScoreDanger) {
             return new RiskAnalysis(RiskType.SUBJECT_GRADE, RiskLevel.DANGER);
         }
-
-        if (totalAbsent >= 3) {
+        // 경고(Warning) 레벨 처리
+        if (isAbsentWarning) {
             return new RiskAnalysis(RiskType.ATTENDANCE, RiskLevel.WARNING);
         }
-
-        if (detail.getConvertedMark() != null && detail.getConvertedMark() < 70.0) {
+        if (isScoreWarning) {
             return new RiskAnalysis(RiskType.SUBJECT_GRADE, RiskLevel.WARNING);
         }
 

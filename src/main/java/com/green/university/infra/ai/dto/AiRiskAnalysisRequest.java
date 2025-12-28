@@ -16,12 +16,16 @@ public class AiRiskAnalysisRequest { // AI에게 넘기는 핵심 DTO
 
     private long absent;
     private long lateness;
-    private double convertedMark;
+
+    private Long homework;
+    private Long midExam;
+    private Long finalExam;
+
+    private double convertedMark; // 환산 점수
     private String letterGrade;       // "A0", "F" 등
     private Double semesterGpa; // null 가능
 
     private RiskType riskType;
     private RiskLevel riskLevel;
 
-    // 추가: 과제 점수, 중간/기말 점수 등 넣어도 됨
 }
