@@ -1,0 +1,87 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - ha-251216-refactor # 본인의 작업 브랜치명으로 수정
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Create application.yml
+        run: |
+          mkdir -p src/main/resources
+          cat <<EOF > src/main/resources/application.yml
+          server:
+            port: 8888
+
+          spring:
+            jackson:
+              time-zone: Asia/Seoul
+            datasource:
+              driver-class-name: com.mysql.cj.jdbc.Driver
+              url: ${{ secrets.MYSQL_URL }}
+              username: admin
+              password: ${{ secrets.MYSQL_PASSWORD }}
+            jpa:
+              hibernate:
+                ddl-auto: update
+            web:
+              error:
+                include-exception: true
+                include-stacktrace: always
+
+          jwt:
+            secret: ${{ secrets.JWT_SECRET }}
+          
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} # 제미나이 인식 못해서 이 코드 추가함
+          app:
+            ai:
+              mistral:
+                api-key: ${{ secrets.MISTRAL_API_KEY }}
+                # /chat/completions를 제거합니다.
+                url: "https://api.mistral.ai/v1"
+              gemini:
+                api-key: ${{ secrets.GEMINI_API_KEY }}
+                # 모델명 이전인 /v1beta 까지만 적습니다.
+                url: "https://generativelanguage.googleapis.com/v1beta"
+          EOF
+
+      - name: Grant execute permission for Gradle
+        run: chmod +x ./gradlew
+
+      - name: Build Spring Boot
+        run: ./gradlew build -x test
+
+      - name: Copy Jar to EC2
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          source: "build/libs/*.jar"
+          # <폴더이름> 부분을 4단계에서 만든 이름과 동일하게 수정하세요.
+          target: "/home/ubuntu/green/build/libs"
+          strip_components: 2
+
+      - name: Restart backend service
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            sudo systemctl daemon-reload
+            sudo systemctl restart backend.service
+            sudo systemctl status backend.service --no-pager

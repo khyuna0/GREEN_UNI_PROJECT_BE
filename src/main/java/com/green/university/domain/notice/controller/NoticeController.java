@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,7 +67,16 @@ public class NoticeController {
     // 테스트 어려움 , 수정시 버그위험 증가, 다른api에도 중복 코드 많이 생김
     @PostMapping("/write")
     @PreAuthorize("hasRole('STAFF')")
-    public ResponseEntity<?> insertNotice(@ModelAttribute @Validated NoticeFormDto noticeFormDto) {
+    public ResponseEntity<?> insertNotice(@ModelAttribute @Validated NoticeFormDto noticeFormDto,
+                                          BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            bindingResult.getFieldErrors().forEach(error -> {
+                System.out.println("검증 실패 필드: " + error.getField());
+                System.out.println("에러 메시지: " + error.getDefaultMessage());
+            });
+            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
+        }
 
         noticeService.createNotice(noticeFormDto);
         return ResponseEntity.ok().body("공지사항 입력이 완료되었습니다");

@@ -88,7 +88,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173")); // 추후 s3 bucket 주소도 추가해야함
+        config.setAllowedOrigins(List.of(
+                "https://d16el2fl1tkjlz.cloudfront.net",
+                "http://localhost:5173"
+        )); // 추후 s3 bucket 주소도 추가해야함
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
