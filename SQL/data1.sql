@@ -1,5 +1,5 @@
 -- 우리 db에 맞게 필드 수정함 (2025.12.17)
-
+--
 -- 대학
 INSERT INTO college (id, name) VALUES (1, '공과대학');
 INSERT INTO college (id, name) VALUES (2, '인문대학');
