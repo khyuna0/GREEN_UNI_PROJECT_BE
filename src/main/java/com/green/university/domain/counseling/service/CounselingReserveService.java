@@ -547,7 +547,7 @@ public class CounselingReserveService {
     public boolean isValidRoomStu(Long studentId, String roomCode) {
         long startTime = LocalTime.now().getHour();
         return counselingReserveRepository.existsByStudent_IdAndRoomCodeAndApprovalStateAndCounselingSchedule_StartTimeAndCounselingSchedule_EndTimeAndCounselingSchedule_CounselingDate(
-                studentId, roomCode, ApprovalState.APPROVED, startTime, startTime + 1, LocalDate.now());
+                studentId, roomCode, ApprovalState.APPROVED, startTime, startTime + 1, LocalDate.now(ZoneId.of("Asia/Seoul")));
     }
 
     // 할당된 방 검증 - 교수
@@ -556,7 +556,7 @@ public class CounselingReserveService {
         List<Long> subjectIds = subjects.stream().map(Subject::getId).toList();
         long startTime = LocalTime.now().getHour();
         return counselingReserveRepository.existsBySubject_IdInAndRoomCodeAndApprovalStateAndCounselingSchedule_StartTimeAndCounselingSchedule_EndTimeAndCounselingSchedule_CounselingDate(
-                subjectIds, roomCode, ApprovalState.APPROVED, startTime, startTime + 1, LocalDate.now());
+                subjectIds, roomCode, ApprovalState.APPROVED, startTime, startTime + 1, LocalDate.now(ZoneId.of("Asia/Seoul")));
     }
 
     // 시간 검증( 남은 시간 체크 )
