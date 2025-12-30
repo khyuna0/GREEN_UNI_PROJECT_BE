@@ -58,7 +58,7 @@ jwt:
 
 # 6. AI API + 공통 앱 설정
 app:
-  timezone: Asia/Seoul   # ★ JVM 보조 설정용
+  timezone: Asia/Seoul
   ai:
     mistral:
       api-key: ${MISTRAL_API_KEY}
