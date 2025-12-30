@@ -1,11 +1,12 @@
 server:
   port: 8888
 
-
 spring:
   # 1. env
   config:
     import: file:.env[.properties]
+
+  # JSON 직렬화 KST
   jackson:
     time-zone: Asia/Seoul
 
@@ -29,6 +30,7 @@ spring:
   # 3. DB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
+    # ⚠️ MYSQL_URL 안에 serverTimezone=Asia/Seoul 필수
     url: ${MYSQL_URL}
     username: root
     password: ${MYSQL_PASSWORD}
@@ -40,22 +42,23 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        # show_sql: true 인데 false로 바꿨음
         show_sql: false
         dialect: org.hibernate.dialect.MySQLDialect
+        jdbc:
+          time_zone: Asia/Seoul   # ★ 중요
 
   web:
     error:
       include-exception: true
       include-stacktrace: always
-      # development : always, deployment : never
 
 # 5. JWT
 jwt:
   secret: ${JWT_SECRET}
 
-# 6. AI API
+# 6. AI API + 공통 앱 설정
 app:
+  timezone: Asia/Seoul   # ★ JVM 보조 설정용
   ai:
     mistral:
       api-key: ${MISTRAL_API_KEY}

@@ -42,7 +42,7 @@ public class NoShowScheduler {
                                                 .atTime(s.getEndTime().intValue(), 0);
 
                                 // 종료 + 10분 지났고, 아직 완료 처리 안 된 건
-                                return endDateTime.plusMinutes(10).isBefore(now);
+                                return endDateTime.isBefore(now);
 
                             })
                             .toList();
