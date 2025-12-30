@@ -24,7 +24,7 @@ public class CounselingReserveController {
     public CounselingReserveController(CounselingReserveService counselingReserveService) {
         this.counselingReserveService = counselingReserveService;
     }
-
+//
     // 로그인 유저 + requester에 따라 reserve db의 모든 내용을 가져오기
     @GetMapping("/list/requester")
     public ResponseEntity<?> getListByRequester(@AuthenticationPrincipal CustomUserDetails principal) {
