@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Component
@@ -21,12 +22,12 @@ public class NoShowScheduler {
     private final CounselingReserveRepository reserveRepository;
 
         @Transactional
-        @Scheduled(cron = "0 0 * * * *") // 매 정시
-//        @Scheduled(cron = "0 */1 * * * *") // 5분 간격 (테스트용)
+//        @Scheduled(cron = "0 0 * * * *") // 매 정시
+        @Scheduled(cron = "0 */1 * * * *") // 1분 간격 (테스트용)
         public void markNoShow() {
             System.out.println("노쇼 감지 시작");
-            LocalDate today = LocalDate.now();
-            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+            LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
 
             List<CounselingReserve> targets =
                     reserveRepository

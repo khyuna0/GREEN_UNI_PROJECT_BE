@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Component
@@ -26,12 +27,12 @@ public class NotApprovedScheduleScheduler {
     // 만약 교수가 열어둔 일정에 대해 승인한 일정이 없는 상태로 startTime 이 지나버린 경우 (교수가 승인 안해주고 시간지남)
     // 신청 상태(approvalState) REJECTED로 변경, 위험학생인 경우 COUNSEL_REQ -> DETECTED 로 변경
     @Transactional
-    @Scheduled(cron = "0 0 * * * *") // 매 정시
-//  @Scheduled(cron = "0 */1 * * * *") // 5분 간격 (테스트용)
+//    @Scheduled(cron = "0 0 * * * *") // 매 정시
+  @Scheduled(cron = "0 */1 * * * *") // 1분 간격 (테스트용)
     public void markRejected () {
 
         System.out.println("미승인 예약 신청 감지 시작");
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
         Long nowHour = (long) LocalTime.now().getHour();
 
         List<CounselingReserve> targets =
