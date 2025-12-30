@@ -23,7 +23,7 @@ public class NoShowScheduler {
 
         @Transactional
 //        @Scheduled(cron = "0 0 * * * *") // 매 정시
-        @Scheduled(cron = "0 */1 * * * *") // 1분 간격 (테스트용)
+        @Scheduled(cron = "0 */30 * * * *") // 1분 간격 (테스트용)
         public void markNoShow() {
             System.out.println("노쇼 감지 시작");
             LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
