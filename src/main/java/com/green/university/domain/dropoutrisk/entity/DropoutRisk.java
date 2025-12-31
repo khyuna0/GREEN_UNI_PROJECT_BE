@@ -11,6 +11,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Data
@@ -60,12 +61,9 @@ public class DropoutRisk { // 위험 학생 관리 테이블
     @Column(columnDefinition = "TEXT")
     private String aiReasonTags;
 
+    private LocalDateTime createdAt = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    private LocalDateTime updatedAt = LocalDateTime.now(ZoneId.of("Asia/Seoul"));;
 
 
     // 편의 메서드
