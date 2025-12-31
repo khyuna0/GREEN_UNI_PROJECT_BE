@@ -125,6 +125,10 @@ public class UserService {
                 () -> new CustomRestfullException("아이디를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
         );
 
+        if(userRepository.findById(Long.valueOf(loginFormDto.getId())).isEmpty()) {
+            throw new CustomRestfullException("아이디를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+        }
+
         //비밀번호 검증
         if (!passwordEncoder.matches(loginFormDto.getPassword(), user.getPassword())) {
             throw new CustomRestfullException("비밀번호가 틀렸습니다.", HttpStatus.BAD_REQUEST);
