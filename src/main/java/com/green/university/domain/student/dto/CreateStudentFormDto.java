@@ -43,10 +43,10 @@ public class CreateStudentFormDto {
 
     @NotEmpty(message = "학년을 입력해 주세요")
     @Pattern(regexp = "^[1-4]$", message = "학년은 1~4만 입력 가능합니다")
-	private String grade;
+	private Long grade;
 
     @NotEmpty(message = "학기를 입력해 주세요")
     @Pattern(regexp = "^[1-2]$", message = "학기는 1 또는 2만 입력 가능합니다")
-	private String semester;
+	private Long semester;
 	
 }

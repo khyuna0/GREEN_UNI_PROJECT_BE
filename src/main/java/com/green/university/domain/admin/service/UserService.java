@@ -106,6 +106,8 @@ public class UserService {
         student.setEmail(dto.getEmail());
         student.setDepartment(departmentRepository.findById(dto.getDeptId())
                 .orElseThrow(() -> new CustomRestfullException("없는 학과 정보입니다.", HttpStatus.NOT_FOUND)));
+        student.setGrade(dto.getGrade());
+        student.setSemester(dto.getSemester());
         Student savedStudent = studentRepository.save(student);
         Long studentId = savedStudent.getId();
 
