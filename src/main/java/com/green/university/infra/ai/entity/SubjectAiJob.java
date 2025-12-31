@@ -40,10 +40,8 @@ public class SubjectAiJob {
     @Column(columnDefinition = "TEXT")
     private String message;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    private LocalDateTime updatedAt = LocalDateTime.now();
 }
 
