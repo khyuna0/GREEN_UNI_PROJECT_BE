@@ -104,10 +104,10 @@ public class UserService {
         student.setTel(dto.getTel());
         student.setEntranceDate(dto.getEntranceDate());
         student.setEmail(dto.getEmail());
-        student.setDepartment(departmentRepository.findById(dto.getDeptId())
-                .orElseThrow(() -> new CustomRestfullException("없는 학과 정보입니다.", HttpStatus.NOT_FOUND)));
         student.setGrade(dto.getGrade());
         student.setSemester(dto.getSemester());
+        student.setDepartment(departmentRepository.findById(dto.getDeptId())
+                .orElseThrow(() -> new CustomRestfullException("없는 학과 정보입니다.", HttpStatus.NOT_FOUND)));
         Student savedStudent = studentRepository.save(student);
         Long studentId = savedStudent.getId();
 
