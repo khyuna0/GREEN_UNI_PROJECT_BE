@@ -1,5 +1,6 @@
 package com.green.university.infra.ai.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.green.university.domain.subject.entity.Subject;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -41,8 +42,10 @@ public class SubjectAiJob {
     @Column(columnDefinition = "TEXT")
     private String message;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
     private LocalDateTime createdAt = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
     private LocalDateTime updatedAt = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 }
 

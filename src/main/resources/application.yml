@@ -8,6 +8,7 @@ spring:
     import: file:.env[.properties]
   jackson:
     time-zone: Asia/Seoul
+    date-format: yyyy-MM-dd HH:mm:ss
 
   # 2. file upload setting
   servlet:
